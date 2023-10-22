@@ -26,7 +26,9 @@ Staff^--PartTimeWorker
 Staff^--FullTimeWorker
 EventOrganizer||..o{Event : organizes
 Event||..|{Staff : has
-Event}|.|{Company
-PartTimeWorker||..||TimeSheet : enters
+Event}|.|{Company : ?
+PartTimeWorker||..o{TimeSheet : enters
+TimeSheet}o..||Event
 PayCalculation||..||TimeSheet : used for
+Company||..|{Staff
 @enduml
