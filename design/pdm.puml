@@ -18,17 +18,27 @@ entity Event {}
 
 entity Company {}
 
+entity SponsorCompany {}
+
+entity OrganizerCompany {}
+
 entity PayCalculation {}
 
 User^-Staff
 User^-EventOrganizer
 Staff^--PartTimeWorker
 Staff^--FullTimeWorker
-EventOrganizer||..o{Event : organizes
+Company^--OrganizerCompany
+Company^--SponsorCompany
+EventOrganizer}|..o{Event : organizes
+EventOrganizer}|..|{Company
+Staff||..||Company
 Event||..|{Staff : has
 Event}|.|{Company
-PartTimeWorker||..o{TimeSheet : enters
-TimeSheet}o..||Event
+PartTimeWorker||..|{TimeSheet : enters
+FullTimeWorker||..|{TimeSheet : enters
+TimeSheet||..||Event
+TimeSheet||.||Company
 PayCalculation||..||TimeSheet : used for
 Company||..|{Staff : ?
 @enduml
