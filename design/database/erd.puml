@@ -1,0 +1,64 @@
+@startuml erd
+skinparam Linetype ortho
+hide circle
+
+entity User {
+    *id: <<uuid>>
+    ---
+    *name: string
+    *user_level: int
+}
+
+entity WorkTime {
+    *user_id: <<uuid>>
+    *company_id: <<uuid>>
+    *start_date: date
+    *end_date: date
+    ---
+    *worked_hours: int
+}
+
+entity Event {
+    *id: <<uuid>>
+    ---
+    *name: string
+    webiste: url
+}
+
+entity  Company {
+    *company_id: <<uuid>>
+    ---
+    *name: string
+    website: url
+}
+
+entity AssociatedCompanies {
+    *event_id: <<uuid>>
+    *company_id: <<uuid>>
+    ---
+    *association_type: AssociationType
+}
+
+entity Employment {
+    *user_id: <<uuid>>
+    *company_id: <<uuid>>
+    ---
+    *employment_type: EmploymentType
+    *hourly_rate: float
+}
+
+entity EventStaff {
+    *user_id: <<uuid>>
+    *event_id: <<uuid>>
+    ---
+    *is_organizer: boolean
+}
+
+User||..||Employment
+WorkTime}o..||Employment
+Employment}o..||Company
+Event||.o{AssociatedCompanies
+Company||..o{AssociatedCompanies
+Event||..o{EventStaff
+User||..o{EventStaff
+@enduml
