@@ -6,30 +6,90 @@ entity User {
     *id: <<uuid>>
     ---
     *name: string
-    *user_level: int
+    *user_level: UserLevel
+    *createdAt: datetime
+    *editedAt: datetime
+    deletedAt: datetime
 }
 
-entity WorkTime {
+entity TimeSheet {
+    *sheet_id: <<uuid>>
+    ---
     *user_id: <<uuid>>
     *company_id: <<uuid>>
     *start_date: date
     *end_date: date
+    *worked_hours: int
+    *is_editable: boolean
+    *createdAt: datetime
+    *editedAt: datetime
+    deletedAt: datetime
+}
+
+entity WorkDay {
+    *sheet_id: <<uuid>>
+    *date: date
     ---
     *worked_hours: int
+    commentary: varchar
+    *is_editable: boolean
+    *createdAt: datetime
+    *editedAt: datetime
+    deletedAt: datetime
 }
 
 entity Event {
     *id: <<uuid>>
     ---
-    *name: string
+    *name: varchar
+    description: varchar
+    avatar: url
     webiste: url
+    *createdAt: datetime
+    *editedAt: datetime
+    deletedAt: datetime
 }
 
-entity  Company {
+entity Task {
+    *id: <<uuid>>
+    --
+    *description: string
+    *priority: <<enum TaskPriority>>
+    *assigned_staff: uuid
+    *task_creator: uuid
+    *createdAt: datetime
+    *editedAt: datetime
+    deletedAt: datetime
+}
+
+entity AssignedStaff {
+    *task_id: <<uuid>>
+    *staff_id: <<uuid>>
+}
+
+entity EventTimeSlot {
+    *slotId: <<uuid>>
+    *eventId: <<uuid>>
+    ----
+    *time_from: timestamp with date
+    *time_to: timestamp with date
+    slot_name: varchar
+    description: varchar
+    avatar: url
+    *createdAt: datetime
+    *editedAt: datetime
+    deletedAt: datetime
+}
+
+entity Company {
     *company_id: <<uuid>>
     ---
     *name: string
+    avatar: url
     website: url
+    *createdAt: datetime
+    *editedAt: datetime
+    deletedAt: datetime
 }
 
 entity AssociatedCompanies {
@@ -45,20 +105,46 @@ entity Employment {
     ---
     *employment_type: EmploymentType
     *hourly_rate: float
+    *employee_level: EmployeeLevel
+    *createdAt: datetime
+    *editedAt: datetime
+    deletedAt: datetime
 }
 
 entity EventStaff {
     *user_id: <<uuid>>
     *event_id: <<uuid>>
     ---
-    *is_organizer: boolean
+    *staff_level: StaffLevel
+    *createdAt: datetime
+    *editedAt: datetime
+    deletedAt: datetime
+}
+
+entity EventComment {
+    *id: <<uuid>>
+    *event_id: <<uuid>>
+    *author_id: <<uuid>>
+    ---
+    *content: varchar
+    *createdAt: datetime
+    *editedAt: datetime
+    deletedAt: datetime
 }
 
 User||..||Employment
-WorkTime}o..||Employment
+TimeSheet}o..||Employment
+TimeSheet||..o{WorkDay
 Employment}o..||Company
 Event||.o{AssociatedCompanies
 Company||..o{AssociatedCompanies
 Event||..o{EventStaff
+Event||..o{Task
+Event||...o{EventTimeSlot
+Event||...o{EventComment
+EventComment}o..||User
+Task||..||EventStaff : task_creator
+Task||..o{AssignedStaff
+AssignedStaff}o..||EventStaff
 User||..o{EventStaff
 @enduml
