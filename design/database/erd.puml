@@ -2,17 +2,17 @@
 skinparam Linetype ortho
 hide circle
 
-entity User {
+entity user {
     *id: <<uuid>>
     ---
-    *name: string
-    *user_level: UserLevel
-    *createdAt: datetime
-    *editedAt: datetime
-    deletedAt: datetime
+    *name: varchar(255)
+    *user_level: <<enum UserLevel>>
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
 }
 
-entity TimeSheet {
+entity timesheet {
     *sheet_id: <<uuid>>
     ---
     *user_id: <<uuid>>
@@ -21,130 +21,130 @@ entity TimeSheet {
     *end_date: date
     *worked_hours: int
     *is_editable: boolean
-    *createdAt: datetime
-    *editedAt: datetime
-    deletedAt: datetime
+    *createdAt: timestamp
+    *editedAt: timestamp
+    deletedAt: timestamp
 }
 
-entity WorkDay {
+entity work_day {
     *sheet_id: <<uuid>>
-    *date: date
+    *work_date: date
     ---
     *worked_hours: int
-    commentary: varchar
+    commentary: text
     *is_editable: boolean
-    *createdAt: datetime
-    *editedAt: datetime
-    deletedAt: datetime
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
 }
 
-entity Event {
+entity event {
     *id: <<uuid>>
     ---
-    *name: varchar
-    description: varchar
+    *name: varchar(255)
+    description: text
     avatar: url
     webiste: url
-    *createdAt: datetime
-    *editedAt: datetime
-    deletedAt: datetime
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
 }
 
-entity Task {
+entity task {
     *id: <<uuid>>
     --
-    *description: string
+    *description: text
     *priority: <<enum TaskPriority>>
-    *assigned_staff: uuid
-    *task_creator: uuid
-    *createdAt: datetime
-    *editedAt: datetime
-    deletedAt: datetime
+    *creator_id: uuid (FK event_staff)
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
 }
 
-entity AssignedStaff {
+entity assigned_staff {
     *task_id: <<uuid>>
     *staff_id: <<uuid>>
 }
 
-entity EventTimeSlot {
+entity event_time_slot {
     *slotId: <<uuid>>
     *eventId: <<uuid>>
     ----
-    *time_from: timestamp with date
-    *time_to: timestamp with date
-    slot_name: varchar
-    description: varchar
+    *time_from: timestamp
+    *time_to: timestamp
+    slot_name: varchar(255)
+    description: text
     avatar: url
-    *createdAt: datetime
-    *editedAt: datetime
-    deletedAt: datetime
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
 }
 
-entity Company {
+entity company {
     *company_id: <<uuid>>
     ---
-    *name: string
+    *name: varchar(255)
+    description: text
     avatar: url
     website: url
-    *createdAt: datetime
-    *editedAt: datetime
-    deletedAt: datetime
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
 }
 
-entity AssociatedCompanies {
+entity associated_company {
     *event_id: <<uuid>>
     *company_id: <<uuid>>
     ---
-    *association_type: AssociationType
+    *association_type: <<enum AssociationType>>
 }
 
-entity Employment {
+entity employment {
     *user_id: <<uuid>>
     *company_id: <<uuid>>
     ---
-    *employment_type: EmploymentType
+    *employment_type: <<enum EmploymentType>>
     *hourly_rate: float
-    *employee_level: EmployeeLevel
-    *createdAt: datetime
-    *editedAt: datetime
-    deletedAt: datetime
+    *employee_level: <<enum EmployeeLevel>>
+    *createdAt: timestamp
+    *editedAt: timestamp
+    deletedAt: timestamp
 }
 
-entity EventStaff {
+entity event_staff {
     *user_id: <<uuid>>
     *event_id: <<uuid>>
     ---
-    *staff_level: StaffLevel
-    *createdAt: datetime
-    *editedAt: datetime
-    deletedAt: datetime
+    *staff_level: <<enum StaffLevel>>
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
 }
 
-entity EventComment {
+entity event_comment {
     *id: <<uuid>>
     *event_id: <<uuid>>
     *author_id: <<uuid>>
     ---
-    *content: varchar
-    *createdAt: datetime
-    *editedAt: datetime
-    deletedAt: datetime
+    *content: text
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
 }
 
-User||..||Employment
-TimeSheet}o..||Employment
-TimeSheet||..o{WorkDay
-Employment}o..||Company
-Event||.o{AssociatedCompanies
-Company||..o{AssociatedCompanies
-Event||..o{EventStaff
-Event||..o{Task
-Event||...o{EventTimeSlot
-Event||...o{EventComment
-EventComment}o..||User
-Task||..||EventStaff : task_creator
-Task||..o{AssignedStaff
-AssignedStaff}o..||EventStaff
-User||..o{EventStaff
+user||..||employment
+timesheet}o..||employment
+timesheet||..o{workday
+employment}o..||company
+event||.o{associated_company
+company||..o{associated_company
+event||..o{event_staff
+event||..o{task
+event||...o{event_time_slot
+event||...o{event_comment
+event_comment}o..||user
+task||..||event_staff : task_creator
+task||..o{assigned_staff
+assigned_staff}o..||event_staff
+user||..o{event_staff
 @enduml

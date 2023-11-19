@@ -6,3 +6,12 @@ ERD.puml contains the entity relationship diagram of the database design for the
 - The different types of users (event organizer, temporary, full-time) are recorded in the user_level attribute of User.
 
 - Do we also want an administrator to be a user, or a separate entity with different responsibilites? (E.G. An Administrator can't do the same things either of the normal users can). If and administrator is to be a user, then the cardinality of User - Employment must be changed from 1:1 to 1:{0,1}.
+
+## Enums
+Currently, the enums in the model are as follows:
+- UserLevel { 'user', 'admin' }
+- TaskPriority { 'low', 'medium', 'high' }
+- AssociationType { 'sponsor', 'organizer', 'other' }
+- EmploymentType { 'dpp', 'dpc', 'hpp' }
+- EmployeeLevel { 'basic', 'manager' }
+- StaffLevel { 'basic', 'organizer'}
