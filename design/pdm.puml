@@ -1,5 +1,6 @@
 @startuml pdm
 skinparam Linetype ortho
+scale 800 * 800
 hide circle
 
 entity User {}
