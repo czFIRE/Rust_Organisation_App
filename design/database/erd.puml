@@ -57,7 +57,10 @@ entity event {
 entity task {
     *id: <<uuid>>
     --
+    *title: text
     *description: text
+    *accomplished_level: int
+    date_accomplished: timestamp
     *priority: <<enum TaskPriority>>
     *creator_id: uuid (FK event_staff)
     *created_at: timestamp
