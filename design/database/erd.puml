@@ -8,6 +8,9 @@ entity user {
     ---
     *name: varchar(255)
     *user_level: <<enum UserLevel>>
+    *pw_hash varchar(45)
+    *email VARCHAR(45)
+    *login_cnt int
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
