@@ -22,9 +22,9 @@ entity timesheet {
     *end_date: date
     *worked_hours: int
     *is_editable: boolean
-    *createdAt: timestamp
-    *editedAt: timestamp
-    deletedAt: timestamp
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
 }
 
 entity work_day {
@@ -68,8 +68,8 @@ entity assigned_staff {
 }
 
 entity event_time_slot {
-    *slotId: <<uuid>>
-    *eventId: <<uuid>>
+    *slot_id: <<uuid>>
+    *event_id: <<uuid>>
     ----
     *time_from: timestamp
     *time_to: timestamp
@@ -107,9 +107,9 @@ entity employment {
     *employment_type: <<enum EmploymentType>>
     *hourly_rate: float
     *employee_level: <<enum EmployeeLevel>>
-    *createdAt: timestamp
-    *editedAt: timestamp
-    deletedAt: timestamp
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
 }
 
 entity event_staff {
