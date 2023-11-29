@@ -130,7 +130,8 @@ entity event_staff {
 
 entity comment {
     *id: <<uuid>>
-    *event_id: <<uuid>>
+    event_id: <<uuid>>
+    task_id: <<uuid>>
     *author_id: <<uuid>>
     ---
     *content: text
@@ -148,7 +149,8 @@ company||..o{associated_company
 event||..o{event_staff
 event||..o{task
 event||...o{event_time_slot
-event||...o{comment
+event|o...o{comment
+task|o...o{comment
 comment}o..||user
 task||..||event_staff : task_creator
 task||..o{assigned_staff
