@@ -128,7 +128,7 @@ entity event_staff {
     deleted_at: timestamp
 }
 
-entity event_comment {
+entity comment {
     *id: <<uuid>>
     *event_id: <<uuid>>
     *author_id: <<uuid>>
@@ -148,8 +148,8 @@ company||..o{associated_company
 event||..o{event_staff
 event||..o{task
 event||...o{event_time_slot
-event||...o{event_comment
-event_comment}o..||user
+event||...o{comment
+comment}o..||user
 task||..||event_staff : task_creator
 task||..o{assigned_staff
 assigned_staff}o..||event_staff
