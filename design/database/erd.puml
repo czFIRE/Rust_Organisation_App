@@ -22,6 +22,7 @@ entity timesheet {
     *start_date: date
     *end_date: date
     *worked_hours: int
+    *worked_minutes: int
     *is_editable: boolean
     *created_at: timestamp
     *edited_at: timestamp
@@ -33,6 +34,7 @@ entity work_day {
     *work_date: date
     ---
     *worked_hours: int
+    *worked_minutes: int
     commentary: text
     *is_editable: boolean
     *created_at: timestamp
