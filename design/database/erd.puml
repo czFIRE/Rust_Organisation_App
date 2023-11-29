@@ -55,6 +55,14 @@ entity event {
     deleted_at: timestamp
 }
 
+entity event_timespan_range {
+    *id: <<uuid>>
+    *event_id: <<uuid>>
+    ---
+    *time_from: timestamp
+    *time_to: timestamp
+}
+
 entity task {
     *id: <<uuid>>
     --
@@ -151,6 +159,7 @@ event||..o{event_staff
 event||..o{task
 event||...o{event_time_slot
 event|o...o{comment
+event||...o{event_timespan_range
 task|o...o{comment
 comment}o..||user
 task||..||event_staff : task_creator
