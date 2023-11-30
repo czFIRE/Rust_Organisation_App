@@ -17,7 +17,7 @@ entity user {
 }
 
 entity timesheet {
-    *<u>sheet_id</u>: <<uuid>>
+    *<u>timesheet_id</u>: <<uuid>>
     ---
     *user_id: <<uuid>>
     *company_id: <<uuid>>
@@ -32,7 +32,7 @@ entity timesheet {
 }
 
 entity work_day {
-    *<u>sheet_id</u>: <<uuid>>
+    *<u>timesheet_id</u>: <<uuid>>
     *<u>work_date</u>: date
     ---
     *worked_hours: int
@@ -84,7 +84,7 @@ entity assigned_staff {
 }
 
 entity event_time_slot {
-    *<u>slot_id</u>: <<uuid>>
+    *<u>event_time_slot_id</u>: <<uuid>>
     *event_id: <<uuid>>
     ----
     *time_from: timestamp
