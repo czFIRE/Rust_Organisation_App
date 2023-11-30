@@ -5,7 +5,7 @@ scale 1800 * 1800
 hide circle
 
 entity user {
-    *user_id: <<uuid>>
+    *<u>user_id</u>: <<uuid>>
     ---
     *name: varchar(255)
     *user_level: <<enum UserLevel>>
@@ -17,7 +17,7 @@ entity user {
 }
 
 entity timesheet {
-    *sheet_id: <<uuid>>
+    *<u>sheet_id</u>: <<uuid>>
     ---
     *user_id: <<uuid>>
     *company_id: <<uuid>>
@@ -32,8 +32,8 @@ entity timesheet {
 }
 
 entity work_day {
-    *sheet_id: <<uuid>>
-    *work_date: date
+    *<u>sheet_id</u>: <<uuid>>
+    *<u>work_date</u>: date
     ---
     *worked_hours: int
     *worked_minutes: int
@@ -45,7 +45,7 @@ entity work_day {
 }
 
 entity event {
-    *event_id: <<uuid>>
+    *<u>event_id</u>: <<uuid>>
     ---
     *name: varchar(255)
     description: text
@@ -57,7 +57,7 @@ entity event {
 }
 
 entity event_timespan_range {
-    *event_timespan_range_id: <<uuid>>
+    *<u>event_timespan_range_id</u>: <<uuid>>
     *event_id: <<uuid>>
     ---
     *time_from: timestamp
@@ -65,7 +65,7 @@ entity event_timespan_range {
 }
 
 entity task {
-    *task_id: <<uuid>>
+    *<u>task_id</u>: <<uuid>>
     --
     *title: text
     *description: text
@@ -79,12 +79,12 @@ entity task {
 }
 
 entity assigned_staff {
-    *task_id: <<uuid>>
-    *staff_id: <<uuid>>
+    *<u>task_id</u>: <<uuid>>
+    *<u>staff_id</u>: <<uuid>>
 }
 
 entity event_time_slot {
-    *slot_id: <<uuid>>
+    *<u>slot_id</u>: <<uuid>>
     *event_id: <<uuid>>
     ----
     *time_from: timestamp
@@ -98,7 +98,7 @@ entity event_time_slot {
 }
 
 entity company {
-    *company_id: <<uuid>>
+    *<u>company_id</u>: <<uuid>>
     ---
     *name: varchar(255)
     description: text
@@ -110,15 +110,15 @@ entity company {
 }
 
 entity associated_company {
-    *event_id: <<uuid>>
-    *company_id: <<uuid>>
+    *<u>event_id</u>: <<uuid>>
+    *<u>company_id</u>: <<uuid>>
     ---
     *association_type: <<enum AssociationType>>
 }
 
 entity employment {
-    *user_id: <<uuid>>
-    *company_id: <<uuid>>
+    *<u>user_id</u>: <<uuid>>
+    *<u>company_id</u>: <<uuid>>
     ---
     *employment_type: <<enum EmploymentType>>
     *hourly_rate: float
@@ -129,8 +129,8 @@ entity employment {
 }
 
 entity event_staff {
-    *user_id: <<uuid>>
-    *event_id: <<uuid>>
+    *<u>user_id</u>: <<uuid>>
+    *<u>event_id</u>: <<uuid>>
     ---
     *staff_level: <<enum StaffLevel>>
     *created_at: timestamp
@@ -139,7 +139,7 @@ entity event_staff {
 }
 
 entity comment {
-    *comment_id: <<uuid>>
+    *<u>comment_id</u>: <<uuid>>
     event_id: <<uuid>>
     task_id: <<uuid>>
     *author_id: <<uuid>>
