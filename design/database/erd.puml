@@ -49,7 +49,7 @@ entity event {
     *name: varchar(255)
     description: text
     avatar: url
-    webiste: url
+    website: url
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
