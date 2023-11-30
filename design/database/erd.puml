@@ -44,24 +44,40 @@ entity work_day {
     deleted_at: timestamp
 }
 
-entity event {
-    *<u>event_id</u>: <<uuid>>
-    ---
-    *name: varchar(255)
-    description: text
-    avatar: url
-    website: url
-    *created_at: timestamp
-    *edited_at: timestamp
-    deleted_at: timestamp
-}
+together {
+    entity event {
+        *<u>event_id</u>: <<uuid>>
+        ---
+        *name: varchar(255)
+        description: text
+        avatar: url
+        website: url
+        *created_at: timestamp
+        *edited_at: timestamp
+        deleted_at: timestamp
+    }
 
-entity event_timespan_range {
-    *<u>event_timespan_range_id</u>: <<uuid>>
-    *event_id: <<uuid>>
-    ---
-    *time_from: timestamp
-    *time_to: timestamp
+    entity event_time_slot {
+        *<u>event_time_slot_id</u>: <<uuid>>
+        *event_id: <<uuid>>
+        ----
+        *time_from: timestamp
+        *time_to: timestamp
+        slot_name: varchar(255)
+        description: text
+        avatar: url
+        *created_at: timestamp
+        *edited_at: timestamp
+        deleted_at: timestamp
+    }
+
+    entity event_timespan_range {
+        *<u>event_timespan_range_id</u>: <<uuid>>
+        *event_id: <<uuid>>
+        ---
+        *time_from: timestamp
+        *time_to: timestamp
+    }
 }
 
 entity task {
@@ -81,20 +97,6 @@ entity task {
 entity assigned_staff {
     *<u>task_id</u>: <<uuid>>
     *<u>staff_id</u>: <<uuid>>
-}
-
-entity event_time_slot {
-    *<u>event_time_slot_id</u>: <<uuid>>
-    *event_id: <<uuid>>
-    ----
-    *time_from: timestamp
-    *time_to: timestamp
-    slot_name: varchar(255)
-    description: text
-    avatar: url
-    *created_at: timestamp
-    *edited_at: timestamp
-    deleted_at: timestamp
 }
 
 entity company {
