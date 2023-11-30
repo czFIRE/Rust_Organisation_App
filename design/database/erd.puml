@@ -1,7 +1,7 @@
 @startuml erd
 skinparam Linetype ortho
 skinparam classFontSize 20
-scale 1600 * 1600
+scale 1800 * 1800
 hide circle
 
 entity user {
