@@ -66,13 +66,13 @@ entity event_timespan_range {
 
 entity task {
     *<u>task_id</u>: <<uuid>>
+    *creator_id: uuid (FK event_staff)
     --
     *title: text
     *description: text
     *accomplished_level: int
     date_accomplished: timestamp
     *priority: <<enum TaskPriority>>
-    *creator_id: uuid (FK event_staff)
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
