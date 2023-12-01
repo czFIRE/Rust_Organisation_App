@@ -9,9 +9,9 @@ ERD.puml contains the entity relationship diagram of the database design for the
 
 ## Enums
 Currently, the enums in the model are as follows:
-- UserLevel { 'user', 'admin' }
-- TaskPriority { 'low', 'medium', 'high' }
-- AssociationType { 'sponsor', 'organizer', 'other' }
-- EmploymentType { 'dpp', 'dpc', 'hpp' }
-- EmployeeLevel { 'basic', 'manager' }
-- StaffLevel { 'basic', 'organizer'}
+- UserLevel { 'User', 'Admin' }
+- TaskPriority { 'Low', 'Medium', 'High' }
+- AssociationType { 'Sponsor', 'Organizer', 'Other' }
+- EmploymentType { 'DPP', 'DPC', 'HPP' }
+- EmployeeLevel { 'Basic', 'Manager' }
+- StaffLevel { 'Basic', 'Organizer'}
