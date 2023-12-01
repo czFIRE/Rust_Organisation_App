@@ -1,13 +1,15 @@
 @startuml erd
 skinparam Linetype ortho
-scale 1600 * 1600
+skinparam classFontSize 20
+scale 1800 * 1800
 hide circle
 
 entity user {
-    *id: <<uuid>>
+    *<u>user_id</u>: <<uuid>>
     ---
     *name: varchar(255)
     *user_level: <<enum UserLevel>>
+    *user_status <<enum UserStatus>>
     *email VARCHAR(45)
     *created_at: timestamp
     *edited_at: timestamp
@@ -15,13 +17,14 @@ entity user {
 }
 
 entity timesheet {
-    *sheet_id: <<uuid>>
+    *<u>timesheet_id</u>: <<uuid>>
     ---
     *user_id: <<uuid>>
     *company_id: <<uuid>>
     *start_date: date
     *end_date: date
     *worked_hours: int
+    *worked_minutes: int
     *is_editable: boolean
     *created_at: timestamp
     *edited_at: timestamp
@@ -29,10 +32,11 @@ entity timesheet {
 }
 
 entity work_day {
-    *sheet_id: <<uuid>>
-    *work_date: date
+    *<u>timesheet_id</u>: <<uuid>>
+    *<u>work_date</u>: date
     ---
     *worked_hours: int
+    *worked_minutes: int
     commentary: text
     *is_editable: boolean
     *created_at: timestamp
@@ -40,53 +44,63 @@ entity work_day {
     deleted_at: timestamp
 }
 
-entity event {
-    *id: <<uuid>>
-    ---
-    *name: varchar(255)
-    description: text
-    avatar: url
-    webiste: url
-    *created_at: timestamp
-    *edited_at: timestamp
-    deleted_at: timestamp
+together {
+    entity event {
+        *<u>event_id</u>: <<uuid>>
+        ---
+        *name: varchar(255)
+        description: text
+        avatar: url
+        website: url
+        *created_at: timestamp
+        *edited_at: timestamp
+        deleted_at: timestamp
+    }
+
+    entity event_time_slot {
+        *<u>event_time_slot_id</u>: <<uuid>>
+        *event_id: <<uuid>>
+        ----
+        *time_from: timestamp
+        *time_to: timestamp
+        slot_name: varchar(255)
+        description: text
+        avatar: url
+        *created_at: timestamp
+        *edited_at: timestamp
+        deleted_at: timestamp
+    }
+
+    entity event_timespan_range {
+        *<u>event_timespan_range_id</u>: <<uuid>>
+        *event_id: <<uuid>>
+        ---
+        *time_from: timestamp
+        *time_to: timestamp
+    }
 }
 
 entity task {
-    *id: <<uuid>>
+    *<u>task_id</u>: <<uuid>>
+    *creator_id: uuid (FK event_staff)
     --
     *title: text
     *description: text
     *accomplished_level: int
     date_accomplished: timestamp
     *priority: <<enum TaskPriority>>
-    *creator_id: uuid (FK event_staff)
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
 }
 
 entity assigned_staff {
-    *task_id: <<uuid>>
-    *staff_id: <<uuid>>
-}
-
-entity event_time_slot {
-    *slot_id: <<uuid>>
-    *event_id: <<uuid>>
-    ----
-    *time_from: timestamp
-    *time_to: timestamp
-    slot_name: varchar(255)
-    description: text
-    avatar: url
-    *created_at: timestamp
-    *edited_at: timestamp
-    deleted_at: timestamp
+    *<u>task_id</u>: <<uuid>>
+    *<u>staff_id</u>: <<uuid>>
 }
 
 entity company {
-    *company_id: <<uuid>>
+    *<u>company_id</u>: <<uuid>>
     ---
     *name: varchar(255)
     description: text
@@ -98,15 +112,15 @@ entity company {
 }
 
 entity associated_company {
-    *event_id: <<uuid>>
-    *company_id: <<uuid>>
+    *<u>event_id</u>: <<uuid>>
+    *<u>company_id</u>: <<uuid>>
     ---
     *association_type: <<enum AssociationType>>
 }
 
 entity employment {
-    *user_id: <<uuid>>
-    *company_id: <<uuid>>
+    *<u>user_id</u>: <<uuid>>
+    *<u>company_id</u>: <<uuid>>
     ---
     *employment_type: <<enum EmploymentType>>
     *hourly_rate: float
@@ -117,8 +131,8 @@ entity employment {
 }
 
 entity event_staff {
-    *user_id: <<uuid>>
-    *event_id: <<uuid>>
+    *<u>user_id</u>: <<uuid>>
+    *<u>event_id</u>: <<uuid>>
     ---
     *staff_level: <<enum StaffLevel>>
     *created_at: timestamp
@@ -126,9 +140,10 @@ entity event_staff {
     deleted_at: timestamp
 }
 
-entity event_comment {
-    *id: <<uuid>>
-    *event_id: <<uuid>>
+entity comment {
+    *<u>comment_id</u>: <<uuid>>
+    event_id: <<uuid>>
+    task_id: <<uuid>>
     *author_id: <<uuid>>
     ---
     *content: text
@@ -146,8 +161,10 @@ company||..o{associated_company
 event||..o{event_staff
 event||..o{task
 event||...o{event_time_slot
-event||...o{event_comment
-event_comment}o..||user
+event|o...o{comment
+event||...o{event_timespan_range
+task|o...o{comment
+comment}o..||user
 task||..||event_staff : task_creator
 task||..o{assigned_staff
 assigned_staff}o..||event_staff
