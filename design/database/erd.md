@@ -9,10 +9,10 @@ ERD.puml contains the entity relationship diagram of the database design for the
 
 ## Enums
 Currently, the enums in the model are as follows:
-- UserLevel { 'User', 'Admin' }
-- TaskPriority { 'Low', 'Medium', 'High' }
-- AssociationType { 'Sponsor', 'Organizer', 'Other' }
-- EmploymentType { 'DPP', 'DPC', 'HPP' }
-- EmployeeLevel { 'Basic', 'Manager' }
-- StaffLevel { 'Basic', 'Organizer' }
-- UserStatus { 'OK', 'Sick', 'Vacation' }
+- UserLevel { 'User', 'Admin' } -> Denotes the privileges of a user in terms of interactions with the system as a whole.
+- TaskPriority { 'Low', 'Medium', 'High' } -> Denotes the priority of a task assigned to event staff.
+- AssociationType { 'Sponsor', 'Organizer', 'Other' } -> Denotes the type of association that a company has with an event.
+- EmploymentType { 'DPP', 'DPC', 'HPP' } -> Denotes the type of employment an employee may have with a company.
+- EmployeeLevel { 'Basic', 'Manager' } -> Denotes whether the employee has managerial responsibilities / privileges within a company, or not.
+- StaffLevel { 'Basic', 'Organizer' } -> Denotes whether the employee has additional (organizer) privileges within a given event.
+- UserStatus { 'OK', 'Sick', 'Vacation' } -> Denotes the availability of a user in terms of employment and task opportunities.
