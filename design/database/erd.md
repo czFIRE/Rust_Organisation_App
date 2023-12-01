@@ -14,4 +14,5 @@ Currently, the enums in the model are as follows:
 - AssociationType { 'Sponsor', 'Organizer', 'Other' }
 - EmploymentType { 'DPP', 'DPC', 'HPP' }
 - EmployeeLevel { 'Basic', 'Manager' }
-- StaffLevel { 'Basic', 'Organizer'}
+- StaffLevel { 'Basic', 'Organizer' }
+- UserStatus { 'OK', 'Sick', 'Vacation' }
