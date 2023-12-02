@@ -140,40 +140,41 @@ entity event_staff {
     deleted_at: timestamp
 }
 
-entity comment {
-    *<u>comment_id</u>: <<uuid>>
-    event_id: <<uuid>>
-    task_id: <<uuid>>
-    *author_id: <<uuid>>
-    ---
-    *content: text
-    *created_at: timestamp
-    *edited_at: timestamp
-    deleted_at: timestamp
-}
+together {
+    entity comment {
+        *<u>comment_id</u>: <<uuid>>
+        event_id: <<uuid>>
+        task_id: <<uuid>>
+        *author_id: <<uuid>>
+        ---
+        *content: text
+        *created_at: timestamp
+        *edited_at: timestamp
+        deleted_at: timestamp
+    }
 
+    /'
+    A `file` table allows to refer to file system paths by joining
+    `file_id` and `extension` (and possibly using attributes like `type`).
 
-/'
-A `file` table allows to refer to file system paths by joining
-`file_id` and `extension` (and possibly other attributes like `type`).
+    The `FileType` enum determines how the file is treated (e.g. image, text).
+    It is expected to be used to determine how to present the file.
+    be utilized for constructing a file system path the file gets stored at
+    (and store all images under a dedicated `image/` directory for instance).
 
-The `FileType` enum determines how the file is treated (e.g. image, text).
-It is expected to be used to determine how to present the file.
-be utilized for constructing a file system path the file gets stored at
-(and store all images under a dedicated `image/` directory for instance).
-
-The `params` column may optionally contain values in `param=value;` format.
-In case of images, it may store params representing e.g. width and height.
-'/
-entity file {
-    *<u>file_id</u>: <<uuid>>
-    comment_id: <<uuid>>
-    ---
-    extention: varchar(20)
-    params: varchar(60)
-    *type <<enum FileType>>
-    *created_at: timestamp
-    deleted_at: timestamp
+    The `params` column may optionally contain values in `param=value;` format.
+    In case of images, it may store params representing e.g. width and height.
+    '/
+    entity file {
+        *<u>file_id</u>: <<uuid>>
+        comment_id: <<uuid>>
+        ---
+        extention: varchar(20)
+        params: varchar(60)
+        *type <<enum FileType>>
+        *created_at: timestamp
+        deleted_at: timestamp
+    }
 }
 
 user||..||employment
