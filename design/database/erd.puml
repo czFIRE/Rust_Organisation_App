@@ -6,6 +6,7 @@ hide circle
 
 entity user {
     *<u>user_id</u>: <<uuid>>
+    avatar_id: <<uuid>> (FK file)
     ---
     *name: varchar(255)
     *user_level: <<enum UserLevel>>
@@ -198,4 +199,5 @@ file}o..o|comment
 file|o..o|company
 file|o..o|event
 file|o..o|event_time_slot
+file|o..o|user
 @enduml
