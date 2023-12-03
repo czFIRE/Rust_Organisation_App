@@ -178,7 +178,7 @@ together {
     }
 }
 
-user||..||employment
+user||..|{employment
 timesheet}o..||employment
 timesheet||..o{work_day
 employment}o..||company
