@@ -126,6 +126,8 @@ entity employment {
     *employment_type: <<enum EmploymentType>>
     *hourly_rate: float
     *employee_level: <<enum EmployeeLevel>>
+    *start_date: from
+    *end_date: to
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
