@@ -16,3 +16,4 @@ Currently, the enums in the model are as follows:
 - EmployeeLevel { 'Basic', 'Manager' } -> Denotes whether the employee has managerial responsibilities / privileges within a company, or not.
 - StaffLevel { 'Basic', 'Organizer' } -> Denotes whether the employee has additional (organizer) privileges within a given event.
 - UserStatus { 'OK', 'Sick', 'Vacation' } -> Denotes the availability of a user in terms of employment and task opportunities.
+- FileType { 'image', 'text', 'other' } -> Denotes a type of an uploaded file.
