@@ -13,7 +13,7 @@ Currently, the enums in the model are as follows:
 - TaskPriority { 'Low', 'Medium', 'High' } -> Denotes the priority of a task assigned to event staff.
 - AssociationType { 'Sponsor', 'Organizer', 'Other' } -> Denotes the type of association that a company has with an event.
 - EmploymentType { 'DPP', 'DPC', 'HPP' } -> Denotes the type of employment an employee may have with a company.
-- EmployeeLevel { 'Basic', 'Manager' } -> Denotes whether the employee has managerial responsibilities / privileges within a company, or not.
+- EmployeeLevel { 'Basic', 'Manager', 'Upper Manager' } -> Denotes whether the employee has managerial responsibilities / privileges within a company, or not. The Upper Manager role represents the overall responsible person (people) that take care of the company in the system.
 - StaffLevel { 'Basic', 'Organizer' } -> Denotes whether the employee has additional (organizer) privileges within a given event.
 - UserStatus { 'OK', 'Sick', 'Vacation' } -> Denotes the availability of a user in terms of employment and task opportunities.
 - FileType { 'image', 'text', 'other' } -> Denotes a type of an uploaded file.
