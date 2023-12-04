@@ -58,20 +58,6 @@ together {
         deleted_at: timestamp
     }
 
-    entity event_time_slot {
-        *<u>event_time_slot_id</u>: <<uuid>>
-        *event_id: <<uuid>>
-        avatar_id: <<uuid>> (FK file)
-        ----
-        *time_from: timestamp
-        *time_to: timestamp
-        slot_name: varchar(255)
-        description: text
-        *created_at: timestamp
-        *edited_at: timestamp
-        deleted_at: timestamp
-    }
-
     entity event_timespan_range {
         *<u>event_timespan_range_id</u>: <<uuid>>
         *event_id: <<uuid>>
@@ -191,7 +177,6 @@ event||.o{associated_company
 company||..o{associated_company
 event||..o{event_staff
 event||..o{task
-event||...o{event_time_slot
 event|o...o{comment
 event||...o{event_timespan_range
 task|o...o{comment
@@ -203,6 +188,5 @@ user||..o{event_staff
 file}o..o|comment
 file|o..o|company
 file|o..o|event
-file|o..o|event_time_slot
 file|o..o|user
 @enduml
