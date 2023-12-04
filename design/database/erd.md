@@ -20,50 +20,48 @@ Currently, the enums in the model are as follows:
 - AssignmentStatus { 'pending', 'accepted', 'rejected' } -> Denotes the status of a staff request to work on a task.
 
 ## Notes (4.12.2023)
+*Just a consideration*
 Anyone can register and then a higher-privilege user (company manager or admin) can register them to a company.
 
-Age, 
-
-Organizer gives staff a task
-vs.
-Staff chooses a task
-
-
+**DONE**
 Event Time Slot: Remove
 
+**TODO**
 User: Add birth_date
       Add gender (enum)
       
 
-**Event** Registration:
+**Event** Registration - **TODO**:
     - User-based registration - workers (full or part-time) may register to an event, or management may assign them to an event. Once registered, a worker can't unregister from an event.
     - Organizers must confirm/reject event registrations.
     - **Events have two states** - 'accepts workers' / 'doesn't accept workers' which is set by event organizer
 
-**Task** Registration:
+**Task** Registration - **TODO**:
     - Staff-based registration - Staff may volunteer for a task, or organizers may assign them to a task. Works like event registration. 
     - Organizers must confirm/reject task volunteers.
     - **Tasks have two states** - 'accepts staff' / 'doesn't accept staff'
     
-Assigned Staff:
+Assigned Staff - **DONE**:
     - Add decided_by column which contains the ID of the organizer that made the final decision on the staff request to work on a task.
     - Add assignment_status column which contains an enum of three values (Pending, Accepted, Rejected) determining the status of the assignment.
 
-Timesheet:
+Timesheet - **TODO**:
     - Timesheet is **attached to an event**.
     - start_date, end_date is reduntant with event_timespan_range time_from, time_to, but this is probably okay for now.
 
-File:
+File - **TODO**:
     - Reference to a thumbnail (smaller version) and its size (width x height).
 
+**DONE**
 Move avatar id below line
 
 
-Company:
+Company - **DONE**:
     - ICO, DICO, Address, Contact Telephone Number, Contact Email
 
-Employment:
+
+Employment - **DONE**:
     - Employee Level <BIGBOSS>
 
-TimeSheet: 
+TimeSheet - **TODO**: 
     - Responsible Person ID / Approved By / Approved Column
