@@ -6,8 +6,8 @@ hide circle
 
 entity user {
     *<u>user_id</u>: <<uuid>>
-    avatar_id: <<uuid>> (FK file)
     ---
+    avatar_id: <<uuid>> (FK file)
     *name: varchar(255)
     *user_level: <<enum UserLevel>>
     *user_status <<enum UserStatus>>
@@ -48,8 +48,8 @@ entity work_day {
 together {
     entity event {
         *<u>event_id</u>: <<uuid>>
-        avatar_id: <<uuid>> (FK file)
         ---
+        avatar_id: <<uuid>> (FK file)
         *name: varchar(255)
         description: text
         website: url
@@ -91,8 +91,8 @@ entity assigned_staff {
 
 entity company {
     *<u>company_id</u>: <<uuid>>
-    avatar_id: <<uuid>> (FK file)
     ---
+    avatar_id: <<uuid>> (FK file)
     *name: varchar(255)
     description: text
     website: url
@@ -164,8 +164,8 @@ together {
     '/
     entity file {
         *<u>file_id</u>: <<uuid>>
-        comment_id: <<uuid>>
         ---
+        comment_id: <<uuid>>
         extention: varchar(20)
         params: varchar(60)
         *type <<enum FileType>>
