@@ -17,6 +17,7 @@ Currently, the enums in the model are as follows:
 - StaffLevel { 'Basic', 'Organizer' } -> Denotes whether the employee has additional (organizer) privileges within a given event.
 - UserStatus { 'OK', 'Sick', 'Vacation' } -> Denotes the availability of a user in terms of employment and task opportunities.
 - FileType { 'image', 'text', 'other' } -> Denotes a type of an uploaded file.
+- AssignmentStatus { 'pending', 'accepted', 'rejected' } -> Denotes the status of a staff request to work on a task.
 
 ## Notes (4.12.2023)
 Anyone can register and then a higher-privilege user (company manager or admin) can register them to a company.
