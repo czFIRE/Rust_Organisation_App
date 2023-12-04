@@ -98,6 +98,9 @@ entity task {
 entity assigned_staff {
     *<u>task_id</u>: <<uuid>>
     *<u>staff_id</u>: <<uuid>>
+    ---
+    *assignment_status: <<enum AssignmentStatus>>
+    decided_by: <<uuid>>
 }
 
 entity company {
