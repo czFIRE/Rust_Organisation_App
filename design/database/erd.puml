@@ -96,6 +96,11 @@ entity company {
     *name: varchar(255)
     description: text
     website: url
+    *ICO: int
+    *DICO: varchar(10) /' 10 should be the length of the DICO '/
+    *address: string
+    *contact_phone: string
+    *contact_email: string
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
