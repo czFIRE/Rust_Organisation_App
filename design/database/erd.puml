@@ -102,7 +102,12 @@ entity company {
 	         numbers, some letters as well, but they all fit into 16 characters.
 	'/
     *CRN: varchar(16)
-    *DICO: varchar(10) /' 10 should be the length of the DICO '/
+	/'
+	  A Value-Added Tax Identification Number.
+
+      Note: The China seems to have a longest format with 18 characters.
+	'/
+	*VATIN: varchar(18)
     *address: string
     *contact_phone: string
     *contact_email: string
