@@ -86,7 +86,7 @@ entity assigned_staff {
     *<u>staff_id</u>: <<uuid>>
     ---
     *assignment_status: <<enum AssignmentStatus>>
-    decided_by: <<uuid>>
+    approved_by: <<uuid>>
 }
 
 entity company {
