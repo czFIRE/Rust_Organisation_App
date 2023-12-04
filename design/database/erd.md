@@ -17,3 +17,52 @@ Currently, the enums in the model are as follows:
 - StaffLevel { 'Basic', 'Organizer' } -> Denotes whether the employee has additional (organizer) privileges within a given event.
 - UserStatus { 'OK', 'Sick', 'Vacation' } -> Denotes the availability of a user in terms of employment and task opportunities.
 - FileType { 'image', 'text', 'other' } -> Denotes a type of an uploaded file.
+
+## Notes (4.12.2023)
+Anyone can register and then a higher-privilege user (company manager or admin) can register them to a company.
+
+Age, 
+
+Organizer gives staff a task
+vs.
+Staff chooses a task
+
+
+Event Time Slot: Remove
+
+User: Add birth_date
+      Add gender (enum)
+      
+
+**Event** Registration:
+    - User-based registration - workers (full or part-time) may register to an event, or management may assign them to an event. Once registered, a worker can't unregister from an event.
+    - Organizers must confirm/reject event registrations.
+    - **Events have two states** - 'accepts workers' / 'doesn't accept workers' which is set by event organizer
+
+**Task** Registration:
+    - Staff-based registration - Staff may volunteer for a task, or organizers may assign them to a task. Works like event registration. 
+    - Organizers must confirm/reject task volunteers.
+    - **Tasks have two states** - 'accepts staff' / 'doesn't accept staff'
+    
+Assigned Staff:
+    - Add decided_by column which contains the ID of the organizer that made the final decision on the staff request to work on a task.
+    - Add assignment_status column which contains an enum of three values (Pending, Accepted, Rejected) determining the status of the assignment.
+
+Timesheet:
+    - Timesheet is **attached to an event**.
+    - start_date, end_date is reduntant with event_timespan_range time_from, time_to, but this is probably okay for now.
+
+File:
+    - Reference to a thumbnail (smaller version) and its size (width x height).
+
+Move avatar id below line
+
+
+Company:
+    - ICO, DICO, Address, Contact Telephone Number, Contact Email
+
+Employment:
+    - Employee Level <BIGBOSS>
+
+TimeSheet: 
+    - Responsible Person ID / Approved By / Approved Column
