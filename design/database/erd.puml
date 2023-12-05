@@ -146,7 +146,7 @@ entity assigned_staff {
     *<u>staff_id</u>: <<uuid>>
     ---
     *assignment_status: <<enum AssignmentStatus>>
-    approved_by: <<uuid>>
+    decided_by: <<uuid>>
 }
 
 entity company {
@@ -167,7 +167,7 @@ entity company {
 
       Note: The China seems to have a longest format with 18 characters.
 	'/
-	*VATIN: varchar(18)
+	  *VATIN: varchar(18)
     *address: string
     *contact_phone: string
     *contact_email: string
