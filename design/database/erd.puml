@@ -56,6 +56,11 @@ enum UserLevel {
 	Admin
 }
 
+enum UserSex {
+    Female
+	Male
+}
+
 entity user {
     *<u>user_id</u>: <<uuid>>
     ---
@@ -64,6 +69,9 @@ entity user {
     *user_level: <<enum UserLevel>>
     *user_status <<enum UserStatus>>
     *email VARCHAR(45)
+	*date_of_birth: date
+	'/ Note: User may choose to leave this unfilled, the collumn is optional. '/
+	sex: <<enum UserSex>>
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
