@@ -4,6 +4,58 @@ skinparam classFontSize 20
 scale 1800 * 1800
 hide circle
 
+enum TaskPriority {
+    Low
+	Medium
+	High
+}
+
+enum AssociationType {
+    Sponsor
+	Organizer
+	Other
+}
+
+enum EmploymentType {
+    DPP
+	DPC
+	HPP
+}
+
+enum EmployeeLevel {
+    Basic
+	Manager
+	Upper Manager
+}
+
+enum StaffLevel {
+    Basic
+    Organizer
+}
+
+enum UserStatus {
+    OK
+	Sick
+	Vacation
+}
+
+enum FileType {
+    Image
+	Text
+	Other
+}
+
+enum AssignmentStatus {
+    Pending
+	Accepted
+	Rejected
+}
+
+enum UserLevel {
+    User
+	Admin
+}
+
 entity user {
     *<u>user_id</u>: <<uuid>>
     ---
