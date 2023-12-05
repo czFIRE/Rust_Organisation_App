@@ -26,7 +26,7 @@ Anyone can register and then a higher-privilege user (company manager or admin) 
 **DONE**
 Event Time Slot: Remove
 
-**TODO**
+**DONE**
 User: Add birth_date
       Add gender (enum)
       

@@ -4,6 +4,63 @@ skinparam classFontSize 20
 scale 1800 * 1800
 hide circle
 
+enum TaskPriority {
+    Low
+	Medium
+	High
+}
+
+enum AssociationType {
+    Sponsor
+	Organizer
+	Other
+}
+
+enum EmploymentType {
+    DPP
+	DPC
+	HPP
+}
+
+enum EmployeeLevel {
+    Basic
+	Manager
+	Upper Manager
+}
+
+enum StaffLevel {
+    Basic
+    Organizer
+}
+
+enum UserStatus {
+    OK
+	Sick
+	Vacation
+}
+
+enum FileType {
+    Image
+	Text
+	Other
+}
+
+enum AssignmentStatus {
+    Pending
+	Accepted
+	Rejected
+}
+
+enum UserLevel {
+    User
+	Admin
+}
+
+enum UserSex {
+    Female
+	Male
+}
+
 entity user {
     *<u>user_id</u>: <<uuid>>
     ---
@@ -12,6 +69,9 @@ entity user {
     *user_level: <<enum UserLevel>>
     *user_status <<enum UserStatus>>
     *email VARCHAR(45)
+	*date_of_birth: date
+	'/ Note: User may choose to leave this unfilled, the collumn is optional. '/
+	sex: <<enum UserSex>>
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
@@ -96,8 +156,18 @@ entity company {
     *name: varchar(255)
     description: text
     website: url
-    *ICO: int
-    *DICO: varchar(10) /' 10 should be the length of the DICO '/
+    /' A Company Registration Number.
+
+       Note: Different European countries use different format, some just
+	         numbers, some letters as well, but they all fit into 16 characters.
+	'/
+    *CRN: varchar(16)
+	/'
+	  A Value-Added Tax Identification Number.
+
+      Note: The China seems to have a longest format with 18 characters.
+	'/
+	  *VATIN: varchar(18)
     *address: string
     *contact_phone: string
     *contact_email: string
