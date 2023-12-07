@@ -1566,49 +1566,6 @@ paths:
                 schema:
                   $ref: '#/components/schemas/Error'
 
-  /timesheet:
-    post:
-      tags:
-        - timeSheet
-      summary: Create a new timesheet.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/NewTimeSheet'
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TimeSheet'
-        '400':
-          description: Bad Request
-          content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Error'
-        '403':
-          description: Forbidden
-          content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Error'
-        '404':
-          description: Not Found
-          content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Error'
-        '500':
-          description: Internal Error
-          content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Error'
-  
   /timesheet/{id}:
     get:
       tags:
