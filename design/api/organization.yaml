@@ -2562,7 +2562,7 @@ components:
         work_days:
           type: array
           items:
-            $ref: '#/components/schemas/WorkDay'
+            $ref: '#/components/schemas/WorkDayData'
         is_editable:
           type: boolean
           example: true
