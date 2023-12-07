@@ -15,7 +15,9 @@ tags:
   - name: companyContent
     description: Content relevant to companies
   - name: event
-    description: Event in system
+    description: Handles operations specific to an event entity.
+  - name: eventStaff
+    description: Handles operations specific to event staff.
   - name: eventContent
     description: Content relevant to events
   - name: eventTask
@@ -303,13 +305,63 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
+  /user/{user_id}/employment/{company_id}:
+    get:
+      tags:
+        - employment
+      summary: Get an employment relationship by its user and company IDs.
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: company_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employment'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     patch:
       tags:
         - employment
       summary: Update an employment relationship between a user and a company.
       parameters:
         - in: path
-          name: id
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: company_id
           required: true
           schema:
             type: string
@@ -346,8 +398,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
-  /user/{user_id}/employment/{company_id}:
     delete:
       tags:
         - employment
@@ -702,6 +752,251 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  
+  /event/{id}/staff:
+    get:
+      tags:
+        - eventStaff
+      summary: Retrieves all event staff.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        #ToDo: Add registration
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventStaff'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+        - eventStaff
+      summary: Create a new staff relationship between a user and an event.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewEventStaff'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewEventStaff'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found (EventID is invalid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - eventStaff
+      summary: Removes all event staff.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /event/{event_id}/staff/{user_id}:
+    get: 
+      tags:
+        - eventStaff
+      summary: Retrieves specific event staff.
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventStaff'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      tags:
+        - eventStaff
+      summary: Update eventStaff
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Partial data for updates.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventStaffData'
+      responses:
+        '200':
+            description: Ok
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/EventStaff'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete: 
+      tags:
+        - eventStaff
+      summary: Removes specific event staff.
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
     User:
@@ -831,10 +1126,6 @@ components:
     UpdateEmployment:
       type: object
       properties:
-        company_id:
-          type: string
-          format: uuid
-          example: a40c9874-c743-48e2-9295-0625f5d5a068
         employment_type:
           type: string
           format: EmploymentType
@@ -966,6 +1257,48 @@ components:
         website:
           type: string
           example: hackertyper.com
+    
+    EventStaff:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          example: s40c9874-c743-48e2-9295-0625f5d5a068
+        event_id:
+          type: string
+          format: uuid
+          example: e40c9874-c743-48e2-9295-0625f5d5a068
+        staff_level:
+          type: string
+          format: StaffLevel
+          example: Organizer
+        created_at:
+          type: string
+          example: '2023-07-12 11:57:05+01'
+        edited_at:
+          type: string
+          example: '2023-07-12 11:57:05+01'
+    
+    NewEventStaff:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          example: s40c9874-c743-48e2-9295-0625f5d5a068
+        staff_level:
+          type: string
+          format: StaffLevel
+          example: Organizer
+    
+    EventStaffData:
+      type: object
+      properties:
+        staff_level:
+          type: string
+          format: StaffLevel
+          example: Organizer
 
     Error:
       type: object
