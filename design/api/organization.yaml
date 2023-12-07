@@ -997,6 +997,449 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
+  /event/{id}/task:
+    get:
+      tags:
+        - eventTask
+      summary: Retrieves all tasks for the given event.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: accomplished
+          description: matches on date_accomplished (null or not)
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventTask'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+        - eventTask
+      summary: Creates a task for the given event.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewEventTask'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - eventTask
+      summary: Removes all tasks for the given event.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: accomplished
+          description: matches on date_accomplished (null or not)
+          schema:
+            type: boolean
+      responses:
+        '204':
+          description: No content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /event/{event_id}/task/{task_id}:
+    patch:
+      tags:
+        - eventTask
+      summary: Updates information about a task.
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Partial data for the update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventTaskData'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventTask'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+        tags:
+          - eventTask
+        summary: Deletes a task.
+        parameters:
+          - in: path
+            name: event_id
+            required: true
+            schema:
+              type: string
+              format: uuid
+          - in: path
+            name: task_id
+            required: true
+            schema:
+              type: string
+              format: uuid
+        responses:
+          '204':
+            description: No Content
+          '400':
+            description: Bad Request
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+          '404':
+            description: Not Found
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+          '500':
+            description: Internal Error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+
+  /user/{user_id}/employment/{company_id}/sheet:
+    get:
+      tags:
+        - timeSheet
+      summary: Get all the timesheets for a chosen user's employment.
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: company_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeSheet'
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+  
+  /timesheet:
+    post:
+      tags:
+        - timeSheet
+      summary: Create a new timesheet.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewTimeSheet'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeSheet'
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+  
+  /timesheet/{id}:
+    get:
+      tags:
+        - timeSheet
+      summary: Retrieve a specific timesheet.
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeSheet'
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+    
+    patch:
+      tags:
+        - timeSheet
+      summary: Updates the timesheet's relevant attributes.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Partial data for the update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeSheetData'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeSheet'
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - timeSheet
+      summary: Delete a timesheet. (Though we probably don't want to.)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+
 components:
   schemas:
     User:
@@ -1299,6 +1742,193 @@ components:
           type: string
           format: StaffLevel
           example: Organizer
+
+    EventTask:
+      type: object
+      properties:
+        task_id:
+          type: string
+          format: uuid
+          example: t40c9874-c743-48e2-9295-0625f5d5a068
+        creator_id:
+          type: string
+          format: uuid
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
+        title:
+          type: string
+          example: Vacuum the sandbox
+        description:
+          type: string
+          example: VERY IMPORTANT! We need 1 person to vacuum the sandbox periodically so that the sand is as clean as it can be. IMPORTANT! DO NOT VACUUM THE SAND!!!
+        accomplished_level:
+          type: number
+          example: 100
+        date_accomplished:
+          type: string
+          example: '2023-05-03 23:59:59+01'
+        priority:
+          type: string
+          format: TaskPriority
+          example: 'High'
+        created_at:
+          type: string
+          example: '2023-05-01 03:00:00+01'
+        edited_at:
+          type: string
+          example: '2023-05-03 23:59:59+01'
+    
+    NewEventTask:
+      type: object
+      properties:
+        creator_id:
+          type: string
+          format: uuid
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
+        title:
+          type: string
+          example: Vacuum the sandbox
+        description:
+          type: string
+          example: VERY IMPORTANT! We need 1 person to vacuum the sandbox periodically so that the sand is as clean as it can be. IMPORTANT! DO NOT VACUUM THE SAND!!!
+        priority:
+          type: string
+          format: TaskPriority
+          example: 'High'
+    
+    EventTaskData:
+      type: object
+      properties:
+        title:
+          type: string
+          example: Vacuum the sandbox
+        description:
+          type: string
+          example: VERY IMPORTANT! We need 1 person to vacuum the sandbox periodically so that the sand is as clean as it can be. IMPORTANT! DO NOT VACUUM THE SAND!!!
+        accomplished_level:
+          type: number
+          example: 100
+        date_accomplished:
+          type: string
+          example: '2023-05-03 23:59:59+01'
+        priority:
+          type: string
+          format: TaskPriority
+          example: 'High'
+    
+    WorkDay:
+      type: object
+      properties:
+        timesheet_id:
+          type: string
+          format: uuid
+          example: t50c9874-c743-48e2-9295-0625f5d5a068
+        work_date:
+          type: string
+          example: '2020-06-01'
+        worked_hours:
+          type: number
+          example: 6
+        worked_minutes:
+          type: number
+          example: 30
+        commentary:
+          type: string
+          example: 'Backstage: Catering for The Mutes accapella band.'
+        is_editable:
+          type: boolean
+          example: false
+        created_at:
+          type: string
+          example: '2020-06-01 00:00:00+01'
+        edited_at:
+          type: string
+          example: '2020-06-16 14:15:06+01'
+    
+    WorkDayData:
+      type: object
+      properties:
+        worked_hours:
+          type: number
+          example: 6
+        worked_minutes:
+          type: number
+          example: 30
+        commentary:
+          type: string
+          example: 'Backstage: Catering for The Mutes accapella band.'
+        is_editable:
+          type: boolean
+          example: false
+
+    TimeSheet:
+      type: object
+      properties:
+        timesheet_id:
+          type: string
+          format: uuid
+          example: t50c9874-c743-48e2-9295-0625f5d5a068
+        user_id:
+          type: string
+          format: uuid
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
+        company_id:
+          type: string
+          format: uuid
+          example: a50c9874-c743-48e2-9295-0625f5d5a068
+        start_date:
+          type: string
+          example: '2020-06-01 00:00:00+01'
+        end_date:
+          type: string
+          example: '2020-06-15 00:00:00+01'
+        worked_hours:
+          type: number
+          example: 20
+        worked_minutes:
+          type: number
+          example: 30
+        work_days:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkDay'
+        is_editable:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          example: '2020-06-01 00:00:00+01'
+        edited_at:
+          type: string
+          example: '2020-06-20 13:05:25+01'
+
+    NewTimeSheet:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
+        company_id:
+          type: string
+          format: uuid
+          example: a50c9874-c743-48e2-9295-0625f5d5a068
+        start_date:
+          type: string
+          example: '2020-06-01 00:00:00+01'
+        end_date:
+          type: string
+          example: '2020-06-15 00:00:00+01'
+
+    TimeSheetData:
+      type: object
+      properties:
+        work_days:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkDay'
+        is_editable:
+          type: boolean
+          example: true
 
     Error:
       type: object
