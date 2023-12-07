@@ -1,0 +1,975 @@
+openapi: 3.0.3
+info:
+  title: Organisation App API
+  description: Actix Web API for the Organisation App project.
+  version: 0.1.0
+tags:
+  - name: user
+    description: System user
+  - name: userContent
+    description: Content relevant to users
+  - name: employment
+    description: User employment
+  - name: company
+    description: Company in system
+  - name: companyContent
+    description: Content relevant to companies
+  - name: event
+    description: Event in system
+  - name: eventContent
+    description: Content relevant to events
+  - name: eventTask
+    description: Task relevant services
+  - name: timeSheet
+    description: Timesheet relevant services
+paths:
+  /user:
+    post:
+      tags:
+        - user
+      summary: Adds a new user to the system.
+      operationId: addUser
+      requestBody:
+        description: New user data.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+  /user/{id}:
+    get:
+      summary: Retrieves user data from the system.
+      tags: 
+        - user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      summary: 'Updates a user record.'
+      tags:
+        - user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Partial new user data.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404': 
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: 'Remove a user from the system.'
+      tags:
+        - user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  #!!!!!!TODO!!!!!!!!
+  /user/{id}/avatar:
+    get:
+      tags:
+        - userContent
+      summary: 'Load user avatar.'
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '501':
+          description: Not Implemented
+    post:
+      tags:
+        - userContent
+      summary: 'Create user avatar.'
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '501':
+          description: Not Implemented
+    put:
+      tags:
+        - userContent
+      summary: 'Apply new user avatar, rewriting the old one.'
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '501': 
+          description: Not Implemented
+    delete:
+      tags:
+        - userContent
+      summary: 'Remove user avatar, leaving a blank avatar in its place.'
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '501': 
+          description: Not Implemented
+
+  /employment:
+    post:
+      tags:
+        - employment
+      summary: Create a new employment relationship between a user and a company.
+      requestBody:
+        required: true
+        description: Data of the new employment relationship.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewEmployment'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employment'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+  /user/{id}/employment:
+    get:
+      tags:
+        - employment
+      summary: Retrieve all employments for a user.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employment'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      tags:
+        - employment
+      summary: Update an employment relationship between a user and a company.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Partial new employment data.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEmployment'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employment'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /user/{user_id}/employment/{company_id}:
+    delete:
+      tags:
+        - employment
+      summary: Remove an employment relationship between a user and a company.
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: company_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /company:
+    post:
+      tags:
+        - company
+      summary: Create a new company within the system.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewCompany'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /company/{id}:
+    get:
+      tags: 
+        - company
+      summary: Get a company by its id.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'       
+    patch:
+      tags:
+        - company
+      summary: Update company info.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Partial data for update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewCompany'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags: 
+        - company
+      summary: Remove a company from the system.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error' 
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error' 
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /event:
+    post:
+      tags:
+        - event
+      summary: Create a new event in the system.
+      requestBody:
+        description: Data for the new event.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewEvent'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        
+  /event/{id}:
+    get:
+      tags:
+        - event
+      summary: Retrieve data about an event by its id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      tags:
+        - event
+      summary: Update information about an event.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Partial data for the update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewEvent'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - event
+      summary: Delete an event from the system.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    User:
+      type: object
+      properties: 
+        id:
+          type: string
+          format: uuid
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
+        avatar_id:
+          type: string
+          format: Optional(uuid)
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
+        name:
+          type: string
+          format: string
+          example: Josephe Jusephi
+        user_level:
+          type: string
+          format: UserLevel
+          example: User
+        user_status:
+          type: string
+          format: UserStatus
+          example: Vacation
+        email:
+          type: string
+          format: email
+          example: Josephe@goodmail.com
+        date_of_birth:
+          type: string
+          example: '1995-10-21 0:00:00'
+        sex:
+          type: string
+          format: UserSex
+          example: Male
+        created_at:
+          type: string
+          example: '2023-01-15 5:32:12+01'
+    
+    NewUser:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Pepo Pepowskyj
+        email:
+          type: string
+          format: email
+          example: Pepo2@adresa.pl
+        date_of_birth:
+          type: string
+          example: '1999-10-21 0:00:00'
+        sex:
+          type: string
+          format: UserSex
+          example: Other
+        userLevel:
+          type: string
+          format: UserLevel
+          example: User
+
+    Employment:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
+        company_id:
+          type: string
+          format: uuid
+          example: a40c9874-c743-48e2-9295-0625f5d5a068
+        employment_type:
+          type: string
+          format: EmploymentType
+          example: HPP
+        hourly_rate: 
+          type: number
+          example: 200.00
+        employee_level:
+          type: string
+          format: EmployeeLevel
+          example: Basic
+        start_date:
+          type: string
+          example: '2020-07-01'
+        end_date:
+          type: string
+          example: '9999-12-31'
+        created_at:
+          type: string
+          example: '2022-12-12'
+        edited_at:
+          type: string
+          example: '2023-03-15'
+
+    NewEmployment:
+      type: object
+      properties:
+        user_id: 
+          type: string
+          format: uuid
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
+        company_id:
+          type: string
+          format: uuid
+          example: a40c9874-c743-48e2-9295-0625f5d5a068
+        employment_type:
+          type: string
+          format: EmploymentType
+          example: HPP
+        hourly_rate:
+          type: number
+          example: 200.00
+        employee_level:
+          type: string
+          format: EmployeeLevel
+          example: Basic
+        start_date:
+          type: string
+          example: '2022-07-01'
+        end_date:
+          type: string
+          example: '9999-12-31'
+
+    UpdateEmployment:
+      type: object
+      properties:
+        company_id:
+          type: string
+          format: uuid
+          example: a40c9874-c743-48e2-9295-0625f5d5a068
+        employment_type:
+          type: string
+          format: EmploymentType
+          example: HPP
+        hourly_rate:
+          type: number
+          example: 200.00
+        employee_level:
+          type: string
+          format: EmployeeLevel
+          example: Basic
+        start_date:
+          type: string
+          example: '2022-07-01'
+        end_date:
+          type: string
+          example: '9999-12-31'
+
+    Company:
+      type: object
+      properties:
+        company_id:
+          type: string
+          format: uuid
+          example: a40c9874-c743-48e2-9295-0625f5d5a068
+        avatar_id:
+          type: string
+          format: uuid
+          example: c40c9874-c743-48e2-9295-0625f5d5a068
+        name:
+          type: string
+          example: Pain Inc.
+        description:
+          type: string
+          example: We specialize in inconvenient business solutions, so your employees can get the experience of complaining about bad software!
+        website:
+          type: string
+          example: www.pain.co.uk
+        CRN:
+          type: string
+          format: CRN
+          example: 12345678
+        VATIN:
+          type: string
+          format: VATIN
+          example: CZ1234567890
+        address:
+          type: string
+          example: Botanicka 67a, Brno, Czech Republic
+        contact_phone:
+          type: string
+          example: 420003300000
+        contact_email:
+          type: string
+          example: paininc@pain.inc
+        created_at:
+          type: string
+          example: '2023-01-01 05:00:02+01'
+        edited_at:
+          type: string
+          example: '2023-01-01 05:00:02+01'
+
+    NewCompany:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Pain Inc.
+        description:
+          type: string
+          example: We specialize in inconvenient business solutions, so your employees can get the experience of complaining about bad software!
+        website:
+          type: string
+          example: www.pain.co.uk
+        CRN:
+          type: string
+          format: CRN
+          example: 12345678
+        VATIN:
+          type: string
+          format: VATIN
+          example: CZ1234567890
+        address:
+          type: string
+          example: Botanicka 67a, Brno, Czech Republic
+        contact_phone:
+          type: string
+          example: 420003300000
+        contact_email:
+          type: string
+          example: paininc@pain.inc
+        
+    Event:
+      type: object
+      properties:
+        event_id:
+          type: string
+          format: uuid
+          example: e40c9874-c743-48e2-9295-0625f5d5a068
+        avatar_id:
+          type: string
+          format: uuid
+          example: c40c9874-c743-48e2-9295-0625f5d5a068
+        name:
+          type: string
+          example: Musicfest Loud Extravaganza WeeWoo
+        description:
+          type: string
+          example: Garble Garble Come Enjoy Music Zip Zoop
+        website:
+          type: string
+          example: hackertyper.com
+        created_at:
+          type: string
+          example: '2023-06-15 12:00:05+01'
+        edited_at:
+          type: string
+          example: '2023-06-15 12:00:05+01'
+
+    NewEvent:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Musicfest Loud Extravaganza WeeWoo
+        description:
+          type: string
+          example: Garble Garble Come Enjoy Music Zip Zoop
+        website:
+          type: string
+          example: hackertyper.com
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: error message
