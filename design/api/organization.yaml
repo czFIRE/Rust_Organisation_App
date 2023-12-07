@@ -184,8 +184,32 @@ paths:
             type: string
             format: uuid
       responses:
-        '501':
-          description: Not Implemented
+        '200':
+          description: Ok
+          content:
+            image/jpg:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
     post:
       tags:
         - userContent
@@ -197,9 +221,44 @@ paths:
           schema:
             type: string
             format: uuid
+      requestBody:
+        content:
+          image/jpg:
+            schema:
+              type: string
+              format: binary
       responses:
-        '501':
-          description: Not Implemented
+        '200':
+          description: Ok
+          content:
+            image/jpg:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     put:
       tags:
         - userContent
@@ -211,9 +270,44 @@ paths:
           schema:
             type: string
             format: uuid
+      requestBody:
+        content:
+          image/jpg:
+            schema:
+              type: string
+              format: binary
       responses:
-        '501': 
-          description: Not Implemented
+        '200':
+          description: Ok
+          content:
+            image/jpg:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500': 
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     delete:
       tags:
         - userContent
@@ -226,8 +320,37 @@ paths:
             type: string
             format: uuid
       responses:
-        '501': 
-          description: Not Implemented
+        '200':
+          description: OK (returns blank/default image)
+          content:
+            image/jpg:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500': 
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /employment:
     post:
