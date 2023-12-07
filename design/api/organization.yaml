@@ -1335,6 +1335,199 @@ paths:
                 schema:
                   $ref: '#/components/schemas/Error'
   
+  /event/{id}/company:
+    get:
+      tags:
+        - eventCompany
+      summary: Get all associated companies.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+            # ToDo: Add query for association types?
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AssociatedCompany'
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+    
+    post:
+      tags:
+        - eventCompany
+      summary: Add a company to the list of associated companies.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewAssociatedCompany'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssociatedCompany'
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+    
+  /event/{event_id}/company/{company_id}:
+    patch:
+      tags:
+        - eventCompany
+      summary: Update the association of the associated company.
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: company_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssociatedCompanyData'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssociatedCompany'
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - eventCompany
+      summary: Remove a company from associated companies for the event.
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: company_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+      
+        
+
   /event/{id}/image:
     get:
       tags:
@@ -2192,6 +2385,42 @@ components:
         is_editable:
           type: boolean
           example: true
+
+    AssociatedCompany:
+      type: object
+      properties:
+        event_id:
+          type: string
+          format: uuid
+          example: e50c9874-c743-48e2-9295-0625f5d5a068
+        company_id:
+          type: string
+          format: uuid
+          example: a50c9874-c743-48e2-9295-0625f5d5a068
+        association_type:
+          type: string
+          format: AssociationType
+          example: Sponsor
+
+    NewAssociatedCompany:
+      type: object
+      properties:
+        company_id:
+          type: string
+          format: uuid
+          example: a50c9874-c743-48e2-9295-0625f5d5a068
+        association_type:
+          type: string
+          format: AssociationType
+          example: Sponsor
+
+    AssociatedCompanyData:
+      type: object
+      properties:
+        association_type:
+          type: string
+          format: AssociationType
+          example: Sponsor
 
     Error:
       type: object
