@@ -80,8 +80,9 @@ entity user {
 entity timesheet {
     *<u>timesheet_id</u>: <<uuid>>
     ---
-    *user_id: <<uuid>>
-    *company_id: <<uuid>>
+    *user_id: <<uuid>> (FK user)
+    *company_id: <<uuid>> (FK company)
+    *event_id: <<uuid>> (FK event)
     *start_date: date
     *end_date: date
     *worked_hours: int
@@ -248,6 +249,7 @@ together {
 user||..|{employment
 timesheet}o..||employment
 timesheet||..o{work_day
+timesheet||..||event
 employment}o..||company
 event||.o{associated_company
 company||..o{associated_company
