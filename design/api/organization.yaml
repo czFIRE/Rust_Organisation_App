@@ -20,6 +20,10 @@ tags:
     description: Handles operations specific to event staff.
   - name: eventTask
     description: Task relevant services.
+  - name: taskStaff
+    description: Task Staff relevant services.
+  - name: taskContent
+    description: Content relevant to tasks.
   - name: eventCompany
     description: Associated Company relevant services.
   - name: eventContent
@@ -1516,6 +1520,427 @@ paths:
                 schema:
                   $ref: '#/components/schemas/Error'
   
+  /task/{id}:
+    get:
+      tags:
+        - taskStaff
+      summary: Get all staff for a task.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: assignment_status
+          required: false
+          schema:
+            type: string
+            format: AssignmentStatus
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventTaskStaff'
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - taskStaff
+      summary: Delete all Pending and Rejected staff for a task.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok (remaining staff)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventTaskStaff'
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+
+  /task/{task_id}/staff/{staff_id}:
+    get:
+      tags:
+        - taskStaff
+      summary: Get specific staff information.
+      parameters:
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: staff_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventTaskStaff'
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+      
+    patch:
+      tags:
+        - taskStaff
+      summary: Update task staff information.
+      parameters:
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: staff_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventTaskStaffData'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventTaskStaff'
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+      
+  /event/{id}/comment:
+    get:
+      tags:
+        - eventContent
+      summary: 'Get event comments.'
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventComment'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - eventContent
+      summary: 'Create an event comment.'
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewEventComment'
+        
+          
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventComment'
+            
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - eventContent
+      summary: 'Remove all event comments.'
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500': 
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /event/{event_id}/comment/{comment_id}:
+    put:
+      tags:
+        - eventContent
+      summary: 'Rewrite event comment.'
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: comment_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventCommentData'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventComment'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500': 
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - eventContent
+      summary: 'Delete event comment.'
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: comment_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500': 
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
   /event/{id}/company:
     get:
       tags:
@@ -1707,7 +2132,234 @@ paths:
                 schema:
                   $ref: '#/components/schemas/Error'
       
-        
+  /task/{id}/comment:
+    get:
+      tags:
+        - taskContent
+      summary: 'Get task comments.'
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskComment'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - taskContent
+      summary: 'Create a task comment.'
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewTaskComment'
+          
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskComment'
+            
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - taskContent
+      summary: 'Remove all task comments.'
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500': 
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /task/{task_id}/comment/{comment_id}:
+    put:
+      tags:
+        - taskContent
+      summary: 'Rewrite task comment.'
+      parameters:
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: comment_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCommentData'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskComment'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500': 
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - taskContent
+      summary: 'Delete task comment.'
+      parameters:
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: comment_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500': 
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /event/{id}/image:
     get:
@@ -2116,6 +2768,33 @@ components:
         created_at:
           type: string
           example: '2023-01-15 5:32:12+01'
+
+    UserLite:
+      type: object
+      properties: 
+        id:
+          type: string
+          format: uuid
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
+        avatar_id:
+          type: string
+          format: Optional(uuid)
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
+        name:
+          type: string
+          format: string
+          example: Josephe Jusephi
+        user_status:
+          type: string
+          format: UserStatus
+          example: Vacation
+        age:
+          type: string
+          example: '25'
+        sex:
+          type: string
+          format: UserSex
+          example: Male
     
     NewUser:
       type: object
@@ -2341,10 +3020,8 @@ components:
     EventStaff:
       type: object
       properties:
-        user_id:
-          type: string
-          format: uuid
-          example: s40c9874-c743-48e2-9295-0625f5d5a068
+        user:
+          $ref: '#/components/schemas/UserLite'
         event_id:
           type: string
           format: uuid
@@ -2387,6 +3064,10 @@ components:
           type: string
           format: uuid
           example: t40c9874-c743-48e2-9295-0625f5d5a068
+        event_id:
+          type: string
+          format: uuid
+          example: e50c9874-c743-48e2-9295-0625f5d5a068
         creator_id:
           type: string
           format: uuid
@@ -2451,7 +3132,128 @@ components:
           type: string
           format: TaskPriority
           example: 'High'
+
+    EventTaskStaff:
+      type: object
+      properties:
+        staff:
+          $ref: '#/components/schemas/EventStaff'
+        assignment_status:
+          type: string
+          format: AssignmentStatus
+          example: Rejected
+        decided_by:
+          type: string
+          format: uuid
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
     
+    NewEventTaskStaff:
+      type: object
+      properties:
+        staff_id:
+          type: string
+          format: uuid
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
+    
+    EventTaskStaffData:
+      type: object
+      properties:
+        assignment_status:
+          type: string
+          format: AssignmentStatus
+          example: Rejected
+
+    EventComment:
+      type: object
+      properties:
+        comment_id:
+          type: string
+          format: uuid
+          example: k50c9874-c743-48e2-9295-0625f5d5a068
+        event_id:
+          type: string
+          format: uuid
+          example: e50c9874-c743-48e2-9295-0625f5d5a068
+        author:
+          $ref: '#/components/schemas/UserLite'
+        content:
+          type: string
+          example: Back in my day, concerts were much crazier and the music didn't sound like cats screaming into the night!!!
+        created_at:
+          type: string
+          example: '2023-01-01 03:00:00+01'
+        edited_at:
+          type: string
+          example: '2023-01-01 03:00:00+01'
+
+    NewEventComment:
+      type: object
+      properties:
+        author_id:
+          type: string
+          format: uuid
+          example: a50c9874-c743-48e2-9295-0625f5d5a068
+        content:
+          type: string
+          example: Back in my day, concerts were much crazier and the music didn't sound like cats screaming into the night!!!
+
+    EventCommentData:
+      type: object
+      properties:
+        author_id:
+          type: string
+          format: uuid
+          example: a50c9874-c743-48e2-9295-0625f5d5a068
+        content:
+          type: string
+          example: Back in my day, music events were much crazier and the music didn't sound like cats screaming into the night!!!
+
+    TaskComment:
+      type: object
+      properties:
+        comment_id:
+          type: string
+          format: uuid
+          example: k50c9874-c743-48e2-9295-0625f5d5a068
+        task_id:
+          type: string
+          format: uuid
+          example: e50c9874-c743-48e2-9295-0625f5d5a068
+        author:
+          $ref: '#/components/schemas/UserLite'
+        content:
+          type: string
+          example: Man, finding the Red Herring in that pond really proved to be a challenge...
+        created_at:
+          type: string
+          example: '2023-01-01 03:00:00+01'
+        edited_at:
+          type: string
+          example: '2023-01-01 03:00:00+01'
+
+    NewTaskComment:
+      type: object
+      properties:
+        author_id:
+          type: string
+          format: uuid
+          example: a50c9874-c743-48e2-9295-0625f5d5a068
+        content:
+          type: string
+          example: Man, finding the Red Herring in that small pond really proved to be a challenge...
+
+    TaskCommentData:
+      type: object
+      properties:
+        author_id:
+          type: string
+          format: uuid
+          example: a50c9874-c743-48e2-9295-0625f5d5a068
+        content:
+          type: string
+          example: Man, finding the Red Herring in that pond really proved to be a challenge...
+
+
     WorkDay:
       type: object
       properties:
