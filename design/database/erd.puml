@@ -237,6 +237,7 @@ entity event_staff {
     ---
     *staff_level: <<enum StaffLevel>>
     *acceptance_status: <<enum AcceptanceStatus>>
+    decided_by: <<uuid>> (FK event_staff)
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
@@ -302,6 +303,7 @@ comment}o..||user
 task||..||event_staff : task_creator
 task||..o{assigned_staff
 assigned_staff}o..||event_staff
+assigned_staff||..||event_staff : decided_by
 user||..o{event_staff
 file|o..o|company
 file|o..o|event
