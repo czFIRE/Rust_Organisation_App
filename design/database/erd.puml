@@ -160,31 +160,48 @@ entity assigned_staff {
     deleted_at: timestamp
 }
 
-entity company {
-    *<u>company_id</u>: <<uuid>>
-    ---
-    avatar_id: <<uuid>> (FK file)
-    *name: varchar(255)
-    description: text
-    website: url
-    /' A Company Registration Number.
+together {
+    entity company {
+        *<u>company_id</u>: <<uuid>>
+        ---
+        avatar_id: <<uuid>> (FK file)
+        *name: varchar(255)
+        description: text
+        website: url
+        /' A Company Registration Number.
 
-       Note: Different European countries use different format, some just
-	         numbers, some letters as well, but they all fit into 16 characters.
-	'/
-    *CRN: varchar(16)
-	/'
-	  A Value-Added Tax Identification Number.
+        Note: Different European countries use different format, some just
+                numbers, some letters as well, but they all fit into 16 characters.
+        '/
+        *CRN: varchar(16)
+        /'
+        A Value-Added Tax Identification Number.
 
-      Note: The China seems to have a longest format with 18 characters.
-	'/
-	*VATIN: varchar(18)
-    *address: string
-    *contact_phone: string
-    *contact_email: string
-    *created_at: timestamp
-    *edited_at: timestamp
-    deleted_at: timestamp
+        Note: The China seems to have a longest format with 18 characters.
+        '/
+        *VATIN: varchar(18)
+        *address: string
+        *contact_phone: string
+        *contact_email: string
+        *created_at: timestamp
+        *edited_at: timestamp
+        deleted_at: timestamp
+    }
+
+    /' 
+        Normalization for compound type address.
+        In case we want to expand some filtering.
+        Also normalization.
+    '/
+    entity company_address {
+        *<u>company_id<u>: <<uuid>>
+        ---
+        country: varchar(255)
+        region: varchar(255)
+        city: varchar(255)
+        street: varchar(255)
+        address_number: varchar(255)
+    }
 }
 
 entity associated_company {
@@ -270,6 +287,7 @@ employment}o..||company
 employment|o..o{employment : manages
 event||.o{associated_company
 company||..o{associated_company
+company||..||company_address
 event||..o{event_staff
 event||..o{task
 event|o...o{comment
