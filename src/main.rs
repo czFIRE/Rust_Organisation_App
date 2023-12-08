@@ -1,30 +1,22 @@
+use anyhow::Result;
 use dotenv::dotenv;
-use redis::{Client, ConnectionLike};
-use sqlx::{postgres::PgConnection, Connection};
+use sqlx::migrate::{MigrateDatabase, Migrator};
+use sqlx::Postgres;
+use std::path::Path;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<()> {
     dotenv().ok();
-    let database_url = dotenv::var("DATABASE_URL").unwrap();
-    let redis_url = dotenv::var("REDIS_URL").unwrap();
+    let database_url = dotenv::var("DATABASE_URL")?;
 
-    let connection = PgConnection::connect(&database_url).await;
-    match connection {
-        Ok(_) => {
-            println!("Successfully connected to postgres");
-        }
-        Err(_) => {
-            println!("Failed to connect to postgres");
-        }
-    }
+    Postgres::drop_database(&database_url).await?;
+    Postgres::create_database(&database_url).await?;
 
-    let mut client = Client::open(redis_url).unwrap();
-    match client.check_connection() {
-        true => {
-            println!("Successfully connected to redis");
-        }
-        false => {
-            println!("Failed to connect to redis");
-        }
-    }
+    let pool = sqlx::PgPool::connect(&database_url).await?;
+
+    let migrator = Migrator::new(Path::new("./migrations")).await?;
+    migrator.run(&pool).await?;
+    println!("All migrations were successfully applied \\o/");
+
+    Ok(())
 }
