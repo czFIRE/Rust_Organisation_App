@@ -39,12 +39,6 @@ enum UserStatus {
 	Vacation
 }
 
-enum FileType {
-    Image
-	Text
-	Other
-}
-
 enum AssignmentStatus {
     Pending
 	Accepted
@@ -279,7 +273,6 @@ together {
         ---
         *extension: varchar(20)
         params: varchar(60)
-        *type <<enum FileType>>
         *created_at: timestamp
         *edited_at: timestamp
         deleted_at: timestamp
