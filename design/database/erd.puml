@@ -130,6 +130,7 @@ together {
 entity task {
     *<u>task_id</u>: <<uuid>>
     --
+    *event_id: uuid (FK event)
     *creator_id: uuid (FK event_staff)
     *title: text
     *description: text
