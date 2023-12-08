@@ -129,8 +129,8 @@ together {
 
 entity task {
     *<u>task_id</u>: <<uuid>>
-    *creator_id: uuid (FK event_staff)
     --
+    *creator_id: uuid (FK event_staff)
     *title: text
     *description: text
     *accomplished_level: int
