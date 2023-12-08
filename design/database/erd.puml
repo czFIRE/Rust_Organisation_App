@@ -261,7 +261,6 @@ task||..||event_staff : task_creator
 task||..o{assigned_staff
 assigned_staff}o..||event_staff
 user||..o{event_staff
-file}o..o|comment
 file|o..o|company
 file|o..o|event
 file|o..o|user
