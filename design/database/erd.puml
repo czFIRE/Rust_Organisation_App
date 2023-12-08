@@ -51,6 +51,12 @@ enum AssignmentStatus {
 	Rejected
 }
 
+enum AcceptanceStatus {
+    Pending
+    Accepted
+    Rejected
+}
+
 enum UserLevel {
     User
 	Admin
@@ -112,6 +118,7 @@ together {
         *name: varchar(255)
         description: text
         website: url
+        *accepts_staff: boolean
         *created_at: timestamp
         *edited_at: timestamp
         deleted_at: timestamp
@@ -135,6 +142,7 @@ entity task {
     *description: text
     date_accomplished: timestamp
     *priority: <<enum TaskPriority>>
+    *accepts_staff: boolean
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
@@ -210,6 +218,7 @@ entity event_staff {
     *<u>event_id</u>: <<uuid>>
     ---
     *staff_level: <<enum StaffLevel>>
+    *acceptance_status: <<enum AcceptanceStatus>>
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
@@ -243,11 +252,11 @@ together {
     entity file {
         *<u>file_id</u>: <<uuid>>
         ---
-        comment_id: <<uuid>>
-        extention: varchar(20)
+        *extension: varchar(20)
         params: varchar(60)
         *type <<enum FileType>>
         *created_at: timestamp
+        *edited_at: timestamp
         deleted_at: timestamp
     }
 }
@@ -257,7 +266,7 @@ timesheet}o..||employment
 timesheet||..o{work_day
 timesheet||..||event
 employment}o..||company
-employment||..o{employment : manages
+employment|o..o{employment : manages
 event||.o{associated_company
 company||..o{associated_company
 event||..o{event_staff

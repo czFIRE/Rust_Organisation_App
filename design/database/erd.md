@@ -18,7 +18,8 @@ Currently, the enums in the model are as follows:
 - UserStatus { 'OK', 'Sick', 'Vacation' } -> Denotes the availability of a user in terms of employment and task opportunities.
 - FileType { 'image', 'text', 'other' } -> Denotes a type of an uploaded file.
 - AssignmentStatus { 'pending', 'accepted', 'rejected' } -> Denotes the status of a staff request to work on a task.
-
+- AcceptanceStatus { 'pending', 'accepted', 'rejected' } -> Denotes the status of a staff request to work on an event.
+  
 ## Notes (4.12.2023)
 *Just a consideration*
 Anyone can register and then a higher-privilege user (company manager or admin) can register them to a company.
@@ -45,11 +46,11 @@ Assigned Staff - **DONE**:
     - Add decided_by column which contains the ID of the organizer that made the final decision on the staff request to work on a task.
     - Add assignment_status column which contains an enum of three values (Pending, Accepted, Rejected) determining the status of the assignment.
 
-Timesheet - **TODO**:
+Timesheet - **DONE**:
     - Timesheet is **attached to an event**.
     - start_date, end_date is reduntant with event_timespan_range time_from, time_to, but this is probably okay for now.
 
-File - **TODO**:
+File - **DONE**:
     - Reference to a thumbnail (smaller version) and its size (width x height).
 
 **DONE**
@@ -63,5 +64,5 @@ Company - **DONE**:
 Employment - **DONE**:
     - Employee Level <BIGBOSS>
 
-TimeSheet - **TODO**: 
+TimeSheet - **DONE**: 
     - Responsible Person ID / Approved By / Approved Column
