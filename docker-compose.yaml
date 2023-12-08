@@ -30,6 +30,13 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     ports:
       - "5050:80"
+
+  adminer:
+    container_name: adminer-container
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
   
   redis:
     container_name: redis-container
