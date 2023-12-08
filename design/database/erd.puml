@@ -146,6 +146,9 @@ entity assigned_staff {
     ---
     *assignment_status: <<enum AssignmentStatus>>
     decided_by: <<uuid>>
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
 }
 
 entity company {
@@ -180,6 +183,9 @@ entity associated_company {
     *<u>company_id</u>: <<uuid>>
     ---
     *association_type: <<enum AssociationType>>
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
 }
 
 entity employment {
