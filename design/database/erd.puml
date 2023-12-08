@@ -122,17 +122,11 @@ together {
         description: text
         website: url
         *accepts_staff: boolean
+        *work_start: date
+        *work_end: date
         *created_at: timestamp
         *edited_at: timestamp
         deleted_at: timestamp
-    }
-
-    entity event_timespan_range {
-        *<u>event_timespan_range_id</u>: <<uuid>>
-        *event_id: <<uuid>>
-        ---
-        *time_from: timestamp
-        *time_to: timestamp
     }
 }
 
@@ -302,7 +296,6 @@ company||..||company_address
 event||..o{event_staff
 event||..o{task
 event|o...o{comment
-event||...o{event_timespan_range
 task|o...o{comment
 comment}o..||user
 task||..||event_staff : task_creator
