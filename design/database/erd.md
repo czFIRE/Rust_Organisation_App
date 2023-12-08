@@ -32,12 +32,12 @@ User: Add birth_date
       Add gender (enum)
       
 
-**Event** Registration - **TODO**:
+**Event** Registration - **DONE**:
     - User-based registration - workers (full or part-time) may register to an event, or management may assign them to an event. Once registered, a worker can't unregister from an event.
     - Organizers must confirm/reject event registrations.
     - **Events have two states** - 'accepts workers' / 'doesn't accept workers' which is set by event organizer
 
-**Task** Registration - **TODO**:
+**Task** Registration - **DONE**:
     - Staff-based registration - Staff may volunteer for a task, or organizers may assign them to a task. Works like event registration. 
     - Organizers must confirm/reject task volunteers.
     - **Tasks have two states** - 'accepts staff' / 'doesn't accept staff'

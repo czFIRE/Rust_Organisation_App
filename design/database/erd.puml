@@ -72,12 +72,13 @@ entity user {
     *<u>user_id</u>: <<uuid>>
     ---
     avatar_id: <<uuid>> (FK file)
-    *name: varchar(255)
+    ' Full name. They will log in using their email.
+    *name: varchar(255) 
     *user_level: <<enum UserLevel>>
     *user_status <<enum UserStatus>>
-    *email VARCHAR(45)
+    *email: varchar(45)
 	*date_of_birth: date
-	sex: <<enum UserSex>>
+	*sex: <<enum UserSex>>
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
@@ -177,7 +178,7 @@ entity company {
 
       Note: The China seems to have a longest format with 18 characters.
 	'/
-	  *VATIN: varchar(18)
+	*VATIN: varchar(18)
     *address: string
     *contact_phone: string
     *contact_email: string
