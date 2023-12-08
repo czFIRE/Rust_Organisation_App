@@ -54,7 +54,7 @@ paths:
         '400':
           description: Bad Request
           content:
-            application/json:
+            application/json: 
               schema:
                 $ref: '#/components/schemas/Error'
         '500':
@@ -2790,7 +2790,7 @@ components:
           example: Vacation
         age:
           type: string
-          example: '25'
+          example: 25
         sex:
           type: string
           format: UserSex
@@ -2829,6 +2829,8 @@ components:
           type: string
           format: uuid
           example: a40c9874-c743-48e2-9295-0625f5d5a068
+        manager:
+          $ref: "#/components/schemas/UserLite"
         employment_type:
           type: string
           format: EmploymentType
@@ -2864,6 +2866,10 @@ components:
           type: string
           format: uuid
           example: a40c9874-c743-48e2-9295-0625f5d5a068
+        manager_id:
+          type: string
+          format: uuid
+          example: b40c9874-c743-48e2-9295-0625f5d5a068
         employment_type:
           type: string
           format: EmploymentType
@@ -2885,6 +2891,11 @@ components:
     UpdateEmployment:
       type: object
       properties:
+        # A change in managers could occur.
+        manager_id:
+          type: string
+          format: uuid
+          example: b40c9874-c743-48e2-9295-0625f5d5a068
         employment_type:
           type: string
           format: EmploymentType
@@ -2902,6 +2913,28 @@ components:
         end_date:
           type: string
           example: '9999-12-31'
+
+    CompanyAddress:
+      type: object
+      properties:
+        country:
+          type: string
+          example: Czech Republic
+        region:
+          type: string
+          example: Jihomoravský Kraj
+        city:
+          type: string
+          example: Brno
+        street:
+          type: string
+          example: Botanická
+        postal_code:
+          type: string
+          example: 60200
+        address_number:
+          type: string
+          example: 68a 
 
     Company:
       type: object
@@ -2932,8 +2965,7 @@ components:
           format: VATIN
           example: CZ1234567890
         address:
-          type: string
-          example: Botanicka 67a, Brno, Czech Republic
+          $ref: '#/components/schemas/CompanyAddress'
         contact_phone:
           type: string
           example: 420003300000
@@ -2968,8 +3000,7 @@ components:
           format: VATIN
           example: CZ1234567890
         address:
-          type: string
-          example: Botanicka 67a, Brno, Czech Republic
+          $ref: '#/components/schemas/CompanyAddress'
         contact_phone:
           type: string
           example: 420003300000
@@ -2997,6 +3028,15 @@ components:
         website:
           type: string
           example: hackertyper.com
+        accepts_staff:
+          type: boolean
+          example: true
+        work_start:
+          type: string
+          example: '2023-08-15'
+        work_end:
+          type: string
+          example: '2023-08-20'
         created_at:
           type: string
           example: '2023-06-15 12:00:05+01'
@@ -3016,6 +3056,12 @@ components:
         website:
           type: string
           example: hackertyper.com
+        work_start:
+          type: string
+          example: '2023-08-15'
+        work_end:
+          type: string
+          example: '2023-08-20'
     
     EventStaff:
       type: object
@@ -3030,6 +3076,12 @@ components:
           type: string
           format: StaffLevel
           example: Organizer
+        acceptance_status:
+          type: string
+          format: AcceptanceStatus
+          example: Accepted
+        decided_by:
+          $ref: "#/components/schemas/UserLite"
         created_at:
           type: string
           example: '2023-07-12 11:57:05+01'
@@ -3047,8 +3099,8 @@ components:
         staff_level:
           type: string
           format: StaffLevel
-          example: Organizer
-    
+          example: Organizer 
+
     EventStaffData:
       type: object
       properties:
@@ -3056,6 +3108,14 @@ components:
           type: string
           format: StaffLevel
           example: Organizer
+        acceptance_status:
+          type: string
+          format: AcceptanceStatus
+          example: Accepted
+        decided_by:
+          type: string
+          format: uuid
+          example: b40c9874-c743-48e2-9295-0625f5d5a068
 
     EventTask:
       type: object
@@ -3068,19 +3128,14 @@ components:
           type: string
           format: uuid
           example: e50c9874-c743-48e2-9295-0625f5d5a068
-        creator_id:
-          type: string
-          format: uuid
-          example: b50c9874-c743-48e2-9295-0625f5d5a068
+        creator:
+          $ref: "#/components/schemas/UserLite"
         title:
           type: string
           example: Vacuum the sandbox
         description:
           type: string
           example: VERY IMPORTANT! We need 1 person to vacuum the sandbox periodically so that the sand is as clean as it can be. IMPORTANT! DO NOT VACUUM THE SAND!!!
-        accomplished_level:
-          type: number
-          example: 100
         date_accomplished:
           type: string
           example: '2023-05-03 23:59:59+01'
@@ -3088,13 +3143,16 @@ components:
           type: string
           format: TaskPriority
           example: 'High'
+        accepts_staff:
+          type: boolean
+          example: true
         created_at:
           type: string
           example: '2023-05-01 03:00:00+01'
         edited_at:
           type: string
           example: '2023-05-03 23:59:59+01'
-    
+
     NewEventTask:
       type: object
       properties:
@@ -3122,9 +3180,6 @@ components:
         description:
           type: string
           example: VERY IMPORTANT! We need 1 person to vacuum the sandbox periodically so that the sand is as clean as it can be. IMPORTANT! DO NOT VACUUM THE SAND!!!
-        accomplished_level:
-          type: number
-          example: 100
         date_accomplished:
           type: string
           example: '2023-05-03 23:59:59+01'
@@ -3132,6 +3187,9 @@ components:
           type: string
           format: TaskPriority
           example: 'High'
+        accepts_staff:
+          type: boolean
+          example: true
 
     EventTaskStaff:
       type: object
@@ -3143,9 +3201,7 @@ components:
           format: AssignmentStatus
           example: Rejected
         decided_by:
-          type: string
-          format: uuid
-          example: b50c9874-c743-48e2-9295-0625f5d5a068
+          $ref: "#/components/schemas/UserLite"
     
     NewEventTaskStaff:
       type: object
@@ -3162,6 +3218,10 @@ components:
           type: string
           format: AssignmentStatus
           example: Rejected
+        decided_by:
+          type: string
+          format: uuid
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
 
     EventComment:
       type: object
@@ -3267,9 +3327,6 @@ components:
         worked_hours:
           type: number
           example: 6
-        worked_minutes:
-          type: number
-          example: 30
         commentary:
           type: string
           example: 'Backstage: Catering for The Mutes accapella band.'
@@ -3289,9 +3346,6 @@ components:
         worked_hours:
           type: number
           example: 6
-        worked_minutes:
-          type: number
-          example: 30
         commentary:
           type: string
           example: 'Backstage: Catering for The Mutes accapella band.'
@@ -3323,9 +3377,6 @@ components:
         worked_hours:
           type: number
           example: 20
-        worked_minutes:
-          type: number
-          example: 30
         work_days:
           type: array
           items:
@@ -3333,6 +3384,9 @@ components:
         is_editable:
           type: boolean
           example: true
+        manager_note:
+          type: string
+          example: How did you work 20 hours when the event had a total of 10 hours???
         created_at:
           type: string
           example: '2020-06-01 00:00:00+01'
@@ -3368,6 +3422,9 @@ components:
         is_editable:
           type: boolean
           example: true
+        manager_note:
+          type: string
+          example: How did you work 20 hours when the event had a total of 10 hours???
 
     AssociatedCompany:
       type: object
@@ -3384,7 +3441,12 @@ components:
           type: string
           format: AssociationType
           example: Sponsor
-
+        created_at:
+          type: string
+          example: '2020-05-15 10:05:09+01'
+        edited_at:
+          type: string
+          example: '2020-05-15 10:05:09+01'
     NewAssociatedCompany:
       type: object
       properties:
