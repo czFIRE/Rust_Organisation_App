@@ -59,6 +59,7 @@ enum UserLevel {
 enum UserSex {
     Female
 	Male
+    Other
 }
 
 entity user {
@@ -70,7 +71,6 @@ entity user {
     *user_status <<enum UserStatus>>
     *email VARCHAR(45)
 	*date_of_birth: date
-	'/ Note: User may choose to leave this unfilled, the collumn is optional. '/
 	sex: <<enum UserSex>>
     *created_at: timestamp
     *edited_at: timestamp
