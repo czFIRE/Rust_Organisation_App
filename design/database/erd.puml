@@ -85,8 +85,7 @@ entity timesheet {
     *event_id: <<uuid>> (FK event)
     *start_date: date
     *end_date: date
-    *worked_hours: int
-    *worked_minutes: int
+    *worked_hours: number
     *is_editable: boolean
     *created_at: timestamp
     *edited_at: timestamp
@@ -97,8 +96,7 @@ entity work_day {
     *<u>timesheet_id</u>: <<uuid>>
     *<u>work_date</u>: date
     ---
-    *worked_hours: int
-    *worked_minutes: int
+    *worked_hours: number
     commentary: text
     *is_editable: boolean
     *created_at: timestamp
