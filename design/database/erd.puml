@@ -187,6 +187,9 @@ entity employment {
     *<u>user_id</u>: <<uuid>>
     *<u>company_id</u>: <<uuid>>
     ---
+    ' manager_id and company_id give us the manager's employment record.
+    ' manager_id is therefore the user ID.
+    *manager_id: <<uuid>> 
     *employment_type: <<enum EmploymentType>>
     *hourly_rate: float
     *employee_level: <<enum EmployeeLevel>>
@@ -249,6 +252,7 @@ timesheet}o..||employment
 timesheet||..o{work_day
 timesheet||..||event
 employment}o..||company
+employment||..o{employment : manages
 event||.o{associated_company
 company||..o{associated_company
 event||..o{event_staff
