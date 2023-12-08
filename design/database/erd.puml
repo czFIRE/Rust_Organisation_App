@@ -94,6 +94,8 @@ entity timesheet {
     *end_date: date
     *worked_hours: float
     *is_editable: boolean
+    ' allows managers to leave notes in case of errors.
+    manager_note: text
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
@@ -177,10 +179,9 @@ together {
         /'
         A Value-Added Tax Identification Number.
 
-        Note: The China seems to have a longest format with 18 characters.
+        Note: China seems to have a longest format with 18 characters.
         '/
         *VATIN: varchar(18)
-        *address: string
         *contact_phone: string
         *contact_email: string
         *created_at: timestamp
@@ -218,12 +219,16 @@ entity employment {
     *<u>user_id</u>: <<uuid>>
     *<u>company_id</u>: <<uuid>>
     ---
-    ' manager_id and company_id give us the manager's employment record.
-    ' manager_id is therefore the user ID.
+    /' 
+        manager_id and company_id give us the manager's employment record.
+        manager_id is therefore the user ID of the manager.
+    '/
     *manager_id: <<uuid>> 
     *employment_type: <<enum EmploymentType>>
     *hourly_rate: float
     *employee_level: <<enum EmployeeLevel>>
+    ' Allows for descriptions of the employment's purpose.
+    description: text
     *start_date: date
     *end_date: date
     *created_at: timestamp
@@ -245,6 +250,12 @@ entity event_staff {
 together {
     entity comment {
         *<u>comment_id</u>: <<uuid>>
+        /' 
+            Note that the nullability of event_id 
+            and task_id is a xor relationship.
+            So either event_id is null, and task_id is not null, or the opposite.
+            They can't both be null, or both not be null.
+        '/
         event_id: <<uuid>>
         task_id: <<uuid>>
         *author_id: <<uuid>>
