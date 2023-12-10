@@ -127,6 +127,20 @@ CREATE TABLE IF NOT EXISTS "company_address" (
 
 );
 
+CREATE TABLE IF NOT EXISTS "associated_company" (
+    event_id uuid REFERENCES "event"(event_id),
+    company_id uuid REFERENCES "company"(company_id),
+    ---------------------------------------------
+    association_type "AssociationType" NOT NULL,
+    created_at timestamp NOT NULL DEFAULT now(),
+    edited_at timestamp NOT NULL DEFAULT now(),
+    deleted_at timestamp,
+
+    PRIMARY KEY (event_id, company_id),
+    CONSTRAINT check_associated_company_created_at_lte_edited_at
+        CHECK (edited_at >= created_at)
+);
+
 
 CREATE TABLE IF NOT EXISTS "timesheet"
 (
@@ -168,14 +182,6 @@ CREATE TABLE IF NOT EXISTS "comment"
 (
     id          SERIAL PRIMARY KEY,
     ---------------------------------------------
-    created_at  TIMESTAMP NOT NULL DEFAULT now(),
-    edited_at   TIMESTAMP NOT NULL DEFAULT now(),
-    deleted_at  TIMESTAMP
-);
-
-
-CREATE TABLE IF NOT EXISTS "associated_company"
-(
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at  TIMESTAMP
