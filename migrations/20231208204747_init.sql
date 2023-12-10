@@ -56,6 +56,30 @@ CREATE TABLE IF NOT EXISTS "user"
 );
 
 
+CREATE TABLE IF NOT EXISTS "event" (
+    event_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    ---------------------------------------------
+    avatar_id uuid REFERENCES "file"(file_id),
+    ---------------------------------------------
+    name varchar(255) NOT NULL UNIQUE,
+    description text NOT NULL DEFAULT '',
+    website varchar(4096) NOT NULL DEFAULT '',
+    accepts_staff bool NOT NULL DEFAULT true,
+    work_start date NOT NULL,
+    work_end date NOT NULL,
+    created_at timestamp NOT NULL DEFAULT now(),
+    edited_at timestamp NOT NULL DEFAULT now(),
+    deleted_at timestamp,
+
+    CONSTRAINT check_event_name_len
+        CHECK (char_length(name) >= 1),
+    CONSTRAINT check_event_work_start_lte_work_end
+        CHECK (work_start >= work_end),
+    CONSTRAINT check_event_created_at_lte_edited_at
+        CHECK (edited_at >= created_at)
+);
+
+
 CREATE TABLE IF NOT EXISTS "timesheet"
 (
     id          SERIAL PRIMARY KEY,
@@ -68,16 +92,6 @@ CREATE TABLE IF NOT EXISTS "timesheet"
 
 CREATE TABLE IF NOT EXISTS "work_day"
 (
-    created_at  TIMESTAMP NOT NULL DEFAULT now(),
-    edited_at   TIMESTAMP NOT NULL DEFAULT now(),
-    deleted_at  TIMESTAMP
-);
-
-
-CREATE TABLE IF NOT EXISTS "event"
-(
-    id          SERIAL PRIMARY KEY,
-    ---------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at  TIMESTAMP
