@@ -27,6 +27,9 @@ CREATE DOMAIN ufloat AS float
 CREATE DOMAIN hours_per_month_float AS ufloat
     -- check value is <= than max hours per month (24.0 * 31.0)
     CHECK(VALUE <= 744.0);
+CREATE DOMAIN hours_per_day_float AS ufloat
+    -- check value is <= than max hours per day
+    CHECK(VALUE <= 24.0);
 
 -- Tables
 
@@ -175,9 +178,19 @@ CREATE TABLE IF NOT EXISTS "timesheet" (
 
 CREATE TABLE IF NOT EXISTS "work_day"
 (
-    created_at  TIMESTAMP NOT NULL DEFAULT now(),
-    edited_at   TIMESTAMP NOT NULL DEFAULT now(),
-    deleted_at  TIMESTAMP
+    timesheet_id uuid REFERENCES "timesheet"(timesheet_id),
+    work_date date,
+    ---------------------------------------------
+    worked_hours hours_per_day_float NOT NULL,
+    commentary text NOT NULL DEFAULT '',
+    is_editable boolean NOT NULL DEFAULT true,
+    created_at timestamp NOT NULL DEFAULT now(),
+    edited_at timestamp NOT NULL DEFAULT now(),
+    deleted_at timestamp,
+
+    PRIMARY KEY (timesheet_id, work_date),
+    CONSTRAINT check_work_day_created_at_lte_edited_at
+        CHECK (edited_at >= created_at)
 );
 
 
