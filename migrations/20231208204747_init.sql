@@ -35,6 +35,26 @@ CREATE TABLE IF NOT EXISTS "file" (
         CHECK (edited_at >= created_at)
 );
 
+CREATE TABLE IF NOT EXISTS "user"
+(
+    user_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    ---------------------------------------------
+    avatar_id uuid REFERENCES "file"(file_id),
+    ---------------------------------------------
+    name varchar(255) NOT NULL,
+    user_level "UserLevel" NOT NULL DEFAULT 'user',
+    user_status "UserStatus" NOT NULL DEFAULT 'ok',
+    email varchar(45) NOT NULL,
+    date_of_birth date NOT NULL,
+    sex "UserSex" NOT NULL,
+    created_at timestamp NOT NULL DEFAULT now(),
+    edited_at timestamp NOT NULL DEFAULT now(),
+    deleted_at timestamp,
+
+    CONSTRAINT check_user_created_at_lte_edited_at
+        CHECK (edited_at >= created_at)
+);
+
 
 CREATE TABLE IF NOT EXISTS "timesheet"
 (
@@ -83,16 +103,6 @@ CREATE TABLE IF NOT EXISTS "task"
 
 
 CREATE TABLE IF NOT EXISTS "comment"
-(
-    id          SERIAL PRIMARY KEY,
-    ---------------------------------------------
-    created_at  TIMESTAMP NOT NULL DEFAULT now(),
-    edited_at   TIMESTAMP NOT NULL DEFAULT now(),
-    deleted_at  TIMESTAMP
-);
-
-
-CREATE TABLE IF NOT EXISTS "user"
 (
     id          SERIAL PRIMARY KEY,
     ---------------------------------------------
