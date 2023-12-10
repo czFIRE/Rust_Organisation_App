@@ -80,6 +80,27 @@ CREATE TABLE IF NOT EXISTS "event" (
 );
 
 
+CREATE TABLE IF NOT EXISTS "company" (
+    company_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    ---------------------------------------------
+    avatar_id uuid REFERENCES "file"(file_id),
+    ---------------------------------------------
+    name varchar(255) NOT NULL UNIQUE,
+    description text NOT NULL DEFAULT '',
+    website varchar(4096) NOT NULL DEFAULT '',
+    crn varchar(16) NOT NULL,
+    vatin varchar(18) NOT NULL,
+    created_at timestamp NOT NULL DEFAULT now(),
+    edited_at timestamp NOT NULL DEFAULT now(),
+    deleted_at timestamp,
+
+    CONSTRAINT check_company_name_len
+        CHECK (char_length(name) >= 1),
+    CONSTRAINT check_company_created_at_lte_edited_at
+        CHECK (edited_at >= created_at)
+);
+
+
 CREATE TABLE IF NOT EXISTS "timesheet"
 (
     id          SERIAL PRIMARY KEY,
@@ -117,16 +138,6 @@ CREATE TABLE IF NOT EXISTS "task"
 
 
 CREATE TABLE IF NOT EXISTS "comment"
-(
-    id          SERIAL PRIMARY KEY,
-    ---------------------------------------------
-    created_at  TIMESTAMP NOT NULL DEFAULT now(),
-    edited_at   TIMESTAMP NOT NULL DEFAULT now(),
-    deleted_at  TIMESTAMP
-);
-
-
-CREATE TABLE IF NOT EXISTS "company"
 (
     id          SERIAL PRIMARY KEY,
     ---------------------------------------------
