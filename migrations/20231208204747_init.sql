@@ -11,7 +11,7 @@
 
 CREATE TYPE "UserSex"             AS ENUM ('male', 'female', 'other');
 CREATE TYPE "UserLevel"           AS ENUM ('user', 'admin');
-CREATE TYPE "Association"         AS ENUM ('sponsor', 'organization', 'media');
+CREATE TYPE "AssociationType"     AS ENUM ('sponsor', 'organization', 'media');
 CREATE TYPE "TaskPriority"        AS ENUM ('low', 'medium', 'high');
 CREATE TYPE "AssignmentStatus"    AS ENUM ('pending', 'accepted', 'rejected');
 CREATE TYPE "AcceptanceStatus"    AS ENUM ('pending', 'accepted', 'rejected');
