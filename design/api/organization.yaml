@@ -181,7 +181,7 @@ paths:
     get:
       tags:
         - userContent
-      summary: 'Load user avatar.'
+      summary: 'Retireve path to a user avatar.'
       parameters:
         - in: path
           name: id
@@ -193,10 +193,9 @@ paths:
         '200':
           description: Ok
           content:
-            image/jpg:
+            application/json:
               schema:
-                type: string
-                format: binary
+                $ref: '#/components/schemas/Avatar'
         '400':
           description: Bad Request
           content:
@@ -237,10 +236,9 @@ paths:
         '200':
           description: Ok
           content:
-            image/jpg:
+            application/json:
               schema:
-                type: string
-                format: binary
+                $ref: '#/components/schemas/Avatar'
         '400':
           description: Bad Request
           content:
@@ -329,10 +327,9 @@ paths:
         '200':
           description: OK (returns blank/default image)
           content:
-            image/jpg:
+            application/json:
               schema:
-                type: string
-                format: binary
+                $ref: '#/components/schemas/Avatar'
         '400':
           description: Bad Request
           content:
@@ -771,7 +768,7 @@ paths:
     get:
       tags:
         - companyContent
-      summary: 'Load company image.'
+      summary: 'Load company avatar.'
       parameters:
         - in: path
           name: id
@@ -783,10 +780,9 @@ paths:
         '200':
           description: Ok
           content:
-            image/jpg:
+            application/json:
               schema:
-                type: string
-                format: binary
+                $ref: '#/components/schemas/Avatar'
         '400':
           description: Bad Request
           content:
@@ -809,7 +805,7 @@ paths:
     post:
       tags:
         - companyContent
-      summary: 'Create company image.'
+      summary: 'Create company avatar.'
       parameters:
         - in: path
           name: id
@@ -827,10 +823,9 @@ paths:
         '200':
           description: Ok
           content:
-            image/jpg:
+            application/json:
               schema:
-                type: string
-                format: binary
+                $ref: '#/components/schemas/Avatar'
         '400':
           description: Bad Request
           content:
@@ -876,10 +871,9 @@ paths:
         '200':
           description: Ok
           content:
-            image/jpg:
+            application/json:
               schema:
-                type: string
-                format: binary
+                $ref: '#/components/schemas/Avatar'
         '400':
           description: Bad Request
           content:
@@ -907,7 +901,7 @@ paths:
     delete:
       tags:
         - companyContent
-      summary: 'Remove company image, leaving a blank/default image in its place.'
+      summary: 'Remove company avatar, leaving a blank/default image in its place.'
       parameters:
         - in: path
           name: id
@@ -919,10 +913,9 @@ paths:
         '200':
           description: OK (returns blank/default image)
           content:
-            image/jpg:
+            application/json:
               schema:
-                type: string
-                format: binary
+                $ref: '#/components/schemas/Avatar'
         '400':
           description: Bad Request
           content:
@@ -2517,7 +2510,7 @@ paths:
     get:
       tags:
         - eventContent
-      summary: 'Load event image.'
+      summary: 'Load event avatar.'
       parameters:
         - in: path
           name: id
@@ -2529,10 +2522,9 @@ paths:
         '200':
           description: Ok
           content:
-            image/jpg:
+            application/json:
               schema:
-                type: string
-                format: binary
+                $ref: '#/components/schemas/Avatar'
         '400':
           description: Bad Request
           content:
@@ -2555,7 +2547,7 @@ paths:
     post:
       tags:
         - eventContent
-      summary: 'Create an event image.'
+      summary: 'Create an event avatar.'
       parameters:
         - in: path
           name: id
@@ -2573,10 +2565,9 @@ paths:
         '200':
           description: Ok
           content:
-            image/jpg:
+            application/json:
               schema:
-                type: string
-                format: binary
+                $ref: '#/components/schemas/Avatar'
         '400':
           description: Bad Request
           content:
@@ -2604,7 +2595,7 @@ paths:
     put:
       tags:
         - eventContent
-      summary: 'Apply new event image, rewriting the old one.'
+      summary: 'Apply new event avatar, rewriting the old one.'
       parameters:
         - in: path
           name: id
@@ -2622,10 +2613,9 @@ paths:
         '200':
           description: Ok
           content:
-            image/jpg:
+            application/json:
               schema:
-                type: string
-                format: binary
+                $ref: '#/components/schemas/Avatar'
         '400':
           description: Bad Request
           content:
@@ -2653,7 +2643,7 @@ paths:
     delete:
       tags:
         - eventContent
-      summary: 'Remove event image, leaving a blank/default image in its place.'
+      summary: 'Remove an event avatar, leaving a blank/default image in its place.'
       parameters:
         - in: path
           name: id
@@ -2665,10 +2655,9 @@ paths:
         '200':
           description: OK (returns blank/default image)
           content:
-            image/jpg:
+            application/json:
               schema:
-                type: string
-                format: binary
+                $ref: '#/components/schemas/Avatar'
         '400':
           description: Bad Request
           content:
@@ -2979,6 +2968,13 @@ components:
           type: string
           format: UserLevel
           example: User
+
+    Avatar:
+      type: object
+      properties:
+        path:
+          type: string
+          example: /example/sadcat.jpg
 
     Employment:
       type: object
