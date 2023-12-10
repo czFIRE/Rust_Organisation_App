@@ -12,7 +12,9 @@ CREATE TYPE "EventRole"           AS ENUM ('worker', 'staff');
 
 -- Tables
 
-CREATE TABLE IF NOT EXISTS "Timesheet"
+
+
+CREATE TABLE IF NOT EXISTS "timesheet"
 (
     id          SERIAL PRIMARY KEY,
     ---------------------------------------------
@@ -22,7 +24,7 @@ CREATE TABLE IF NOT EXISTS "Timesheet"
 );
 
 
-CREATE TABLE IF NOT EXISTS "WorkDay"
+CREATE TABLE IF NOT EXISTS "work_day"
 (
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
@@ -30,25 +32,7 @@ CREATE TABLE IF NOT EXISTS "WorkDay"
 );
 
 
-CREATE TABLE IF NOT EXISTS "Event"
-(
-    id          SERIAL PRIMARY KEY,
-    ---------------------------------------------
-    created_at  TIMESTAMP NOT NULL DEFAULT now(),
-    edited_at   TIMESTAMP NOT NULL DEFAULT now(),
-    deleted_at  TIMESTAMP
-);
-
-
-CREATE TABLE IF NOT EXISTS "EventStaff"
-(
-    created_at  TIMESTAMP NOT NULL DEFAULT now(),
-    edited_at   TIMESTAMP NOT NULL DEFAULT now(),
-    deleted_at  TIMESTAMP
-);
-
-
-CREATE TABLE IF NOT EXISTS "Task"
+CREATE TABLE IF NOT EXISTS "event"
 (
     id          SERIAL PRIMARY KEY,
     ---------------------------------------------
@@ -58,7 +42,7 @@ CREATE TABLE IF NOT EXISTS "Task"
 );
 
 
-CREATE TABLE IF NOT EXISTS "TaskAsignee"
+CREATE TABLE IF NOT EXISTS "event_staff"
 (
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
@@ -66,17 +50,7 @@ CREATE TABLE IF NOT EXISTS "TaskAsignee"
 );
 
 
-CREATE TABLE IF NOT EXISTS "Comment"
-(
-    id          SERIAL PRIMARY KEY,
-    ---------------------------------------------
-    created_at  TIMESTAMP NOT NULL DEFAULT now(),
-    edited_at   TIMESTAMP NOT NULL DEFAULT now(),
-    deleted_at  TIMESTAMP
-);
-
-
-CREATE TABLE IF NOT EXISTS "User"
+CREATE TABLE IF NOT EXISTS "task"
 (
     id          SERIAL PRIMARY KEY,
     ---------------------------------------------
@@ -86,7 +60,15 @@ CREATE TABLE IF NOT EXISTS "User"
 );
 
 
-CREATE TABLE IF NOT EXISTS "Company"
+CREATE TABLE IF NOT EXISTS "taskasignee"
+(
+    created_at  TIMESTAMP NOT NULL DEFAULT now(),
+    edited_at   TIMESTAMP NOT NULL DEFAULT now(),
+    deleted_at  TIMESTAMP
+);
+
+
+CREATE TABLE IF NOT EXISTS "comment"
 (
     id          SERIAL PRIMARY KEY,
     ---------------------------------------------
@@ -96,7 +78,27 @@ CREATE TABLE IF NOT EXISTS "Company"
 );
 
 
-CREATE TABLE IF NOT EXISTS "AssociatedCompany"
+CREATE TABLE IF NOT EXISTS "user"
+(
+    id          SERIAL PRIMARY KEY,
+    ---------------------------------------------
+    created_at  TIMESTAMP NOT NULL DEFAULT now(),
+    edited_at   TIMESTAMP NOT NULL DEFAULT now(),
+    deleted_at  TIMESTAMP
+);
+
+
+CREATE TABLE IF NOT EXISTS "company"
+(
+    id          SERIAL PRIMARY KEY,
+    ---------------------------------------------
+    created_at  TIMESTAMP NOT NULL DEFAULT now(),
+    edited_at   TIMESTAMP NOT NULL DEFAULT now(),
+    deleted_at  TIMESTAMP
+);
+
+
+CREATE TABLE IF NOT EXISTS "associated_company"
 (
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
@@ -104,13 +106,13 @@ CREATE TABLE IF NOT EXISTS "AssociatedCompany"
 );
 
 
-CREATE TABLE IF NOT EXISTS "CompanyAddress"
+CREATE TABLE IF NOT EXISTS "company_address"
 (
     -- TODO
 );
 
 
-CREATE TABLE IF NOT EXISTS "Employment"
+CREATE TABLE IF NOT EXISTS "employment"
 (
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
