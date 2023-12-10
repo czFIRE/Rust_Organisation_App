@@ -20,6 +20,14 @@ CREATE TYPE "StaffLevel"          AS ENUM ('basic', 'organizer');
 CREATE TYPE "EmploymentType"      AS ENUM ('DPP', 'DPC', 'HPP');
 CREATE TYPE "UserStatus"          AS ENUM ('ok', 'sick', 'vacation');
 
+-- Domains
+
+CREATE DOMAIN ufloat AS float
+    CHECK(VALUE >= 0.0);
+CREATE DOMAIN hours_per_month_float AS ufloat
+    -- check value is <= than max hours per month (24.0 * 31.0)
+    CHECK(VALUE <= 744.0);
+
 -- Tables
 
 CREATE TABLE IF NOT EXISTS "file" (
@@ -142,13 +150,26 @@ CREATE TABLE IF NOT EXISTS "associated_company" (
 );
 
 
-CREATE TABLE IF NOT EXISTS "timesheet"
-(
-    id          SERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS "timesheet" (
+    timesheet_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     ---------------------------------------------
-    created_at  TIMESTAMP NOT NULL DEFAULT now(),
-    edited_at   TIMESTAMP NOT NULL DEFAULT now(),
-    deleted_at  TIMESTAMP
+    user_id uuid NOT NULL REFERENCES "user"(user_id),
+    company_id uuid NOT NULL REFERENCES "company"(company_id),
+    event_id uuid NOT NULL REFERENCES "event"(event_id),
+    ---------------------------------------------
+    start_date date NOT NULL,
+    end_date date NOT NULL,
+    worked_hours hours_per_month_float NOT NULL DEFAULT 0.0,
+    is_editable boolean NOT NULL DEFAULT true,
+    manager_note text NOT NULL DEFAULT '',
+    created_at timestamp NOT NULL,
+    edited_at timestamp NOT NULL,
+    deleted_at timestamp,
+
+    CONSTRAINT check_timesheet_start_date_lte_end_date
+        CHECK (start_date >= end_date),
+    CONSTRAINT check_timesheet_created_at_lte_edited_at
+        CHECK (edited_at >= created_at)
 );
 
 
