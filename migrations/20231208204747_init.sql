@@ -101,6 +101,33 @@ CREATE TABLE IF NOT EXISTS "company" (
 );
 
 
+CREATE TABLE IF NOT EXISTS "company_address" (
+    company_id uuid PRIMARY KEY REFERENCES "company"(company_id)
+        DEFAULT gen_random_uuid(),
+    ---------------------------------------------
+    country varchar(255) NOT NULL,
+    region varchar(255) NOT NULL,
+    city varchar(255) NOT NULL,
+    street varchar(255) NOT NULL,
+    address_number varchar(255) NOT NULL,
+    postal_code varchar(255) NOT NULL,
+
+    CONSTRAINT check_company_address_country_len
+        CHECK (char_length(country) >= 1),
+    CONSTRAINT check_company_address_region_len
+        CHECK (char_length(region) >= 1),
+    CONSTRAINT check_company_address_city_len
+        CHECK (char_length(city) >= 1),
+    CONSTRAINT check_company_address_street_len
+        CHECK (char_length(street) >= 1),
+    CONSTRAINT check_company_address_address_number_len
+        CHECK (char_length(address_number) >= 1),
+    CONSTRAINT check_company_address_postal_code_len
+        CHECK (char_length(postal_code) >= 1)
+
+);
+
+
 CREATE TABLE IF NOT EXISTS "timesheet"
 (
     id          SERIAL PRIMARY KEY,
@@ -152,12 +179,6 @@ CREATE TABLE IF NOT EXISTS "associated_company"
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at  TIMESTAMP
-);
-
-
-CREATE TABLE IF NOT EXISTS "company_address"
-(
-    -- TODO
 );
 
 
