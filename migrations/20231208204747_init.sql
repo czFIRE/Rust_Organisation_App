@@ -15,7 +15,7 @@ CREATE TYPE "AssociationType"     AS ENUM ('sponsor', 'organizer', 'other');
 CREATE TYPE "TaskPriority"        AS ENUM ('low', 'medium', 'high');
 CREATE TYPE "AssignmentStatus"    AS ENUM ('pending', 'accepted', 'rejected');
 CREATE TYPE "AcceptanceStatus"    AS ENUM ('pending', 'accepted', 'rejected');
-CREATE TYPE "EmployeeLevel"       AS ENUM ('basic', 'organizer', 'manager');
+CREATE TYPE "EmployeeLevel"       AS ENUM ('basic', 'manager', 'upper manager');
 CREATE TYPE "EmployeeContract"    AS ENUM ('full-time', 'part-time', 'temporary');
 CREATE TYPE "EmployeeStatus"      AS ENUM ('available', 'unavailable');
 CREATE TYPE "EventRole"           AS ENUM ('worker', 'staff');
