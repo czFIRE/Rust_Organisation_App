@@ -18,7 +18,6 @@ CREATE TYPE "AcceptanceStatus"    AS ENUM ('pending', 'accepted', 'rejected');
 CREATE TYPE "EmployeeLevel"       AS ENUM ('basic', 'manager', 'upper manager');
 CREATE TYPE "EmploymentType"      AS ENUM ('DPP', 'DPC', 'HPP');
 CREATE TYPE "UserStatus"          AS ENUM ('ok', 'sick', 'vacation');
-CREATE TYPE "EventRole"           AS ENUM ('worker', 'staff');
 
 -- Tables
 
