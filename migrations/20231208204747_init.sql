@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS "AssociatedCompany"
 );
 
 
-CREATE TABLE IF NOT EXISTS "Adress"
+CREATE TABLE IF NOT EXISTS "CompanyAddress"
 (
     -- TODO
 );
