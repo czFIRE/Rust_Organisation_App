@@ -9,7 +9,7 @@
 
 -- Enums
 
-CREATE TYPE "UserSex"             AS ENUM ('male', 'female');
+CREATE TYPE "UserSex"             AS ENUM ('male', 'female', 'other');
 CREATE TYPE "Role"                AS ENUM ('user', 'admin');
 CREATE TYPE "Association"         AS ENUM ('sponsor', 'organization', 'media');
 CREATE TYPE "TaskPriority"        AS ENUM ('low', 'medium', 'high');
