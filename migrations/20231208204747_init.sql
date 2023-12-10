@@ -196,9 +196,19 @@ CREATE TABLE IF NOT EXISTS "work_day"
 
 CREATE TABLE IF NOT EXISTS "event_staff"
 (
+    user_id uuid REFERENCES "user"(user_id),
+    event_id uuid REFERENCES "event"(event_id),
+    ---------------------------------------------
+    staff_level "StaffLevel" NOT NULL DEFAULT 'basic',
+    acceptance_status "AcceptanceStatus" NOT NULL DEFAULT 'pending',
+    -- todo: decided_by
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
-    deleted_at  TIMESTAMP
+    deleted_at  TIMESTAMP,
+
+    PRIMARY KEY (user_id, event_id),
+    CONSTRAINT check_event_stuff_created_at_lte_edited_at
+        CHECK (edited_at >= created_at)
 );
 
 
