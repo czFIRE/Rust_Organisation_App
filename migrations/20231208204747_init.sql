@@ -60,14 +60,6 @@ CREATE TABLE IF NOT EXISTS "task"
 );
 
 
-CREATE TABLE IF NOT EXISTS "taskasignee"
-(
-    created_at  TIMESTAMP NOT NULL DEFAULT now(),
-    edited_at   TIMESTAMP NOT NULL DEFAULT now(),
-    deleted_at  TIMESTAMP
-);
-
-
 CREATE TABLE IF NOT EXISTS "comment"
 (
     id          SERIAL PRIMARY KEY,
