@@ -212,13 +212,24 @@ CREATE TABLE IF NOT EXISTS "event_staff"
 );
 
 
-CREATE TABLE IF NOT EXISTS "task"
-(
-    id          SERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS "task" (
+    task_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     ---------------------------------------------
-    created_at  TIMESTAMP NOT NULL DEFAULT now(),
-    edited_at   TIMESTAMP NOT NULL DEFAULT now(),
-    deleted_at  TIMESTAMP
+    event_id uuid NOT NULL REFERENCES "event"(event_id),
+    ---------------------------------------------
+    -- todo: creator_id
+    title text NOT NULL,
+    description text NOT NULL DEFAULT '',
+    date_accomplished timestamp,
+    priority "TaskPriority" NOT NULL,
+    created_at timestamp NOT NULL,
+    edited_at timestamp NOT NULL,
+    deleted_at timestamp,
+
+    CONSTRAINT check_event_title_len
+        CHECK (char_length(title) >= 1),
+    CONSTRAINT check_event_stuff_created_at_lte_edited_at
+        CHECK (edited_at >= created_at)
 );
 
 
