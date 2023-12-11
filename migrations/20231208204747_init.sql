@@ -257,7 +257,23 @@ CREATE TABLE IF NOT EXISTS "comment"
 
 CREATE TABLE IF NOT EXISTS "employment"
 (
-    created_at  TIMESTAMP NOT NULL DEFAULT now(),
-    edited_at   TIMESTAMP NOT NULL DEFAULT now(),
-    deleted_at  TIMESTAMP
+    user_id uuid NOT NULL REFERENCES "user"(user_id),
+    company_id uuid NOT NULL REFERENCES "company"(company_id),
+    ---------------------------------------------
+    -- todo: manager_id
+    employment_type "EmploymentType" NOT NULL,
+    hourly_rate float NOT NULL,
+    employee_level "EmployeeLevel" NOT NULL,
+    description text NOT NULL DEFAULT '',
+    start_date date NOT NULL,
+    end_date date NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT now(),
+    edited_at TIMESTAMP NOT NULL DEFAULT now(),
+    deleted_at TIMESTAMP,
+
+    PRIMARY KEY (user_id, company_id),
+    CONSTRAINT check_employment_start_date_lte_end_date
+        CHECK (start_date >= end_date),
+    CONSTRAINT check_employment_created_at_lte_edited_at
+        CHECK (edited_at >= created_at)
 );
