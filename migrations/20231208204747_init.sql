@@ -235,11 +235,23 @@ CREATE TABLE IF NOT EXISTS "task" (
 
 CREATE TABLE IF NOT EXISTS "comment"
 (
-    id          SERIAL PRIMARY KEY,
+    comment_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     ---------------------------------------------
-    created_at  TIMESTAMP NOT NULL DEFAULT now(),
-    edited_at   TIMESTAMP NOT NULL DEFAULT now(),
-    deleted_at  TIMESTAMP
+    event_id uuid REFERENCES "event"(event_id),
+    task_id uuid REFERENCES "task"(task_id),
+    author_id uuid NOT NULL REFERENCES "user"(user_id),
+    content text NOT NULL,
+    created_at timestamp NOT NULL,
+    edited_at timestamp NOT NULL,
+    deleted_at timestamp
+
+    CONSTRAINT check_comment_single_relation_only
+        CHECK (
+            (CASE WHEN event_id IS NULL THEN 0 ELSE 1 END
+             + CASE WHEN task_id IS NULL THEN 0 ELSE 1 END
+            ) = 1),
+    CONSTRAINT check_comment_created_at_lte_edited_at
+        CHECK (edited_at >= created_at)
 );
 
 
