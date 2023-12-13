@@ -143,6 +143,8 @@ entity task {
 entity assigned_staff {
     *<u>task_id</u>: <<uuid>>
     *<u>user_id</u>: <<uuid>>
+    *<u>event_id</u>: <<uuid>>
+    *<u>company_id</u>: <<uuid>>
     ---
     *assignment_status: <<enum AssignmentStatus>>
     decided_by: <<uuid>>
@@ -229,6 +231,7 @@ entity employment {
 
 entity event_staff {
     *<u>user_id</u>: <<uuid>>
+    *<u>company_id</u>: <<uuid>>
     *<u>event_id</u>: <<uuid>>
     ---
     *staff_level: <<enum StaffLevel>>
@@ -261,11 +264,14 @@ user||..|{employment
 timesheet}o..||employment
 timesheet||..o{work_day
 timesheet||..||event
+employment||..o{event_staff
 employment}o..||company
 employment|o..o{employment : manages
 event||.o{associated_company
 company||..o{associated_company
 company||..||company_address
+company||..o{event_staff
+assigned_staff}o..||company
 event||..o{event_staff
 event||..o{task
 event|o...o{comment
