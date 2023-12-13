@@ -241,6 +241,7 @@ entity event_staff {
 
 entity comment {
     *<u>comment_id</u>: <<uuid>>
+    ---
     /' 
         Note that the nullability of event_id 
         and task_id is a xor relationship.
@@ -250,7 +251,6 @@ entity comment {
     event_id: <<uuid>>
     task_id: <<uuid>>
     *author_id: <<uuid>>
-    ---
     *content: text
     *created_at: timestamp
     *edited_at: timestamp
