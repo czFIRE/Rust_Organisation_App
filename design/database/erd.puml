@@ -140,10 +140,8 @@ entity task {
 }
 
 entity assigned_staff {
-    *<u>task_id</u>: <<uuid>>
-    *<u>user_id</u>: <<uuid>>
-    *<u>event_id</u>: <<uuid>>
-    *<u>company_id</u>: <<uuid>>
+    *<u>task_id</u>: <<uuid>> (FK task)
+    *<u>staff_id</u>: <<uuid>> (FK event_staff)
     ---
     *assignment_status: <<enum AssignmentStatus>>
     decided_by: <<uuid>>
@@ -228,10 +226,11 @@ entity employment {
 }
 
 entity event_staff {
-    *<u>user_id</u>: <<uuid>>
-    *<u>company_id</u>: <<uuid>>
-    *<u>event_id</u>: <<uuid>>
+    *<u>staff_id</u>: <<uuid>>  
     ---
+    *user_id: <<uuid>> (FK user, part of FK employment)
+    *company_id: <<uuid>> (FK company, part of FK employment)
+    *event_id: <<uuid>> (FK event)
     *staff_level: <<enum StaffLevel>>
     *acceptance_status: <<enum AcceptanceStatus>>
     decided_by: <<uuid>> (FK event_staff)
@@ -269,7 +268,6 @@ event||.o{associated_company
 company||..o{associated_company
 company||..||company_address
 company||..o{event_staff
-assigned_staff}o..||company
 event||..o{event_staff
 event||..o{task
 event|o...o{comment
