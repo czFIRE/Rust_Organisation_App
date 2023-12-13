@@ -65,13 +65,13 @@ enum UserSex {
 entity user {
     *<u>user_id</u>: <<uuid>>
     ---
-    avatar_id: <<uuid>> (FK file)
     ' Full name. They will log in using their email.
     *name: varchar(255) 
     *user_level: <<enum UserLevel>>
     *user_status <<enum UserStatus>>
     *email: varchar(45)
 	*date_of_birth: date
+    avatar_url: varchar(255)
 	*sex: <<enum UserSex>>
     *created_at: timestamp
     *edited_at: timestamp
@@ -118,6 +118,7 @@ together {
         *accepts_staff: boolean
         *work_start: date
         *work_end: date
+        avatar_url: varchar(255)
         *created_at: timestamp
         *edited_at: timestamp
         deleted_at: timestamp
@@ -141,7 +142,7 @@ entity task {
 
 entity assigned_staff {
     *<u>task_id</u>: <<uuid>>
-    *<u>staff_id</u>: <<uuid>>
+    *<u>user_id</u>: <<uuid>>
     ---
     *assignment_status: <<enum AssignmentStatus>>
     decided_by: <<uuid>>
@@ -172,6 +173,7 @@ together {
         *VATIN: varchar(18)
         *contact_phone: string
         *contact_email: string
+        avatar_url: varchar(255)
         *created_at: timestamp
         *edited_at: timestamp
         deleted_at: timestamp
@@ -237,46 +239,22 @@ entity event_staff {
     deleted_at: timestamp
 }
 
-together {
-    entity comment {
-        *<u>comment_id</u>: <<uuid>>
-        /' 
-            Note that the nullability of event_id 
-            and task_id is a xor relationship.
-            So either event_id is null, and task_id is not null, or the opposite.
-            They can't both be null, or both not be null.
-        '/
-        event_id: <<uuid>>
-        task_id: <<uuid>>
-        *author_id: <<uuid>>
-        ---
-        *content: text
-        *created_at: timestamp
-        *edited_at: timestamp
-        deleted_at: timestamp
-    }
-
-    /'
-    A `file` table allows to refer to file system paths by joining
-    `file_id` and `extension` (and possibly using attributes like `type`).
-
-    The `FileType` enum determines how the file is treated (e.g. image, text).
-    It is expected to be used to determine how to present the file.
-    be utilized for constructing a file system path the file gets stored at
-    (and store all images under a dedicated `image/` directory for instance).
-
-    The `params` column may optionally contain values in `param=value;` format.
-    In case of images, it may store params representing e.g. width and height.
+entity comment {
+    *<u>comment_id</u>: <<uuid>>
+    /' 
+        Note that the nullability of event_id 
+        and task_id is a xor relationship.
+        So either event_id is null, and task_id is not null, or the opposite.
+        They can't both be null, or both not be null.
     '/
-    entity file {
-        *<u>file_id</u>: <<uuid>>
-        ---
-        *extension: varchar(20)
-        params: varchar(60)
-        *created_at: timestamp
-        *edited_at: timestamp
-        deleted_at: timestamp
-    }
+    event_id: <<uuid>>
+    task_id: <<uuid>>
+    *author_id: <<uuid>>
+    ---
+    *content: text
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
 }
 
 user||..|{employment
@@ -298,7 +276,4 @@ task||..o{assigned_staff
 assigned_staff}o..||event_staff
 assigned_staff||..||event_staff : decided_by
 user||..o{event_staff
-file|o..o|company
-file|o..o|event
-file|o..o|user
 @enduml
