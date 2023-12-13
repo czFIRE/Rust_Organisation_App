@@ -111,7 +111,6 @@ together {
     entity event {
         *<u>event_id</u>: <<uuid>>
         ---
-        avatar_id: <<uuid>> (FK file)
         *name: varchar(255)
         description: text
         website: url
@@ -157,7 +156,6 @@ together {
     entity company {
         *<u>company_id</u>: <<uuid>>
         ---
-        avatar_id: <<uuid>> (FK file)
         *name: varchar(255)
         description: text
         website: url
