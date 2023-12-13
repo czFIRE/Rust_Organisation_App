@@ -131,6 +131,15 @@ Contains information about tasks that are to be carried out during the work on e
 - priority - priority of the task, TaskPriority enum
 - accepts_staff - this has similar semantics as the event attribute of accepts_staff. Toggles the ability of event staff to register for a task.
 
+### Comment
+This table contains comments from users. These commenst are either for events (where only those involved in an event can see them) or tasks (similar).
+
+#### Attributes
+- comment_id - Primary Key
+- event_id / task_id - FK to the relevant table (only one, never both, never neither)
+- author_id - FK to user, the author of the comment.
+- content - the content of the comment
+
 
 ## Enums
 Currently, the enums in the model are as follows:
