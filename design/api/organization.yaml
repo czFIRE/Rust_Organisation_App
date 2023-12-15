@@ -65,14 +65,14 @@ paths:
                 $ref: '#/components/schemas/Error'
 
 
-  /user/{id}:
+  /user/{user_id}:
     get:
       summary: Retrieves user data from the system.
       tags: 
         - user
       parameters:
         - in: path
-          name: id
+          name: user_id
           required: true
           schema:
             type: string
@@ -108,7 +108,7 @@ paths:
         - user
       parameters:
         - in: path
-          name: id
+          name: user_id
           required: true
           schema:
             type: string
@@ -150,7 +150,7 @@ paths:
         - user
       parameters:
         - in: path
-          name: id
+          name: user_id
           required: true
           schema:
             type: string
@@ -177,14 +177,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   
-  /user/{id}/avatar:
+  /user/{user_id}/avatar:
     get:
       tags:
         - userContent
       summary: 'Retireve path to a user avatar.'
       parameters:
         - in: path
-          name: id
+          name: user_id
           required: true
           schema:
             type: string
@@ -221,7 +221,7 @@ paths:
       summary: 'Create user avatar.'
       parameters:
         - in: path
-          name: id
+          name: user_id
           required: true
           schema:
             type: string
@@ -269,7 +269,7 @@ paths:
       summary: 'Apply new user avatar, rewriting the old one.'
       parameters:
         - in: path
-          name: id
+          name: user_id
           required: true
           schema:
             type: string
@@ -318,7 +318,7 @@ paths:
       summary: 'Remove user avatar, leaving a blank avatar in its place.'
       parameters:
         - in: path
-          name: id
+          name: user_id
           required: true
           schema:
             type: string
@@ -394,14 +394,14 @@ paths:
                 $ref: '#/components/schemas/Error'
 
 
-  /user/{id}/employment:
+  /user/{user_id}/employment:
     get:
       tags:
         - employment
       summary: Retrieve all employments for a user.
       parameters:
         - in: path
-          name: id
+          name: user_id
           required: true
           schema:
             type: string
@@ -646,14 +646,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /company/{id}:
+  /company/{company_id}:
     get:
       tags: 
         - company
       summary: Get a company by its id.
       parameters:
         - in: path
-          name: id
+          name: company_id
           required: true
           schema:
             type: string
@@ -689,7 +689,7 @@ paths:
       summary: Update company info.
       parameters:
         - in: path
-          name: id
+          name: company_id
           required: true
           schema:
             type: string
@@ -731,7 +731,7 @@ paths:
       summary: Remove a company from the system.
       parameters:
         - in: path
-          name: id
+          name: company_id
           required: true
           schema:
             type: string
@@ -764,14 +764,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   
-  /company/{id}/image:
+  /company/{company_id}/image:
     get:
       tags:
         - companyContent
       summary: 'Load company avatar.'
       parameters:
         - in: path
-          name: id
+          name: company_id
           required: true
           schema:
             type: string
@@ -808,7 +808,7 @@ paths:
       summary: 'Create company avatar.'
       parameters:
         - in: path
-          name: id
+          name: company_id
           required: true
           schema:
             type: string
@@ -856,7 +856,7 @@ paths:
       summary: 'Apply new company image, rewriting the old one.'
       parameters:
         - in: path
-          name: id
+          name: company_id
           required: true
           schema:
             type: string
@@ -904,7 +904,7 @@ paths:
       summary: 'Remove company avatar, leaving a blank/default image in its place.'
       parameters:
         - in: path
-          name: id
+          name: company_id
           required: true
           schema:
             type: string
@@ -1015,14 +1015,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
         
-  /event/{id}:
+  /event/{event_id}:
     get:
       tags:
         - event
       summary: Retrieve data about an event by its id
       parameters:
         - in: path
-          name: id
+          name: event_id
           required: true
           schema:
             type: string
@@ -1058,7 +1058,7 @@ paths:
       summary: Update information about an event.
       parameters:
         - in: path
-          name: id
+          name: event_id
           required: true
           schema:
             type: string
@@ -1106,7 +1106,7 @@ paths:
       summary: Delete an event from the system.
       parameters:
         - in: path
-          name: id
+          name: event_id
           required: true
           schema:
             type: string
@@ -1139,14 +1139,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   
-  /event/{id}/staff:
+  /event/{event_id}/staff:
     get:
       tags:
         - eventStaff
       summary: Retrieves all event staff.
       parameters:
         - in: path
-          name: id
+          name: event_id
           required: true
           schema:
             type: string
@@ -1200,7 +1200,7 @@ paths:
       summary: Create a new staff relationship between a user and an event.
       parameters:
         - in: path
-          name: id
+          name: event_id
           required: true
           schema:
             type: string
@@ -1242,7 +1242,7 @@ paths:
       summary: Removes all event staff.
       parameters:
         - in: path
-          name: id
+          name: event_id
           required: true
           schema:
             type: string
@@ -1399,14 +1399,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /event/{id}/task:
+  /event/{event_id}/task:
     get:
       tags:
         - eventTask
       summary: Retrieves all tasks for the given event.
       parameters:
         - in: path
-          name: id
+          name: event_id
           required: true
           schema:
             type: string
@@ -1459,7 +1459,7 @@ paths:
       summary: Creates a task for the given event.
       parameters:
         - in: path
-          name: id
+          name: event_id
           required: true
           schema:
             type: string
@@ -1501,7 +1501,7 @@ paths:
       summary: Removes all tasks for the given event.
       parameters:
         - in: path
-          name: id
+          name: event_id
           required: true
           schema:
             type: string
@@ -1621,14 +1621,14 @@ paths:
                 schema:
                   $ref: '#/components/schemas/Error'
   
-  /task/{id}:
+  /task/{task_id}:
     get:
       tags:
         - taskStaff
       summary: Get all staff for a task.
       parameters:
         - in: path
-          name: id
+          name: task_id
           required: true
           schema:
             type: string
@@ -1683,7 +1683,7 @@ paths:
       summary: Delete all Pending and Rejected staff for a task.
       parameters:
         - in: path
-          name: id
+          name: task_id
           required: true
           schema:
             type: string
@@ -1821,14 +1821,14 @@ paths:
                 schema:
                   $ref: '#/components/schemas/Error'
       
-  /event/{id}/comment:
+  /event/{event_id}/comment:
     get:
       tags:
         - eventContent
       summary: 'Get event comments.'
       parameters:
         - in: path
-          name: id
+          name: event_id
           required: true
           schema:
             type: string
@@ -1877,7 +1877,7 @@ paths:
       summary: 'Create an event comment.'
       parameters:
         - in: path
-          name: id
+          name: event_id
           required: true
           schema:
             type: string
@@ -1928,7 +1928,7 @@ paths:
       summary: 'Remove all event comments.'
       parameters:
         - in: path
-          name: id
+          name: event_id
           required: true
           schema:
             type: string
@@ -2062,14 +2062,14 @@ paths:
                 $ref: '#/components/schemas/Error'
 
 
-  /event/{id}/company:
+  /event/{event_id}/company:
     get:
       tags:
         - eventCompany
       summary: Get all associated companies.
       parameters:
         - in: path
-          name: id
+          name: event_id
           required: true
           schema:
             type: string
@@ -2123,7 +2123,7 @@ paths:
       summary: Add a company to the list of associated companies.
       parameters:
         - in: path
-          name: id
+          name: event_id
           required: true
           schema:
             type: string
@@ -2267,14 +2267,14 @@ paths:
                 schema:
                   $ref: '#/components/schemas/Error'
       
-  /task/{id}/comment:
+  /task/{task_id}/comment:
     get:
       tags:
         - taskContent
       summary: 'Get task comments.'
       parameters:
         - in: path
-          name: id
+          name: task_id
           required: true
           schema:
             type: string
@@ -2323,7 +2323,7 @@ paths:
       summary: 'Create a task comment.'
       parameters:
         - in: path
-          name: id
+          name: task_id
           required: true
           schema:
             type: string
@@ -2373,7 +2373,7 @@ paths:
       summary: 'Remove all task comments.'
       parameters:
         - in: path
-          name: id
+          name: task_id
           required: true
           schema:
             type: string
@@ -2506,14 +2506,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /event/{id}/image:
+  /event/{event_id}/image:
     get:
       tags:
         - eventContent
       summary: 'Load event avatar.'
       parameters:
         - in: path
-          name: id
+          name: event_id
           required: true
           schema:
             type: string
@@ -2550,7 +2550,7 @@ paths:
       summary: 'Create an event avatar.'
       parameters:
         - in: path
-          name: id
+          name: event_id
           required: true
           schema:
             type: string
@@ -2598,7 +2598,7 @@ paths:
       summary: 'Apply new event avatar, rewriting the old one.'
       parameters:
         - in: path
-          name: id
+          name: event_id
           required: true
           schema:
             type: string
@@ -2646,7 +2646,7 @@ paths:
       summary: 'Remove an event avatar, leaving a blank/default image in its place.'
       parameters:
         - in: path
-          name: id
+          name: event_id
           required: true
           schema:
             type: string
@@ -2743,20 +2743,14 @@ paths:
                 schema:
                   $ref: '#/components/schemas/Error'
 
-  /timesheet/{id}:
+  /timesheet/{timesheet_id}:
     get:
       tags:
         - timeSheet
       summary: Retrieve a specific timesheet.
       parameters:
         - in: path
-          name: user_id
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - in: path
-          name: id
+          name: timesheet_id
           required: true
           schema:
             type: string
@@ -2799,7 +2793,7 @@ paths:
       summary: Updates the timesheet's relevant attributes.
       parameters:
         - in: path
-          name: id
+          name: timesheet_id
           required: true
           schema:
             type: string
@@ -2847,7 +2841,7 @@ paths:
       summary: Delete a timesheet. (Though we probably don't want to.)
       parameters:
         - in: path
-          name: id
+          name: timesheet_id
           required: true
           schema:
             type: string
