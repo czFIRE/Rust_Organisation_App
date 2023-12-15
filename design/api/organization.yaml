@@ -1,0 +1,3720 @@
+openapi: 3.0.3
+info:
+  title: Organisation App API
+  description: Actix Web API for the Organisation App project.
+  version: 0.1.0
+tags:
+  - name: user
+    description: User relevant services.
+  - name: userContent
+    description: Content relevant to users.
+  - name: employment
+    description: User employment relevant services.
+  - name: company
+    description: Company relevant services.
+  - name: companyContent
+    description: Content relevant to companies.
+  - name: event
+    description: Handles operations specific to an event entity.
+  - name: eventStaff
+    description: Handles operations specific to event staff.
+  - name: eventTask
+    description: Task relevant services.
+  - name: taskStaff
+    description: Task Staff relevant services.
+  - name: taskContent
+    description: Content relevant to tasks.
+  - name: eventCompany
+    description: Associated Company relevant services.
+  - name: eventContent
+    description: Content relevant to events.
+  - name: timeSheet
+    description: Timesheet relevant services.
+paths:
+  /user:
+    post:
+      tags:
+        - user
+      summary: Adds a new user to the system.
+      operationId: addUser
+      requestBody:
+        description: New user data.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad Request
+          content:
+            application/json: 
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+  /user/{user_id}:
+    get:
+      summary: Retrieves user data from the system.
+      tags: 
+        - user
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      summary: 'Updates a user record.'
+      tags:
+        - user
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Partial new user data.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404': 
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: 'Remove a user from the system.'
+      tags:
+        - user
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /user/{user_id}/avatar:
+    get:
+      tags:
+        - userContent
+      summary: 'Retireve path to a user avatar.'
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Avatar'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - userContent
+      summary: 'Create user avatar.'
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          image/jpg:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Avatar'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags:
+        - userContent
+      summary: 'Apply new user avatar, rewriting the old one.'
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          image/jpg:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: Ok
+          content:
+            image/jpg:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500': 
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - userContent
+      summary: 'Remove user avatar, leaving a blank avatar in its place.'
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK (returns blank/default image)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Avatar'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500': 
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /employment:
+    post:
+      tags:
+        - employment
+      summary: Create a new employment relationship between a user and a company.
+      requestBody:
+        required: true
+        description: Data of the new employment relationship.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewEmployment'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employment'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+  /user/{user_id}/employment:
+    get:
+      tags:
+        - employment
+      summary: Retrieve all employments for a user.
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: number
+        - in: query
+          name: offset
+          required: false
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EmploymentLite'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /user/{user_id}/employment/{company_id}:
+    get:
+      tags:
+        - employment
+      summary: Get an employment relationship by its user and company IDs.
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: company_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employment'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      tags:
+        - employment
+      summary: Update an employment relationship between a user and a company.
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: company_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Partial new employment data.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEmployment'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Employment'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - employment
+      summary: Remove an employment relationship between a user and a company.
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: company_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /company:
+    post:
+      tags:
+        - company
+      summary: Create a new company within the system.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewCompany'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      tags: 
+        - company
+      summary: Get all companies.
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: number
+        - in: query
+          name: offset
+          required: false
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CompanyLite'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /company/{company_id}:
+    get:
+      tags: 
+        - company
+      summary: Get a company by its id.
+      parameters:
+        - in: path
+          name: company_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'       
+    patch:
+      tags:
+        - company
+      summary: Update company info.
+      parameters:
+        - in: path
+          name: company_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Partial data for update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewCompany'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags: 
+        - company
+      summary: Remove a company from the system.
+      parameters:
+        - in: path
+          name: company_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error' 
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error' 
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /company/{company_id}/image:
+    get:
+      tags:
+        - companyContent
+      summary: 'Load company avatar.'
+      parameters:
+        - in: path
+          name: company_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Avatar'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - companyContent
+      summary: 'Create company avatar.'
+      parameters:
+        - in: path
+          name: company_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          image/jpg:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Avatar'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags:
+        - companyContent
+      summary: 'Apply new company image, rewriting the old one.'
+      parameters:
+        - in: path
+          name: company_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          image/jpg:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Avatar'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500': 
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - companyContent
+      summary: 'Remove company avatar, leaving a blank/default image in its place.'
+      parameters:
+        - in: path
+          name: company_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK (returns blank/default image)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Avatar'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500': 
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /event:
+    post:
+      tags:
+        - event
+      summary: Create a new event in the system.
+      requestBody:
+        description: Data for the new event.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewEvent'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    get:
+      tags:
+        - event
+      summary: Retrieve all events
+      parameters:
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: number
+        - in: query
+          name: offset
+          required: false
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventLite'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        
+  /event/{event_id}:
+    get:
+      tags:
+        - event
+      summary: Retrieve data about an event by its id
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      tags:
+        - event
+      summary: Update information about an event.
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Partial data for the update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewEvent'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - event
+      summary: Delete an event from the system.
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /event/{event_id}/staff:
+    get:
+      tags:
+        - eventStaff
+      summary: Retrieves all event staff.
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: assignment_status
+          required: false
+          schema:
+            type: string
+            format: AssignmentStatus
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: number
+        - in: query
+          name: offset
+          required: false
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventStaff'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+        - eventStaff
+      summary: Create a new staff relationship between a user and an event.
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewEventStaff'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewEventStaff'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found (EventID is invalid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - eventStaff
+      summary: Removes all event staff.
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /event/{event_id}/staff/{user_id}:
+    get: 
+      tags:
+        - eventStaff
+      summary: Retrieves specific event staff.
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventStaff'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      tags:
+        - eventStaff
+      summary: Update eventStaff
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Partial data for updates.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventStaffData'
+      responses:
+        '200':
+            description: Ok
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/EventStaff'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete: 
+      tags:
+        - eventStaff
+      summary: Removes specific event staff.
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /event/{event_id}/task:
+    get:
+      tags:
+        - eventTask
+      summary: Retrieves all tasks for the given event.
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: accomplished
+          description: matches on date_accomplished (null or not)
+          schema:
+            type: boolean
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: number
+        - in: query
+          name: offset
+          required: false
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventTask'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+        - eventTask
+      summary: Creates a task for the given event.
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewEventTask'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - eventTask
+      summary: Removes all tasks for the given event.
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: accomplished
+          description: matches on date_accomplished (null or not)
+          schema:
+            type: boolean
+      responses:
+        '204':
+          description: No content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /event/{event_id}/task/{task_id}:
+    patch:
+      tags:
+        - eventTask
+      summary: Updates information about a task.
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Partial data for the update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventTaskData'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventTask'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+        tags:
+          - eventTask
+        summary: Deletes a task.
+        parameters:
+          - in: path
+            name: event_id
+            required: true
+            schema:
+              type: string
+              format: uuid
+          - in: path
+            name: task_id
+            required: true
+            schema:
+              type: string
+              format: uuid
+        responses:
+          '204':
+            description: No Content
+          '400':
+            description: Bad Request
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+          '404':
+            description: Not Found
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+          '500':
+            description: Internal Error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+  
+  /task/{task_id}:
+    get:
+      tags:
+        - taskStaff
+      summary: Get all staff for a task.
+      parameters:
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: assignment_status
+          required: false
+          schema:
+            type: string
+            format: AssignmentStatus
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: number
+        - in: query
+          name: offset
+          required: false
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventTaskStaff'
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - taskStaff
+      summary: Delete all Pending and Rejected staff for a task.
+      parameters:
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok (remaining staff)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventTaskStaff'
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+
+  /task/{task_id}/staff/{staff_id}:
+    get:
+      tags:
+        - taskStaff
+      summary: Get specific staff information.
+      parameters:
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: staff_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventTaskStaff'
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+      
+    patch:
+      tags:
+        - taskStaff
+      summary: Update task staff information.
+      parameters:
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: staff_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventTaskStaffData'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventTaskStaff'
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+      
+  /event/{event_id}/comment:
+    get:
+      tags:
+        - eventContent
+      summary: 'Get event comments.'
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: number
+        - in: query
+          name: offset
+          required: false
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventComment'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - eventContent
+      summary: 'Create an event comment.'
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewEventComment'
+        
+          
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventComment'
+            
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - eventContent
+      summary: 'Remove all event comments.'
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500': 
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /event/{event_id}/comment/{comment_id}:
+    put:
+      tags:
+        - eventContent
+      summary: 'Rewrite event comment.'
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: comment_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventCommentData'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventComment'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500': 
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - eventContent
+      summary: 'Delete event comment.'
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: comment_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500': 
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+  /event/{event_id}/company:
+    get:
+      tags:
+        - eventCompany
+      summary: Get all associated companies.
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: association_type
+          schema:
+            type: string
+            format: AssociationType
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: number
+        - in: query
+          name: offset
+          required: false
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AssociatedCompany'
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+    
+    post:
+      tags:
+        - eventCompany
+      summary: Add a company to the list of associated companies.
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewAssociatedCompany'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssociatedCompany'
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+    
+  /event/{event_id}/company/{company_id}:
+    patch:
+      tags:
+        - eventCompany
+      summary: Update the association of the associated company.
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: company_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssociatedCompanyData'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssociatedCompany'
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - eventCompany
+      summary: Remove a company from associated companies for the event.
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: company_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+      
+  /task/{task_id}/comment:
+    get:
+      tags:
+        - taskContent
+      summary: 'Get task comments.'
+      parameters:
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: number
+        - in: query
+          name: offset
+          required: false
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskComment'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - taskContent
+      summary: 'Create a task comment.'
+      parameters:
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewTaskComment'
+          
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskComment'
+            
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - taskContent
+      summary: 'Remove all task comments.'
+      parameters:
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500': 
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /task/{task_id}/comment/{comment_id}:
+    put:
+      tags:
+        - taskContent
+      summary: 'Rewrite task comment.'
+      parameters:
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: comment_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCommentData'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskComment'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500': 
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - taskContent
+      summary: 'Delete task comment.'
+      parameters:
+        - in: path
+          name: task_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: comment_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500': 
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /event/{event_id}/image:
+    get:
+      tags:
+        - eventContent
+      summary: 'Load event avatar.'
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Avatar'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - eventContent
+      summary: 'Create an event avatar.'
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          image/jpg:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Avatar'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags:
+        - eventContent
+      summary: 'Apply new event avatar, rewriting the old one.'
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          image/jpg:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Avatar'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500': 
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags:
+        - eventContent
+      summary: 'Remove an event avatar, leaving a blank/default image in its place.'
+      parameters:
+        - in: path
+          name: event_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK (returns blank/default image)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Avatar'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500': 
+          description: Internal Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /user/{user_id}/employment/{company_id}/sheet:
+    get:
+      tags:
+        - timeSheet
+      summary: Get all the timesheets for a chosen user's employment.
+      parameters:
+        - in: path
+          name: user_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: company_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: number
+        - in: query
+          name: offset
+          required: false
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeSheetLite'
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+
+  /timesheet/{timesheet_id}:
+    get:
+      tags:
+        - timeSheet
+      summary: Retrieve a specific timesheet.
+      parameters:
+        - in: path
+          name: timesheet_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeSheet'
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+    
+    patch:
+      tags:
+        - timeSheet
+      summary: Updates the timesheet's relevant attributes.
+      parameters:
+        - in: path
+          name: timesheet_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Partial data for the update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TimeSheetData'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeSheet'
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+
+  /timesheet/{timesheet_id}/workdays:
+    delete:
+      tags:
+        - timeSheet
+      summary: Clear all workdays for a timesheet, setting their worked hours to 0, and removing comments from employee.
+      parameters:
+        - in: path
+          name: timesheet_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: No Content
+        '400':
+          description: Bad Request
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '404':
+          description: Not Found
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal Error
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    User:
+      type: object
+      properties: 
+        id:
+          type: string
+          format: uuid
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
+        avatar_url:
+          type: string
+          example: /bambino/default.jpg
+        name:
+          type: string
+          format: string
+          example: Josephe Jusephi
+        user_level:
+          type: string
+          format: UserLevel
+          example: User
+        user_status:
+          type: string
+          format: UserStatus
+          example: Vacation
+        email:
+          type: string
+          format: email
+          example: Josephe@goodmail.com
+        date_of_birth:
+          type: string
+          example: '1995-10-21 0:00:00'
+        sex:
+          type: string
+          format: UserSex
+          example: Male
+        created_at:
+          type: string
+          example: '2023-01-15 5:32:12+01'
+
+    UserLite:
+      type: object
+      properties: 
+        id:
+          type: string
+          format: uuid
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
+        avatar_url:
+          type: string
+          example: /bambino/default.jpg
+        name:
+          type: string
+          format: string
+          example: Josephe Jusephi
+        user_status:
+          type: string
+          format: UserStatus
+          example: Vacation
+        age:
+          type: string
+          example: 25
+        sex:
+          type: string
+          format: UserSex
+          example: Male
+    
+    NewUser:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Pepo Pepowskyj
+        email:
+          type: string
+          format: email
+          example: Pepo2@adresa.pl
+        date_of_birth:
+          type: string
+          example: '1999-10-21 0:00:00'
+        sex:
+          type: string
+          format: UserSex
+          example: Other
+        userLevel:
+          type: string
+          format: UserLevel
+          example: User
+
+    Avatar:
+      type: object
+      properties:
+        path:
+          type: string
+          example: /example/sadcat.jpg
+
+    Employment:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
+        company:
+          $ref: "#/components/schemas/CompanyLite"
+        manager:
+          $ref: "#/components/schemas/UserLite"
+        employment_type:
+          type: string
+          format: EmploymentType
+          example: HPP
+        hourly_rate: 
+          type: number
+          example: 200.00
+        employee_level:
+          type: string
+          format: EmployeeLevel
+          example: Basic
+        start_date:
+          type: string
+          example: '2020-07-01'
+        end_date:
+          type: string
+          example: '9999-12-31'
+        created_at:
+          type: string
+          example: '2022-12-12'
+        edited_at:
+          type: string
+          example: '2023-03-15'
+
+    EmploymentLite:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
+        company:
+          $ref: "#/components/schemas/CompanyLite"
+        employment_type:
+          type: string
+          format: EmploymentType
+          example: HPP
+        start_date:
+          type: string
+          example: '2020-07-01'
+        end_date:
+          type: string
+          example: '9999-12-31'
+
+    NewEmployment:
+      type: object
+      properties:
+        user_id: 
+          type: string
+          format: uuid
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
+        company_id:
+          type: string
+          format: uuid
+          example: a40c9874-c743-48e2-9295-0625f5d5a068
+        manager_id:
+          type: string
+          format: uuid
+          example: b40c9874-c743-48e2-9295-0625f5d5a068
+        employment_type:
+          type: string
+          format: EmploymentType
+          example: HPP
+        hourly_rate:
+          type: number
+          example: 200.00
+        employee_level:
+          type: string
+          format: EmployeeLevel
+          example: Basic
+        start_date:
+          type: string
+          example: '2022-07-01'
+        end_date:
+          type: string
+          example: '9999-12-31'
+
+    UpdateEmployment:
+      type: object
+      properties:
+        # A change in managers could occur.
+        manager_id:
+          type: string
+          format: uuid
+          example: b40c9874-c743-48e2-9295-0625f5d5a068
+        employment_type:
+          type: string
+          format: EmploymentType
+          example: HPP
+        hourly_rate:
+          type: number
+          example: 200.00
+        employee_level:
+          type: string
+          format: EmployeeLevel
+          example: Basic
+        start_date:
+          type: string
+          example: '2022-07-01'
+        end_date:
+          type: string
+          example: '9999-12-31'
+
+    CompanyAddress:
+      type: object
+      properties:
+        country:
+          type: string
+          example: Czech Republic
+        region:
+          type: string
+          example: Jihomoravský Kraj
+        city:
+          type: string
+          example: Brno
+        street:
+          type: string
+          example: Botanická
+        postal_code:
+          type: string
+          example: 60200
+        address_number:
+          type: string
+          example: 68a 
+
+    Company:
+      type: object
+      properties:
+        company_id:
+          type: string
+          format: uuid
+          example: a40c9874-c743-48e2-9295-0625f5d5a068
+        avatar_url:
+          type: string
+          example: /img/pepebusiness.png
+        name:
+          type: string
+          example: Pain Inc.
+        description:
+          type: string
+          example: We specialize in inconvenient business solutions, so your employees can get the experience of complaining about bad software!
+        website:
+          type: string
+          example: www.pain.co.uk
+        CRN:
+          type: string
+          format: CRN
+          example: 12345678
+        VATIN:
+          type: string
+          format: VATIN
+          example: CZ1234567890
+        address:
+          $ref: '#/components/schemas/CompanyAddress'
+        contact_phone:
+          type: string
+          example: 420003300000
+        contact_email:
+          type: string
+          example: paininc@pain.inc
+        created_at:
+          type: string
+          example: '2023-01-01 05:00:02+01'
+        edited_at:
+          type: string
+          example: '2023-01-01 05:00:02+01'
+
+    CompanyLite:
+      type: object
+      properties:
+        company_id:
+          type: string
+          format: uuid
+          example: a40c9874-c743-48e2-9295-0625f5d5a068
+        avatar_url:
+          type: string
+          example: /img/pepebusiness.png
+        name:
+          type: string
+          example: Pain Inc.
+
+    NewCompany:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Pain Inc.
+        description:
+          type: string
+          example: We specialize in inconvenient business solutions, so your employees can get the experience of complaining about bad software!
+        website:
+          type: string
+          example: www.pain.co.uk
+        CRN:
+          type: string
+          format: CRN
+          example: 12345678
+        VATIN:
+          type: string
+          format: VATIN
+          example: CZ1234567890
+        address:
+          $ref: '#/components/schemas/CompanyAddress'
+        contact_phone:
+          type: string
+          example: 420003300000
+        contact_email:
+          type: string
+          example: paininc@pain.inc
+        
+    Event:
+      type: object
+      properties:
+        event_id:
+          type: string
+          format: uuid
+          example: e40c9874-c743-48e2-9295-0625f5d5a068
+        avatar_url:
+          type: string
+          example: /img/pepejam.png
+        name:
+          type: string
+          example: Musicfest Loud Extravaganza WeeWoo
+        description:
+          type: string
+          example: Garble Garble Come Enjoy Music Zip Zoop
+        website:
+          type: string
+          example: hackertyper.com
+        accepts_staff:
+          type: boolean
+          example: true
+        work_start:
+          type: string
+          example: '2023-08-15'
+        work_end:
+          type: string
+          example: '2023-08-20'
+        created_at:
+          type: string
+          example: '2023-06-15 12:00:05+01'
+        edited_at:
+          type: string
+          example: '2023-06-15 12:00:05+01'
+
+    EventLite:
+      type: object
+      properties:
+        event_id:
+          type: string
+          format: uuid
+          example: e40c9874-c743-48e2-9295-0625f5d5a068
+        avatar_url:
+          type: string
+          example: /img/pepejam.png
+        name:
+          type: string
+          example: Musicfest Loud Extravaganza WeeWoo
+        accepts_staff:
+          type: boolean
+          example: true
+        work_start:
+          type: string
+          example: '2023-08-15'
+        work_end:
+          type: string
+          example: '2023-08-20'
+
+    NewEvent:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Musicfest Loud Extravaganza WeeWoo
+        description:
+          type: string
+          example: Garble Garble Come Enjoy Music Zip Zoop
+        website:
+          type: string
+          example: hackertyper.com
+        work_start:
+          type: string
+          example: '2023-08-15'
+        work_end:
+          type: string
+          example: '2023-08-20'
+    
+    EventStaff:
+      type: object
+      properties:
+        staff_id:
+          type: string
+          format: uuid
+          example: e40c9874-c743-48e2-9295-0625f5d5a068
+        user:
+          $ref: '#/components/schemas/UserLite'
+        company:
+          $ref: '#/components/schemas/CompanyLite'
+        event_id:
+          type: string
+          format: uuid
+          example: e40c9874-c743-48e2-9295-0625f5d5a068
+        staff_level:
+          type: string
+          format: StaffLevel
+          example: Organizer
+        acceptance_status:
+          type: string
+          format: AcceptanceStatus
+          example: Accepted
+        decided_by:
+          $ref: "#/components/schemas/UserLite"
+        created_at:
+          type: string
+          example: '2023-07-12 11:57:05+01'
+        edited_at:
+          type: string
+          example: '2023-07-12 11:57:05+01'
+    
+    NewEventStaff:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          example: s40c9874-c743-48e2-9295-0625f5d5a068
+        staff_level:
+          type: string
+          format: StaffLevel
+          example: Organizer 
+
+    EventStaffData:
+      type: object
+      properties:
+        staff_level:
+          type: string
+          format: StaffLevel
+          example: Organizer
+        acceptance_status:
+          type: string
+          format: AcceptanceStatus
+          example: Accepted
+        decided_by:
+          type: string
+          format: uuid
+          example: b40c9874-c743-48e2-9295-0625f5d5a068
+
+    EventTask:
+      type: object
+      properties:
+        task_id:
+          type: string
+          format: uuid
+          example: t40c9874-c743-48e2-9295-0625f5d5a068
+        event_id:
+          type: string
+          format: uuid
+          example: e50c9874-c743-48e2-9295-0625f5d5a068
+        creator:
+          $ref: "#/components/schemas/UserLite"
+        title:
+          type: string
+          example: Vacuum the sandbox
+        description:
+          type: string
+          example: VERY IMPORTANT! We need 1 person to vacuum the sandbox periodically so that the sand is as clean as it can be. IMPORTANT! DO NOT VACUUM THE SAND!!!
+        date_accomplished:
+          type: string
+          example: '2023-05-03 23:59:59+01'
+        priority:
+          type: string
+          format: TaskPriority
+          example: 'High'
+        accepts_staff:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          example: '2023-05-01 03:00:00+01'
+        edited_at:
+          type: string
+          example: '2023-05-03 23:59:59+01'
+
+    NewEventTask:
+      type: object
+      properties:
+        creator_id:
+          type: string
+          format: uuid
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
+        title:
+          type: string
+          example: Vacuum the sandbox
+        description:
+          type: string
+          example: VERY IMPORTANT! We need 1 person to vacuum the sandbox periodically so that the sand is as clean as it can be. IMPORTANT! DO NOT VACUUM THE SAND!!!
+        priority:
+          type: string
+          format: TaskPriority
+          example: 'High'
+    
+    EventTaskData:
+      type: object
+      properties:
+        title:
+          type: string
+          example: Vacuum the sandbox
+        description:
+          type: string
+          example: VERY IMPORTANT! We need 1 person to vacuum the sandbox periodically so that the sand is as clean as it can be. IMPORTANT! DO NOT VACUUM THE SAND!!!
+        date_accomplished:
+          type: string
+          example: '2023-05-03 23:59:59+01'
+        priority:
+          type: string
+          format: TaskPriority
+          example: 'High'
+        accepts_staff:
+          type: boolean
+          example: true
+
+    EventTaskStaff:
+      type: object
+      properties:
+        staff:
+          $ref: '#/components/schemas/EventStaff'
+        assignment_status:
+          type: string
+          format: AssignmentStatus
+          example: Rejected
+        decided_by:
+          $ref: "#/components/schemas/UserLite"
+    
+    NewEventTaskStaff:
+      type: object
+      properties:
+        staff_id:
+          type: string
+          format: uuid
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
+    
+    EventTaskStaffData:
+      type: object
+      properties:
+        assignment_status:
+          type: string
+          format: AssignmentStatus
+          example: Rejected
+        decided_by:
+          type: string
+          format: uuid
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
+
+    EventComment:
+      type: object
+      properties:
+        comment_id:
+          type: string
+          format: uuid
+          example: k50c9874-c743-48e2-9295-0625f5d5a068
+        event_id:
+          type: string
+          format: uuid
+          example: e50c9874-c743-48e2-9295-0625f5d5a068
+        author:
+          $ref: '#/components/schemas/UserLite'
+        content:
+          type: string
+          example: Back in my day, concerts were much crazier and the music didn't sound like cats screaming into the night!!!
+        created_at:
+          type: string
+          example: '2023-01-01 03:00:00+01'
+        edited_at:
+          type: string
+          example: '2023-01-01 03:00:00+01'
+
+    NewEventComment:
+      type: object
+      properties:
+        author_id:
+          type: string
+          format: uuid
+          example: a50c9874-c743-48e2-9295-0625f5d5a068
+        content:
+          type: string
+          example: Back in my day, concerts were much crazier and the music didn't sound like cats screaming into the night!!!
+
+    EventCommentData:
+      type: object
+      properties:
+        author_id:
+          type: string
+          format: uuid
+          example: a50c9874-c743-48e2-9295-0625f5d5a068
+        content:
+          type: string
+          example: Back in my day, music events were much crazier and the music didn't sound like cats screaming into the night!!!
+
+    TaskComment:
+      type: object
+      properties:
+        comment_id:
+          type: string
+          format: uuid
+          example: k50c9874-c743-48e2-9295-0625f5d5a068
+        task_id:
+          type: string
+          format: uuid
+          example: e50c9874-c743-48e2-9295-0625f5d5a068
+        author:
+          $ref: '#/components/schemas/UserLite'
+        content:
+          type: string
+          example: Man, finding the Red Herring in that pond really proved to be a challenge...
+        created_at:
+          type: string
+          example: '2023-01-01 03:00:00+01'
+        edited_at:
+          type: string
+          example: '2023-01-01 03:00:00+01'
+
+    NewTaskComment:
+      type: object
+      properties:
+        author_id:
+          type: string
+          format: uuid
+          example: a50c9874-c743-48e2-9295-0625f5d5a068
+        content:
+          type: string
+          example: Man, finding the Red Herring in that small pond really proved to be a challenge...
+
+    TaskCommentData:
+      type: object
+      properties:
+        author_id:
+          type: string
+          format: uuid
+          example: a50c9874-c743-48e2-9295-0625f5d5a068
+        content:
+          type: string
+          example: Man, finding the Red Herring in that pond really proved to be a challenge...
+
+
+    WorkDay:
+      type: object
+      properties:
+        timesheet_id:
+          type: string
+          format: uuid
+          example: t50c9874-c743-48e2-9295-0625f5d5a068
+        work_date:
+          type: string
+          example: '2020-06-01'
+        worked_hours:
+          type: number
+          example: 6
+        commentary:
+          type: string
+          example: 'Backstage: Catering for The Mutes accapella band.'
+        is_editable:
+          type: boolean
+          example: false
+        created_at:
+          type: string
+          example: '2020-06-01 00:00:00+01'
+        edited_at:
+          type: string
+          example: '2020-06-16 14:15:06+01'
+    
+    WorkDayData:
+      type: object
+      properties:
+        worked_hours:
+          type: number
+          example: 6
+        commentary:
+          type: string
+          example: 'Backstage: Catering for The Mutes accapella band.'
+        is_editable:
+          type: boolean
+          example: false
+
+    TimeSheetLite:
+      type: object
+      properties:
+        timesheet_id:
+          type: string
+          format: uuid
+          example: t50c9874-c743-48e2-9295-0625f5d5a068
+        user_id:
+          type: string
+          format: uuid
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
+        event:
+          $ref: '#/components/schemas/EventLite'
+        start_date:
+          type: string
+          example: '2020-06-01 00:00:00+01'
+        end_date:
+          type: string
+          example: '2020-06-15 00:00:00+01'
+        is_editable:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          example: '2020-06-01 00:00:00+01'
+        edited_at:
+          type: string
+          example: '2020-06-20 13:05:25+01'
+
+    TimeSheet:
+      type: object
+      properties:
+        timesheet_id:
+          type: string
+          format: uuid
+          example: t50c9874-c743-48e2-9295-0625f5d5a068
+        user_id:
+          type: string
+          format: uuid
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
+        company_id:
+          type: string
+          format: uuid
+          example: a50c9874-c743-48e2-9295-0625f5d5a068
+        event_id:
+          type: string
+          format: uuid
+          example: a50c9874-c743-48e2-9295-0625f5d5a068
+        start_date:
+          type: string
+          example: '2020-06-01 00:00:00+01'
+        end_date:
+          type: string
+          example: '2020-06-15 00:00:00+01'
+        worked_hours:
+          type: number
+          example: 20
+        work_days:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkDay'
+        is_editable:
+          type: boolean
+          example: true
+        manager_note:
+          type: string
+          example: How did you work 20 hours when the event had a total of 10 hours???
+        created_at:
+          type: string
+          example: '2020-06-01 00:00:00+01'
+        edited_at:
+          type: string
+          example: '2020-06-20 13:05:25+01'
+
+    NewTimeSheet:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          example: b50c9874-c743-48e2-9295-0625f5d5a068
+        company_id:
+          type: string
+          format: uuid
+          example: a50c9874-c743-48e2-9295-0625f5d5a068
+        start_date:
+          type: string
+          example: '2020-06-01 00:00:00+01'
+        end_date:
+          type: string
+          example: '2020-06-15 00:00:00+01'
+
+    TimeSheetData:
+      type: object
+      properties:
+        work_days:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkDayData'
+        is_editable:
+          type: boolean
+          example: true
+        manager_note:
+          type: string
+          example: How did you work 20 hours when the event had a total of 10 hours???
+
+    AssociatedCompany:
+      type: object
+      properties:
+        event_id:
+          type: string
+          format: uuid
+          example: e50c9874-c743-48e2-9295-0625f5d5a068
+        company:
+          $ref: '#/components/schemas/CompanyLite'
+        association_type:
+          type: string
+          format: AssociationType
+          example: Sponsor
+        created_at:
+          type: string
+          example: '2020-05-15 10:05:09+01'
+        edited_at:
+          type: string
+          example: '2020-05-15 10:05:09+01'
+
+    NewAssociatedCompany:
+      type: object
+      properties:
+        company_id:
+          type: string
+          format: uuid
+          example: a50c9874-c743-48e2-9295-0625f5d5a068
+        association_type:
+          type: string
+          format: AssociationType
+          example: Sponsor
+
+    AssociatedCompanyData:
+      type: object
+      properties:
+        association_type:
+          type: string
+          format: AssociationType
+          example: Sponsor
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: error message
