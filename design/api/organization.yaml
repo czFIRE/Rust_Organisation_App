@@ -2883,10 +2883,9 @@ components:
           type: string
           format: uuid
           example: b50c9874-c743-48e2-9295-0625f5d5a068
-        avatar_id:
+        avatar_url:
           type: string
-          format: Optional(uuid)
-          example: b50c9874-c743-48e2-9295-0625f5d5a068
+          example: /bambino/default.jpg
         name:
           type: string
           format: string
@@ -2921,10 +2920,9 @@ components:
           type: string
           format: uuid
           example: b50c9874-c743-48e2-9295-0625f5d5a068
-        avatar_id:
+        avatar_url:
           type: string
-          format: Optional(uuid)
-          example: b50c9874-c743-48e2-9295-0625f5d5a068
+          example: /bambino/default.jpg
         name:
           type: string
           format: string
@@ -3095,10 +3093,9 @@ components:
           type: string
           format: uuid
           example: a40c9874-c743-48e2-9295-0625f5d5a068
-        avatar_id:
+        avatar_url:
           type: string
-          format: uuid
-          example: c40c9874-c743-48e2-9295-0625f5d5a068
+          example: /img/pepebusiness.png
         name:
           type: string
           example: Pain Inc.
@@ -3167,10 +3164,9 @@ components:
           type: string
           format: uuid
           example: e40c9874-c743-48e2-9295-0625f5d5a068
-        avatar_id:
+        avatar_url:
           type: string
-          format: uuid
-          example: c40c9874-c743-48e2-9295-0625f5d5a068
+          example: /img/pepejam.png
         name:
           type: string
           example: Musicfest Loud Extravaganza WeeWoo
