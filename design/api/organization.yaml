@@ -2835,10 +2835,12 @@ paths:
               application/json:
                 schema:
                   $ref: '#/components/schemas/Error'
+                  
+  /timesheet/{timesheet_id}/workdays:
     delete:
       tags:
         - timeSheet
-      summary: Delete a timesheet. (Though we probably don't want to.)
+      summary: Clear all workdays for a timesheet, setting their worked hours to 0, and removing comments from employee.
       parameters:
         - in: path
           name: timesheet_id
