@@ -2975,10 +2975,8 @@ components:
           type: string
           format: uuid
           example: b50c9874-c743-48e2-9295-0625f5d5a068
-        company_id:
-          type: string
-          format: uuid
-          example: a40c9874-c743-48e2-9295-0625f5d5a068
+        company:
+          $ref: "#/components/schemas/CompanyLite"
         manager:
           $ref: "#/components/schemas/UserLite"
         employment_type:
