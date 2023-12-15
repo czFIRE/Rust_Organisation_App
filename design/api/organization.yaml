@@ -3128,6 +3128,20 @@ components:
           type: string
           example: '2023-01-01 05:00:02+01'
 
+    CompanyLite:
+      type: object
+      properties:
+        company_id:
+          type: string
+          format: uuid
+          example: a40c9874-c743-48e2-9295-0625f5d5a068
+        avatar_url:
+          type: string
+          example: /img/pepebusiness.png
+        name:
+          type: string
+          example: Pain Inc.
+
     NewCompany:
       type: object
       properties:
@@ -3192,6 +3206,26 @@ components:
           type: string
           example: '2023-06-15 12:00:05+01'
 
+    EventLite:
+      type: object
+      properties:
+        event_id:
+          type: string
+          format: uuid
+          example: e40c9874-c743-48e2-9295-0625f5d5a068
+        avatar_url:
+          type: string
+          example: /img/pepejam.png
+        name:
+          type: string
+          example: Musicfest Loud Extravaganza WeeWoo
+        work_start:
+          type: string
+          example: '2023-08-15'
+        work_end:
+          type: string
+          example: '2023-08-20'
+
     NewEvent:
       type: object
       properties:
@@ -3214,8 +3248,14 @@ components:
     EventStaff:
       type: object
       properties:
+        staff_id:
+          type: string
+          format: uuid
+          example: e40c9874-c743-48e2-9295-0625f5d5a068
         user:
           $ref: '#/components/schemas/UserLite'
+        company:
+          $ref: '#/components/schemas/CompanyLite'
         event_id:
           type: string
           format: uuid
@@ -3512,15 +3552,14 @@ components:
           type: string
           format: uuid
           example: b50c9874-c743-48e2-9295-0625f5d5a068
+        event:
+          $ref: '#/components/schemas/EventLite'
         start_date:
           type: string
           example: '2020-06-01 00:00:00+01'
         end_date:
           type: string
           example: '2020-06-15 00:00:00+01'
-        worked_hours:
-          type: number
-          example: 20
         is_editable:
           type: boolean
           example: true
@@ -3543,6 +3582,10 @@ components:
           format: uuid
           example: b50c9874-c743-48e2-9295-0625f5d5a068
         company_id:
+          type: string
+          format: uuid
+          example: a50c9874-c743-48e2-9295-0625f5d5a068
+        event_id:
           type: string
           format: uuid
           example: a50c9874-c743-48e2-9295-0625f5d5a068
@@ -3611,10 +3654,8 @@ components:
           type: string
           format: uuid
           example: e50c9874-c743-48e2-9295-0625f5d5a068
-        company_id:
-          type: string
-          format: uuid
-          example: a50c9874-c743-48e2-9295-0625f5d5a068
+        company:
+          $ref: '#/components/schemas/CompanyLite'
         association_type:
           type: string
           format: AssociationType
@@ -3625,6 +3666,7 @@ components:
         edited_at:
           type: string
           example: '2020-05-15 10:05:09+01'
+
     NewAssociatedCompany:
       type: object
       properties:
