@@ -13,6 +13,7 @@ enum AcceptanceStatus {
 enum Association {
     Sponsor
 	Organizer
+	Media
 	Other
 }
 
