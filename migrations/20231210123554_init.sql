@@ -68,7 +68,7 @@ CREATE TABLE company
 );
 
 
-CREATE TABLE adress
+CREATE TABLE address
 (
     country     VARCHAR(255) NOT NULL,
     region      VARCHAR(255) NOT NULL,
