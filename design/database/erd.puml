@@ -26,7 +26,7 @@ enum EmployeeContract {
 enum EmployeeLevel {
     Basic
     Manager
-    Upper Manager
+    CompanyAdministrator
 }
 
 enum StaffLevel {
