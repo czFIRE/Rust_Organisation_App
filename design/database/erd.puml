@@ -29,6 +29,12 @@ enum EmployeeLevel {
     CompanyAdministrator
 }
 
+enum Gender {
+    Female
+    Male
+    Other
+}
+
 enum StaffLevel {
     Basic
     Organizer
@@ -43,12 +49,6 @@ enum TaskPriority {
 enum UserLevel {
     User
     Admin
-}
-
-enum UserSex {
-    Female
-    Male
-    Other
 }
 
 enum UserStatus {
@@ -67,7 +67,7 @@ entity user {
     *email: varchar(45)
     *date_of_birth: date
     *avatar_url: varchar(255)
-    *sex: <<enum UserSex>>
+    *gender: <<enum Gender>>
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
