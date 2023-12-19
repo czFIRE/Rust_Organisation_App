@@ -1,7 +1,7 @@
 @startuml erd
 skinparam Linetype ortho
 skinparam classFontSize 20
-scale 1800 * 1800
+scale 2400 * 2400
 hide circle
 
 enum TaskPriority {
