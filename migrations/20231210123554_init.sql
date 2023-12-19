@@ -39,7 +39,7 @@ CREATE TABLE user_record
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at  TIMESTAMP,
     -------------------------------------------------------
-    CONSTRAINT check_user_created_at_lte_edited_at
+    CONSTRAINT check_user_record_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
 
