@@ -1,0 +1,281 @@
+@startuml erd
+skinparam Linetype ortho
+skinparam classFontSize 20
+scale 1800 * 1800
+hide circle
+
+enum TaskPriority {
+    Low
+	Medium
+	High
+}
+
+enum AssociationType {
+    Sponsor
+	Organizer
+	Other
+}
+
+enum EmploymentType {
+    DPP
+	DPC
+	HPP
+}
+
+enum EmployeeLevel {
+    Basic
+	Manager
+	Upper Manager
+}
+
+enum StaffLevel {
+    Basic
+    Organizer
+}
+
+enum UserStatus {
+    OK
+	Sick
+	Vacation
+}
+
+enum AssignmentStatus {
+    Pending
+	Accepted
+	Rejected
+}
+
+enum AcceptanceStatus {
+    Pending
+    Accepted
+    Rejected
+}
+
+enum UserLevel {
+    User
+	Admin
+}
+
+enum UserSex {
+    Female
+	Male
+    Other
+}
+
+entity user {
+    *<u>user_id</u>: <<uuid>>
+    ---
+    ' Full name. They will log in using their email.
+    *name: varchar(255) 
+    *user_level: <<enum UserLevel>>
+    *user_status <<enum UserStatus>>
+    *email: varchar(45)
+	*date_of_birth: date
+    *avatar_url: varchar(255)
+	*sex: <<enum UserSex>>
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
+}
+
+entity timesheet {
+    *<u>timesheet_id</u>: <<uuid>>
+    ---
+    *user_id: <<uuid>> (FK user)
+    *company_id: <<uuid>> (FK company)
+    *event_id: <<uuid>> (FK event)
+    *start_date: date
+    *end_date: date
+    *worked_hours: float
+    *is_editable: boolean
+    ' allows managers to leave notes in case of errors.
+    manager_note: text
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
+}
+
+entity work_day {
+    *<u>timesheet_id</u>: <<uuid>>
+    *<u>work_date</u>: date
+    ---
+    *worked_hours: float
+    commentary: text
+    *is_editable: boolean
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
+}
+
+together {
+    entity event {
+        *<u>event_id</u>: <<uuid>>
+        ---
+        *name: varchar(255)
+        description: text
+        website: url
+        *accepts_staff: boolean
+        *work_start: date
+        *work_end: date
+        *avatar_url: varchar(255)
+        *created_at: timestamp
+        *edited_at: timestamp
+        deleted_at: timestamp
+    }
+}
+
+entity task {
+    *<u>task_id</u>: <<uuid>>
+    --
+    *event_id: uuid (FK event)
+    *creator_id: uuid (FK event_staff)
+    *title: text
+    *description: text
+    date_accomplished: timestamp
+    *priority: <<enum TaskPriority>>
+    *accepts_staff: boolean
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
+}
+
+entity assigned_staff {
+    *<u>task_id</u>: <<uuid>> (FK task)
+    *<u>staff_id</u>: <<uuid>> (FK event_staff)
+    ---
+    *assignment_status: <<enum AssignmentStatus>>
+    decided_by: <<uuid>>
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
+}
+
+together {
+    entity company {
+        *<u>company_id</u>: <<uuid>>
+        ---
+        *name: varchar(255)
+        description: text
+        website: url
+        /' A Company Registration Number.
+
+        Note: Different European countries use different format, some just
+                numbers, some letters as well, but they all fit into 16 characters.
+        '/
+        *CRN: varchar(16)
+        /'
+        A Value-Added Tax Identification Number.
+
+        Note: China seems to have a longest format with 18 characters.
+        '/
+        *VATIN: varchar(18)
+        *contact_phone: string
+        *contact_email: string
+        *avatar_url: varchar(255)
+        *created_at: timestamp
+        *edited_at: timestamp
+        deleted_at: timestamp
+    }
+
+    /' 
+        Normalization for compound type address.
+        In case we want to expand some filtering.
+        Also normalization.
+    '/
+    entity company_address {
+        *<u>company_id<u>: <<uuid>>
+        ---
+        country: varchar(255)
+        region: varchar(255)
+        city: varchar(255)
+        street: varchar(255)
+        address_number: varchar(255)
+        postal_code: varchar(255)
+    }
+}
+
+entity associated_company {
+    *<u>event_id</u>: <<uuid>>
+    *<u>company_id</u>: <<uuid>>
+    ---
+    *association_type: <<enum AssociationType>>
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
+}
+
+entity employment {
+    *<u>user_id</u>: <<uuid>>
+    *<u>company_id</u>: <<uuid>>
+    ---
+    /' 
+        manager_id and company_id give us the manager's employment record.
+        manager_id is therefore the user ID of the manager.
+    '/
+    *manager_id: <<uuid>> 
+    *employment_type: <<enum EmploymentType>>
+    *hourly_rate: float
+    *employee_level: <<enum EmployeeLevel>>
+    ' Allows for descriptions of the employment's purpose.
+    description: text
+    *start_date: date
+    *end_date: date
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
+}
+
+entity event_staff {
+    *<u>staff_id</u>: <<uuid>>  
+    ---
+    *user_id: <<uuid>> (FK user, part of FK employment)
+    *company_id: <<uuid>> (FK company, part of FK employment)
+    *event_id: <<uuid>> (FK event)
+    *staff_level: <<enum StaffLevel>>
+    *acceptance_status: <<enum AcceptanceStatus>>
+    decided_by: <<uuid>> (FK event_staff)
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
+}
+
+entity comment {
+    *<u>comment_id</u>: <<uuid>>
+    ---
+    /' 
+        Note that the nullability of event_id 
+        and task_id is a xor relationship.
+        So either event_id is null, and task_id is not null, or the opposite.
+        They can't both be null, or both not be null.
+    '/
+    event_id: <<uuid>>
+    task_id: <<uuid>>
+    *author_id: <<uuid>>
+    *content: text
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
+}
+
+user||..|{employment
+timesheet}o..||employment
+timesheet||..o{work_day
+timesheet}o..||event
+employment||..o{event_staff
+employment}o..||company
+employment|o..o{employment : manages
+event||.o{associated_company
+company||..o{associated_company
+company||..||company_address
+company||..o{event_staff
+event||..o{event_staff
+event||..o{task
+event|o...o{comment
+task|o...o{comment
+comment}o..||user
+task||..||event_staff : task_creator
+task||..o{assigned_staff
+assigned_staff}o..||event_staff
+assigned_staff||..||event_staff : decided_by
+user||..o{event_staff
+@enduml

@@ -1,0 +1,45 @@
+@startuml pdm
+skinparam Linetype ortho
+scale 1600 * 1600
+hide circle
+
+entity User {}
+
+entity EventOrganizer {}
+
+entity PartTimeWorker {}
+
+entity FullTimeWorker {}
+
+entity TimeSheet {}
+
+entity Staff {}
+
+entity Event {}
+
+entity Company {}
+
+entity SponsorCompany {}
+
+entity OrganizerCompany {}
+
+entity PayCalculation {}
+
+User^-Staff
+User^-EventOrganizer
+Staff^--PartTimeWorker
+Staff^--FullTimeWorker
+Company^--OrganizerCompany
+Company^--SponsorCompany
+EventOrganizer}|..o{Event : organizes
+EventOrganizer}|..|{Company
+Staff||..||Company
+Event||..|{Staff : has
+Event}|.|{Company
+PartTimeWorker||..|{TimeSheet : enters
+FullTimeWorker||..|{TimeSheet : enters
+TimeSheet||..||Event
+TimeSheet||.||Company
+PayCalculation||..||TimeSheet : used for
+Company||..|{Staff : ?
+@enduml
