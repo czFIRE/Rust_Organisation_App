@@ -10,7 +10,7 @@ enum AcceptanceStatus {
     Rejected
 }
 
-enum AssociationType {
+enum Association {
     Sponsor
 	Organizer
 	Other
@@ -192,7 +192,7 @@ entity associated_company {
     *<u>event_id</u>: <<uuid>>
     *<u>company_id</u>: <<uuid>>
     ---
-    *association_type: <<enum AssociationType>>
+    *association_type: <<enum Association>>
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
