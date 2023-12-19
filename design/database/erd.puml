@@ -4,39 +4,10 @@ skinparam classFontSize 20
 scale 2400 * 2400
 hide circle
 
-enum TaskPriority {
-    Low
-	Medium
-	High
-}
-
-enum AssociationType {
-    Sponsor
-	Organizer
-	Other
-}
-
-enum EmploymentType {
-    DPP
-	DPC
-	HPP
-}
-
-enum EmployeeLevel {
-    Basic
-	Manager
-	Upper Manager
-}
-
-enum StaffLevel {
-    Basic
-    Organizer
-}
-
-enum UserStatus {
-    OK
-	Sick
-	Vacation
+enum AcceptanceStatus {
+    Pending
+    Accepted
+    Rejected
 }
 
 enum AssignmentStatus {
@@ -45,10 +16,33 @@ enum AssignmentStatus {
 	Rejected
 }
 
-enum AcceptanceStatus {
-    Pending
-    Accepted
-    Rejected
+enum AssociationType {
+    Sponsor
+	Organizer
+	Other
+}
+
+enum EmployeeLevel {
+    Basic
+	Manager
+	Upper Manager
+}
+
+enum EmploymentType {
+    DPP
+	DPC
+	HPP
+}
+
+enum StaffLevel {
+    Basic
+    Organizer
+}
+
+enum TaskPriority {
+    Low
+	Medium
+	High
 }
 
 enum UserLevel {
@@ -60,6 +54,12 @@ enum UserSex {
     Female
 	Male
     Other
+}
+
+enum UserStatus {
+    OK
+	Sick
+	Vacation
 }
 
 entity user {
