@@ -82,17 +82,17 @@ CREATE TABLE address
     PRIMARY KEY (company_id),
     FOREIGN KEY (company_id) REFERENCES company (id),
     -------------------------------------------------------
-    CONSTRAINT check_company_address_country_len
+    CONSTRAINT check_address_country_len
         CHECK (char_length(country) >= 1),
-    CONSTRAINT check_company_address_region_len
+    CONSTRAINT check_address_region_len
         CHECK (char_length(region) >= 1),
-    CONSTRAINT check_company_address_city_len
+    CONSTRAINT check_address_city_len
         CHECK (char_length(city) >= 1),
-    CONSTRAINT check_company_address_street_len
+    CONSTRAINT check_address_street_len
         CHECK (char_length(street) >= 1),
-    CONSTRAINT check_company_address_address_number_len
+    CONSTRAINT check_address_address_number_len
         CHECK (char_length(number) >= 1),
-    CONSTRAINT check_company_address_postal_code_len
+    CONSTRAINT check_address_postal_code_len
         CHECK (char_length(postal_code) >= 1)
 );
 
