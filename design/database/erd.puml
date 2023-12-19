@@ -10,12 +10,6 @@ enum AcceptanceStatus {
     Rejected
 }
 
-enum AssignmentStatus {
-    Pending
-	Accepted
-	Rejected
-}
-
 enum AssociationType {
     Sponsor
 	Organizer
