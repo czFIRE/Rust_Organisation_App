@@ -1,14 +1,14 @@
 -- Enums
 
+CREATE TYPE acceptance_status       AS ENUM ('pending', 'accepted', 'rejected');
+CREATE TYPE association             AS ENUM ('sponsor', 'organization', 'media', 'other');
+CREATE TYPE employee_contract       AS ENUM ('DPP', 'DPC', 'HPP');
+CREATE TYPE employee_level          AS ENUM ('basic', 'manager', 'company_administrator');
+CREATE TYPE event_role              AS ENUM ('staff', 'organizer');
 CREATE TYPE gender                  AS ENUM ('male', 'female', 'other');
 CREATE TYPE role                    AS ENUM ('user', 'admin');
 CREATE TYPE status                  AS ENUM ('available', 'unavailable');
-CREATE TYPE association             AS ENUM ('sponsor', 'organization', 'media', 'other');
 CREATE TYPE task_priority           AS ENUM ('low', 'medium', 'high');
-CREATE TYPE acceptance_status       AS ENUM ('pending', 'accepted', 'rejected');
-CREATE TYPE employee_level          AS ENUM ('basic', 'manager', 'company_administrator');
-CREATE TYPE employee_contract       AS ENUM ('DPP', 'DPC', 'HPP');
-CREATE TYPE event_role              AS ENUM ('staff', 'organizer');
 
 
 -- Constraints
