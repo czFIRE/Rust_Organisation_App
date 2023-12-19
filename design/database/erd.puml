@@ -17,16 +17,16 @@ enum Association {
     Other
 }
 
+enum EmployeeContract {
+    DPP
+    DPC
+    HPP
+}
+
 enum EmployeeLevel {
     Basic
     Manager
     Upper Manager
-}
-
-enum EmploymentType {
-    DPP
-    DPC
-    HPP
 }
 
 enum StaffLevel {
@@ -208,7 +208,7 @@ entity employment {
         manager_id is therefore the user ID of the manager.
     '/
     *manager_id: <<uuid>> 
-    *employment_type: <<enum EmploymentType>>
+    *employment_type: <<enum EmployeeContract>>
     *hourly_rate: float
     *employee_level: <<enum EmployeeLevel>>
     ' Allows for descriptions of the employment's purpose.
