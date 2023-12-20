@@ -183,7 +183,7 @@ together {
         region: varchar(255)
         city: varchar(255)
         street: varchar(255)
-        address_number: varchar(255)
+        street_number: varchar(255)
         postal_code: varchar(255)
     }
 }
