@@ -65,8 +65,8 @@ entity user {
     *date_of_birth: date
     *avatar_path: varchar(255)
     *gender: <<enum Gender>>
-    *user_role: <<enum UserRole>>
-    *user_status <<enum UserStatus>>
+    *role: <<enum UserRole>>
+    *status <<enum UserStatus>>
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
