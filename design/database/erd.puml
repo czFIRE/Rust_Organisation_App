@@ -207,13 +207,13 @@ entity employment {
         manager_id is therefore the user ID of the manager.
     '/
     *manager_id: <<uuid>> 
-    *employment_type: <<enum EmployeeContract>>
     *hourly_rate: float
-    *employee_level: <<enum EmployeeLevel>>
-    ' Allows for descriptions of the employment's purpose.
-    description: text
     *start_date: date
     *end_date: date
+    ' Allows for descriptions of the employment's purpose.
+    description: text
+    *employment_type: <<enum EmployeeContract>>
+    *employee_level: <<enum EmployeeLevel>>
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
