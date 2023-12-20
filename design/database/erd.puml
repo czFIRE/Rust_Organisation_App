@@ -207,7 +207,7 @@ entity employment {
         manager_id is therefore the user ID of the manager.
     '/
     *manager_id: <<uuid>> 
-    *hourly_rate: float
+    *hourly_wage: float
     *start_date: date
     *end_date: date
     ' Allows for descriptions of the employment's purpose.
