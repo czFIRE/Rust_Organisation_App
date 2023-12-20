@@ -203,7 +203,7 @@ entity employment {
     *<u>company_id</u>: <<uuid>>
     ---
     /' 
-        manager_id and company_id give us the manager's employment record.
+        manager_id and company_id give us the manager\'s employment record.
         manager_id is therefore the user ID of the manager.
     '/
     *manager_id: <<uuid>> 
@@ -240,7 +240,7 @@ entity comment {
         Note that the nullability of event_id 
         and task_id is a xor relationship.
         So either event_id is null, and task_id is not null, or the opposite.
-        They can't both be null, or both not be null.
+        They can\'t both be null, or both not be null.
     '/
     event_id: <<uuid>>
     task_id: <<uuid>>
