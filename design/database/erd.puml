@@ -80,7 +80,7 @@ entity timesheet {
     *event_id: <<uuid>> (FK event)
     *start_date: date
     *end_date: date
-    *worked_hours: float
+    *total_hours: float
     *is_editable: boolean
     ' allows managers to leave notes in case of errors.
     manager_note: text
