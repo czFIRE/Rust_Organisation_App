@@ -46,7 +46,7 @@ enum TaskPriority {
     High
 }
 
-enum UserLevel {
+enum UserRole {
     User
     Admin
 }
@@ -62,7 +62,7 @@ entity user {
     ---
     ' Full name. They will log in using their email.
     *name: varchar(255) 
-    *user_level: <<enum UserLevel>>
+    *user_role: <<enum UserRole>>
     *user_status <<enum UserStatus>>
     *email: varchar(45)
     *date_of_birth: date
