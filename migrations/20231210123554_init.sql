@@ -82,14 +82,14 @@ CREATE TABLE company
 
 CREATE TABLE address
 (
+    company_id  UUID NOT NULL,
+    -------------------------------------------------------
     country       VARCHAR(255) NOT NULL,
     region        VARCHAR(255) NOT NULL,
     city          VARCHAR(255) NOT NULL,
     street        VARCHAR(255) NOT NULL,
     street_number VARCHAR(255) NOT NULL,
     postal_code   VARCHAR(255) NOT NULL,
-    -------------------------------------------------------
-    company_id  UUID NOT NULL,
     -------------------------------------------------------
     PRIMARY KEY (company_id),
     FOREIGN KEY (company_id) REFERENCES company (id),
@@ -111,6 +111,11 @@ CREATE TABLE address
 
 CREATE TABLE employment
 (
+    user_id     UUID NOT NULL,
+    company_id  UUID NOT NULL,
+    -------------------------------------------------------
+    manager_id  UUID,
+    -------------------------------------------------------
     hourly_wage FLOAT NOT NULL,
     start_date  DATE NOT NULL,
     end_date    DATE NOT NULL,
@@ -121,10 +126,6 @@ CREATE TABLE employment
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at  TIMESTAMP,
-    -------------------------------------------------------
-    user_id     UUID NOT NULL,
-    company_id  UUID NOT NULL,
-    manager_id  UUID,
     -------------------------------------------------------
     PRIMARY KEY (user_id, company_id),
     FOREIGN KEY (user_id) REFERENCES user_record (id),
@@ -167,14 +168,14 @@ CREATE TABLE event
 
 CREATE TABLE associated_company
 (
+    company_id  UUID NOT NULL,
+    event_id    UUID NOT NULL,
+    -------------------------------------------------------
     type        association NOT NULL,
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at  TIMESTAMP,
-    -------------------------------------------------------
-    company_id  UUID NOT NULL,
-    event_id    UUID NOT NULL,
     -------------------------------------------------------
     PRIMARY KEY (company_id, event_id),
     FOREIGN KEY (company_id) REFERENCES company (id),
@@ -189,6 +190,10 @@ CREATE TABLE timesheet
 (
     id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     -------------------------------------------------------
+    user_id      UUID NOT NULL,
+    company_id   UUID NOT NULL,
+    event_id     UUID NOT NULL,
+    --------------------------------------------------------
     start_date   DATE NOT NULL,
     end_date     DATE NOT NULL,
     total_hours  hours_per_month_float NOT NULL DEFAULT 0.0,
@@ -198,10 +203,6 @@ CREATE TABLE timesheet
     created_at   TIMESTAMP NOT NULL DEFAULT now(),
     edited_at    TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at   TIMESTAMP,
-    --------------------------------------------------------
-    user_id      UUID NOT NULL,
-    company_id   UUID NOT NULL,
-    event_id     UUID NOT NULL,
     --------------------------------------------------------
     FOREIGN KEY  (user_id) REFERENCES user_record (id),
     FOREIGN KEY  (company_id) REFERENCES company (id),
@@ -216,7 +217,9 @@ CREATE TABLE timesheet
 
 CREATE TABLE work_day
 (   
+    timesheet_id UUID NOT NULL,
     date         DATE NOT NULL,
+    --------------------------------------------------------
     total_hours  hours_per_day_float NOT NULL DEFAULT 0.0,
     comment      TEXT,
     is_editable  BOOLEAN NOT NULL,
@@ -224,8 +227,6 @@ CREATE TABLE work_day
     created_at   TIMESTAMP NOT NULL DEFAULT now(),
     edited_at    TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at   TIMESTAMP,
-    --------------------------------------------------------
-    timesheet_id UUID NOT NULL,
     --------------------------------------------------------
     PRIMARY KEY  (timesheet_id, date),
     FOREIGN KEY  (timesheet_id) REFERENCES timesheet (id),
@@ -241,16 +242,16 @@ CREATE TABLE event_staff
 (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     -------------------------------------------------------
+    user_id     UUID NOT NULL,
+    company_id  UUID NOT NULL,
+    decided_by  UUID NOT NULL,
+    -------------------------------------------------------
     role        event_role NOT NULL,
     status      acceptance_status NOT NULL,
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at  TIMESTAMP,
-    -------------------------------------------------------
-    user_id     UUID NOT NULL,
-    company_id  UUID NOT NULL,
-    decided_by  UUID NOT NULL,
     -------------------------------------------------------
     FOREIGN KEY (user_id) REFERENCES user_record (id),
     FOREIGN KEY (company_id) REFERENCES company (id),
@@ -265,6 +266,9 @@ CREATE TABLE task
 (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     -------------------------------------------------------
+    event_id    UUID NOT NULL,
+    creator_id  UUID NOT NULL,
+    -------------------------------------------------------
     title           VARCHAR(255) NOT NULL,
     description     TEXT,
     finished_at     DATE,
@@ -274,9 +278,6 @@ CREATE TABLE task
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at  TIMESTAMP,
-    -------------------------------------------------------
-    event_id    UUID NOT NULL,
-    creator_id  UUID NOT NULL,
     -------------------------------------------------------
     FOREIGN KEY (event_id) REFERENCES event (id),
     FOREIGN KEY (creator_id) REFERENCES event_staff (id),
@@ -290,19 +291,20 @@ CREATE TABLE task
 
 CREATE TABLE assigned_staff
 (
+    task_id     UUID NOT NULL,
+    staff_id    UUID NOT NULL,
+    -------------------------------------------------------
+    decided_by  UUID NOT NULL,
+    -------------------------------------------------------
     status      acceptance_status NOT NULL,
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at  TIMESTAMP,
     -------------------------------------------------------
-    decided_by  UUID NOT NULL,
-    task_id     UUID NOT NULL,
-    staff_id    UUID NOT NULL,
-    -------------------------------------------------------
-    PRIMARY KEY (staff_id, task_id),
-    FOREIGN KEY (decided_by) REFERENCES event_staff (id),
+    PRIMARY KEY (task_id, staff_id),
     FOREIGN KEY (task_id) REFERENCES task (id),
+    FOREIGN KEY (decided_by) REFERENCES event_staff (id),
     FOREIGN KEY (staff_id) REFERENCES event_staff (id),
     -------------------------------------------------------
     CONSTRAINT check_assigned_staff_created_at_lte_edited_at
@@ -314,15 +316,15 @@ CREATE TABLE comment
 (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     -------------------------------------------------------
+    event_id    UUID,
+    author_id   UUID NOT NULL,
+    task_id     UUID,
+    -------------------------------------------------------
     content     TEXT NOT NULL,
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at  TIMESTAMP,
-    -------------------------------------------------------
-    event_id    UUID,
-    author_id   UUID NOT NULL,
-    task_id     UUID,
     -------------------------------------------------------
     FOREIGN KEY (event_id) REFERENCES event (id),
     FOREIGN KEY (author_id) REFERENCES user_record (id),
