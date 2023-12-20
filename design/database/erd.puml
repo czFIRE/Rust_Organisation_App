@@ -163,8 +163,8 @@ together {
         Note: China seems to have a longest format with 18 characters.
         '/
         *VATIN: varchar(18)
-        *phone: string
-        *email: string
+        *phone: varchar(255)
+        *email: varchar(255)
         *avatar_path: varchar(255)
         *created_at: timestamp
         *edited_at: timestamp
