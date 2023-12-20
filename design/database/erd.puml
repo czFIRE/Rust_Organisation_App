@@ -109,8 +109,8 @@ together {
         description: text
         website: varchar(255)
         *accepts_staff: boolean
-        *work_start: date
-        *work_end: date
+        *start_date: date
+        *end_date: date
         avatar_path: varchar(255)
         *created_at: timestamp
         *edited_at: timestamp
