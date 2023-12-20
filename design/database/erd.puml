@@ -176,7 +176,7 @@ together {
         In case we want to expand some filtering.
         Also normalization.
     '/
-    entity company_address {
+    entity address {
         *<u>company_id<u>: <<uuid>>
         ---
         country: varchar(255)
@@ -260,7 +260,7 @@ employment}o..||company
 employment|o..o{employment : manages
 event||.o{associated_company
 company||..o{associated_company
-company||..||company_address
+company||..||address
 company||..o{event_staff
 event||..o{event_staff
 event||..o{task
