@@ -93,8 +93,8 @@ entity work_day {
     *<u>timesheet_id</u>: <<uuid>>
     *<u>work_date</u>: date
     ---
-    *worked_hours: float
-    commentary: text
+    *total_hours: float
+    comment: text
     *is_editable: boolean
     *created_at: timestamp
     *edited_at: timestamp
