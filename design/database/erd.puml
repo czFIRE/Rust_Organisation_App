@@ -107,7 +107,7 @@ together {
         ---
         *name: varchar(255)
         description: text
-        website: url
+        website: varchar(255)
         *accepts_staff: boolean
         *work_start: date
         *work_end: date
@@ -150,7 +150,7 @@ together {
         ---
         *name: varchar(255)
         description: text
-        website: url
+        website: varchar(255)
         /' A Company Registration Number.
 
         Note: Different European countries use different format, some just
