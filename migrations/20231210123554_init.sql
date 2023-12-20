@@ -6,9 +6,9 @@ CREATE TYPE employee_contract       AS ENUM ('DPP', 'DPC', 'HPP');
 CREATE TYPE employee_level          AS ENUM ('basic', 'manager', 'company_administrator');
 CREATE TYPE event_role              AS ENUM ('staff', 'organizer');
 CREATE TYPE gender                  AS ENUM ('male', 'female', 'other');
-CREATE TYPE status                  AS ENUM ('available', 'unavailable');
 CREATE TYPE task_priority           AS ENUM ('low', 'medium', 'high');
 CREATE TYPE user_role               AS ENUM ('user', 'admin');
+CREATE TYPE user_status             AS ENUM ('available', 'unavailable');
 
 
 -- Constraints
@@ -33,7 +33,7 @@ CREATE TABLE user_record
     avatar_url  VARCHAR(255),
     gender      gender NOT NULL,
     role        user_role NOT NULL,
-    status      status NOT NULL,
+    status      user_status NOT NULL,
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
