@@ -65,7 +65,7 @@ entity user {
     *user_status <<enum UserStatus>>
     *email: varchar(45)
     *date_of_birth: date
-    *avatar_url: varchar(255)
+    *avatar_path: varchar(255)
     *gender: <<enum Gender>>
     *created_at: timestamp
     *edited_at: timestamp
@@ -111,7 +111,7 @@ together {
         *accepts_staff: boolean
         *work_start: date
         *work_end: date
-        *avatar_url: varchar(255)
+        *avatar_path: varchar(255)
         *created_at: timestamp
         *edited_at: timestamp
         deleted_at: timestamp
@@ -165,7 +165,7 @@ together {
         *VATIN: varchar(18)
         *contact_phone: string
         *contact_email: string
-        *avatar_url: varchar(255)
+        *avatar_path: varchar(255)
         *created_at: timestamp
         *edited_at: timestamp
         deleted_at: timestamp

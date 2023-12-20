@@ -30,7 +30,7 @@ CREATE TABLE user_record
     name        VARCHAR(255) NOT NULL,
     email       VARCHAR(255) NOT NULL UNIQUE,
     birth       DATE NOT NULL,
-    avatar_url  VARCHAR(255),
+    avatar_path VARCHAR(255),
     gender      gender NOT NULL,
     role        user_role NOT NULL,
     status      user_status NOT NULL,
@@ -55,7 +55,7 @@ CREATE TABLE company
     vatin       VARCHAR(18) NOT NULL UNIQUE,
     phone       VARCHAR(255) NOT NULL UNIQUE,
     email       VARCHAR(255) NOT NULL UNIQUE,
-    avatar_url  VARCHAR(255),
+    avatar_path VARCHAR(255),
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
@@ -138,7 +138,7 @@ CREATE TABLE event
     accepts_staff  BOOLEAN NOT NULL,
     start_date     DATE NOT NULL,
     end_date       DATE NOT NULL,
-    avatar_url     VARCHAR(255),
+    avatar_path    VARCHAR(255),
     -------------------------------------------------------
     created_at     TIMESTAMP NOT NULL DEFAULT now(),
     edited_at      TIMESTAMP NOT NULL DEFAULT now(),
