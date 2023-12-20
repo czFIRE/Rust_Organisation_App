@@ -132,6 +132,8 @@ CREATE TABLE employment
     FOREIGN KEY (company_id) REFERENCES company (id),
     FOREIGN KEY (manager_id) REFERENCES user_record  (id),
     -------------------------------------------------------
+    CONSTRAINT check_employment_hourly_wage_gte_0
+        CHECK (hourly_wage >= 0.0),
     CONSTRAINT check_employment_start_date_lte_end_date
         CHECK (start_date >= end_date),
     CONSTRAINT check_employment_created_at_lte_edited_at
