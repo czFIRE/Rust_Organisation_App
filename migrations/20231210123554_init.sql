@@ -63,6 +63,14 @@ CREATE TABLE company
     -------------------------------------------------------
     CONSTRAINT check_company_name_len
         CHECK (char_length(name) >= 1),
+    CONSTRAINT check_company_crn_len
+        CHECK (char_length(crn) >= 1),
+    CONSTRAINT check_company_vatin_len
+        CHECK (char_length(vatin) >= 1),
+    CONSTRAINT check_company_phone_len
+        CHECK (char_length(phone) >= 2),
+    CONSTRAINT check_company_email_len
+        CHECK (char_length(email) >= 3),
     CONSTRAINT check_company_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
