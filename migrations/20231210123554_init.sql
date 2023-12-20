@@ -39,6 +39,10 @@ CREATE TABLE user_record
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at  TIMESTAMP,
     -------------------------------------------------------
+    CONSTRAINT check_user_record_name_len
+        CHECK (char_length(name) >= 1),
+    CONSTRAINT check_user_record_email_len
+        CHECK (char_length(name) >= 3),
     CONSTRAINT check_user_record_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
