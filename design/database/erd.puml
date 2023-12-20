@@ -189,8 +189,8 @@ together {
 }
 
 entity associated_company {
-    *<u>event_id</u>: <<uuid>>
     *<u>company_id</u>: <<uuid>>
+    *<u>event_id</u>: <<uuid>>
     ---
     *association_type: <<enum Association>>
     *created_at: timestamp
