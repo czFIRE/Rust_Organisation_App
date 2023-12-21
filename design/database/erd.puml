@@ -254,17 +254,17 @@ entity comment {
 '/
 user||..|{employment
 timesheet}o..||employment
-timesheet||..o{work_day
+timesheet||..o{work_day : can\nhave\n >
 timesheet}o..||event
 employment||..o{event_staff
 employment}o..||company
 employment|o..o{employment : manages
 event||.o{associated_company
 company||..o{associated_company
-company||..||address
+company||..||address : has headquaters at >
 company||..o{event_staff
 event||..o{event_staff
-event||..o{task
+event||..o{task : can have associated >
 event|o...o{comment
 task|o...o{comment
 comment}o..||user
