@@ -2,7 +2,7 @@
 
 CREATE TYPE acceptance_status       AS ENUM ('pending', 'accepted', 'rejected');
 CREATE TYPE association             AS ENUM ('sponsor', 'organizer', 'media', 'other');
-CREATE TYPE employee_contract       AS ENUM ('DPP', 'DPC', 'HPP');
+CREATE TYPE employment_contract     AS ENUM ('DPP', 'DPC', 'HPP');
 CREATE TYPE employee_level          AS ENUM ('basic', 'manager', 'company_administrator');
 CREATE TYPE event_role              AS ENUM ('staff', 'organizer');
 CREATE TYPE gender                  AS ENUM ('male', 'female', 'other');
@@ -120,7 +120,7 @@ CREATE TABLE employment
     start_date  DATE NOT NULL,
     end_date    DATE NOT NULL,
     description TEXT,
-    type        employee_contract NOT NULL,
+    type        employment_contract NOT NULL,
     level       employee_level NOT NULL,
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),

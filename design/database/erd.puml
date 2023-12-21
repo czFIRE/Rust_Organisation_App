@@ -17,7 +17,7 @@ enum Association {
     Other
 }
 
-enum EmployeeContract {
+enum EmploymentContract {
     DPP
     DPC
     HPP
@@ -210,7 +210,7 @@ entity employment {
     *end_date: date
     ' Allows for descriptions of the employment's purpose.
     description: text
-    *employment_type: <<enum EmployeeContract>>
+    *employment_type: <<enum EmploymentContract>>
     *employee_level: <<enum EmployeeLevel>>
     *created_at: timestamp
     *edited_at: timestamp
