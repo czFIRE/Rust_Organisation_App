@@ -251,6 +251,9 @@ entity comment {
     deleted_at: timestamp
 }
 
+/'
+  Class relations, possibly with labels.
+'/
 user||..|{employment
 timesheet}o..||employment
 timesheet||..o{work_day
