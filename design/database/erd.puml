@@ -267,9 +267,9 @@ event||..o{task
 event|o...o{comment
 task|o...o{comment
 comment}o..||user
-task||..||event_staff : task_creator >
+task||..||event_staff : was\ncreated\nby >
 task||..o{assigned_staff
 assigned_staff}o..||event_staff
-assigned_staff||..||event_staff : decided_by >
+assigned_staff||..||event_staff : is\ndecided\nby >
 user||..o{event_staff
 @enduml
