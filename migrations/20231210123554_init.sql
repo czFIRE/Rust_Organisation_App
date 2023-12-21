@@ -306,8 +306,8 @@ CREATE TABLE assigned_staff
     -------------------------------------------------------
     PRIMARY KEY (task_id, staff_id),
     FOREIGN KEY (task_id) REFERENCES task (id),
-    FOREIGN KEY (decided_by) REFERENCES event_staff (id),
     FOREIGN KEY (staff_id) REFERENCES event_staff (id),
+    FOREIGN KEY (decided_by) REFERENCES event_staff (id),
     -------------------------------------------------------
     CONSTRAINT check_assigned_staff_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
@@ -329,8 +329,8 @@ CREATE TABLE comment
     deleted_at  TIMESTAMP,
     -------------------------------------------------------
     FOREIGN KEY (event_id) REFERENCES event (id),
-    FOREIGN KEY (author_id) REFERENCES user_record (id),
     FOREIGN KEY (task_id) REFERENCES task (id),
+    FOREIGN KEY (author_id) REFERENCES user_record (id),
     -------------------------------------------------------
     CONSTRAINT check_comment_single_relation_only
         CHECK (
