@@ -101,21 +101,19 @@ entity work_day {
     deleted_at: timestamp
 }
 
-together {
-    entity event {
-        *<u>event_id</u>: <<uuid>>
-        ---
-        *name: varchar(255)
-        description: text
-        website: varchar(255)
-        *accepts_staff: boolean
-        *start_date: date
-        *end_date: date
-        avatar_path: varchar(255)
-        *created_at: timestamp
-        *edited_at: timestamp
-        deleted_at: timestamp
-    }
+entity event {
+    *<u>event_id</u>: <<uuid>>
+    ---
+    *name: varchar(255)
+    description: text
+    website: varchar(255)
+    *accepts_staff: boolean
+    *start_date: date
+    *end_date: date
+    avatar_path: varchar(255)
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
 }
 
 entity task {
