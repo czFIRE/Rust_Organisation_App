@@ -284,9 +284,9 @@ CREATE TABLE task
     FOREIGN KEY (event_id) REFERENCES event (id),
     FOREIGN KEY (creator_id) REFERENCES event_staff (id),
     -------------------------------------------------------
-    CONSTRAINT check_event_title_len
+    CONSTRAINT check_task_title_len
         CHECK (char_length(title) >= 1),
-    CONSTRAINT check_event_stuff_created_at_lte_edited_at
+    CONSTRAINT check_task_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
 
