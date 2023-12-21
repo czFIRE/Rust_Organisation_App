@@ -246,6 +246,7 @@ CREATE TABLE event_staff
     -------------------------------------------------------
     user_id     UUID NOT NULL,
     company_id  UUID NOT NULL,
+    event_id    UUID NOT NULL,
     decided_by  UUID NOT NULL,
     -------------------------------------------------------
     role        event_role NOT NULL,
@@ -257,6 +258,7 @@ CREATE TABLE event_staff
     -------------------------------------------------------
     FOREIGN KEY (user_id) REFERENCES user_record (id),
     FOREIGN KEY (company_id) REFERENCES company (id),
+    FOREIGN KEY (event_id) REFERENCES event (id),
     FOREIGN KEY (decided_by) REFERENCES event_staff (id),
     -------------------------------------------------------
     CONSTRAINT check_event_staff_created_at_lte_edited_at
