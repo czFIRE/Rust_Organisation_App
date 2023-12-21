@@ -259,7 +259,7 @@ CREATE TABLE event_staff
     FOREIGN KEY (company_id) REFERENCES company (id),
     FOREIGN KEY (decided_by) REFERENCES event_staff (id),
     -------------------------------------------------------
-    CONSTRAINT check_event_stuff_created_at_lte_edited_at
+    CONSTRAINT check_event_staff_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
 
