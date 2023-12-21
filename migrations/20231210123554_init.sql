@@ -319,8 +319,8 @@ CREATE TABLE comment
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     -------------------------------------------------------
     event_id    UUID,
-    author_id   UUID NOT NULL,
     task_id     UUID,
+    author_id   UUID NOT NULL,
     -------------------------------------------------------
     content     TEXT NOT NULL,
     -------------------------------------------------------
