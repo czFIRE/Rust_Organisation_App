@@ -273,7 +273,7 @@ CREATE TABLE task
     -------------------------------------------------------
     title           VARCHAR(255) NOT NULL,
     description     TEXT,
-    finished_at     DATE,
+    finished_at     TIMESTAMP,
     priority        task_priority NOT NULL,
     accepts_staff   BOOLEAN NOT NULL,
     -------------------------------------------------------
