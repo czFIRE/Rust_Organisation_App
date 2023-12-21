@@ -125,7 +125,7 @@ entity task {
     *creator_id: uuid (FK event_staff)
     *title: text
     *description: text
-    date_accomplished: timestamp
+    finished_at: timestamp
     *priority: <<enum TaskPriority>>
     *accepts_staff: boolean
     *created_at: timestamp
