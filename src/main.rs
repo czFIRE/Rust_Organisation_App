@@ -1,3 +1,6 @@
+mod templates;
+mod models;
+
 use anyhow::Result;
 use dotenv::dotenv;
 use sqlx::migrate::{MigrateDatabase, Migrator};
