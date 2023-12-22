@@ -6,6 +6,17 @@ use uuid::Uuid;
 use crate::models::Association;
 
 #[derive(Template)]
+#[template(path = "company/address.html")]
+pub struct AddressTemplate {
+    pub country: String,
+    pub region: String,
+    pub city: String,
+    pub street: String,
+    pub postal_code: String,
+    pub address_number: String
+}
+
+#[derive(Template)]
 #[template(path = "company/company.html")]
 pub struct CompanyTemplate {
     pub id: Uuid,
