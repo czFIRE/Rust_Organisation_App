@@ -8,7 +8,7 @@ use crate::models::TaskPriority;
 use super::user::UserLiteTemplate;
 
 #[derive(Template)]
-#[template(path = "task/task.html")]
+#[template(path = "event/task/task.html")]
 pub struct TaskTemplate {
     pub id: Uuid,
     pub event_id: Uuid,

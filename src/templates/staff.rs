@@ -8,7 +8,7 @@ use crate::models::{StaffLevel, AcceptanceStatus};
 use super::{company::CompanyLiteTemplate, user::UserLiteTemplate};
 
 #[derive(Template)]
-#[template(path = "staff/staff.html")]
+#[template(path = "event/staff/staff.html")]
 pub struct StaffTemplate {
     pub id: Uuid,
     pub user: UserLiteTemplate,
@@ -22,7 +22,7 @@ pub struct StaffTemplate {
 }
 
 #[derive(Template)]
-#[template(path = "staff/task-staff.html")]
+#[template(path = "event/staff/task-staff.html")]
 pub struct TaskStaffTemplate {
     pub id: Uuid,
     pub user: StaffTemplate,
