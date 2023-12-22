@@ -1,0 +1,88 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT * FROM timesheet WHERE id = $1;",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "start_date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 2,
+        "name": "end_date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 3,
+        "name": "total_hours",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 4,
+        "name": "is_editable",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "manager_note",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 7,
+        "name": "edited_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 8,
+        "name": "deleted_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 9,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 10,
+        "name": "company_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 11,
+        "name": "event_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "ca4a48b3951ce9a86ca6491e8accd8f0f5fe2ff3939692c76084a5bab3f136a2"
+}

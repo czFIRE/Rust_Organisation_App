@@ -1,0 +1,96 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE timesheet SET start_date = $1, end_date = $2, total_hours = $3, is_editable = $4, manager_note = $5, user_id = $6, company_id = $7, event_id = $8 WHERE id = $9 RETURNING *;",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "start_date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 2,
+        "name": "end_date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 3,
+        "name": "total_hours",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 4,
+        "name": "is_editable",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "manager_note",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 7,
+        "name": "edited_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 8,
+        "name": "deleted_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 9,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 10,
+        "name": "company_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 11,
+        "name": "event_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Date",
+        "Date",
+        "Float4",
+        "Bool",
+        "Text",
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "bb091761dff80d42469e2dbece33296ea6da8972235e250b4b24ede2c9fb11af"
+}

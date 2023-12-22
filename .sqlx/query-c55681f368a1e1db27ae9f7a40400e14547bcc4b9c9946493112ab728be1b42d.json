@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE timesheet SET deleted_at = NOW() WHERE id = $1;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c55681f368a1e1db27ae9f7a40400e14547bcc4b9c9946493112ab728be1b42d"
+}
