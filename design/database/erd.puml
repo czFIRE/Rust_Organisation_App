@@ -272,4 +272,5 @@ task||..||event_staff : was\ncreated\nby >
 task||..o{assigned_staff
 assigned_staff}o..||event_staff
 assigned_staff||..||event_staff : is\ndecided\nby >
+event_staff}o..||event_staff : appointed\n as an\n organizer
 @enduml
