@@ -12,15 +12,6 @@ CREATE TYPE task_priority           AS ENUM ('low', 'medium', 'high');
 CREATE TYPE user_role               AS ENUM ('user', 'admin');
 CREATE TYPE user_status             AS ENUM ('available', 'unavailable');
 
-
--- Constraints
-
-CREATE DOMAIN ufloat AS float CHECK(VALUE >= 0.0);
--- max hours per month: 24.0 * 31.0 = 744.0
-CREATE DOMAIN hours_per_month_float AS ufloat CHECK(VALUE <= 744.0);
-CREATE DOMAIN hours_per_day_float AS ufloat CHECK(VALUE <= 24.0);
-
-
 -- Tables
 
 -- BASIC ENTTITIES
@@ -200,7 +191,7 @@ CREATE TABLE timesheet
     --------------------------------------------------------
     start_date   DATE NOT NULL,
     end_date     DATE NOT NULL,
-    total_hours  hours_per_month_float NOT NULL DEFAULT 0.0,
+    total_hours  REAL NOT NULL DEFAULT 0.0,
     is_editable  BOOLEAN NOT NULL,
     status       approval_status NOT NULL DEFAULT 'not_requested',
     manager_note TEXT,
@@ -213,6 +204,9 @@ CREATE TABLE timesheet
     FOREIGN KEY  (company_id) REFERENCES company (id),
     FOREIGN KEY  (event_id) REFERENCES event (id),
     --------------------------------------------------------
+    CONSTRAINT check_total_hours_lte_744
+        CHECK (total_hours <= 744.0),
+    -- max hours per month: 24.0 * 31.0 = 744.0
     CONSTRAINT check_timesheet_start_date_lte_end_date
         CHECK (start_date >= end_date),
     CONSTRAINT check_timesheet_created_at_lte_edited_at
@@ -224,8 +218,7 @@ CREATE TABLE work_day
 (   
     timesheet_id UUID NOT NULL,
     date         DATE NOT NULL,
-    --------------------------------------------------------
-    total_hours  hours_per_day_float NOT NULL DEFAULT 0.0,
+    total_hours  REAL NOT NULL DEFAULT 0.0,
     comment      TEXT,
     is_editable  BOOLEAN NOT NULL,
     --------------------------------------------------------
@@ -236,6 +229,8 @@ CREATE TABLE work_day
     PRIMARY KEY  (timesheet_id, date),
     FOREIGN KEY  (timesheet_id) REFERENCES timesheet (id),
     --------------------------------------------------------
+    CONSTRAINT check_total_hours_lte_24
+        CHECK (total_hours <= 24.0),
     CONSTRAINT check_work_day_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
