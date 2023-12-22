@@ -7,7 +7,9 @@ use std::sync::Arc;
 
 mod common;
 mod handlers;
+mod models;
 mod repositories;
+mod templates;
 
 const HOST: &str = "0.0.0.0:8000";
 
