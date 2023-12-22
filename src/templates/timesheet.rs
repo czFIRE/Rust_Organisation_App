@@ -23,7 +23,7 @@ pub struct TimesheetTemplate {
     pub id: Uuid,
     pub user_id: Uuid,
     pub company_id: Uuid,
-    pub event_id: Uuid,
+    pub event: EventLiteTemplate,
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
     pub total_hours: u16,
