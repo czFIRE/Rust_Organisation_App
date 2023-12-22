@@ -1,7 +1,7 @@
 use askama::Template;
+use chrono::{NaiveDate, NaiveDateTime};
 use sqlx::types::uuid;
 use uuid::Uuid;
-use chrono::{NaiveDate, NaiveDateTime};
 
 #[derive(Template)]
 #[template(path = "event/event.html")]
@@ -15,7 +15,7 @@ pub struct EventTemplate {
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
     pub created_at: NaiveDateTime,
-    pub edited_at: NaiveDateTime
+    pub edited_at: NaiveDateTime,
 }
 
 #[derive(Template)]
@@ -26,5 +26,5 @@ pub struct EventLiteTemplate {
     pub name: String,
     pub accepts_staff: bool,
     pub start_date: NaiveDate,
-    pub end_date: NaiveDate
+    pub end_date: NaiveDate,
 }

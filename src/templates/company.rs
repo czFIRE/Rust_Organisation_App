@@ -1,10 +1,9 @@
 use askama::Template;
+use chrono::NaiveDateTime;
 use sqlx::types::uuid;
 use uuid::Uuid;
-use chrono::NaiveDateTime;
 
 use crate::models::Association;
-
 
 #[derive(Template)]
 #[template(path = "company/company.html")]
@@ -20,7 +19,7 @@ pub struct CompanyTemplate {
     pub vatin: String,
     // timestamps
     pub created_at: NaiveDateTime,
-    pub edited_at: NaiveDateTime
+    pub edited_at: NaiveDateTime,
 }
 
 #[derive(Template)]
@@ -28,7 +27,7 @@ pub struct CompanyTemplate {
 pub struct CompanyLiteTemplate {
     pub id: Uuid,
     pub name: String,
-    pub avatar_url: String
+    pub avatar_url: String,
 }
 
 #[derive(Template)]
@@ -38,5 +37,5 @@ pub struct AssociatedCompanyTemplate {
     pub company: CompanyLiteTemplate,
     pub association_type: Association,
     pub created_at: NaiveDateTime,
-    pub edited_at: NaiveDateTime
+    pub edited_at: NaiveDateTime,
 }

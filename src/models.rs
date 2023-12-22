@@ -4,14 +4,14 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "snake_case")]
 pub enum UserRole {
     User,
-    Admin   
+    Admin,
 }
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UserStatus {
     Available,
-    Unavailable
+    Unavailable,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -19,14 +19,14 @@ pub enum UserStatus {
 pub enum Gender {
     Male,
     Female,
-    Other
+    Other,
 }
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum StaffLevel {
     Basic,
-    Organizer
+    Organizer,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -34,7 +34,7 @@ pub enum StaffLevel {
 pub enum AcceptanceStatus {
     Pending,
     Accepted,
-    Rejected
+    Rejected,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -42,7 +42,7 @@ pub enum AcceptanceStatus {
 pub enum TaskPriority {
     Low,
     Medium,
-    High
+    High,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -51,7 +51,7 @@ pub enum Association {
     Sponsor,
     Organizer,
     Media,
-    Other
+    Other,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -59,13 +59,13 @@ pub enum Association {
 pub enum EmployeeLevel {
     Basic,
     Manager,
-    CompanyAdministrator
+    CompanyAdministrator,
 }
 
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum EmployeeContract {
-    DPP,
-    DPC,
-    HPP
+    Dpp,
+    Dpc,
+    Hpp,
 }

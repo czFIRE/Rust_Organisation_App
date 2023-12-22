@@ -1,7 +1,7 @@
 use askama::Template;
+use chrono::NaiveDateTime;
 use sqlx::types::uuid;
 use uuid::Uuid;
-use chrono::NaiveDateTime;
 
 use super::user::UserLiteTemplate;
 
@@ -13,5 +13,5 @@ pub struct CommentTemplate {
     pub author: UserLiteTemplate,
     pub content: String,
     pub created_at: NaiveDateTime,
-    pub edited_at: NaiveDateTime
+    pub edited_at: NaiveDateTime,
 }

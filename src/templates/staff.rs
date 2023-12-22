@@ -1,9 +1,9 @@
 use askama::Template;
+use chrono::NaiveDateTime;
 use sqlx::types::uuid;
 use uuid::Uuid;
-use chrono::NaiveDateTime;
 
-use crate::models::{StaffLevel, AcceptanceStatus};
+use crate::models::{AcceptanceStatus, StaffLevel};
 
 use super::{company::CompanyLiteTemplate, user::UserLiteTemplate};
 
@@ -18,7 +18,7 @@ pub struct StaffTemplate {
     pub status: AcceptanceStatus,
     pub decided_by: UserLiteTemplate,
     pub created_at: NaiveDateTime,
-    pub edited_at: NaiveDateTime
+    pub edited_at: NaiveDateTime,
 }
 
 #[derive(Template)]
@@ -27,5 +27,5 @@ pub struct TaskStaffTemplate {
     pub id: Uuid,
     pub user: StaffTemplate,
     pub status: AcceptanceStatus,
-    pub decided_by: UserLiteTemplate
+    pub decided_by: UserLiteTemplate,
 }

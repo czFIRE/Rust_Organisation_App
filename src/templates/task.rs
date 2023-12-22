@@ -1,7 +1,7 @@
 use askama::Template;
+use chrono::{NaiveDate, NaiveDateTime};
 use sqlx::types::uuid;
 use uuid::Uuid;
-use chrono::{NaiveDate, NaiveDateTime};
 
 use crate::models::TaskPriority;
 
@@ -19,5 +19,5 @@ pub struct TaskTemplate {
     pub priority: TaskPriority,
     pub accepts_staff: bool,
     pub created_at: NaiveDateTime,
-    pub edited_at: NaiveDateTime
+    pub edited_at: NaiveDateTime,
 }

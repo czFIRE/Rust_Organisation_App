@@ -1,9 +1,9 @@
 /* Note to the person merging: Just ignore this version
- * in favour of the one that is in the master branch. 
+ * in favour of the one that is in the master branch.
  * You can add these two lines manually.
  */
-mod templates;
 mod models;
+mod templates;
 
 use anyhow::Result;
 use dotenv::dotenv;

@@ -1,7 +1,7 @@
 use askama::Template;
+use chrono::{NaiveDate, NaiveDateTime};
 use sqlx::types::uuid;
 use uuid::Uuid;
-use chrono::{NaiveDateTime, NaiveDate};
 
 use crate::models::{EmployeeContract, EmployeeLevel};
 
@@ -20,7 +20,7 @@ pub struct EmploymentTemplate {
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
     pub created_at: NaiveDateTime,
-    pub edited_at: NaiveDateTime
+    pub edited_at: NaiveDateTime,
 }
 
 #[derive(Template)]
@@ -30,5 +30,5 @@ pub struct EmploymentLiteTemplate {
     pub company: CompanyLiteTemplate,
     pub employment_type: EmployeeContract,
     pub start_date: NaiveDate,
-    pub end_date: NaiveDate
+    pub end_date: NaiveDate,
 }
