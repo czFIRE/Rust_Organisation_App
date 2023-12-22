@@ -1,5 +1,7 @@
 FROM rust:latest
 
+RUN cargo install sqlx-cli
+
 # create temporary rust project
 RUN cargo new /app
 
@@ -17,7 +19,6 @@ RUN rm -rf src
 
 # what a hack
 COPY . .
-RUN cargo build
 
 # what a genius
-CMD cargo run
+CMD sqlx migrate run && cargo run
