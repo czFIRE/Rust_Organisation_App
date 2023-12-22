@@ -262,7 +262,6 @@ employment|o..o{employment : manages
 event||.o{associated_company
 company||..o{associated_company
 company||..||address : has headquaters at >
-company||..o{event_staff
 event||..o{event_staff : is organized by >
 event||..o{task : can have associated >
 event|o...o{comment : can have >
