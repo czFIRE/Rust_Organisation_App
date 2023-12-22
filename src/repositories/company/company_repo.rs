@@ -1,38 +1,10 @@
 use crate::common::DbResult;
-use chrono::NaiveDateTime;
+use crate::repositories::company::models::Company;
 use sqlx::postgres::PgPool;
-use sqlx::prelude::FromRow;
 use std::sync::Arc;
 use uuid::Uuid;
 
-#[derive(Debug, FromRow)]
-pub struct Company {
-    pub id: Uuid,
-    pub name: String,
-    pub description: Option<String>,
-    pub phone: String,
-    pub email: String,
-    pub avatar_url: Option<String>,
-    pub website: Option<String>,
-    pub crn: String,
-    pub vatin: String,
-    // timestamps
-    pub created_at: NaiveDateTime,
-    pub edited_at: NaiveDateTime,
-    pub deleted_at: Option<NaiveDateTime>,
-}
-
-#[derive(Debug, FromRow)]
-pub struct CompanyData {
-    pub name: String,
-    pub description: Option<String>,
-    pub phone: String,
-    pub email: String,
-    pub avatar_url: Option<String>,
-    pub website: Option<String>,
-    pub crn: String,
-    pub vatin: String,
-}
+use super::models::{CompanyData, CompanyFilters};
 
 #[derive(Clone)]
 pub struct CompanyRepository {
@@ -77,7 +49,8 @@ impl CompanyRepository {
         Ok(company)
     }
 
-    pub async fn _read_all(&self) -> DbResult<Vec<Company>> {
+    // ToDo: Work filters in.
+    pub async fn _read_all(&self, _filters: CompanyFilters) -> DbResult<Vec<Company>> {
         let executor = self.pool.as_ref();
 
         let companies = sqlx::query_as!(Company, "SELECT * FROM company;")
