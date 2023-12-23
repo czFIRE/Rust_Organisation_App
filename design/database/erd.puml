@@ -297,6 +297,15 @@ entity comment {
 
 /'
   Class relations, possibly with labels.
+
+  Note: One can use `u`, `r`, `d`, `b` values in relation syntax
+        (e.g. `author|o-b-o{books`).
+
+
+        It allows to request some table to be put `up` / `right`
+        / `bottom` / `left` relative to some other table.
+
+        This seems to be undocumented, but it works.
 '/
 user||..|{employment
 timesheet}o..||employment
