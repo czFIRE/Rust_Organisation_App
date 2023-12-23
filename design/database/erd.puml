@@ -4,6 +4,9 @@ skinparam classFontSize 20
 scale 2400 * 2400
 hide circle
 
+/'
+  Denotes the status of an employee\'s request to work on an event.
+'/
 enum AcceptanceStatus {
     Pending
     Accepted
@@ -23,6 +26,9 @@ enum ApprovalStatus {
     Rejected
 }
 
+/'
+  Denotes the type of association that a company has with an event.
+'/
 enum Association {
     Sponsor
     Organizer
@@ -30,40 +36,66 @@ enum Association {
     Other
 }
 
+/'
+  Denotes the type of employment an employee may have with a company.
+'/
 enum EmploymentContract {
     DPP
     DPC
     HPP
 }
 
+/'
+  Denotes whether the employee has managerial responsibilities / privileges
+  within a company, or not. The Upper Manager role represents the overall
+  responsible person (people) that take care of the company in the system.
+'/
 enum EmployeeLevel {
     Basic
     Manager
     CompanyAdministrator
 }
 
+/'
+  Denotes whether the employee has additional (organizer) privileges
+  within a given event.
+'/
 enum EventRole {
     Basic
     Organizer
 }
 
+/'
+  Denotes a gender types that user is allowed to choose from.
+'/
 enum Gender {
     Female
     Male
     Other
 }
 
+/'
+  Denotes the priority of a task assigned to event staff.
+'/
 enum TaskPriority {
     Low
     Medium
     High
 }
 
+/'
+  Denotes the privileges of a user in terms of interactions with the system
+  as a whole.
+'/
 enum UserRole {
     User
     Admin
 }
 
+/'
+  Denotes the availability of a user in terms of employment
+  and task opportunities.
+'/
 enum UserStatus {
     Available
     Unavailable
