@@ -202,6 +202,7 @@ CREATE TABLE timesheet
     end_date     DATE NOT NULL,
     total_hours  hours_per_month_float NOT NULL DEFAULT 0.0,
     is_editable  BOOLEAN NOT NULL,
+    status       approval_status NOT NULL DEFAULT 'not_requested',
     manager_note TEXT,
     -------------------------------------------------------
     created_at   TIMESTAMP NOT NULL DEFAULT now(),

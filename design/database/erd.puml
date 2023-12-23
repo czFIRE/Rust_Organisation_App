@@ -95,6 +95,7 @@ entity timesheet {
     *end_date: date
     *total_hours: float
     *is_editable: boolean
+    *status: <<enum ApprovalStatus>>,
     ' allows managers to leave notes in case of errors.
     manager_note: text
     *created_at: timestamp
