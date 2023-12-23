@@ -1,7 +1,7 @@
 @startuml erd
 skinparam Linetype ortho
 skinparam classFontSize 20
-scale 2400 * 2400
+scale 2000 * 2000
 hide circle
 
 /'
