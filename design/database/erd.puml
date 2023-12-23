@@ -218,7 +218,7 @@ entity employment {
         manager_id and company_id give us the manager\'s employment record.
         manager_id is therefore the user ID of the manager.
     '/
-    *manager_id: <<uuid>> (FK user)
+    manager_id: <<uuid>> (FK user)
     *hourly_wage: float
     *start_date: date
     *end_date: date
