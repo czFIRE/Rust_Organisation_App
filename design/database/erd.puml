@@ -10,6 +10,19 @@ enum AcceptanceStatus {
     Rejected
 }
 
+enum ApprovalStatus {
+    /'
+      A temporary state which preceeds a `Pending` state.
+
+      Suggests an employee currently modifies its workdays
+      and does not want to get his/her timesheet verified yet.
+    '/
+    NotRequested
+    Pending
+    Accepted
+    Rejected
+}
+
 enum Association {
     Sponsor
     Organizer

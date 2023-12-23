@@ -1,6 +1,8 @@
 -- Enums
 
 CREATE TYPE acceptance_status       AS ENUM ('pending', 'accepted', 'rejected');
+CREATE TYPE approval_status         AS ENUM ('not_requested', 'pending',
+                                             'accepted', 'rejected');
 CREATE TYPE association             AS ENUM ('sponsor', 'organizer', 'media', 'other');
 CREATE TYPE employment_contract     AS ENUM ('DPP', 'DPC', 'HPP');
 CREATE TYPE employee_level          AS ENUM ('basic', 'manager', 'company_administrator');
