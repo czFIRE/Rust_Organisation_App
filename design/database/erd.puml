@@ -188,48 +188,46 @@ entity assigned_staff {
     deleted_at: timestamp
 }
 
-together {
-    entity company {
-        *<u>company_id</u>: <<uuid>>
-        ---
-        *name: varchar(255)
-        description: text
-        website: varchar(255)
-        /' A Company Registration Number.
+entity company {
+    *<u>company_id</u>: <<uuid>>
+    ---
+    *name: varchar(255)
+    description: text
+    website: varchar(255)
+    /' A Company Registration Number.
 
-        Note: Different European countries use different format, some just
-                numbers, some letters as well, but they all fit into 16 characters.
-        '/
-        *CRN: varchar(16)
-        /'
-        A Value-Added Tax Identification Number.
-
-        Note: China seems to have a longest format with 18 characters.
-        '/
-        *VATIN: varchar(18)
-        *phone: varchar(255)
-        *email: varchar(255)
-        *avatar_path: varchar(255)
-        *created_at: timestamp
-        *edited_at: timestamp
-        deleted_at: timestamp
-    }
-
-    /' 
-        Normalization for compound type address.
-        In case we want to expand some filtering.
-        Also normalization.
+    Note: Different European countries use different format, some just
+            numbers, some letters as well, but they all fit into 16 characters.
     '/
-    entity address {
-        *<u>company_id<u>: <<uuid>>
-        ---
-        country: varchar(255)
-        region: varchar(255)
-        city: varchar(255)
-        street: varchar(255)
-        street_number: varchar(255)
-        postal_code: varchar(255)
-    }
+    *CRN: varchar(16)
+    /'
+    A Value-Added Tax Identification Number.
+
+    Note: China seems to have a longest format with 18 characters.
+    '/
+    *VATIN: varchar(18)
+    *phone: varchar(255)
+    *email: varchar(255)
+    *avatar_path: varchar(255)
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
+}
+
+/'
+    Normalization for compound type address.
+    In case we want to expand some filtering.
+    Also normalization.
+'/
+entity address {
+    *<u>company_id<u>: <<uuid>>
+    ---
+    country: varchar(255)
+    region: varchar(255)
+    city: varchar(255)
+    street: varchar(255)
+    street_number: varchar(255)
+    postal_code: varchar(255)
 }
 
 entity associated_company {
