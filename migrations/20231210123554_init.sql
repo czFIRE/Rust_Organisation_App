@@ -137,7 +137,7 @@ CREATE TABLE employment
     CONSTRAINT check_employment_hourly_wage_gte_0
         CHECK (hourly_wage >= 0.0),
     CONSTRAINT check_employment_start_date_lte_end_date
-        CHECK (start_date >= end_date),
+        CHECK (start_date <= end_date),
     CONSTRAINT check_employment_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
@@ -164,7 +164,7 @@ CREATE TABLE event
     CONSTRAINT check_event_name_len
         CHECK (char_length(name) >= 1),
     CONSTRAINT check_event_start_date_lte_end_date
-        CHECK (start_date >= end_date),
+        CHECK (start_date <= end_date),
     CONSTRAINT check_event_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
@@ -214,7 +214,7 @@ CREATE TABLE timesheet
     FOREIGN KEY  (event_id) REFERENCES event (id),
     --------------------------------------------------------
     CONSTRAINT check_timesheet_start_date_lte_end_date
-        CHECK (start_date >= end_date),
+        CHECK (start_date <= end_date),
     CONSTRAINT check_timesheet_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
