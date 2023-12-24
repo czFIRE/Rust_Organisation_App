@@ -1,211 +1,252 @@
-// Write your tests here.
+#[cfg(test)]
+pub mod user_repo_tests {
+    use sqlx::PgPool;
 
-#[test]
-pub fn create_user_test() {
-    todo!()
+    #[sqlx::test(fixtures("users"))]
+    async fn create(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("users"))]
+    async fn read(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("users"))]
+    async fn update(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("users"))]
+    async fn delete(_pool: PgPool) {
+        todo!()
+    }
 }
 
-#[test]
-pub fn read_user_test() {
-    todo!()
+#[cfg(test)]
+pub mod company_repo_tests {
+    use sqlx::PgPool;
+
+    #[sqlx::test(fixtures("companies"))]
+    async fn create_company_test(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("companies"))]
+    async fn read_company_test(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("companies"))]
+    async fn read_all_companies_test(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("companies"))]
+    async fn update_company_test(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("companies"))]
+    async fn delete_company_test(_pool: PgPool) {
+        todo!()
+    }
 }
 
-#[test]
-pub fn update_user_test() {
-    todo!()
+#[cfg(test)]
+pub mod event_repo_tests {
+    use sqlx::PgPool;
+
+    #[sqlx::test(fixtures("events"))]
+    async fn create(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("events"))]
+    async fn read(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("events"))]
+    async fn read_all(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("events"))]
+    async fn update(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("events"))]
+    async fn delete(_pool: PgPool) {
+        todo!()
+    }
 }
 
-#[test]
-pub fn delete_user_test() {
-    todo!()
+#[cfg(test)]
+pub mod employment_repo_tests {
+    use sqlx::PgPool;
+
+    
+    #[sqlx::test(fixtures("employments"))]
+    async fn create(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("employments"))]
+    async fn read(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("employments"))]
+    async fn read_all_per_user(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("employments"))]
+    pub fn read_all_per_company(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("employments"))]
+    pub fn read_all_subordinates(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("employments"))]
+    pub fn update(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("employments"))]
+    pub fn delete(_pool: PgPool) {
+        todo!()
+    }
 }
 
-#[test]
-pub fn create_event_test() {
-    todo!()
+ #[cfg(test)]
+ pub mod event_staff_repo_tests {
+    use sqlx::PgPool;
+    
+    #[sqlx::test(fixtures("event_staff"))]
+    async fn create(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("event_staff"))]
+    async fn read(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("event_staff"))]
+    async fn read_all_per_event(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("event_staff"))]
+    async fn update(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("event_staff"))]
+    async fn delete(_pool: PgPool) {
+        todo!()
+    }
 }
 
-#[test]
-pub fn read_event_test() {
-    todo!()
+
+#[cfg(test)]
+pub mod task_repo_tests {
+    use sqlx::PgPool;
+
+    #[sqlx::test(fixtures("task"))]
+    async fn create(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("task"))]
+    async fn read_one(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("task"))]
+    async fn read_all_per_event(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("task"))]
+    async fn update(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("task"))]
+    async fn delete(_pool: PgPool) {
+        todo!()
+    }
+
 }
 
-#[test]
-pub fn read_all_events_test() {
-    todo!()
+#[cfg(test)]
+pub mod assigned_staff_repo_tests { 
+    use sqlx::PgPool;
+
+    #[sqlx::test(fixtures("assigned_staff"))]
+    pub fn create(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("assigned_staff"))]
+    pub fn read_one(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("assigned_staff"))]
+    pub fn read_all_per_task(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("assigned_staff"))]
+    pub fn update(_pool: PgPool) {
+        todo!()
+    }
+
+    #[sqlx::test(fixtures("assigned_staff"))]
+    pub fn delete(_pool: PgPool) {
+        todo!()
+    }
 }
 
-#[test]
-pub fn update_event_test() {
-    todo!()
-}
+#[cfg(test)]
+pub mod comment_repo_tests {
+    use sqlx::PgPool;
 
-#[test]
-pub fn delete_event_test() {
-    todo!()
-}
+    #[sqlx::test(fixtures("comments"))]
+    async fn create(_pool: PgPool) {
+        todo!()
+    }
 
-#[test]
-pub fn create_company_test() {
-    todo!()
-}
+    #[sqlx::test(fixtures("comments"))]
+    async fn read_one(_pool: PgPool) {
+        todo!()
+    }
 
-#[test]
-pub fn read_company_test() {
-    todo!()
-}
+    #[sqlx::test(fixtures("comments"))]
+    async fn read_all_per_event(_pool: PgPool) {
+        todo!()
+    }
 
-#[test]
-pub fn read_all_companies_test() {
-    todo!()
-}
+    #[sqlx::test(fixtures("comments"))]
+    async fn read_all_per_task(_pool: PgPool) {
+        todo!()
+    }
 
-#[test]
-pub fn update_company_test() {
-    todo!()
-}
+    #[sqlx::test(fixtures("comments"))]
+    async fn update(_pool: PgPool) {
+        todo!()
+    }
 
-#[test]
-pub fn delete_company_test() {
-    todo!()
-}
-
-#[test]
-pub fn create_employment_test() {
-    todo!()
-}
-
-#[test]
-pub fn read_employment_test() {
-    todo!()
-}
-
-#[test]
-pub fn read_all_employments_per_user_test() {
-    todo!()
-}
-
-#[test]
-pub fn read_all_employments_per_company_test() {
-    todo!()
-}
-
-#[test]
-pub fn read_all_subordinates_per_manager_test() {
-    todo!()
-}
-
-#[test]
-pub fn update_employment_test() {
-    todo!()
-}
-
-#[test]
-pub fn delete_employment_test() {
-    todo!()
-}
-
-#[test]
-pub fn create_event_staff_test() {
-    todo!()
-}
-
-#[test]
-pub fn read_event_staff_test() {
-    todo!()
-}
-
-#[test]
-pub fn read_all_event_staff_per_event_test() {
-    todo!()
-}
-
-#[test]
-pub fn update_event_staff_test() {
-    todo!()
-}
-
-#[test]
-pub fn delete_event_staff_test() {
-    todo!()
-}
-
-#[test]
-pub fn create_task_test() {
-    todo!()
-}
-
-#[test]
-pub fn read_task_test() {
-    todo!()
-}
-
-#[test]
-pub fn read_all_tasks_per_event_test() {
-    todo!()
-}
-
-#[test]
-pub fn update_task_test() {
-    todo!()
-}
-
-#[test]
-pub fn delete_task_test() {
-    todo!()
-}
-
-#[test]
-pub fn create_comment_test() {
-    todo!()
-}
-
-#[test]
-pub fn read_comment_test() {
-    todo!()
-}
-
-#[test]
-pub fn read_all_comments_per_event_test() {
-    todo!()
-}
-
-#[test]
-pub fn read_all_comments_per_task_test() {
-    todo!()
-}
-
-#[test]
-pub fn update_comment_test() {
-    todo!()
-}
-
-#[test]
-pub fn delete_comment_test() {
-    todo!()
-}
-
-#[test]
-pub fn create_assigned_staff_test() {
-    todo!()
-}
-
-#[test]
-pub fn read_assigned_staff_test() {
-    todo!()
-}
-
-#[test]
-pub fn read_all_assigned_staff_per_task_test() {
-    todo!()
-}
-
-#[test]
-pub fn update_assigned_staff_test() {
-    todo!()
-}
-
-#[test]
-pub fn delete_assigned_staff_test() {
-    todo!()
+    #[sqlx::test(fixtures("comments"))]
+    async fn delete(_pool: PgPool) {
+        todo!()
+    }
 }
