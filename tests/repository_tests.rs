@@ -87,7 +87,6 @@ pub mod event_repo_tests {
 pub mod employment_repo_tests {
     use sqlx::PgPool;
 
-    
     #[sqlx::test(fixtures("employments"))]
     async fn create(_pool: PgPool) {
         todo!()
@@ -124,10 +123,10 @@ pub mod employment_repo_tests {
     }
 }
 
- #[cfg(test)]
- pub mod event_staff_repo_tests {
+#[cfg(test)]
+pub mod event_staff_repo_tests {
     use sqlx::PgPool;
-    
+
     #[sqlx::test(fixtures("event_staff"))]
     async fn create(_pool: PgPool) {
         todo!()
@@ -153,7 +152,6 @@ pub mod employment_repo_tests {
         todo!()
     }
 }
-
 
 #[cfg(test)]
 pub mod task_repo_tests {
@@ -183,11 +181,10 @@ pub mod task_repo_tests {
     async fn delete(_pool: PgPool) {
         todo!()
     }
-
 }
 
 #[cfg(test)]
-pub mod assigned_staff_repo_tests { 
+pub mod assigned_staff_repo_tests {
     use sqlx::PgPool;
 
     #[sqlx::test(fixtures("assigned_staff"))]
