@@ -104,7 +104,9 @@ impl AssignedStaffRepository {
 
         let user: User = sqlx::query_as!(
             User,
-            r#"SELECT id, name, email, birth, avatar_url, gender AS "gender!: Gender", role AS "role!: UserRole", status AS "status!: UserStatus", created_at, edited_at, deleted_at FROM user_record WHERE id = $1;"#,
+            r#"SELECT id, name, email, birth, avatar_url, gender AS "gender!: Gender", 
+            role AS "role!: UserRole", status AS "status!: UserStatus", created_at, edited_at, deleted_at 
+            FROM user_record WHERE id = $1;"#,
             _staff_uuid
         )
         .fetch_one(executor)
@@ -156,6 +158,8 @@ impl AssignedStaffRepository {
         _uuid: Uuid,
         _data: AssignedStaffData,
     ) -> DbResult<AssignedStaffExtended> {
+        let executor = self.pool.as_ref();
+
         todo!()
     }
 
