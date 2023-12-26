@@ -69,3 +69,13 @@ pub enum EmployeeContract {
     Dpc,
     Hpp,
 }
+
+
+#[derive(Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ApprovalStatus {
+    NotRequested,
+    Pending,
+    Accepted,
+    Rejected,
+}
