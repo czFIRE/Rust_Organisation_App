@@ -23,14 +23,29 @@ impl UserRepository {
 
         let new_user: User = sqlx::query_as!(
             User,
-            r#"INSERT INTO user_record (name, email, birth, gender, role) VALUES ($1, $2, $3, $4, $5) 
-            RETURNING id, name, email, birth, avatar_url, gender AS "gender!: Gender", role AS "role!: UserRole", status AS "status!: UserStatus", created_at, edited_at, deleted_at"#,
+            r#"INSERT INTO user_record (name, email, birth, gender, role) 
+            VALUES 
+                ($1, $2, $3, $4, $5) 
+            RETURNING id, 
+                name, 
+                email, 
+                birth, 
+                avatar_url, 
+                gender AS "gender!: Gender", 
+                role AS "role!: UserRole", 
+                status AS "status!: UserStatus", 
+                created_at, 
+                edited_at, 
+                deleted_at
+            "#,
             data.name,
             data.email,
             data.birth,
             data.gender as Gender,
             data.role as UserRole,
-        ).fetch_one(executor).await?;
+        )
+        .fetch_one(executor)
+        .await?;
 
         Ok(new_user)
     }
@@ -52,11 +67,27 @@ impl UserRepository {
 
         let user: User = sqlx::query_as!(
             User,
-            r#"SELECT id, name, email, birth, avatar_url, gender AS "gender!: Gender", role AS "role!: UserRole", 
-            status AS "status!: UserStatus", created_at, edited_at, deleted_at
-            FROM user_record WHERE id = $1"#,
+            r#"SELECT 
+                id, 
+                name, 
+                email, 
+                birth, 
+                avatar_url, 
+                gender AS "gender!: Gender", 
+                role AS "role!: UserRole", 
+                status AS "status!: UserStatus", 
+                created_at, 
+                edited_at, 
+                deleted_at 
+            FROM 
+                user_record 
+            WHERE 
+                id = $1
+            "#,
             user_id,
-        ).fetch_one(executor).await?;
+        )
+        .fetch_one(executor)
+        .await?;
 
         Ok(user)
     }
@@ -82,18 +113,28 @@ impl UserRepository {
 
         let user_res: User = sqlx::query_as!(
             User,
-            r#"
-            UPDATE user_record
-            SET name = COALESCE($1, name),
-                email = COALESCE($2, email),
-                birth = COALESCE($3, birth),
-                gender = COALESCE($4, gender),
-                role = COALESCE($5, role),
-                avatar_url = COALESCE($6, avatar_url)
-            WHERE id = $7
-            AND deleted_at IS NULL
-            RETURNING id, name, email, birth, avatar_url, gender AS "gender!: Gender", 
-            role AS "role!: UserRole", status AS "status!: UserStatus", created_at, edited_at, deleted_at
+            r#"UPDATE 
+                user_record 
+            SET 
+                name = COALESCE($1, name), 
+                email = COALESCE($2, email), 
+                birth = COALESCE($3, birth), 
+                gender = COALESCE($4, gender), 
+                role = COALESCE($5, role), 
+                avatar_url = COALESCE($6, avatar_url) 
+            WHERE 
+                id = $7 
+                AND deleted_at IS NULL RETURNING id, 
+                name, 
+                email, 
+                birth, 
+                avatar_url, 
+                gender AS "gender!: Gender", 
+                role AS "role!: UserRole", 
+                status AS "status!: UserStatus", 
+                created_at, 
+                edited_at, 
+                deleted_at
             "#,
             data.name,
             data.email,
@@ -102,7 +143,9 @@ impl UserRepository {
             data.role as Option<UserRole>,
             data.avatar_url,
             user_id,
-        ).fetch_one(executor).await?;
+        )
+        .fetch_one(executor)
+        .await?;
 
         Ok(user_res)
     }
@@ -112,8 +155,7 @@ impl UserRepository {
         let executor = self.pool.as_ref();
 
         let _user_res = sqlx::query!(
-            r#"
-            UPDATE user_record
+            r#"UPDATE user_record
             SET deleted_at = NOW()
             WHERE id = $1
             AND deleted_at IS NULL

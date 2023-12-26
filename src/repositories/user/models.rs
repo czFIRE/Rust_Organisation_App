@@ -13,6 +13,7 @@ pub struct NewUser {
     pub role: UserRole,
 }
 
+// TODO needs to be kept the same as in task/models.rs => TaskUserFlattened
 #[derive(Debug, FromRow)]
 pub struct User {
     pub id: Uuid,
