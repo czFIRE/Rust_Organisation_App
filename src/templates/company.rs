@@ -11,7 +11,7 @@ pub struct Address {
     pub city: String,
     pub street: String,
     pub postal_code: String,
-    pub address_number: String
+    pub address_number: String,
 }
 
 #[derive(Template)]
