@@ -3,6 +3,8 @@ use chrono::{NaiveDate, NaiveDateTime};
 use sqlx::types::uuid;
 use uuid::Uuid;
 
+use crate::models::ApprovalStatus;
+
 use super::event::EventLiteTemplate;
 
 #[derive(Template)]
@@ -29,6 +31,7 @@ pub struct TimesheetTemplate {
     pub total_hours: u16,
     pub work_days: Vec<WorkdayTemplate>,
     pub calculated_wage: Option<u128>, // Mind this field: It isn't in the DB and needs to be calculated. This is in CZK.
+    pub status: ApprovalStatus,
     pub is_editable: bool,
     pub manager_note: Option<String>,
     pub created_at: NaiveDateTime,
@@ -45,6 +48,7 @@ pub struct TimesheetLiteTemplate {
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
     pub is_editable: bool,
+    pub status: ApprovalStatus,
     pub has_note: bool, // This is just an indicator for the presence / absence of a manager's note.
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
