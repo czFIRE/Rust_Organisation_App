@@ -1,3 +1,4 @@
+use chrono::NaiveDate;
 use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
 
@@ -12,14 +13,14 @@ pub struct NewTask {
     pub priority: TaskPriority,
 }
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, sqlx::FromRow)]
 pub struct Task {
-    pub task_id: Uuid,
+    pub id: Uuid,
     pub event_id: Uuid,
     pub creator_id: Uuid,
     pub title: String,
     pub description: Option<String>,
-    pub finished_at: Option<NaiveDateTime>,
+    pub finished_at: Option<NaiveDateTime>, // TODO: WHO THE FUCK MADE FINISHED_AT AS DATE
     pub priority: TaskPriority,
     pub accepts_staff: bool,
     pub created_at: NaiveDateTime,
@@ -27,7 +28,7 @@ pub struct Task {
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, sqlx::FromRow)]
 pub struct TaskExtended {
     pub task_id: Uuid,
     pub event_id: Uuid,

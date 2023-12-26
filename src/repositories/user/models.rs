@@ -19,7 +19,7 @@ pub struct User {
     pub name: String,
     pub email: String,
     pub birth: NaiveDate,
-    pub avatar_url: String,
+    pub avatar_url: Option<String>, // TODO: Now is the same as in INIT.SQL but do we want this?
     pub gender: Gender,
     pub role: UserRole,
     pub status: UserStatus,

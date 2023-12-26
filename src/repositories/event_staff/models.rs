@@ -17,6 +17,7 @@ pub struct NewStaff {
 
 #[derive(Debug, FromRow)]
 pub struct Staff {
+    pub id: Uuid,
     pub user_id: Uuid,
     pub company_id: Uuid,
     pub event_id: Uuid,
@@ -28,7 +29,7 @@ pub struct Staff {
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, FromRow)]
 pub struct StaffExtended {
     pub user: User,
     pub company: Company,

@@ -68,7 +68,7 @@ CREATE TABLE company
 );
 
 
-CREATE TABLE adress
+CREATE TABLE address
 (
     country     VARCHAR(255) NOT NULL,
     region      VARCHAR(255) NOT NULL,
@@ -239,10 +239,12 @@ CREATE TABLE event_staff
     user_id     UUID NOT NULL,
     company_id  UUID NOT NULL,
     decided_by  UUID NOT NULL,
+    event_id    UUID NOT NULL,
     -------------------------------------------------------
     FOREIGN KEY (user_id) REFERENCES user_record (id),
     FOREIGN KEY (company_id) REFERENCES company (id),
     FOREIGN KEY (decided_by) REFERENCES event_staff (id),
+    FOREIGN KEY (event_id) REFERENCES event (id),
     -------------------------------------------------------
     CONSTRAINT check_event_stuff_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
@@ -255,7 +257,7 @@ CREATE TABLE task
     -------------------------------------------------------
     title           VARCHAR(255) NOT NULL,
     description     TEXT,
-    finished_at     DATE,
+    finished_at     TIMESTAMP,
     priority        task_priority NOT NULL,
     accepts_staff   BOOLEAN NOT NULL,
     -------------------------------------------------------
