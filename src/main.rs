@@ -1,6 +1,3 @@
-mod models;
-mod templates;
-
 use crate::handlers::index::index;
 use crate::repositories::company::CompanyRepository;
 use actix_web::{web, App, HttpServer};
