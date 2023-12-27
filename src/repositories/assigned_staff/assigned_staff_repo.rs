@@ -2,7 +2,6 @@ use crate::{
     common::DbResult,
     repositories::{
         company::models::Company,
-        event::models::Event,
         event_staff::models::{Staff, StaffExtended},
         task::models::Task,
         user::models::User,
@@ -29,7 +28,7 @@ impl AssignedStaffRepository {
     }
 
     // was AssignedStaffExtended
-    pub async fn create(&self, data: NewAssignedStaff) -> DbResult<AssignedStaff> {
+    pub async fn _create(&self, data: NewAssignedStaff) -> DbResult<AssignedStaff> {
         let executor = self.pool.as_ref();
 
         let assigned_staff = sqlx::query_as!(
@@ -59,10 +58,10 @@ impl AssignedStaffRepository {
         staff_uuid: Uuid,
     ) -> DbResult<AssignedStaffExtended> {
         // Redis here
-        self._read_one_db(task_uuid, staff_uuid).await
+        self.read_one_db(task_uuid, staff_uuid).await
     }
 
-    async fn _read_one_db(
+    async fn read_one_db(
         &self,
         _task_uuid: Uuid,
         _staff_uuid: Uuid,

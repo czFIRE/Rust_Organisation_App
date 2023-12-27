@@ -1,14 +1,7 @@
 use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
 
-use crate::{
-    models::AcceptanceStatus,
-    repositories::{
-        self,
-        event_staff::models::StaffExtended,
-        user::{self, user_repo},
-    },
-};
+use crate::{models::AcceptanceStatus, repositories::event_staff::models::StaffExtended};
 
 #[derive(Debug)]
 pub struct NewAssignedStaff {

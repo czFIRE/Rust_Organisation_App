@@ -121,7 +121,8 @@ impl UserRepository {
                 birth = COALESCE($3, birth), 
                 gender = COALESCE($4, gender), 
                 role = COALESCE($5, role), 
-                avatar_url = COALESCE($6, avatar_url) 
+                avatar_url = COALESCE($6, avatar_url),
+                edited_at = NOW() 
             WHERE 
                 id = $7 
                 AND deleted_at IS NULL RETURNING id, 
@@ -156,7 +157,7 @@ impl UserRepository {
 
         let _user_res = sqlx::query!(
             r#"UPDATE user_record
-            SET deleted_at = NOW()
+            SET deleted_at = NOW(), edited_at = NOW()
             WHERE id = $1
             AND deleted_at IS NULL
             "#,

@@ -145,7 +145,8 @@ impl TaskRepository {
                 title = COALESCE($1, title), 
                 description = COALESCE($2, description), 
                 finished_at = COALESCE($3, finished_at), 
-                priority = COALESCE($4, priority) 
+                priority = COALESCE($4, priority),
+                edited_at = NOW() 
             WHERE 
                 id = $5 
                 AND deleted_at IS NULL RETURNING id, 
@@ -177,7 +178,7 @@ impl TaskRepository {
 
         let _task_res = sqlx::query!(
             r#"UPDATE task
-            SET deleted_at = NOW()
+            SET deleted_at = NOW(), edited_at = NOW()
             WHERE id = $1
             AND deleted_at IS NULL
             "#,
