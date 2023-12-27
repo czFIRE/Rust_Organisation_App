@@ -79,8 +79,6 @@ impl EventRepository {
     }
 
     pub async fn _update_event(&self, event_id: Uuid, data: EventData) -> DbResult<Event> {
-        let executor = self.pool.as_ref();
-
         if data.name.is_none()
             && data.description.is_none()
             && data.website.is_none()
@@ -90,6 +88,8 @@ impl EventRepository {
         {
             return Err(sqlx::Error::RowNotFound);
         }
+
+        let executor = self.pool.as_ref();
 
         let event: Event = sqlx::query_as!(
             Event,

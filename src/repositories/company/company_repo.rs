@@ -42,10 +42,10 @@ impl CompanyRepository {
 
     pub async fn _read_one(&self, company_id: Uuid) -> DbResult<Company> {
         // TODO - Redis here
-        self._read_one_db(company_id).await
+        self.read_one_db(company_id).await
     }
 
-    pub async fn _read_one_db(&self, company_id: Uuid) -> DbResult<Company> {
+    pub async fn read_one_db(&self, company_id: Uuid) -> DbResult<Company> {
         let executor = self.pool.as_ref();
 
         let company = sqlx::query_as!(Company, "SELECT * FROM company WHERE id = $1;", company_id)
@@ -72,6 +72,18 @@ impl CompanyRepository {
 
     pub async fn _update(&self, company_id: Uuid, data: CompanyData) -> DbResult<Company> {
         let executor = self.pool.as_ref();
+
+        if data.name.is_none()
+            && data.description.is_none()
+            && data.phone.is_none()
+            && data.email.is_none()
+            && data.avatar_url.is_none()
+            && data.website.is_none()
+            && data.crn.is_none()
+            && data.vatin.is_none()
+        {
+            return self.read_one_db(company_id).await;
+        }
 
         let company = sqlx::query_as!(
             Company,

@@ -24,7 +24,7 @@ pub struct Task {
     pub creator_id: Uuid,
     pub title: String,
     pub description: Option<String>,
-    pub finished_at: Option<NaiveDateTime>, // TODO: WHO THE FUCK MADE FINISHED_AT AS DATE
+    pub finished_at: Option<NaiveDateTime>, // TODO: In the db it was a Date
     pub priority: TaskPriority,
     pub accepts_staff: bool,
     pub created_at: NaiveDateTime,

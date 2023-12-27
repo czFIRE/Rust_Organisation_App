@@ -1,6 +1,8 @@
 use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
 
+// TODO needs to be kept the same as in staff/models.rs => StaffUserCompanyFlattened
+// TODO needs to be kept the same as in employment/models.rs => EmploymentUserCompanyFlattened
 #[derive(Debug, FromRow)]
 pub struct Company {
     pub id: Uuid,
