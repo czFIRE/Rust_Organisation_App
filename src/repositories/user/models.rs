@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::models::{Gender, UserRole, UserStatus};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NewUser {
     pub name: String,
     pub email: String,

@@ -18,7 +18,7 @@ impl UserRepository {
     }
 
     // Creates a new user entry in the database.
-    pub async fn _create(&self, data: NewUser) -> DbResult<User> {
+    pub async fn create(&self, data: NewUser) -> DbResult<User> {
         let executor = self.pool.as_ref();
 
         let new_user: User = sqlx::query_as!(
@@ -167,5 +167,10 @@ impl UserRepository {
         .await?;
 
         Ok(())
+    }
+
+    #[inline]
+    pub async fn disconnect(&mut self) {
+        self.pool.close().await;
     }
 }
