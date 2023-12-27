@@ -50,7 +50,7 @@ impl StaffRepository {
         Ok(new_staff)
     }
 
-    pub async fn _read_one(&self, event_staff_id: Uuid) -> DbResult<StaffExtended> {
+    pub async fn read_one(&self, event_staff_id: Uuid) -> DbResult<StaffExtended> {
         // Redis here
         self.read_one_db(event_staff_id).await
     }
@@ -112,7 +112,7 @@ impl StaffRepository {
 
     pub async fn _read_all(
         &self,
-        event_uuid: Uuid,
+        event_id: Uuid,
         filter: StaffFilter,
     ) -> DbResult<Vec<StaffExtended>> {
         let executor = self.pool.as_ref();
@@ -162,7 +162,7 @@ impl StaffRepository {
                 event_staff.event_id = $1
             LIMIT $2 OFFSET $3;
             "#,
-            event_uuid,
+            event_id,
             filter.limit,
             filter.offset,
         )
