@@ -149,7 +149,8 @@ impl TaskRepository {
                 edited_at = NOW() 
             WHERE 
                 id = $5 
-                AND deleted_at IS NULL RETURNING id, 
+                AND deleted_at IS NULL 
+            RETURNING id, 
                 event_id, 
                 creator_id, 
                 title, 

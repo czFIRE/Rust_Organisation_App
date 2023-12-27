@@ -66,9 +66,14 @@ impl EventRepository {
     pub async fn _read_all(&self, filter: EventFilter) -> DbResult<Vec<Event>> {
         let executor = self.pool.as_ref();
 
-        let events: Vec<Event> = sqlx::query_as!(Event, r#" SELECT * FROM event;"#)
-            .fetch_all(executor)
-            .await?;
+        let events: Vec<Event> = sqlx::query_as!(
+            Event,
+            r#" SELECT * FROM event LIMIT $1 OFFSET $2;"#,
+            filter.limit,
+            filter.offset,
+        )
+        .fetch_all(executor)
+        .await?;
 
         Ok(events)
     }

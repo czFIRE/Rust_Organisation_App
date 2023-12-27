@@ -20,14 +20,14 @@ pub struct Company {
 
 #[derive(Debug)]
 pub struct CompanyData {
-    pub name: String,
+    pub name: Option<String>,
     pub description: Option<String>,
-    pub phone: String,
-    pub email: String,
-    pub avatar_url: String,
+    pub phone: Option<String>,
+    pub email: Option<String>,
+    pub avatar_url: Option<String>,
     pub website: Option<String>,
-    pub crn: String,
-    pub vatin: String,
+    pub crn: Option<String>,
+    pub vatin: Option<String>,
 }
 
 #[derive(Debug)]
