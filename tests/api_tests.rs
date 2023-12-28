@@ -6,13 +6,15 @@ mod api_tests {
     use actix_web::http::header::ContentType;
     use actix_web::{test, App};
     use chrono::{NaiveDate, Utc, TimeZone};
-    use organization::models::UserRole;
+    use organization::models::{UserRole, TaskPriority};
     use organization::templates::company::{CompaniesTemplate, CompanyTemplate};
     use organization::templates::event::{EventsTemplate, EventTemplate};
+    use organization::templates::task::{TasksTemplate, TaskTemplate};
     use organization::templates::user::UserTemplate;
     use serde_json::json;
     use organization::{self, templates};
-    use std::str;
+    use uuid::Uuid;
+    use std::str::{self, FromStr};
 
     struct Error {
         error: String,
@@ -765,37 +767,100 @@ mod api_tests {
     
     #[actix_web::test]
     async fn get_all_tasks_per_event() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event_task::get_event_tasks)).await;
+
+        let req = test::TestRequest::get()
+                    .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task")
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<TasksTemplate>(body).unwrap();
+        assert_eq!(out.tasks.len(), 1);
+        assert_eq!(out.tasks[0].event_id, Uuid::from_str("b71fd7ce-c891-410a-9bba-1aacececc8fa").unwrap());
     }
 
     #[actix_web::test]
     async fn get_all_tasks_per_non_existent_event() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event_task::get_event_tasks)).await;
+
+        let req = test::TestRequest::get()
+                    .uri("/event/ba1cd734-c571-42ea-9bb4-70fc5c7748f8/task")
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn get_all_tasks_per_event_invalid_uuid_format() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event_task::get_event_tasks)).await;
+
+        let req = test::TestRequest::get()
+                    .uri("/event/ba1cd734-tasks-boi-they-sure-are-difficult-are-they-not?")
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
     async fn get_one_task() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event_task::get_event_task)).await;
+
+        let req = test::TestRequest::get()
+                    .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task/7ae0c017-fe31-4aac-b767-100d18a8877b")
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<TaskTemplate>(body).unwrap();
+        assert_eq!(out.title, "Prepare stage for Joe Cocker".to_string());
+        assert_eq!(out.id, Uuid::from_str("7ae0c017-fe31-4aac-b767-100d18a8877b").unwrap());
+        assert_eq!(out.event_id, Uuid::from_str("b71fd7ce-c891-410a-9bba-1aacececc8fa").unwrap());
+        assert!(out.accepts_staff);
     }
 
     #[actix_web::test]
     async fn get_one_task_non_existent_event() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event_task::get_event_task)).await;
+
+        let req = test::TestRequest::get()
+                    .uri("/event/baaadfcf-c891-410a-9bb4-70fc5c7748f8/task/7ae0c017-fe31-4aac-b767-100d18a8877b")
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn get_non_existent_task() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event_task::get_event_task)).await;
+
+        let req = test::TestRequest::get()
+                    .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task/7ae0c017-fffe-4aac-b767-1aacca8877b")
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn get_one_task_invalid_uuid_format() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event_task::get_event_task)).await;
+
+        let req = test::TestRequest::get()
+                    .uri("/event/sleepy-head-I-am?-70fc5c7748f8/task/nowaythiscanbeavalidUUIDbrotherrr")
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
