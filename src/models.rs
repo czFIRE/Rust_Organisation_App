@@ -10,7 +10,7 @@ pub enum UserRole {
 
 #[derive(Serialize, Deserialize, Debug, sqlx::Type, PartialEq)]
 #[serde(rename_all = "snake_case")]
-#[sqlx(type_name = "user_status")]
+#[sqlx(type_name = "user_status", rename_all = "lowercase")]
 pub enum UserStatus {
     Available,
     Unavailable,
