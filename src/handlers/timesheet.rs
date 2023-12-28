@@ -37,9 +37,15 @@ pub async fn get_all_timesheets_for_employment(
     todo!()
 }
 
+
 // Note: This is done automatically whenever event_staff is accepted to work on an event.
 #[post("/timesheet")]
 pub async fn create_timesheet(_new_timesheet: web::Form<NewTimesheetData>) -> HttpResponse {
+    todo!()
+}
+
+#[get("/timesheet/{timesheet_id}")]
+pub async fn get_timesheet(_id: web::Path<String>) -> HttpResponse {
     todo!()
 }
 

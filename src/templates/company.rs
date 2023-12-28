@@ -1,10 +1,12 @@
 use askama::Template;
 use chrono::NaiveDateTime;
+use serde::Deserialize;
 use sqlx::types::uuid;
 use uuid::Uuid;
 
 use crate::models::Association;
 
+#[derive(Deserialize)]
 pub struct Address {
     pub country: String,
     pub region: String,
@@ -14,7 +16,7 @@ pub struct Address {
     pub address_number: String,
 }
 
-#[derive(Template)]
+#[derive(Template, Deserialize)]
 #[template(path = "company/company.html")]
 pub struct CompanyTemplate {
     pub id: Uuid,
@@ -32,7 +34,7 @@ pub struct CompanyTemplate {
     pub edited_at: NaiveDateTime,
 }
 
-#[derive(Template)]
+#[derive(Template, Deserialize)]
 #[template(path = "company/company-lite.html")]
 pub struct CompanyLiteTemplate {
     pub id: Uuid,
@@ -40,7 +42,13 @@ pub struct CompanyLiteTemplate {
     pub avatar_url: String,
 }
 
-#[derive(Template)]
+#[derive(Template, Deserialize)]
+#[template(path = "company/companies.html")]
+pub struct CompaniesTemplate {
+    pub companies: Vec<CompanyLiteTemplate>
+}
+
+#[derive(Template, Deserialize)]
 #[template(path = "company/associated-company.html")]
 pub struct AssociatedCompanyTemplate {
     pub event_id: Uuid,

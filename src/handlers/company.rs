@@ -5,7 +5,7 @@ use serde::Deserialize;
 pub struct NewCompanyData {
     name: String,
     description: Option<String>,
-    webiste: Option<String>,
+    website: Option<String>,
     crn: String,
     vatin: String,
     country: String,
@@ -22,7 +22,7 @@ pub struct NewCompanyData {
 pub struct CompanyData {
     name: Option<String>,
     description: Option<String>,
-    webiste: Option<String>,
+    website: Option<String>,
     crn: Option<String>,
     vatin: Option<String>,
     country: Option<String>,

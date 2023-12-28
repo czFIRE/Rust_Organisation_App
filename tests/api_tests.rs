@@ -6,6 +6,7 @@ mod api_tests {
     use actix_web::http::header::ContentType;
     use actix_web::{test, App};
     use organization::models::UserRole;
+    use organization::templates::company::{CompaniesTemplate, CompanyTemplate};
     use organization::templates::user::UserTemplate;
     use serde_json::json;
     use organization::{self, templates};
@@ -34,7 +35,7 @@ mod api_tests {
             "gender": "male",
             "role": "user"
         });
-        let req = test::TestRequest::post().uri("/user").set_json(user).to_request();
+        let req = test::TestRequest::post().uri("/user").set_form(user).to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::CREATED);
@@ -57,11 +58,11 @@ mod api_tests {
             "gender": "male",
             "role": "user"
         });
-        let req = test::TestRequest::post().uri("/user").set_json(user.clone()).to_request();
+        let req = test::TestRequest::post().uri("/user").set_form(user.clone()).to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
 
-        let req = test::TestRequest::post().uri("/user").set_json(user).to_request();
+        let req = test::TestRequest::post().uri("/user").set_form(user).to_request();
         let res = test::call_service(&app, req).await;
         // Email should be unique.
         assert!(res.status().is_client_error());
@@ -120,7 +121,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
                     .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4")
-                    .set_json(user_update)
+                    .set_form(user_update)
                     .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -143,7 +144,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
                     .uri("/user/35341289-d420-40b6-96d8-ce069b1ba5d4")
-                    .set_json(user_update)
+                    .set_form(user_update)
                     .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -160,7 +161,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
                     .uri("/user/Sleepyhead-d420-zzz6-ygd8-5d4")
-                    .set_json(user_update)
+                    .set_form(user_update)
                     .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -175,7 +176,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
                     .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4")
-                    .set_json(user_update)
+                    .set_form(user_update)
                     .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -255,72 +256,277 @@ mod api_tests {
     
     #[actix_web::test]
     async fn get_all_companies() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::company::get_all_companies)).await;
+        
+        let req = test::TestRequest::get()
+                            .uri("/company")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let companies_template = serde_json::from_str::<CompaniesTemplate>(body).unwrap();
+        assert_eq!(companies_template.companies.len(), 3);
     }
 
     #[actix_web::test]
     async fn get_existing_company() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::company::get_company)).await;
+        
+        let req = test::TestRequest::get()
+                            .uri("/company/b5188eda-528d-48d4-8cee-498e0971f9f5")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<CompanyTemplate>(body).unwrap();
+        assert_eq!(out.name, "AMD");
+        assert_eq!(out.crn, "crn_amd");
+        assert_eq!(out.vatin, "vatin_amd");
+        assert_eq!(out.phone, "+1 408-749-4000");
+        assert_eq!(out.email, "info@amd.com");
+        assert_eq!(out.address.address_number, "2485");
+        assert_eq!(out.address.country, "United States");
+        assert_eq!(out.address.region, "CA");
+        assert_eq!(out.address.city, "Santa Clara");
+        assert_eq!(out.address.street, "Augustine Drive");
     }
 
     #[actix_web::test]
     async fn get_non_existing_company() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::company::get_company)).await;
+        
+        let req = test::TestRequest::get()
+                            .uri("/company/b548eed1-538d-48d4-8cee-498e0971f9f5")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn get_company_invalid_uuid_format() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::company::get_company)).await;
+        
+        let req = test::TestRequest::get()
+                            .uri("/company/b548eed1-sleepy-head-123zzz")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
     async fn create_company() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::company::create_company)).await;
+        
+        let company = json!({
+            "name": "Pepe Productions",
+            "description": "For all your meemz and needz",
+            "website": "www.trollfacecomics.com",
+            "crn": "pepe_crn",
+            "vatin": "pepe_vatin",
+            "country": "Landia",
+            "region": "Landenten",
+            "city": "Citia",
+            "street": "Roadton Ave.",
+            "number": "69",
+            "postal_code": "420 00",
+            "phone": "+0 123456789",
+            "email": "pepe@products.com"
+        });
+
+        let req = test::TestRequest::post()
+                            .uri("/company")
+                            .set_form(company)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::CREATED);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<CompanyTemplate>(body).unwrap();
+        assert_eq!(out.name, "Pepe Productions");
+        assert_eq!(out.crn, "pepe_crn");
+        assert_eq!(out.vatin, "pepe_vatin");
+        assert_eq!(out.phone, "+0 123456789");
+        assert_eq!(out.email, "pepe@products.com");
+        assert_eq!(out.address.address_number, "69");
+        assert_eq!(out.address.country, "Landia");
+        assert_eq!(out.address.region, "Landenten");
+        assert_eq!(out.address.city, "Citia");
+        assert_eq!(out.address.street, "Roadton Ave.");
     }
 
     #[actix_web::test]
     async fn create_duplicate_company() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::company::create_company)).await;
+        
+        let company = json!({
+            "name": "Lethal Company",
+            "description": "We specialize in TOTALLY SAFE salvaging of abandoned space stations.",
+            "website": "https://store.steampowered.com/app/1966720/Lethal_Company/",
+            "crn": "1234",
+            "vatin": "123456",
+            "country": "???",
+            "region": "???",
+            "city": "???",
+            "street": "???",
+            "number": "???",
+            "postal_code": "???",
+            "phone": "+0 123456789",
+            "email": "meet@the.quota"
+        });
+
+        let req = test::TestRequest::post()
+                            .uri("/company")
+                            .set_form(company.clone())
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::CREATED);
+
+        let req = test::TestRequest::post()
+                    .uri("/company")
+                    .set_form(company)
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
     async fn patch_company() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::company::update_company)).await;
+        
+        let data = json!({
+            "crn": "amd_crn",
+            "vatin": "amd_vatin"
+        });
+
+        let req = test::TestRequest::patch()
+                            .uri("/company/b5188eda-528d-48d4-8cee-498e0971f9f5")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<CompanyTemplate>(body).unwrap();
+        assert_eq!(out.name, "AMD");
+        assert_eq!(out.crn, "amd_crn");
+        assert_eq!(out.vatin, "amd_vatin");
+        assert_eq!(out.phone, "+1 408-749-4000");
+        assert_eq!(out.email, "info@amd.com");
+        assert_eq!(out.address.address_number, "2485");
+        assert_eq!(out.address.country, "United States");
+        assert_eq!(out.address.region, "CA");
+        assert_eq!(out.address.city, "Santa Clara");
+        assert_eq!(out.address.street, "Augustine Drive");
     }
 
     #[actix_web::test]
     async fn patch_non_existent_company() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::company::update_company)).await;
+        
+        let data = json!({
+            "crn": "amd_crn",
+            "vatin": "amd_vatin"
+        });
+
+        let req = test::TestRequest::patch()
+                            .uri("/company/b548eed1-538d-48d4-8cee-498e0971f9f5")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn patch_company_invalid_uuid_format() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::company::update_company)).await;
+        
+        let data = json!({
+            "crn": "amd_crn",
+            "vatin": "amd_vatin"
+        });
+
+        let req = test::TestRequest::patch()
+                            .uri("/company/b5188gda-sleepy-head-123zzz")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
     async fn patch_company_empty_data() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::company::update_company)).await;
+        
+        let data = json!({});
+
+        let req = test::TestRequest::patch()
+                            .uri("/company/b5188eda-528d-48d4-8cee-498e0971f9f5")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
     async fn delete_company() {
-        todo!()
+        let app= test::init_service(App::new().service(organization::handlers::company::delete_company)).await;
+
+        let req = test::TestRequest::delete()
+                            .uri("/company/b5188eda-528d-48d4-8cee-498e0971f9f5")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
     }
 
     #[actix_web::test]
     async fn get_deleted_company() {
-        todo!()
+        let app= test::init_service(App::new().service(organization::handlers::company::get_company)).await;
+
+        let req = test::TestRequest::get()
+                            .uri("/company/b5188eda-528d-48d4-8cee-498e0971f9f5")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn delete_non_existent_company() {
-        todo!()
+        let app= test::init_service(App::new().service(organization::handlers::company::delete_company)).await;
+
+        let req = test::TestRequest::delete()
+                            .uri("/company/b5188eda-528d-48d4-8cee-498e0971f9f5")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn delete_company_invalid_uuid_format() {
-        todo!()
+        let app= test::init_service(App::new().service(organization::handlers::company::delete_company)).await;
+
+        let req = test::TestRequest::delete()
+                            .uri("/company/b5188eda-sleepy-head-123zzz")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
@@ -609,9 +815,334 @@ mod api_tests {
         todo!()
     }
 
-    //ToDo: Employment test
-    //ToDo: EventStaff test
-    //ToDo: TaskStaff test
-    //ToDo: AssociatedCompany test
-    //ToDo: Timesheet test
+    #[actix_web::test]
+    async fn get_employments_per_user() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_employments_non_existent_user() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_employments_invalid_uuid_format() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_employment() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_employment_non_existent_user() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_employment_non_existent_company() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_employment_invalid_uuid_format() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_subordinates() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_subordinates_errors() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn create_employment() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn create_employment_errors() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn update_emloyment() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn update_employment_errors() {
+        todo!()
+    }
+    
+    #[actix_web::test]
+    async fn get_all_event_staff() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_all_event_staff_errors() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_event_staff() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_event_staff_errors() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn create_event_staff() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn create_event_staff_errors() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn patch_event_staff() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn patch_event_staff_errors() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn delete_event_staff() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn delete_event_staff_errors() {
+        todo!()
+    }
+    
+    #[actix_web::test]
+    async fn get_all_assigned_staff() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_all_assigned_staff_errors() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_assigned_staff() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_assigned_staff_errors() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn create_assigned_staff() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn create_assigned_staff_errors() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn update_assigned_staff() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn update_assigned_staff_errors() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn delete_assigned_staff() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn delete_assigned_staff_errors() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn delete_not_accepted_assigned_staff() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn delete_not_accepted_assigned_staff_errors() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_all_associated_companies_per_event() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_all_associated_companies_non_existent_event() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_all_associated_comapnies_invalid_uuid_format() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn create_associated_company() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn create_associated_company_duplicate() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn create_associated_company_invalid_uuid_format() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn update_associated_company() {
+        todo!()
+    }
+
+
+    #[actix_web::test]
+    async fn update_associated_company_non_existent_event() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn update_associated_company_non_existent_company() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn update_associated_company_invalid_uuid_format() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn update_associated_company_empty_data() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn delete_associate_company() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn delete_associate_company_non_existent_event() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn delete_associate_company_non_existent_company() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn delete_associate_company_invalid_uuid_format() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_all_timesheets_for_employment() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_all_timesheets_for_non_existent_employment() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_all_timesheets_for_employment_invalid_uuid_format() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_timesheet() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_non_existent_timesheet() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_timesheet_invalid_uuid_format() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn create_timesheet() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn create_timesheet_non_existent_event() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn create_timesheet_non_existent_employment() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn create_timesheet_invalid_uuid_format() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn create_timesheet_duplicate() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    pub async fn update_timesheet() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    pub async fn update_timesheet_non_existent_event() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    pub async fn update_timesheet_non_existent_employment() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    pub async fn update_timesheet_invalid_uuid_format() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    pub async fn update_timesheet_empty_data() {
+        todo!()
+    }
 }
