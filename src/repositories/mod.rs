@@ -6,3 +6,5 @@ pub mod event;
 pub mod event_staff;
 pub mod task;
 pub mod user;
+
+pub mod repository;
