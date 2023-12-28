@@ -422,11 +422,193 @@ mod api_tests {
     async fn remove_event_avatar() {
         todo!()
     }
-
-
     
-    //ToDo: Task test
-    //ToDo: Comment test
+    #[actix_web::test]
+    async fn get_all_tasks_per_event() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_all_tasks_per_non_existent_event() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_all_tasks_per_event_invalid_uuid_format() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_one_task() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_one_task_non_existent_event() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_non_existent_task() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_one_task_invalid_uuid_format() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn create_task() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn create_task_duplicate() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn patch_task() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn patch_non_existent_task() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn patch_task_invalid_uuid_format() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn patch_task_empty_data() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn delete_task() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_deleted_task() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn delete_non_existent_task() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn delete_task_invalid_uuid_format() {
+        todo!()
+    }
+
+
+    #[actix_web::test]
+    async fn get_all_event_comments() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_all_event_comments_non_existent_event() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_all_event_comments_invalid_uuid_format() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn create_event_comment() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn create_event_comment_non_existent_event() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn create_event_comment_invalid_uuid_format() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn update_event_comment() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn update_event_comment_non_existent_event() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn update_event_comment_non_existent_comment() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn update_event_comment_invalid_uuid_format() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_all_task_comments() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_all_task_comments_non_existent_task() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn get_all_task_comments_invalid_uuid_format() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn create_task_comment() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn create_task_comment_non_existent_task() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn create_task_comment_invalid_uuid_format() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn update_task_comment() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn update_task_comment_non_existent_task() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn update_task_comment_non_existent_comment() {
+        todo!()
+    }
+
+    #[actix_web::test]
+    async fn update_task_comment_invalid_uuid_format() {
+        todo!()
+    }
+
     //ToDo: Employment test
     //ToDo: EventStaff test
     //ToDo: TaskStaff test

@@ -36,7 +36,7 @@ pub async fn get_event_task(
 }
 
 #[post("/event/{event_id}/task")]
-pub async fn create_event(
+pub async fn create_task(
     _event_id: web::Path<String>,
     _new_task: web::Form<NewEventTaskData>,
 ) -> HttpResponse {
@@ -44,7 +44,7 @@ pub async fn create_event(
 }
 
 #[patch("/event/{event_id}/task/{task_id}")]
-pub async fn update_event(
+pub async fn update_task(
     _event_id: web::Path<String>,
     _task_id: web::Path<String>,
     _task_data: web::Form<EventTaskData>,
@@ -53,7 +53,7 @@ pub async fn update_event(
 }
 
 #[delete("/event/{event_id}/task/{task_id}")]
-pub async fn delete_event(
+pub async fn delete_task(
     _event_id: web::Path<String>,
     _task_id: web::Path<String>,
 ) -> HttpResponse {
