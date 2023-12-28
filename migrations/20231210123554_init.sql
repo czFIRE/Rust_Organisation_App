@@ -32,8 +32,8 @@ CREATE TABLE user_record
     birth       DATE NOT NULL,
     avatar_url  VARCHAR(255),
     gender      gender NOT NULL,
-    role        role NOT NULL,
-    status      status NOT NULL,
+    role        role NOT NULL DEFAULT 'user',
+    status      status NOT NULL DEFAULT 'available',
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
@@ -104,7 +104,7 @@ CREATE TABLE employment
     end_date    DATE NOT NULL,
     description TEXT,
     type        employee_contract NOT NULL,
-    level       employee_level NOT NULL,
+    level       employee_level NOT NULL DEFAULT 'basic',
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
@@ -135,7 +135,7 @@ CREATE TABLE event
     name           VARCHAR(255) NOT NULL,
     description    TEXT,
     website        VARCHAR(255),
-    accepts_staff  BOOLEAN NOT NULL,
+    accepts_staff  BOOLEAN NOT NULL DEFAULT true,
     start_date     DATE NOT NULL,
     end_date       DATE NOT NULL,
     avatar_url     VARCHAR(255),
@@ -180,7 +180,7 @@ CREATE TABLE timesheet
     start_date   DATE NOT NULL,
     end_date     DATE NOT NULL,
     total_hours  hours_per_month_float NOT NULL DEFAULT 0.0,
-    is_editable  BOOLEAN NOT NULL,
+    is_editable  BOOLEAN NOT NULL DEFAULT true,
     manager_note TEXT,
     -------------------------------------------------------
     created_at   TIMESTAMP NOT NULL DEFAULT now(),
@@ -207,7 +207,7 @@ CREATE TABLE work_day
     date         DATE NOT NULL,
     total_hours  hours_per_day_float NOT NULL DEFAULT 0.0,
     comment      TEXT,
-    is_editable  BOOLEAN NOT NULL,
+    is_editable  BOOLEAN NOT NULL DEFAULT true,
     --------------------------------------------------------
     created_at   TIMESTAMP NOT NULL DEFAULT now(),
     edited_at    TIMESTAMP NOT NULL DEFAULT now(),
@@ -229,8 +229,8 @@ CREATE TABLE event_staff
 (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     -------------------------------------------------------
-    role        event_role NOT NULL,
-    status      acceptance_status NOT NULL,
+    role        event_role NOT NULL DEFAULT 'staff',
+    status      acceptance_status NOT NULL DEFAULT 'pending',
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
@@ -258,8 +258,8 @@ CREATE TABLE task
     title           VARCHAR(255) NOT NULL,
     description     TEXT,
     finished_at     TIMESTAMP,
-    priority        task_priority NOT NULL,
-    accepts_staff   BOOLEAN NOT NULL,
+    priority        task_priority NOT NULL DEFAULT 'medium',
+    accepts_staff   BOOLEAN NOT NULL DEFAULT true,
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
@@ -280,7 +280,7 @@ CREATE TABLE task
 
 CREATE TABLE assigned_staff
 (
-    status      acceptance_status NOT NULL,
+    status      acceptance_status NOT NULL DEFAULT 'pending',
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
