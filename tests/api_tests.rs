@@ -2,11 +2,12 @@
 mod api_tests {
     use std::borrow::Borrow;
 
-    use actix_web::http::{Method, self};
+    use actix_web::http::{Method, self, StatusCode};
     use actix_web::http::header::ContentType;
     use actix_web::{test, App};
     use chrono::{NaiveDate, Utc, TimeZone};
     use organization::models::{UserRole, TaskPriority};
+    use organization::templates::comment::CommentTemplate;
     use organization::templates::company::{CompaniesTemplate, CompanyTemplate};
     use organization::templates::event::{EventsTemplate, EventTemplate};
     use organization::templates::task::{TasksTemplate, TaskTemplate};
@@ -995,22 +996,50 @@ mod api_tests {
 
     #[actix_web::test]
     async fn delete_task() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event_task::delete_task)).await;
+
+        let req = test::TestRequest::delete()
+                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task/7ae0c017-fe31-4aac-b767-100d18a8877b")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
     }
 
     #[actix_web::test]
     async fn delete_non_existent_task() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event_task::delete_task)).await;
+
+        let req = test::TestRequest::delete()
+                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task/7ae0c017-fe31-4aac-b767-100d1fa88aac")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn delete_task_invalid_uuid_format() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event_task::delete_task)).await;
+
+        let req = test::TestRequest::delete()
+                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task/yesofficerIamanUUID.")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
 
+    //ToDo: Insert an event comment into the DB :|
     #[actix_web::test]
     async fn get_all_event_comments() {
+        let app = test::init_service(App::new().service(organization::handlers::comment::get_all_event_comments)).await;
+
+        let req = test::TestRequest::get()
+                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/comment")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
         todo!()
     }
 
@@ -1026,17 +1055,62 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_event_comment() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::comment::create_event_comment)).await;
+
+        let data = json!({
+            "author_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
+            "content": "Cool event, maaaaan!",
+        });
+
+        let req = test::TestRequest::post()
+                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/comment")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::CREATED);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<CommentTemplate>(body).unwrap();
+        assert_eq!(out.author.id, Uuid::from_str("35341253-da20-40b6-96d8-ce069b1ba5d4").unwrap());
+        assert_eq!(out.content, "Cool event, maaaaan!");
+        assert_eq!(out.parent_category_id, Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap());
     }
 
     #[actix_web::test]
     async fn create_event_comment_non_existent_event() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::comment::create_event_comment)).await;
+
+        let data = json!({
+            "author_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
+            "content": "Cool event, maaaaan!",
+        });
+
+        let req = test::TestRequest::post()
+                            .uri("/event/b554d7ac-cdea-410a-9bb4-70fc5c7748f8/comment")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn create_event_comment_invalid_uuid_format() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::comment::create_event_comment)).await;
+
+        let data = json!({
+            "author_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
+            "content": "Cool event, maaaaan!",
+        });
+
+        let req = test::TestRequest::post()
+                            .uri("/event/uuidied-writingthis/comment")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]

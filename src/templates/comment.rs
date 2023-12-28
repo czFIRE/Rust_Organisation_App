@@ -1,11 +1,12 @@
 use askama::Template;
 use chrono::NaiveDateTime;
+use serde::Deserialize;
 use sqlx::types::uuid;
 use uuid::Uuid;
 
 use super::user::UserLiteTemplate;
 
-#[derive(Template)]
+#[derive(Template, Deserialize)]
 #[template(path = "comment/comment.html")]
 pub struct CommentTemplate {
     pub id: Uuid,
