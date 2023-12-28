@@ -70,14 +70,14 @@ CREATE TABLE company
 
 CREATE TABLE address
 (
-    country     VARCHAR(255) NOT NULL,
-    region      VARCHAR(255) NOT NULL,
-    city        VARCHAR(255) NOT NULL,
-    street      VARCHAR(255) NOT NULL,
-    number      VARCHAR(255) NOT NULL,
-    postal_code VARCHAR(255) NOT NULL,
+    country         VARCHAR(255) NOT NULL,
+    region          VARCHAR(255) NOT NULL,
+    city            VARCHAR(255) NOT NULL,
+    street          VARCHAR(255) NOT NULL,
+    street_number   VARCHAR(255) NOT NULL,
+    postal_code     VARCHAR(255) NOT NULL,
     -------------------------------------------------------
-    company_id  UUID NOT NULL,
+    company_id      UUID NOT NULL,
     -------------------------------------------------------
     PRIMARY KEY (company_id),
     FOREIGN KEY (company_id) REFERENCES company (id),
@@ -91,7 +91,7 @@ CREATE TABLE address
     CONSTRAINT check_company_address_street_len
         CHECK (char_length(street) >= 1),
     CONSTRAINT check_company_address_address_number_len
-        CHECK (char_length(number) >= 1),
+        CHECK (char_length(street_number) >= 1),
     CONSTRAINT check_company_address_postal_code_len
         CHECK (char_length(postal_code) >= 1)
 );

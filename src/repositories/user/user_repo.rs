@@ -121,7 +121,7 @@ impl UserRepository {
         }
 
         // Should return error if we can't find the user
-        let user_check = self.read_one_db(user_id).await?;
+        let user_check = self.read_one(user_id).await?;
 
         if user_check.deleted_at.is_some() {
             // TODO better error
@@ -173,7 +173,7 @@ impl UserRepository {
     pub async fn delete_user(&self, user_id: Uuid) -> DbResult<()> {
         let executor = self.pool.as_ref();
 
-        let user = self.read_one_db(user_id).await?;
+        let user = self.read_one(user_id).await?;
 
         if user.deleted_at.is_some() {
             return Err(sqlx::Error::RowNotFound);
