@@ -5,7 +5,7 @@ mod api_tests {
     use actix_web::http::{Method, self};
     use actix_web::http::header::ContentType;
     use actix_web::{test, App};
-    use chrono::NaiveDate;
+    use chrono::{NaiveDate, Utc, TimeZone};
     use organization::models::UserRole;
     use organization::templates::company::{CompaniesTemplate, CompanyTemplate};
     use organization::templates::event::{EventsTemplate, EventTemplate};
@@ -609,12 +609,65 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_event() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event::create_event)).await;
+
+        let start_date = Utc.with_ymd_and_hms(2027, 04, 06, 0, 0, 0).unwrap();
+        let end_date = Utc.with_ymd_and_hms(2027, 04, 07, 0, 0, 0).unwrap();
+
+        let data = json!({  
+            "name": "BitConnect Charitative Concert",
+            "description": "Return of the best bitcoin app, BitConneeeeeeeeect!",
+            "start_date": start_date.clone().to_string(),
+            "end_date": end_date.clone().to_string(),
+        });
+
+        let req = test::TestRequest::post()
+                            .uri("/event")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::CREATED);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<EventTemplate>(body).unwrap();
+        assert_eq!(out.name, "BitConnect Charitative Concert");
+        // Accepts staff should be default true when event is created.
+        assert!(out.accepts_staff);
+        assert_eq!(out.description, Some("Return of the best bitcoin app, BitConneeeeeeeeect!".to_string()));
+        assert_eq!(out.start_date, start_date.date_naive());
+        assert_eq!(out.end_date, end_date.date_naive());
     }
 
     #[actix_web::test]
     async fn create_event_duplicate() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event::create_event)).await;
+
+        let start_date = Utc.with_ymd_and_hms(2027, 04, 06, 0, 0, 0).unwrap();
+        let end_date = Utc.with_ymd_and_hms(2027, 04, 07, 0, 0, 0).unwrap();
+
+        let data = json!({  
+            "name": "BitConnect Charitative Concert",
+            "description": "Return of the best bitcoin app, BitConneeeeeeeeect!",
+            "start_date": start_date.clone().to_string(),
+            "end_date": end_date.clone().to_string(),
+        });
+
+        let req = test::TestRequest::post()
+                            .uri("/event")
+                            .set_form(data.clone())
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::CREATED);
+
+        let req = test::TestRequest::post()
+                            .uri("/event")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
