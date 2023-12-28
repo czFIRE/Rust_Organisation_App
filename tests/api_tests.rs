@@ -5,8 +5,10 @@ mod api_tests {
     use actix_web::http::{Method, self};
     use actix_web::http::header::ContentType;
     use actix_web::{test, App};
+    use chrono::NaiveDate;
     use organization::models::UserRole;
     use organization::templates::company::{CompaniesTemplate, CompanyTemplate};
+    use organization::templates::event::{EventsTemplate, EventTemplate};
     use organization::templates::user::UserTemplate;
     use serde_json::json;
     use organization::{self, templates};
@@ -546,22 +548,63 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_events() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event::get_events)).await;
+        
+        let req = test::TestRequest::get()
+                            .uri("/event")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<EventsTemplate>(body).unwrap();
+        assert_eq!(out.events.len(), 1);
     }
-
+    
     #[actix_web::test]
     async fn get_existing_event() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event::get_event)).await;
+        
+        let req = test::TestRequest::get()
+                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<EventTemplate>(body).unwrap();
+        assert_eq!(out.name, "Woodstock");
+        assert_eq!(out.website, Some("https://woodstock.com".to_string()));
+        assert!(out.accepts_staff);
+        assert_eq!(out.description, Some("A legendary music festival".to_string()));
+        assert_eq!(out.start_date, NaiveDate::from_ymd_opt(1969, 8, 15).unwrap());
+        assert_eq!(out.end_date, NaiveDate::from_ymd_opt(1969, 8, 18).unwrap());
     }
 
     #[actix_web::test]
     async fn get_non_existent_event() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event::get_event)).await;
+        
+        let req = test::TestRequest::get()
+                            .uri("/event/a71cd75e-a811-410a-9bb4-70fc5c7748f8")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn get_event_invalid_uuid_format() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event::get_event)).await;
+        
+        let req = test::TestRequest::get()
+                            .uri("/event/a71cd75e-sleepy-head-111z3zz")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]

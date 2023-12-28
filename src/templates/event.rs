@@ -1,9 +1,10 @@
 use askama::Template;
 use chrono::{NaiveDate, NaiveDateTime};
+use serde::Deserialize;
 use sqlx::types::uuid;
 use uuid::Uuid;
 
-#[derive(Template)]
+#[derive(Template, Deserialize)]
 #[template(path = "event/event.html")]
 pub struct EventTemplate {
     pub id: Uuid,
@@ -18,7 +19,7 @@ pub struct EventTemplate {
     pub edited_at: NaiveDateTime,
 }
 
-#[derive(Template)]
+#[derive(Template, Deserialize)]
 #[template(path = "event/event-lite.html")]
 pub struct EventLiteTemplate {
     pub id: Uuid,
@@ -27,4 +28,10 @@ pub struct EventLiteTemplate {
     pub accepts_staff: bool,
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
+}
+
+#[derive(Template, Deserialize)]
+#[template(path = "event/events.html")]
+pub struct EventsTemplate {
+    pub events: Vec<EventLiteTemplate>,
 }
