@@ -1,3 +1,6 @@
-pub async fn index() -> String {
-    String::from("RUST API is working \\o/")
+use actix_web::{get, HttpResponse};
+
+#[get("/")]
+pub async fn index() -> HttpResponse {
+    HttpResponse::Ok().body(String::from("RUST API is working."))
 }

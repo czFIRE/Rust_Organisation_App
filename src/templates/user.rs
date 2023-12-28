@@ -1,11 +1,12 @@
 use askama::Template;
 use chrono::{NaiveDate, NaiveDateTime};
+use serde::Deserialize;
 use sqlx::types::uuid;
 use uuid::Uuid;
 
 use crate::models::{Gender, UserRole, UserStatus};
 
-#[derive(Template)]
+#[derive(Template, Deserialize)]
 #[template(path = "user/user.html")]
 pub struct UserTemplate {
     pub id: Uuid,
@@ -19,7 +20,7 @@ pub struct UserTemplate {
     pub created_at: NaiveDateTime,
 }
 
-#[derive(Template)]
+#[derive(Template, Deserialize)]
 #[template(path = "user/user-lite.html")]
 pub struct UserLiteTemplate {
     pub id: Uuid,

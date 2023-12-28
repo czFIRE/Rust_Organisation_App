@@ -1,15 +1,15 @@
-use crate::handlers::index::index;
-use crate::repositories::company::CompanyRepository;
-use actix_web::{web, App, HttpServer};
-use dotenv::dotenv;
-use std::io::Result;
-use std::sync::Arc;
-
 mod common;
 mod handlers;
 mod models;
 mod repositories;
 mod templates;
+
+use actix_web::{web, App, HttpServer};
+use dotenv::dotenv;
+use std::io::Result;
+use std::sync::Arc;
+
+use crate::handlers::index::index;
 
 const HOST: &str = "0.0.0.0:8000";
 
@@ -26,12 +26,8 @@ async fn main() -> Result<()> {
 
     println!("API is running on http://{}/api", HOST);
 
-    HttpServer::new(move || {
-        App::new().route("/api", web::get().to(index)).service(
-            web::scope("/api").app_data(web::Data::new(CompanyRepository::new(arc_pool.clone()))),
-        )
-    })
-    .bind(HOST)?
-    .run()
-    .await
+    HttpServer::new(move || App::new().service(index))
+        .bind(HOST)?
+        .run()
+        .await
 }
