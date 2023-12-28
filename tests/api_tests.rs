@@ -865,12 +865,57 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_task() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event_task::create_task)).await;
+
+        let data = json!({
+            "creator_id": "9281b570-4d02-4096-9136-338a613c71cd",
+            "title": "Stock the wood pile.",
+            "priority": "high"
+        });
+
+        let req = test::TestRequest::post()
+                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::CREATED);
+        
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<TaskTemplate>(body).unwrap();
+        assert!(out.accepts_staff);
+        assert!(out.finished_at.is_none());
+        assert_eq!(out.title, "Stock the wood pile.".to_string());
+        assert_eq!(out.creator.id, Uuid::from_str("9281b570-4d02-4096-9136-338a613c71cd").unwrap());
+        assert_eq!(out.event_id, Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap());
     }
 
     #[actix_web::test]
     async fn create_task_duplicate() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event_task::create_task)).await;
+
+        let data = json!({
+            "creator_id": "9281b570-4d02-4096-9136-338a613c71cd",
+            "title": "Unstock the wood pile.",
+            "priority": "low"
+        });
+
+        let req = test::TestRequest::post()
+                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task")
+                            .set_form(data.clone())
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::CREATED);
+
+        let req = test::TestRequest::post()
+                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
