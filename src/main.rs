@@ -5,6 +5,7 @@ use crate::repositories::company::company_repo::CompanyRepository;
 use crate::repositories::employment::employment_repo::EmploymentRepository;
 use crate::repositories::event::event_repo::EventRepository;
 use crate::repositories::event_staff::event_staff_repo::StaffRepository;
+use crate::repositories::repository::DbRepository;
 use crate::repositories::task::task_repo::TaskRepository;
 use crate::repositories::user::user_repo::UserRepository;
 use actix_web::{web, App, HttpServer};

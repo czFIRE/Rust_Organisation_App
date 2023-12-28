@@ -7,16 +7,28 @@ use crate::models::{Gender, UserRole, UserStatus};
 
 use super::models::{NewUser, User, UserData};
 
+use async_trait::async_trait;
+
 #[derive(Clone)]
 pub struct UserRepository {
     pub pool: Arc<PgPool>,
 }
 
-impl UserRepository {
-    pub fn new(pool: Arc<PgPool>) -> Self {
+#[async_trait]
+impl crate::repositories::repository::DbRepository for UserRepository {
+    /// Database repository constructor
+    #[must_use]
+    fn new(pool: Arc<PgPool>) -> Self {
         Self { pool }
     }
 
+    /// Method allowing the database repository to disconnect from the database pool gracefully
+    async fn disconnect(&mut self) -> () {
+        self.pool.close().await;
+    }
+}
+
+impl UserRepository {
     // Creates a new user entry in the database.
     pub async fn create(&self, data: NewUser) -> DbResult<User> {
         let executor = self.pool.as_ref();
@@ -51,7 +63,7 @@ impl UserRepository {
     }
 
     // Reads a single user from the database.
-    pub async fn _read_one(&self, user_id: Uuid) -> DbResult<User> {
+    pub async fn read_one(&self, user_id: Uuid) -> DbResult<User> {
         // TODO: Redis here
 
         self.read_one_db(user_id).await
@@ -93,7 +105,7 @@ impl UserRepository {
     }
 
     // Update a user in the DB.
-    pub async fn _update_user(&self, user_id: Uuid, data: UserData) -> DbResult<User> {
+    pub async fn update_user(&self, user_id: Uuid, data: UserData) -> DbResult<User> {
         // TODO - this should support transactions
         let executor = self.pool.as_ref();
 
@@ -109,7 +121,12 @@ impl UserRepository {
         }
 
         // Should return error if we can't find the user
-        let _user_check = self.read_one_db(user_id).await?;
+        let user_check = self.read_one_db(user_id).await?;
+
+        if user_check.deleted_at.is_some() {
+            // TODO better error
+            return Err(sqlx::Error::RowNotFound);
+        }
 
         let user_res: User = sqlx::query_as!(
             User,
@@ -125,7 +142,8 @@ impl UserRepository {
                 edited_at = NOW() 
             WHERE 
                 id = $7 
-                AND deleted_at IS NULL RETURNING id, 
+                AND deleted_at IS NULL 
+            RETURNING id, 
                 name, 
                 email, 
                 birth, 
@@ -152,10 +170,16 @@ impl UserRepository {
     }
 
     // Remove a user in the DB if they exist.
-    pub async fn _delete_user(&self, user_id: Uuid) -> DbResult<()> {
+    pub async fn delete_user(&self, user_id: Uuid) -> DbResult<()> {
         let executor = self.pool.as_ref();
 
-        let _user_res = sqlx::query!(
+        let user = self.read_one_db(user_id).await?;
+
+        if user.deleted_at.is_some() {
+            return Err(sqlx::Error::RowNotFound);
+        }
+
+        sqlx::query!(
             r#"UPDATE user_record
             SET deleted_at = NOW(), edited_at = NOW()
             WHERE id = $1
@@ -167,10 +191,5 @@ impl UserRepository {
         .await?;
 
         Ok(())
-    }
-
-    #[inline]
-    pub async fn disconnect(&mut self) {
-        self.pool.close().await;
     }
 }

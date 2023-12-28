@@ -32,7 +32,7 @@ pub struct User {
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, FromRow, Clone)]
 pub struct UserData {
     pub name: Option<String>,
     pub email: Option<String>,

@@ -187,8 +187,11 @@ impl AssignedStaffRepository {
                 INNER JOIN user_record ON event_staff.user_id = user_record.id
                 INNER JOIN company ON event_staff.company_id = company.id
             WHERE 
-                assigned_staff.task_id = $1"#,
+                assigned_staff.task_id = $1
+            LIMIT $2 OFFSET $3"#,
             task_id,
+            filter.limit,
+            filter.offset
         )
         .fetch_all(executor)
         .await?;
