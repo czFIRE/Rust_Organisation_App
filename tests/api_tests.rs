@@ -920,22 +920,77 @@ mod api_tests {
 
     #[actix_web::test]
     async fn patch_task() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event_task::update_task)).await;
+
+        let data = json!({
+            "title": "Help do stuff."
+        });
+
+        let req = test::TestRequest::patch()
+                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task/7ae0c017-fe31-4aac-b767-100d18a8877b")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<TaskTemplate>(body).unwrap();
+        assert!(out.accepts_staff);
+        assert!(out.finished_at.is_none());
+        assert_eq!(out.title, "Help do stuff.".to_string());
+        assert_eq!(out.creator.id, Uuid::from_str("9281b570-4d02-4096-9136-338a613c71cd").unwrap());
+        assert_eq!(out.event_id, Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap());
     }
 
     #[actix_web::test]
     async fn patch_non_existent_task() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event_task::update_task)).await;
+
+        let data = json!({
+            "title": "Help do stuff."
+        });
+
+        let req = test::TestRequest::patch()
+                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task/7a201017-aa31-4aac-b767-100d18a8877b")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn patch_task_invalid_uuid_format() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event_task::update_task)).await;
+
+        let data = json!({
+            "title": "Help do stuff."
+        });
+
+        let req = test::TestRequest::patch()
+                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task/IllhaveyouknowIgraduatedtopofmyclassintheNavySealsandIvebeeninvolvedinnumeroussecretraids")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
     async fn patch_task_empty_data() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event_task::update_task)).await;
+
+        let data = json!({});
+
+        let req = test::TestRequest::patch()
+                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task/7ae0c017-fe31-4aac-b767-100d18a8877b")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
