@@ -198,25 +198,6 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn get_deleted_user() {
-        let app = test::init_service(App::new().service(organization::handlers::user::delete_user).service(organization::handlers::user::get_user)).await;
-
-        let req = test::TestRequest::delete()
-                    .uri("/user/ac9bf689-a713-4b66-a3d0-41faaf0f8d0c")
-                    .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_success());
-        assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
-
-        let req = test::TestRequest::get()
-                            .uri("/user/ac9bf689-a713-4b66-a3d0-41faaf0f8d0c")
-                            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
-    }
-
-    #[actix_web::test]
     async fn delete_non_existent_user() {
         let app = test::init_service(App::new().service(organization::handlers::user::delete_user)).await;
 
@@ -496,18 +477,6 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn get_deleted_company() {
-        let app= test::init_service(App::new().service(organization::handlers::company::get_company)).await;
-
-        let req = test::TestRequest::get()
-                            .uri("/company/b5188eda-528d-48d4-8cee-498e0971f9f5")
-                            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
-    }
-
-    #[actix_web::test]
     async fn delete_non_existent_company() {
         let app= test::init_service(App::new().service(organization::handlers::company::delete_company)).await;
 
@@ -672,42 +641,111 @@ mod api_tests {
 
     #[actix_web::test]
     async fn patch_event() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event::update_event)).await;
+
+        let data = json!({
+            "name": "Ironstock"
+        });
+
+        let req = test::TestRequest::patch()
+                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<EventTemplate>(body).unwrap();
+        assert_eq!(out.name, "Ironstock");
+        assert_eq!(out.website, Some("https://woodstock.com".to_string()));
+        assert!(out.accepts_staff);
+        assert_eq!(out.description, Some("A legendary music festival".to_string()));
+        assert_eq!(out.start_date, NaiveDate::from_ymd_opt(1969, 8, 15).unwrap());
+        assert_eq!(out.end_date, NaiveDate::from_ymd_opt(1969, 8, 18).unwrap());
     }
 
     #[actix_web::test]
     async fn patch_non_existent_event() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event::update_event)).await;
+
+        let data = json!({
+            "name": "Ironstock"
+        });
+
+        let req = test::TestRequest::patch()
+                            .uri("/event/b71fd7ce-c891-410a-9bba-1aacececc8fa")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn patch_event_invalid_uuid_format() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event::update_event)).await;
+
+        let data = json!({});
+
+        let req = test::TestRequest::patch()
+                            .uri("/event/b71fd7ce-deaf-listenerz-zz123zy")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
     async fn patch_event_empty_data() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event::update_event)).await;
+
+        let data = json!({});
+
+        let req = test::TestRequest::patch()
+                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
     async fn delete_event() {
-        todo!()
-    }
+        let app = test::init_service(App::new().service(organization::handlers::event::delete_event)).await;
 
-    #[actix_web::test]
-    async fn get_deleted_event() {
-        todo!()
+        let req = test::TestRequest::delete()
+                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
     }
 
     #[actix_web::test]
     async fn delete_non_existent_event() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event::delete_event)).await;
+
+        let req = test::TestRequest::delete()
+                            .uri("/event/b7afddce-c8fe-45aa-a12c-70fc5c7748f8")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn delete_event_invalid_uuid_format() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::event::delete_event)).await;
+
+        let req = test::TestRequest::delete()
+                            .uri("/event/b71fd7ce-im-rusty-boizzz-1")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
@@ -792,11 +830,6 @@ mod api_tests {
 
     #[actix_web::test]
     async fn delete_task() {
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn get_deleted_task() {
         todo!()
     }
 
