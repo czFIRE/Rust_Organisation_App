@@ -1,5 +1,6 @@
 use crate::handlers::index::index;
 use crate::repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository;
+use crate::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
 use crate::repositories::comment::comment_repo::CommentRepository;
 use crate::repositories::company::company_repo::CompanyRepository;
 use crate::repositories::employment::employment_repo::EmploymentRepository;
