@@ -26,7 +26,7 @@ impl crate::repositories::repository::DbRepository for EventRepository {
 }
 
 impl EventRepository {
-    pub async fn _create(&self, data: NewEvent) -> DbResult<Event> {
+    pub async fn create(&self, data: NewEvent) -> DbResult<Event> {
         let executor = self.pool.as_ref();
 
         let new_event: Event = sqlx::query_as!(
@@ -58,7 +58,7 @@ impl EventRepository {
         Ok(new_event)
     }
 
-    pub async fn _read_one(&self, event_id: Uuid) -> DbResult<Event> {
+    pub async fn read_one(&self, event_id: Uuid) -> DbResult<Event> {
         // Redis here
         self.read_one_db(event_id).await
     }
@@ -74,22 +74,38 @@ impl EventRepository {
         Ok(event)
     }
 
-    pub async fn _read_all(&self, filter: EventFilter) -> DbResult<Vec<Event>> {
+    // If you would like to get all companies for an event it's in the associated company repo
+    pub async fn read_all(&self, filter: EventFilter) -> DbResult<Vec<Event>> {
         let executor = self.pool.as_ref();
 
-        let events: Vec<Event> = sqlx::query_as!(
-            Event,
-            r#" SELECT * FROM event LIMIT $1 OFFSET $2;"#,
-            filter.limit,
-            filter.offset,
-        )
-        .fetch_all(executor)
-        .await?;
+        let events: Vec<Event> = match filter.accepts_staff {
+            Some(accepts_staff) => {
+                sqlx::query_as!(
+                    Event,
+                    r#" SELECT * FROM event WHERE accepts_staff = $1 LIMIT $2 OFFSET $3;"#,
+                    accepts_staff,
+                    filter.limit,
+                    filter.offset,
+                )
+                .fetch_all(executor)
+                .await?
+            }
+            None => {
+                sqlx::query_as!(
+                    Event,
+                    r#" SELECT * FROM event LIMIT $1 OFFSET $2;"#,
+                    filter.limit,
+                    filter.offset,
+                )
+                .fetch_all(executor)
+                .await?
+            }
+        };
 
         Ok(events)
     }
 
-    pub async fn _update_event(&self, event_id: Uuid, data: EventData) -> DbResult<Event> {
+    pub async fn update(&self, event_id: Uuid, data: EventData) -> DbResult<Event> {
         if data.name.is_none()
             && data.description.is_none()
             && data.website.is_none()
@@ -101,6 +117,13 @@ impl EventRepository {
         }
 
         let executor = self.pool.as_ref();
+
+        let event_check = self.read_one(event_id).await?;
+
+        if event_check.deleted_at.is_some() {
+            // TODO - return better error
+            return Err(sqlx::Error::RowNotFound);
+        }
 
         let event: Event = sqlx::query_as!(
             Event,
@@ -138,10 +161,17 @@ impl EventRepository {
         Ok(event)
     }
 
-    pub async fn _delete_event(&self, event_id: Uuid) -> DbResult<()> {
+    pub async fn delete(&self, event_id: Uuid) -> DbResult<()> {
         let executor = self.pool.as_ref();
 
-        let _event_res = sqlx::query!(
+        let event_check = self.read_one(event_id).await?;
+
+        if event_check.deleted_at.is_some() {
+            // TODO - return better error
+            return Err(sqlx::Error::RowNotFound);
+        }
+
+        sqlx::query!(
             r#"UPDATE event
             SET deleted_at = NOW(), edited_at = NOW()
             WHERE id = $1

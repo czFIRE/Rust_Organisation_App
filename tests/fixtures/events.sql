@@ -1,3 +1,4 @@
+DO $$
 DECLARE
   company0_id UUID := 'b5188eda-528d-48d4-8cee-498e0971f9f5';
   company1_id UUID := '134d5286-5f55-4637-9b98-223a5820a464';
@@ -28,20 +29,15 @@ DECLARE
   comment0_id UUID := '0d6cec6a-4fe8-4e44-bf68-e33de0ed121b';
   comment1_id UUID := 'daac23ec-fb36-434a-823b-49716ed2002c';
 
-INSERT INTO event
-    (id, name, description,
-    website, accepts_staff,
-    start_date, end_date, avatar_url,
-    created_at, edited_at)
-    VALUES
-    (event0_id, 'Woodstock', 'A legendary music festival.',
-    'https://woodstock.com', true,
-    '1969-08-15', '1969-08-18', 'woodstock.png', 
-    '2023-05-03 10:38:20.4', '2023-12-01 14:30:20.1');
-
-INSERT INTO associated_company
-    (company_id, event_id, type,
-	created_at, edited_at)
-    VALUES
-	(company0_id, event0_id, 'organizer',
-	'2023-05-03 10:38:20.4', '2023-12-01 14:30:20.1');
+BEGIN
+    INSERT INTO event
+        (id, name, description,
+        website, accepts_staff,
+        start_date, end_date, avatar_url,
+        created_at, edited_at)
+        VALUES
+        (event0_id, 'Woodstock', 'A legendary music festival.',
+        'https://woodstock.com', true,
+        '1969-08-15', '1969-08-18', 'woodstock.png', 
+        '2023-05-03 10:38:20.4', '2023-12-01 14:30:20.1');
+END $$;

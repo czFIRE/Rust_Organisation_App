@@ -185,10 +185,10 @@ impl AssociatedCompanyRepository {
         event_id: Uuid,
     ) -> DbResult<Vec<AssociatedCompanyExtented>> {
         // TODO REDIS here
-        self.read_all_db_for_event(filter, event_id).await
+        self.read_all_for_event_db(filter, event_id).await
     }
 
-    pub async fn read_all_db_for_event(
+    pub async fn read_all_for_event_db(
         &self,
         filter: AssociatedCompanyFilter,
         event_id: Uuid,
@@ -244,16 +244,17 @@ impl AssociatedCompanyRepository {
             .collect())
     }
 
-    pub async fn read_all_for_company(
+    pub async fn read_all_events_for_company(
         &self,
         filter: AssociatedCompanyFilter,
         company_id: Uuid,
     ) -> DbResult<Vec<AssociatedCompanyExtented>> {
         // TODO REDIS here
-        self.read_all_db_for_company(filter, company_id).await
+        self.read_all_events_for_company_db(filter, company_id)
+            .await
     }
 
-    pub async fn read_all_db_for_company(
+    pub async fn read_all_events_for_company_db(
         &self,
         filter: AssociatedCompanyFilter,
         company_id: Uuid,

@@ -41,7 +41,6 @@ pub struct EventData {
 #[derive(Debug, Clone)]
 pub struct EventFilter {
     pub accepts_staff: Option<bool>,
-    pub associated_company_id: Option<Uuid>,
     pub limit: Option<i64>,
     pub offset: Option<i64>,
 }

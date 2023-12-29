@@ -718,30 +718,364 @@ pub mod company_repo_tests {
 
 #[cfg(test)]
 pub mod event_repo_tests {
+    use std::sync::Arc;
+
+    use chrono::{NaiveDate, NaiveDateTime, Utc};
+    use organization_app::{
+        common::DbResult,
+        repositories::{
+            event::{
+                event_repo::EventRepository,
+                models::{EventData, EventFilter, NewEvent},
+            },
+            repository::DbRepository,
+        },
+    };
     use sqlx::PgPool;
     use uuid::{uuid, Uuid};
 
     #[sqlx::test(fixtures("events"))]
+    async fn create(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut event_repo = EventRepository::new(arc_pool);
+
+        let new_event_data = NewEvent {
+            name: "Test Event".to_string(),
+            description: Some("Test Description".to_string()),
+            website: Some("test.com".to_string()),
+            start_date: NaiveDate::from_ymd_opt(2021, 9, 15).unwrap(),
+            end_date: NaiveDate::from_ymd_opt(2021, 9, 16).unwrap(),
+        };
+
+        let new_event = event_repo
+            .create(new_event_data.clone())
+            .await
+            .expect("Create should succeed");
+
+        assert_eq!(new_event.name, new_event_data.name);
+        assert_eq!(new_event.description, new_event_data.description);
+        assert_eq!(new_event.website, new_event_data.website);
+        assert_eq!(new_event.start_date, new_event_data.start_date);
+        assert_eq!(new_event.end_date, new_event_data.end_date);
+
+        assert_eq!(
+            new_event.avatar_url,
+            Some("img/default/event.jpg".to_string())
+        );
+
+        assert!(new_event.accepts_staff);
+
+        let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
+        let time_difference_created = time - new_event.created_at;
+        let time_difference_edited = time - new_event.edited_at;
+
+        assert!(time_difference_created.num_seconds() < 2);
+        assert!(time_difference_edited.num_seconds() < 2);
+        assert!(new_event.deleted_at.is_none());
+
+        event_repo.disconnect().await;
+
+        Ok(())
+    }
+
+    #[sqlx::test(fixtures("events"))]
+    async fn read(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut event_repo = EventRepository::new(arc_pool);
+
+        let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8");
+
+        let event = event_repo
+            .read_one(event_id)
+            .await
+            .expect("Read should succeed");
+
+        assert_eq!(event.id, event_id);
+        assert_eq!(event.name, "Woodstock");
+        assert_eq!(
+            event.description,
+            Some("A legendary music festival.".to_string())
+        );
+        assert_eq!(event.website, Some("https://woodstock.com".to_string()));
+        assert_eq!(
+            event.start_date,
+            NaiveDate::from_ymd_opt(1969, 8, 15).unwrap()
+        );
+        assert_eq!(
+            event.end_date,
+            NaiveDate::from_ymd_opt(1969, 8, 18).unwrap()
+        );
+        assert_eq!(event.avatar_url, Some("woodstock.png".to_string()));
+        assert!(event.accepts_staff);
+
+        event_repo.disconnect().await;
+
+        Ok(())
+    }
+
+    #[sqlx::test(fixtures("events"))]
+    async fn read_all(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut event_repo = EventRepository::new(arc_pool);
+
+        {
+            let filter = EventFilter {
+                limit: None,
+                offset: None,
+                accepts_staff: Some(true),
+            };
+
+            let events = event_repo
+                .read_all(filter)
+                .await
+                .expect("Read all should succeed");
+
+            assert_eq!(events.len(), 1);
+
+            let event = &events[0];
+
+            assert_eq!(event.name, "Woodstock");
+        }
+
+        {
+            let filter = EventFilter {
+                limit: None,
+                offset: None,
+                accepts_staff: Some(false),
+            };
+
+            let events = event_repo
+                .read_all(filter)
+                .await
+                .expect("Read all should succeed");
+
+            assert_eq!(events.len(), 0);
+        }
+
+        event_repo.disconnect().await;
+
+        Ok(())
+    }
+
+    #[sqlx::test(fixtures("events"))]
+    async fn update(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut event_repo = EventRepository::new(arc_pool);
+
+        let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8");
+
+        // Correct update
+
+        {
+            let event = event_repo
+                .read_one(event_id)
+                .await
+                .expect("Read should succeed");
+
+            let new_event_data = EventData {
+                name: Some("Test Event".to_string()),
+                description: Some("Test Description".to_string()),
+                website: Some("test.com".to_string()),
+                start_date: Some(NaiveDate::from_ymd_opt(2021, 9, 15).unwrap()),
+                end_date: Some(NaiveDate::from_ymd_opt(2021, 9, 16).unwrap()),
+                avatar_url: Some("test.jpg".to_string()),
+            };
+
+            let updated_event = event_repo
+                .update(event_id, new_event_data.clone())
+                .await
+                .expect("Update should succeed");
+
+            assert_eq!(updated_event.id, event.id);
+            assert_eq!(updated_event.name, new_event_data.name.unwrap());
+            assert_eq!(updated_event.description, new_event_data.description);
+            assert_eq!(updated_event.website, new_event_data.website);
+            assert_eq!(updated_event.start_date, new_event_data.start_date.unwrap());
+            assert_eq!(updated_event.end_date, new_event_data.end_date.unwrap());
+
+            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
+            let time_difference_edited = time - updated_event.edited_at;
+            assert!(time_difference_edited.num_seconds() < 2);
+
+            assert!(updated_event.deleted_at.is_none());
+        }
+
+        // All are none
+
+        {
+            let new_event_data = EventData {
+                name: None,
+                description: None,
+                website: None,
+                start_date: None,
+                end_date: None,
+                avatar_url: None,
+            };
+
+            let _updated_event = event_repo
+                .update(event_id, new_event_data)
+                .await
+                .expect_err("Update should fail - all fields are none");
+        }
+
+        // Non existent
+
+        {
+            let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f9");
+
+            let new_event_data = EventData {
+                name: Some("Test Event".to_string()),
+                description: None,
+                website: None,
+                start_date: None,
+                end_date: None,
+                avatar_url: None,
+            };
+
+            let _updated_event = event_repo
+                .update(event_id, new_event_data)
+                .await
+                .expect_err("Update should fail - non existent event");
+        }
+
+        // Already deleted
+
+        {
+            let event = event_repo
+                .read_one(event_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(event.deleted_at.is_none());
+
+            event_repo
+                .delete(event_id)
+                .await
+                .expect("Delete should succeed");
+
+            let deleted_event = event_repo
+                .read_one(event_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(deleted_event.deleted_at.is_some());
+
+            let new_event_data = EventData {
+                name: Some("Test Event".to_string()),
+                description: None,
+                website: None,
+                start_date: None,
+                end_date: None,
+                avatar_url: None,
+            };
+
+            let _updated_event = event_repo
+                .update(event_id, new_event_data)
+                .await
+                .expect_err("Update should fail - already deleted event");
+        }
+
+        event_repo.disconnect().await;
+
+        Ok(())
+    }
+
+    #[sqlx::test(fixtures("events"))]
+    async fn delete(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut event_repo = EventRepository::new(arc_pool);
+
+        {
+            let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8");
+
+            let event = event_repo
+                .read_one(event_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(event.deleted_at.is_none());
+
+            event_repo.delete(event_id).await.unwrap();
+
+            let new_event = event_repo
+                .read_one(event_id)
+                .await
+                .expect("Read should succeed");
+
+            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
+            let time_difference_edited = time - new_event.edited_at;
+            let time_difference_deleted = time - new_event.deleted_at.unwrap();
+
+            assert!(time_difference_edited.num_seconds() < 2);
+            assert!(time_difference_deleted.num_seconds() < 2);
+        }
+
+        // delete on already deleted event
+
+        {
+            let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8");
+
+            let event = event_repo
+                .read_one(event_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(event.deleted_at.is_some());
+
+            event_repo
+                .delete(event_id)
+                .await
+                .expect_err("Repository should return error on deleting an already deleted event");
+        }
+
+        // delete on non-existing event
+
+        {
+            let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f9");
+
+            event_repo
+                .delete(event_id)
+                .await
+                .expect_err("Repository should return error on deleting a non-existing event");
+        }
+
+        event_repo.disconnect().await;
+
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+pub mod associated_company_repo_tests {
+    use sqlx::PgPool;
+    use uuid::{uuid, Uuid};
+
+    #[sqlx::test(fixtures("associated_company"))]
     async fn create(_pool: PgPool) {
         todo!()
     }
 
-    #[sqlx::test(fixtures("events"))]
+    #[sqlx::test(fixtures("associated_company"))]
     async fn read(_pool: PgPool) {
         todo!()
     }
 
-    #[sqlx::test(fixtures("events"))]
+    #[sqlx::test(fixtures("associated_company"))]
     async fn read_all(_pool: PgPool) {
         todo!()
     }
 
-    #[sqlx::test(fixtures("events"))]
+    #[sqlx::test(fixtures("associated_company"))]
     async fn update(_pool: PgPool) {
         todo!()
     }
 
-    #[sqlx::test(fixtures("events"))]
+    #[sqlx::test(fixtures("associated_company"))]
     async fn delete(_pool: PgPool) {
         todo!()
     }

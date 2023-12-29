@@ -3,7 +3,7 @@
 CREATE TYPE gender                  AS ENUM ('male', 'female', 'other');
 CREATE TYPE role                    AS ENUM ('user', 'admin');
 CREATE TYPE status                  AS ENUM ('available', 'unavailable');
-CREATE TYPE association             AS ENUM ('sponsor', 'organization', 'media', 'other');
+CREATE TYPE association             AS ENUM ('sponsor', 'organizer', 'media', 'other');
 CREATE TYPE task_priority           AS ENUM ('low', 'medium', 'high');
 CREATE TYPE acceptance_status       AS ENUM ('pending', 'accepted', 'rejected');
 CREATE TYPE employee_level          AS ENUM ('basic', 'manager', 'company_administrator');
@@ -147,7 +147,7 @@ CREATE TABLE event
     CONSTRAINT check_event_name_len
         CHECK (char_length(name) >= 1),
     CONSTRAINT check_event_start_date_lte_end_date
-        CHECK (start_date >= end_date),
+        CHECK (start_date <= end_date),
     CONSTRAINT check_event_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
