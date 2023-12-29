@@ -45,6 +45,17 @@ pub struct CompanyExtended {
 }
 
 #[derive(Debug, Clone)]
+pub struct NewCompany {
+    pub name: String,
+    pub description: Option<String>,
+    pub phone: String,
+    pub email: String,
+    pub website: Option<String>,
+    pub crn: String,
+    pub vatin: String,
+}
+
+#[derive(Debug, Clone)]
 pub struct CompanyData {
     pub name: Option<String>,
     pub description: Option<String>,
@@ -57,7 +68,7 @@ pub struct CompanyData {
 }
 
 #[derive(Debug, Clone)]
-pub struct CompanyFilters {
+pub struct CompanyFilter {
     pub limit: Option<i64>,
     pub offset: Option<i64>,
 }

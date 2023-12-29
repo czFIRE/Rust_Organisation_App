@@ -30,7 +30,7 @@ CREATE TABLE user_record
     name        VARCHAR(255) NOT NULL,
     email       VARCHAR(255) NOT NULL UNIQUE,
     birth       DATE NOT NULL,
-    avatar_url VARCHAR(255) DEFAULT 'img/default/user.jpg',
+    avatar_url  VARCHAR(255) DEFAULT 'img/default/user.jpg',
     gender      gender NOT NULL,
     role        role NOT NULL DEFAULT 'user',
     status      status NOT NULL DEFAULT 'available',
@@ -49,7 +49,7 @@ CREATE TABLE company
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     -------------------------------------------------------
     name        VARCHAR(255) NOT NULL,
-    description TEXT,
+    description TEXT NOT NULL DEFAULT '',
     website     VARCHAR(255),
     crn         VARCHAR(16) NOT NULL UNIQUE,
     vatin       VARCHAR(18) NOT NULL UNIQUE,
