@@ -2,7 +2,9 @@ use chrono::NaiveDate;
 use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
 
-#[derive(Debug)]
+use crate::models::Association;
+
+#[derive(Debug, Clone)]
 pub struct NewEvent {
     pub name: String,
     pub description: Option<String>,
@@ -11,7 +13,7 @@ pub struct NewEvent {
     pub end_date: NaiveDate,
 }
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, FromRow, Clone)]
 pub struct Event {
     pub id: Uuid,
     pub name: String,
@@ -26,7 +28,7 @@ pub struct Event {
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct EventData {
     pub name: Option<String>,
     pub description: Option<String>,
@@ -36,7 +38,7 @@ pub struct EventData {
     pub avatar_url: Option<String>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct EventFilter {
     pub accepts_staff: Option<bool>,
     pub associated_company_id: Option<Uuid>,

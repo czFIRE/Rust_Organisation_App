@@ -1,4 +1,5 @@
 use crate::common::DbResult;
+use async_trait::async_trait;
 use sqlx::postgres::PgPool;
 use std::sync::Arc;
 use uuid::Uuid;
@@ -10,11 +11,21 @@ pub struct EventRepository {
     pub pool: Arc<PgPool>,
 }
 
-impl EventRepository {
-    pub fn new(pool: Arc<PgPool>) -> Self {
+#[async_trait]
+impl crate::repositories::repository::DbRepository for EventRepository {
+    /// Database repository constructor
+    #[must_use]
+    fn new(pool: Arc<PgPool>) -> Self {
         Self { pool }
     }
 
+    /// Method allowing the database repository to disconnect from the database pool gracefully
+    async fn disconnect(&mut self) -> () {
+        self.pool.close().await;
+    }
+}
+
+impl EventRepository {
     pub async fn _create(&self, data: NewEvent) -> DbResult<Event> {
         let executor = self.pool.as_ref();
 

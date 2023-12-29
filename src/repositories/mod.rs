@@ -1,4 +1,5 @@
 pub mod assigned_staff;
+pub mod associated_company;
 pub mod comment;
 pub mod company;
 pub mod employment;

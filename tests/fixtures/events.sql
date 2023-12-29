@@ -31,7 +31,7 @@ DECLARE
 INSERT INTO event
     (id, name, description,
     website, accepts_staff,
-    start_date, end_date, avatar_path,
+    start_date, end_date, avatar_url,
     created_at, edited_at)
     VALUES
     (event0_id, 'Woodstock', 'A legendary music festival.',

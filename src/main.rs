@@ -40,6 +40,7 @@ async fn main() -> Result<()> {
     let employment_repo = EmploymentRepository::new(arc_pool.clone());
     let comment_repo = CommentRepository::new(arc_pool.clone());
     let assigned_staff_repo = AssignedStaffRepository::new(arc_pool.clone());
+    let associated_company_repo = AssociatedCompanyRepository::new(arc_pool.clone());
 
     println!("API is running on http://{}/api", HOST);
 
@@ -53,6 +54,7 @@ async fn main() -> Result<()> {
             .app_data(web::Data::new(employment_repo.clone()))
             .app_data(web::Data::new(comment_repo.clone()))
             .app_data(web::Data::new(assigned_staff_repo.clone()))
+            .app_data(web::Data::new(associated_company_repo.clone()))
             .service(index)
     })
     .bind(HOST)?
