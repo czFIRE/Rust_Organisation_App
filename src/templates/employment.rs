@@ -7,7 +7,7 @@ use crate::models::{EmployeeContract, EmployeeLevel};
 
 use super::{company::CompanyLiteTemplate, user::UserLiteTemplate};
 
-#[derive(Template)]
+#[derive(Template, Debug)]
 #[template(path = "employment/employment.html")]
 pub struct EmploymentTemplate {
     pub user_id: Uuid,
@@ -23,7 +23,7 @@ pub struct EmploymentTemplate {
     pub edited_at: NaiveDateTime,
 }
 
-#[derive(Template)]
+#[derive(Template, Debug)]
 #[template(path = "employment/employment-lite.html")]
 pub struct EmploymentLiteTemplate {
     pub user_id: Uuid,
@@ -31,4 +31,10 @@ pub struct EmploymentLiteTemplate {
     pub employment_type: EmployeeContract,
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
+}
+
+#[derive(Template, Debug)]
+#[template(path = "employment/employments.html")]
+pub struct EmploymentsTemplate {
+    pub employments: Vec<EmploymentLiteTemplate>,
 }

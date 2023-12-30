@@ -9,6 +9,7 @@ mod api_tests {
     use organization::models::{UserRole, TaskPriority};
     use organization::templates::comment::CommentTemplate;
     use organization::templates::company::{CompaniesTemplate, CompanyTemplate};
+    use organization::templates::employment::{EmploymentTemplate, EmploymentsTemplate};
     use organization::templates::event::{EventsTemplate, EventTemplate};
     use organization::templates::task::{TasksTemplate, TaskTemplate};
     use organization::templates::user::UserTemplate;
@@ -1115,7 +1116,20 @@ mod api_tests {
 
     #[actix_web::test]
     async fn update_event_comment() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::comment::create_event_comment)).await;
+
+        let data = json!({
+            "author_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
+            "content": "One of the events of all time, maaaaan!",
+        });
+
+        let req = test::TestRequest::post()
+                            .uri("/event/uuidied-writingthis/comment")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
@@ -1185,17 +1199,42 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_employments_per_user() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::employment::get_employments_per_user)).await;
+
+        let req = test::TestRequest::get()
+                            .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4/employment")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<EmploymentsTemplate>(body).unwrap();
+        assert_eq!(out.employments.len(), 1);
     }
 
     #[actix_web::test]
     async fn get_employments_non_existent_user() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::employment::get_employments_per_user)).await;
+
+        let req = test::TestRequest::get()
+                            .uri("/user/35221a5b-da2c-4fe6-96d8-ce069b1ba5d4/employment")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn get_employments_invalid_uuid_format() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::employment::get_employments_per_user)).await;
+
+        let req = test::TestRequest::get()
+                            .uri("/user/wrongUUIDFormatBois/employment")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]

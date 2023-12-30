@@ -3,6 +3,7 @@ pub mod associated_company;
 pub mod comment;
 pub mod common;
 pub mod company;
+pub mod employment;
 pub mod event;
 pub mod event_staff;
 pub mod event_task;
