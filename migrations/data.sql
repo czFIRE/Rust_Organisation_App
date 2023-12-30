@@ -100,7 +100,7 @@ BEGIN
     	created_at, edited_at)
     	VALUES
     	(user0_id, 'Dave Null', 'dave@null.com', '1996-06-23', 'dave.jpg',
-    	'male', 'admin', 'available',
+    	'male', 'user', 'available',
     	'2023-12-22 08:38:20.288688', '2023-12-22 08:38:20.288688');
 
     INSERT INTO user_record
@@ -111,6 +111,24 @@ BEGIN
     	(user1_id, 'Tana Smith', 't.smith@seznam.cz', '1994-02-10', 'tana.jpg',
     	'female', 'user', 'available',
     	'2023-12-26 07:33:20.288688', '2023-12-26 07:33:20.288688');
+
+	INSERT INTO user_record
+        (id, name, email, birth, avatar_path,
+    	gender, role, status,
+    	created_at, edited_at)
+    	VALUES
+    	(user2_id, 'Annna Smeth', 'a.smeth@sezam.cz', '1998-02-10', 'tana.jpg',
+    	'female', 'user', 'available',
+    	'2023-12-27 07:33:20.288688', '2023-12-27 07:33:20.288688');
+
+	INSERT INTO user_record
+        (id, name, email, birth, avatar_path,
+    	gender, role, status,
+    	created_at, edited_at)
+    	VALUES
+    	(user3_id, 'Dee Scord Admen', 'dee@lmao.com', '1999-06-23', 'dave.jpg',
+    	'male', 'admin', 'available',
+    	'2023-12-20 08:38:20.288688', '2023-12-20 08:38:20.288688');
 
     INSERT INTO employment
         (user_id, company_id, manager_id, hourly_wage,
