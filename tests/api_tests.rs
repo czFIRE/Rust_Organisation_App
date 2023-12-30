@@ -1239,22 +1239,55 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_employment() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::employment::get_employment)).await;
+
+        let req = test::TestRequest::get()
+                            .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4/employment/b5188eda-528d-48d4-8cee-498e0971f9f5")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<EmploymentTemplate>(body).unwrap();
+        assert_eq!(out.company.id, Uuid::from_str("b5188eda-528d-48d4-8cee-498e0971f9f5").unwrap());
+        assert_eq!(out.user_id, Uuid::from_str("35341253-da20-40b6-96d8-ce069b1ba5d4").unwrap());
     }
 
     #[actix_web::test]
     async fn get_employment_non_existent_user() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::employment::get_employment)).await;
+
+        let req = test::TestRequest::get()
+                            .uri("/user/35341253-dade-4ac6-96dc-cede9b1ba5d4/employment/b5188eda-528d-48d4-8cee-498e0971f9f5")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn get_employment_non_existent_company() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::employment::get_employment)).await;
+
+        let req = test::TestRequest::get()
+                            .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4/employment/b5188eda-5bcd-4eda-8cae-498e0971f9f5")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn get_employment_invalid_uuid_format() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::employment::get_employment)).await;
+
+        let req = test::TestRequest::get()
+                            .uri("/user/35341y53-BADUUID6d8-ce06zzz/employment/b5188eda-5bcd-4eda-8cae-498e0971f9f5")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
