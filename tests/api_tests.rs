@@ -1765,7 +1765,56 @@ mod api_tests {
     #[actix_web::test]
     async fn create_event_staff_errors() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+        
+        let data = json!({
+            "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
+            "role": "basic"
+        });
+
+        let req = test::TestRequest::post()
+                    .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff")
+                    .set_form(data)
+                    .to_request();
+        
+        let res = test::call_service(&app, req).await;
+
+        // Missing user_id in form data
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+
+        let data = json!({
+            "user_id": "0465041f-fe64-461f-9f71-71e3b97ca85f",
+            "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
+            "role": "basic"
+        });
+
+        let req = test::TestRequest::post()
+                    .uri("/event/baafdece-c291-410a-9bb4-70fc5c7748f8/staff")
+                    .set_form(data)
+                    .to_request();
+        
+        let res = test::call_service(&app, req).await;
+
+        // Non-existent event
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+
+        let data = json!({
+            "user_id": "0465041f-fe64-461f-9f71-71e3b97ca85f",
+            "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
+            "role": "basic"
+        });
+
+        let req = test::TestRequest::post()
+                    .uri("/event/gginvalidUUIDBOIYZZZ91-410a-9bb4-70fc5c7748f8/staff")
+                    .set_form(data)
+                    .to_request();
+        
+        let res = test::call_service(&app, req).await;
+
+        // Invalid UUID
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
     
     #[actix_web::test]
