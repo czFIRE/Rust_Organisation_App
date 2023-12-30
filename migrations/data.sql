@@ -123,6 +123,17 @@ BEGIN
     	'HPP', 'company_administrator',
     	'2022-12-29 12:38:20.4', '2023-12-10 14:52:20.1');
 
+	INSERT INTO employment
+		(user_id, company_id, manager_id, hourly_wage,
+		start_date, end_date, description,
+		type, level,
+		created_at, edited_at)
+		VALUES
+		(user1_id, company0_id, user0_id, 200,
+		'2023-02-01', '2025-01-01', '-',
+		'HPP', 'manager',
+		'2023-12-30 15:00:03.4', '2023-12-30 15:00:03.4');
+
     INSERT INTO event
         (id, name, description,
     	website, accepts_staff,
