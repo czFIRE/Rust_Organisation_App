@@ -1704,7 +1704,7 @@ mod api_tests {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
         let data = json!({
-            "user_id": "0465041f-fe64-461f-9f71-71e3b97ca85f",
+            "user_id": "51a01dbf-dcd5-43a0-809c-94ed8e61d420",
             "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
             "role": "basic"
         });
@@ -1721,7 +1721,7 @@ mod api_tests {
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         let out = serde_json::from_str::<StaffTemplate>(body).unwrap();
-        assert_eq!(out.user.id, Uuid::from_str("0465041f-fe64-461f-9f71-71e3b97ca85f").unwrap());
+        assert_eq!(out.user.id, Uuid::from_str("51a01dbf-dcd5-43a0-809c-94ed8e61d420").unwrap());
         assert_eq!(out.company.id, Uuid::from_str("b5188eda-528d-48d4-8cee-498e0971f9f5").unwrap());
         assert_eq!(out.event_id, Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap());
 
@@ -1741,7 +1741,7 @@ mod api_tests {
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         let out = serde_json::from_str::<StaffTemplate>(body).unwrap();
-        assert_eq!(out.user.id, Uuid::from_str("0465041f-fe64-461f-9f71-71e3b97ca85f").unwrap());
+        assert_eq!(out.user.id, Uuid::from_str("51a01dbf-dcd5-43a0-809c-94ed8e61d420").unwrap());
         assert_eq!(out.company.id, Uuid::from_str("b5188eda-528d-48d4-8cee-498e0971f9f5").unwrap());
         assert_eq!(out.event_id, Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap());
         assert_eq!(out.role, StaffLevel::Organizer);
@@ -1904,6 +1904,10 @@ mod api_tests {
     async fn create_update_delete_assigned_staff() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
+        let data = json!({
+            "staff_id": "a96d1d99-93b5-469b-ac62-654b0cf7ebd3"
+        });
+
         let staff_data = json!({
             "user_id": "0465041f-fe64-461f-9f71-71e3b97ca85f",
             "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
@@ -1911,8 +1915,8 @@ mod api_tests {
         });
 
         let req = test::TestRequest::post()
-                    .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff")
-                    .set_form(staff_data)
+                    .uri("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff")
+                    .set_form(data)
                     .to_request();
         
         let res = test::call_service(&app, req).await;
@@ -1921,10 +1925,10 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::CREATED);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<StaffTemplate>(body).unwrap();
+        let out = serde_json::from_str::<TaskStaffTemplate>(body).unwrap();
         assert_eq!(out.user.id, Uuid::from_str("0465041f-fe64-461f-9f71-71e3b97ca85f").unwrap());
-        assert_eq!(out.company.id, Uuid::from_str("b5188eda-528d-48d4-8cee-498e0971f9f5").unwrap());
-        assert_eq!(out.event_id, Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap());
+        assert_eq!(out.status, AcceptanceStatus::Pending);
+        assert_eq!(out.id, Uuid::from_str("a96d1d99-93b5-469b-ac62-654b0cf7ebd3").unwrap());
 
         let user_id = out.user.id;
         let staff_id = out.id;
@@ -1979,14 +1983,6 @@ mod api_tests {
         // Trying to delete a non-existing entry.
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
-
-        // Cleanup of underyling event staff.
-        let req = test::TestRequest::delete()
-                    .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff")
-                    .to_request();
-        
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_success());
     }
 
     //ToDo:
