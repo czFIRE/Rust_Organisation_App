@@ -6,6 +6,7 @@ mod api_tests {
     use actix_web::http::header::ContentType;
     use actix_web::{test, App};
     use chrono::{NaiveDate, Utc, TimeZone};
+    use organization::models::{UserRole, StaffLevel};
     use organization::templates::comment::CommentTemplate;
     use organization::templates::company::{CompaniesTemplate, CompanyTemplate};
     use organization::templates::employment::{EmploymentTemplate, EmploymentsTemplate};
@@ -1626,7 +1627,64 @@ mod api_tests {
     #[actix_web::test]
     async fn create_update_delete_event_staff() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+        
+        let data = json!({
+            "user_id": "0465041f-fe64-461f-9f71-71e3b97ca85f",
+            "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
+            "role": "basic"
+        });
+
+        let req = test::TestRequest::post()
+                    .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff")
+                    .set_form(data)
+                    .to_request();
+        
+        let res = test::call_service(&app, req).await;
+
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::CREATED);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<StaffTemplate>(body).unwrap();
+        assert_eq!(out.user.id, Uuid::from_str("0465041f-fe64-461f-9f71-71e3b97ca85f").unwrap());
+        assert_eq!(out.company.id, Uuid::from_str("b5188eda-528d-48d4-8cee-498e0971f9f5").unwrap());
+        assert_eq!(out.event_id, Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap());
+
+        let staff_id = out.id;
+
+        let data = json!({
+            "role": "organizer",
+        });
+
+        let req = test::TestRequest::patch()
+                                .uri(format!("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff/{}", staff_id.to_string()).as_str())
+                                .set_form(data)
+                                .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<StaffTemplate>(body).unwrap();
+        assert_eq!(out.user.id, Uuid::from_str("0465041f-fe64-461f-9f71-71e3b97ca85f").unwrap());
+        assert_eq!(out.company.id, Uuid::from_str("b5188eda-528d-48d4-8cee-498e0971f9f5").unwrap());
+        assert_eq!(out.event_id, Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap());
+        assert_eq!(out.role, StaffLevel::Organizer);
+
+        let req = test::TestRequest::delete()
+                    .uri(format!("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff/{}", staff_id.to_string()).as_str())
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
+        
+        let req = test::TestRequest::delete()
+                    .uri(format!("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff/{}", staff_id.to_string()).as_str())
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        // Duplicate delete
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
