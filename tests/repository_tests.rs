@@ -1060,32 +1060,370 @@ pub mod event_repo_tests {
 
 #[cfg(test)]
 pub mod associated_company_repo_tests {
+    use std::sync::Arc;
+
+    use chrono::{NaiveDateTime, Utc};
+    use organization_app::{
+        common::DbResult,
+        models::Association,
+        repositories::{
+            associated_company::{
+                associated_company_repo::AssociatedCompanyRepository,
+                models::{AssociatedCompanyData, AssociatedCompanyFilter, NewAssociatedCompany},
+            },
+            repository::DbRepository,
+        },
+    };
     use sqlx::PgPool;
-    use uuid::{uuid, Uuid};
+    use uuid::uuid;
 
     #[sqlx::test(fixtures("associated_company"))]
-    async fn create(_pool: PgPool) {
-        todo!()
+    async fn create(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut associated_company_repo = AssociatedCompanyRepository::new(arc_pool);
+
+        let associated_company_data = NewAssociatedCompany {
+            event_id: uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"),
+            company_id: uuid!("71fa27d6-6f00-4ad0-8902-778e298aaed2"),
+            association_type: Association::Media,
+        };
+
+        let new_associated_company = associated_company_repo
+            .create(associated_company_data.clone())
+            .await
+            .expect("Create should succeed");
+
+        assert_eq!(
+            new_associated_company.event_id,
+            associated_company_data.event_id
+        );
+        assert_eq!(
+            new_associated_company.company_id,
+            associated_company_data.company_id
+        );
+        assert_eq!(
+            new_associated_company.association_type,
+            associated_company_data.association_type
+        );
+
+        let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
+
+        let time_difference_created = time - new_associated_company.created_at;
+        let time_difference_edited = time - new_associated_company.edited_at;
+
+        assert!(time_difference_created.num_seconds() < 2);
+        assert!(time_difference_edited.num_seconds() < 2);
+
+        assert!(new_associated_company.deleted_at.is_none());
+
+        associated_company_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("associated_company"))]
-    async fn read(_pool: PgPool) {
-        todo!()
+    async fn read(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut associated_company_repo = AssociatedCompanyRepository::new(arc_pool);
+
+        let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
+        let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8");
+
+        let associated_company = associated_company_repo
+            .read_one(company_id, event_id)
+            .await
+            .expect("Read should succeed");
+
+        assert_eq!(associated_company.event.id, event_id);
+        assert_eq!(associated_company.company.id, company_id);
+        assert_eq!(associated_company.association_type, Association::Organizer);
+
+        associated_company_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("associated_company"))]
-    async fn read_all(_pool: PgPool) {
-        todo!()
+    async fn read_all(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut associated_company_repo = AssociatedCompanyRepository::new(arc_pool);
+
+        // Read all
+
+        {
+            let filter = AssociatedCompanyFilter {
+                limit: None,
+                offset: None,
+            };
+
+            let associated_companies = associated_company_repo
+                .read_all(filter)
+                .await
+                .expect("Read all should succeed");
+
+            assert_eq!(associated_companies.len(), 4);
+
+            let associated_company = &associated_companies[0];
+
+            assert_eq!(associated_company.company.name, "AMD");
+
+            let associated_company = &associated_companies[1];
+
+            assert_eq!(associated_company.company.name, "ReportLab");
+
+            let associated_company = &associated_companies[2];
+
+            assert_eq!(associated_company.company.name, "Prusa Research");
+
+            let associated_company = &associated_companies[3];
+
+            assert_eq!(associated_company.company.name, "AMD");
+        }
+
+        // Read all for an event
+
+        {
+            let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8");
+
+            let filter = AssociatedCompanyFilter {
+                limit: None,
+                offset: None,
+            };
+
+            let associated_companies = associated_company_repo
+                .read_all_companies_for_event(event_id, filter)
+                .await
+                .expect("Read all should succeed");
+
+            assert_eq!(associated_companies.len(), 2);
+
+            let associated_company = &associated_companies[0];
+
+            assert_eq!(associated_company.company.name, "AMD");
+
+            let associated_company = &associated_companies[1];
+
+            assert_eq!(associated_company.company.name, "ReportLab");
+        }
+
+        // Read all for a company
+
+        {
+            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
+
+            let filter = AssociatedCompanyFilter {
+                limit: None,
+                offset: None,
+            };
+
+            let associated_companies = associated_company_repo
+                .read_all_events_for_company(company_id, filter)
+                .await
+                .expect("Read all should succeed");
+
+            assert_eq!(associated_companies.len(), 2);
+
+            let associated_company = &associated_companies[0];
+
+            assert_eq!(associated_company.event.name, "Woodstock");
+
+            let associated_company = &associated_companies[1];
+
+            assert_eq!(associated_company.event.name, "PyCon");
+        }
+
+        associated_company_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("associated_company"))]
-    async fn update(_pool: PgPool) {
-        todo!()
+    async fn update(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut associated_company_repo = AssociatedCompanyRepository::new(arc_pool);
+
+        let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
+        let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8");
+
+        // Correct update
+
+        {
+            let associated_company = associated_company_repo
+                .read_one(company_id, event_id)
+                .await
+                .expect("Read should succeed");
+
+            let new_associated_company_data = AssociatedCompanyData {
+                association_type: Some(Association::Media),
+            };
+
+            let updated_associated_company = associated_company_repo
+                .update(company_id, event_id, new_associated_company_data.clone())
+                .await
+                .expect("Update should succeed");
+
+            assert_eq!(
+                updated_associated_company.event_id,
+                associated_company.event.id
+            );
+            assert_eq!(
+                updated_associated_company.company_id,
+                associated_company.company.id
+            );
+            assert_eq!(
+                updated_associated_company.association_type,
+                new_associated_company_data.association_type.unwrap()
+            );
+
+            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
+            let time_difference_edited = time - updated_associated_company.edited_at;
+            assert!(time_difference_edited.num_seconds() < 2);
+
+            assert!(updated_associated_company.deleted_at.is_none());
+        }
+
+        // All are none
+
+        {
+            let new_associated_company_data = AssociatedCompanyData {
+                association_type: None,
+            };
+
+            let _updated_associated_company = associated_company_repo
+                .update(company_id, event_id, new_associated_company_data)
+                .await
+                .expect_err("Update should fail - all fields are none");
+        }
+
+        // Non existent
+
+        {
+            let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f9");
+
+            let new_associated_company_data = AssociatedCompanyData {
+                association_type: Some(Association::Media),
+            };
+
+            let _updated_associated_company = associated_company_repo
+                .update(company_id, event_id, new_associated_company_data)
+                .await
+                .expect_err("Update should fail - non existent associated company");
+        }
+
+        // Already deleted
+
+        {
+            let associated_company = associated_company_repo
+                .read_one(company_id, event_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(associated_company.deleted_at.is_none());
+
+            associated_company_repo
+                .delete(company_id, event_id)
+                .await
+                .expect("Delete should succeed");
+
+            let deleted_associated_company = associated_company_repo
+                .read_one(company_id, event_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(deleted_associated_company.deleted_at.is_some());
+
+            let new_associated_company_data = AssociatedCompanyData {
+                association_type: Some(Association::Media),
+            };
+
+            let _updated_associated_company = associated_company_repo
+                .update(company_id, event_id, new_associated_company_data)
+                .await
+                .expect_err("Update should fail - already deleted associated company");
+        }
+
+        associated_company_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("associated_company"))]
-    async fn delete(_pool: PgPool) {
-        todo!()
+    async fn delete(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut associated_company_repo = AssociatedCompanyRepository::new(arc_pool);
+
+        {
+            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
+            let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8");
+
+            let associated_company = associated_company_repo
+                .read_one(company_id, event_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(associated_company.deleted_at.is_none());
+
+            associated_company_repo
+                .delete(company_id, event_id)
+                .await
+                .unwrap();
+
+            let new_associated_company = associated_company_repo
+                .read_one(company_id, event_id)
+                .await
+                .expect("Read should succeed");
+
+            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
+            let time_difference_edited = time - new_associated_company.edited_at;
+            let time_difference_deleted = time - new_associated_company.deleted_at.unwrap();
+
+            assert!(time_difference_edited.num_seconds() < 2);
+            assert!(time_difference_deleted.num_seconds() < 2);
+        }
+
+        // delete on already deleted associated company
+
+        {
+            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
+            let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8");
+
+            let associated_company = associated_company_repo
+                .read_one(company_id, event_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(associated_company.deleted_at.is_some());
+
+            associated_company_repo
+                .delete(company_id, event_id)
+                .await
+                .expect_err(
+                "Repository should return error on deleting an already deleted associated company",
+            );
+        }
+
+        // delete on non-existing associated company
+
+        {
+            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f9");
+            let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8");
+
+            associated_company_repo
+                .delete(company_id, event_id)
+                .await
+                .expect_err(
+                    "Repository should return error on deleting a non-existing associated company",
+                );
+        }
+
+        associated_company_repo.disconnect().await;
+
+        Ok(())
     }
 }
 

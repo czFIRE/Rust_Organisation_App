@@ -179,19 +179,19 @@ impl AssociatedCompanyRepository {
             .collect())
     }
 
-    pub async fn read_all_for_event(
+    pub async fn read_all_companies_for_event(
         &self,
-        filter: AssociatedCompanyFilter,
         event_id: Uuid,
+        filter: AssociatedCompanyFilter,
     ) -> DbResult<Vec<AssociatedCompanyExtented>> {
         // TODO REDIS here
-        self.read_all_for_event_db(filter, event_id).await
+        self.read_all_companies_for_event_db(event_id, filter).await
     }
 
-    pub async fn read_all_for_event_db(
+    pub async fn read_all_companies_for_event_db(
         &self,
-        filter: AssociatedCompanyFilter,
         event_id: Uuid,
+        filter: AssociatedCompanyFilter,
     ) -> DbResult<Vec<AssociatedCompanyExtented>> {
         let executor = self.pool.as_ref();
 
@@ -246,18 +246,18 @@ impl AssociatedCompanyRepository {
 
     pub async fn read_all_events_for_company(
         &self,
-        filter: AssociatedCompanyFilter,
         company_id: Uuid,
+        filter: AssociatedCompanyFilter,
     ) -> DbResult<Vec<AssociatedCompanyExtented>> {
         // TODO REDIS here
-        self.read_all_events_for_company_db(filter, company_id)
+        self.read_all_events_for_company_db(company_id, filter)
             .await
     }
 
     pub async fn read_all_events_for_company_db(
         &self,
-        filter: AssociatedCompanyFilter,
         company_id: Uuid,
+        filter: AssociatedCompanyFilter,
     ) -> DbResult<Vec<AssociatedCompanyExtented>> {
         let executor = self.pool.as_ref();
 
@@ -318,10 +318,15 @@ impl AssociatedCompanyRepository {
     ) -> DbResult<AssociatedCompany> {
         let executor = self.pool.as_ref();
 
-        let associated_company_check = self.read_one_db(company_id, event_id).await?;
-
         if data.association_type.is_none() {
             // TODO: Return better error
+            return Err(sqlx::Error::RowNotFound);
+        }
+
+        let associated_company_check = self.read_one_db(company_id, event_id).await?;
+
+        if associated_company_check.deleted_at.is_some() {
+            // TODO - return better error
             return Err(sqlx::Error::RowNotFound);
         }
 

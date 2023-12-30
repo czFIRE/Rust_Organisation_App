@@ -51,7 +51,7 @@ pub enum TaskPriority {
     High,
 }
 
-#[derive(Serialize, Deserialize, Debug, sqlx::Type, Clone)]
+#[derive(Serialize, Deserialize, Debug, sqlx::Type, Clone, PartialEq)]
 #[serde(rename_all = "snake_case")]
 #[sqlx(type_name = "association", rename_all = "lowercase")]
 pub enum Association {
