@@ -1290,6 +1290,7 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
+    //ToDo: No data for this yet.
     #[actix_web::test]
     async fn get_subordinates() {
         todo!()
@@ -1302,12 +1303,104 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_employment() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::employment::create_employment)).await;
+
+        let data = json!({
+            "user_id": "0465041f-fe64-461f-9f71-71e3b97ca85f",
+            "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
+            "manager_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
+            "employment_type": "hpp",
+            "hourly_rate": "200.0",
+            "employee_level": "basic",
+            "start_date": "2022-12-23",
+            "end_date": "2022-12-26",
+        });
+
+        let req = test::TestRequest::post()
+                            .uri("/employment")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::CREATED);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<EmploymentTemplate>(body).unwrap();
+        assert_eq!(out.company.id, Uuid::from_str("b5188eda-528d-48d4-8cee-498e0971f9f5").unwrap());
+        assert_eq!(out.user_id, Uuid::from_str("0465041f-fe64-461f-9f71-71e3b97ca85f").unwrap());
+        assert_eq!(out.manager.id, Uuid::from_str("35341253-da20-40b6-96d8-ce069b1ba5d4").unwrap());
     }
 
     #[actix_web::test]
     async fn create_employment_errors() {
-        todo!()
+        let app = test::init_service(App::new().service(organization::handlers::employment::create_employment)).await;
+
+        let data = json!({
+            "user_id": "0465041f-INVALID4-461f-9f71-71aaagf",
+            "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
+            "manager_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
+            "employment_type": "hpp",
+            "hourly_rate": "200.0",
+            "employee_level": "basic",
+            "start_date": "2022-12-23",
+            "end_date": "2022-12-26",
+        });
+
+        let req = test::TestRequest::post()
+                            .uri("/employment")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        // The user ID is invalid.
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+
+        let data = json!({
+            "user_id": "0465041f-fe64-461f-9f71-71e3b97ca85f",
+            "manager_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
+            "employment_type": "hpp",
+            "hourly_rate": "200.0",
+            "employee_level": "basic",
+            "start_date": "2022-12-23",
+            "end_date": "2022-12-26",
+        });
+
+        let req = test::TestRequest::post()
+                            .uri("/employment")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        // Error: No company ID
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+
+        let data = json!({
+            "user_id": "0465041f-fe64-461f-9f71-71e3b97ca85f",
+            "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
+            "manager_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
+            "employment_type": "hpp",
+            "hourly_rate": "200.0",
+            "employee_level": "basic",
+            "start_date": "2022-12-23",
+            "end_date": "2022-12-26",
+        });
+
+        let req = test::TestRequest::post()
+                            .uri("/employment")
+                            .set_form(data.clone())
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::CREATED);
+
+        let req = test::TestRequest::post()
+                            .uri("/employment")
+                            .set_form(data)
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        // Duplicate call.
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]

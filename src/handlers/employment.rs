@@ -1,8 +1,9 @@
 use actix_web::{delete, get, patch, post, web, HttpResponse};
 use chrono::Utc;
 use serde::Deserialize;
+use uuid::Uuid;
 
-use crate::models::EmployeeLevel;
+use crate::models::{EmployeeLevel, EmployeeContract};
 
 #[derive(Deserialize)]
 pub struct NewEmploymentData {
