@@ -7,7 +7,7 @@ CREATE TYPE association             AS ENUM ('sponsor', 'organizer', 'media', 'o
 CREATE TYPE task_priority           AS ENUM ('low', 'medium', 'high');
 CREATE TYPE acceptance_status       AS ENUM ('pending', 'accepted', 'rejected');
 CREATE TYPE employee_level          AS ENUM ('basic', 'manager', 'company_administrator');
-CREATE TYPE employee_contract       AS ENUM ('DPP', 'DPC', 'HPP');
+CREATE TYPE employee_contract       AS ENUM ('dpp', 'dpc', 'hpp');
 CREATE TYPE event_role              AS ENUM ('staff', 'organizer');
 
 
@@ -120,7 +120,7 @@ CREATE TABLE employment
     FOREIGN KEY (manager_id) REFERENCES user_record  (id),
     -------------------------------------------------------
     CONSTRAINT check_employment_start_date_lte_end_date
-        CHECK (start_date >= end_date),
+        CHECK (start_date <= end_date),
     CONSTRAINT check_employment_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
@@ -196,7 +196,7 @@ CREATE TABLE timesheet
     FOREIGN KEY  (event_id) REFERENCES event (id),
     --------------------------------------------------------
     CONSTRAINT check_timesheet_start_date_lte_end_date
-        CHECK (start_date >= end_date),
+        CHECK (start_date <= end_date),
     CONSTRAINT check_timesheet_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );

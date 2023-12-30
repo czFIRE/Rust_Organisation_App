@@ -8,7 +8,7 @@ pub enum UserRole {
     Admin,
 }
 
-#[derive(Serialize, Deserialize, Debug, sqlx::Type, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, sqlx::Type, Clone, PartialEq)]
 #[serde(rename_all = "snake_case")]
 #[sqlx(type_name = "user_status", rename_all = "lowercase")]
 pub enum UserStatus {
@@ -61,16 +61,17 @@ pub enum Association {
     Other,
 }
 
-#[derive(Serialize, Deserialize, Debug, sqlx::Type)]
+#[derive(Serialize, Deserialize, Debug, sqlx::Type, Clone, PartialEq)]
 #[serde(rename_all = "snake_case")]
 #[sqlx(type_name = "employee_level", rename_all = "lowercase")]
 pub enum EmployeeLevel {
     Basic,
     Manager,
+    #[sqlx(rename = "company_administrator")]
     CompanyAdministrator,
 }
 
-#[derive(Serialize, Deserialize, Debug, sqlx::Type)]
+#[derive(Serialize, Deserialize, Debug, sqlx::Type, Clone, PartialEq)]
 #[serde(rename_all = "snake_case")]
 #[sqlx(type_name = "employee_contract", rename_all = "lowercase")]
 pub enum EmployeeContract {
@@ -79,7 +80,7 @@ pub enum EmployeeContract {
     Hpp,
 }
 
-#[derive(Serialize, Deserialize, Debug, sqlx::Type)]
+#[derive(Serialize, Deserialize, Debug, sqlx::Type, Clone, PartialEq)]
 #[serde(rename_all = "snake_case")]
 #[sqlx(type_name = "approval_status", rename_all = "lowercase")]
 pub enum ApprovalStatus {

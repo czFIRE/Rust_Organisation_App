@@ -7,7 +7,7 @@ use crate::{
     repositories::{company::models::Company, user::models::User},
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NewEmployment {
     pub user_id: Uuid,
     pub company_id: Uuid,
@@ -20,7 +20,7 @@ pub struct NewEmployment {
     pub level: EmployeeLevel,
 }
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, FromRow, Clone)]
 pub struct Employment {
     pub user_id: Uuid,
     pub company_id: Uuid,
@@ -36,11 +36,12 @@ pub struct Employment {
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct EmploymentExtended {
+    // User hopefully knows his own data
     pub user_id: Uuid,
     pub company: Company,
-    pub manager_id: User,
+    pub manager: Option<User>,
     pub hourly_wage: f64,
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
@@ -52,7 +53,7 @@ pub struct EmploymentExtended {
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct EmploymentData {
     pub manager_id: Option<Uuid>,
     pub hourly_wage: Option<f64>,
@@ -63,7 +64,7 @@ pub struct EmploymentData {
     pub level: Option<EmployeeLevel>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct EmploymentFilter {
     pub limit: Option<i64>,
     pub offset: Option<i64>,
@@ -89,17 +90,17 @@ pub struct EmploymentUserCompanyFlattened {
     pub employment_edited_at: NaiveDateTime,
     pub employment_deleted_at: Option<NaiveDateTime>,
 
-    pub user_id: Uuid,
-    pub user_name: String,
-    pub user_email: String,
-    pub user_birth: NaiveDate,
-    pub user_avatar_url: Option<String>, // TODO: Now is the same as in INIT.SQL but do we want this?
-    pub user_gender: Gender,
-    pub user_role: UserRole,
-    pub user_status: UserStatus,
-    pub user_created_at: NaiveDateTime,
-    pub user_edited_at: NaiveDateTime,
-    pub user_deleted_at: Option<NaiveDateTime>,
+    pub manager_id: Option<Uuid>,
+    pub manager_name: Option<String>,
+    pub manager_email: Option<String>,
+    pub manager_birth: Option<NaiveDate>,
+    pub manager_avatar_url: Option<String>, // TODO: Now is the same as in INIT.SQL but do we want this?
+    pub manager_gender: Option<Gender>,
+    pub manager_role: Option<UserRole>,
+    pub manager_status: Option<UserStatus>,
+    pub manager_created_at: Option<NaiveDateTime>,
+    pub manager_edited_at: Option<NaiveDateTime>,
+    pub manager_deleted_at: Option<NaiveDateTime>,
 
     pub company_id: Uuid,
     pub company_name: String,
@@ -117,20 +118,6 @@ pub struct EmploymentUserCompanyFlattened {
 
 impl From<EmploymentUserCompanyFlattened> for EmploymentExtended {
     fn from(value: EmploymentUserCompanyFlattened) -> Self {
-        let tmp_user = User {
-            id: value.user_id,
-            name: value.user_name,
-            email: value.user_email,
-            birth: value.user_birth,
-            avatar_url: value.user_avatar_url,
-            gender: value.user_gender,
-            role: value.user_role,
-            status: value.user_status,
-            created_at: value.user_created_at,
-            edited_at: value.user_edited_at,
-            deleted_at: value.user_deleted_at,
-        };
-
         let tmp_company = Company {
             id: value.company_id,
             name: value.company_name,
@@ -146,10 +133,27 @@ impl From<EmploymentUserCompanyFlattened> for EmploymentExtended {
             deleted_at: value.company_deleted_at,
         };
 
+        let tmp_manager = match value.manager_id {
+            None => None,
+            Some(_) => Some(User {
+                id: value.manager_id.unwrap(),
+                name: value.manager_name.unwrap(),
+                email: value.manager_email.unwrap(),
+                birth: value.manager_birth.unwrap(),
+                avatar_url: value.manager_avatar_url,
+                gender: value.manager_gender.unwrap(),
+                role: value.manager_role.unwrap(),
+                status: value.manager_status.unwrap(),
+                created_at: value.manager_created_at.unwrap(),
+                edited_at: value.manager_edited_at.unwrap(),
+                deleted_at: value.manager_deleted_at,
+            }),
+        };
+
         Self {
             user_id: value.employment_user_id,
             company: tmp_company,
-            manager_id: tmp_user,
+            manager: tmp_manager,
             hourly_wage: value.employment_hourly_wage,
             start_date: value.employment_start_date,
             end_date: value.employment_end_date,

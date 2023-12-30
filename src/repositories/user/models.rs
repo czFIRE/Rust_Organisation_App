@@ -17,7 +17,7 @@ pub struct NewUser {
 // TODO needs to be kept the same as in staff/models.rs => StaffUserCompanyFlattened
 // TODO needs to be kept the same as in employment/models.rs => EmploymentUserCompanyFlattened
 // TODO needs to be kept the same as in comment/models.rs => CommentUserFlattened
-#[derive(Debug, FromRow)]
+#[derive(Debug, FromRow, Clone)]
 pub struct User {
     pub id: Uuid,
     pub name: String,

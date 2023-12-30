@@ -104,6 +104,39 @@ impl UserRepository {
         Ok(user)
     }
 
+    pub async fn read_all(&self) -> DbResult<Vec<User>> {
+        // TODO: Redis here
+
+        self.read_all_db().await
+    }
+
+    async fn read_all_db(&self) -> DbResult<Vec<User>> {
+        let executor = self.pool.as_ref();
+
+        let user: Vec<User> = sqlx::query_as!(
+            User,
+            r#"SELECT 
+                id, 
+                name, 
+                email, 
+                birth, 
+                avatar_url, 
+                gender AS "gender!: Gender", 
+                role AS "role!: UserRole", 
+                status AS "status!: UserStatus", 
+                created_at, 
+                edited_at, 
+                deleted_at 
+            FROM 
+                user_record 
+            "#,
+        )
+        .fetch_all(executor)
+        .await?;
+
+        Ok(user)
+    }
+
     // Update a user in the DB.
     pub async fn update_user(&self, user_id: Uuid, data: UserData) -> DbResult<User> {
         // TODO - this should support transactions

@@ -90,6 +90,35 @@ pub mod user_repo_tests {
     }
 
     #[sqlx::test(fixtures("users"))]
+    async fn read_all(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut user_repo = UserRepository::new(arc_pool);
+
+        {
+            let users = user_repo.read_all().await.expect("Read all should succeed");
+
+            assert_eq!(users.len(), 3);
+
+            let user1 = &users[0];
+
+            assert_eq!(user1.name, "Dave Null");
+
+            let user2 = &users[1];
+
+            assert_eq!(user2.name, "John Doe");
+
+            let user3 = &users[2];
+
+            assert_eq!(user3.name, "Jane Doe");
+        }
+
+        user_repo.disconnect().await;
+
+        Ok(())
+    }
+
+    #[sqlx::test(fixtures("users"))]
     async fn update(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1430,42 +1459,453 @@ pub mod associated_company_repo_tests {
 // needs user, company
 #[cfg(test)]
 pub mod employment_repo_tests {
+    use std::sync::Arc;
+
+    use chrono::{NaiveDate, NaiveDateTime, Utc};
+    use organization_app::{
+        common::DbResult,
+        models::{EmployeeContract, EmployeeLevel},
+        repositories::{
+            employment::{
+                employment_repo::EmploymentRepository,
+                models::{EmploymentData, EmploymentFilter, NewEmployment},
+            },
+            repository::DbRepository,
+        },
+    };
     use sqlx::PgPool;
-    use uuid::{uuid, Uuid};
+    use uuid::uuid;
 
     #[sqlx::test(fixtures("employments"))]
-    async fn create(_pool: PgPool) {
-        todo!()
+    async fn create(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut employment_repo = EmploymentRepository::new(arc_pool);
+
+        let employment_data = NewEmployment {
+            user_id: uuid!("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c"),
+            company_id: uuid!("71fa27d6-6f00-4ad0-8902-778e298aaed2"),
+            manager_id: Some(uuid!("35341253-da20-40b6-96d8-ce069b1ba5d4")),
+            hourly_wage: 100.0,
+            start_date: NaiveDate::from_ymd_opt(2021, 9, 15).unwrap(),
+            end_date: NaiveDate::from_ymd_opt(2024, 9, 16).unwrap(),
+            description: Some("Test Description".to_string()),
+            employment_type: EmployeeContract::Hpp,
+            level: EmployeeLevel::Basic,
+        };
+
+        let new_employment = employment_repo
+            .create(employment_data.clone())
+            .await
+            .expect("Create should succeed");
+
+        assert_eq!(new_employment.user_id, employment_data.user_id);
+        assert_eq!(new_employment.company_id, employment_data.company_id);
+        assert_eq!(new_employment.manager_id, employment_data.manager_id);
+        assert_eq!(new_employment.hourly_wage, employment_data.hourly_wage);
+        assert_eq!(new_employment.start_date, employment_data.start_date);
+        assert_eq!(new_employment.end_date, employment_data.end_date);
+        assert_eq!(new_employment.description, employment_data.description);
+        assert_eq!(
+            new_employment.employment_type,
+            employment_data.employment_type
+        );
+        assert_eq!(new_employment.level, employment_data.level);
+
+        let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
+        let time_difference_created = time - new_employment.created_at;
+        let time_difference_edited = time - new_employment.edited_at;
+
+        assert!(time_difference_created.num_seconds() < 2);
+        assert!(time_difference_edited.num_seconds() < 2);
+
+        assert!(new_employment.deleted_at.is_none());
+
+        employment_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("employments"))]
-    async fn read(_pool: PgPool) {
-        todo!()
+    async fn read(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut employment_repo = EmploymentRepository::new(arc_pool);
+
+        // Manager exists
+
+        {
+            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
+            let user_id = uuid!("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c");
+
+            let employment = employment_repo
+                .read_one(user_id, company_id)
+                .await
+                .expect("Read should succeed");
+
+            assert_eq!(employment.company.name, "AMD");
+            assert_eq!(employment.manager.unwrap().name, "Dave Null");
+            assert_eq!(employment.hourly_wage, 200.0);
+        }
+
+        // Manager doesn't exist
+
+        {
+            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
+            let user_id = uuid!("35341253-da20-40b6-96d8-ce069b1ba5d4");
+
+            let employment = employment_repo
+                .read_one(user_id, company_id)
+                .await
+                .expect("Read should succeed");
+
+            assert_eq!(employment.company.name, "AMD");
+            assert!(employment.manager.is_none());
+            assert_eq!(employment.hourly_wage, 300.0);
+        }
+
+        employment_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("employments"))]
-    async fn read_all_per_user(_pool: PgPool) {
-        todo!()
+    async fn read_all_per_user(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut employment_repo = EmploymentRepository::new(arc_pool);
+
+        let user_id = uuid!("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c");
+
+        let filter = EmploymentFilter {
+            limit: None,
+            offset: None,
+        };
+
+        let employments = employment_repo
+            .read_all_for_user(user_id, filter)
+            .await
+            .expect("Read should succeed");
+
+        assert_eq!(employments.len(), 2);
+
+        let employment = &employments[0];
+
+        assert_eq!(employment.company.name, "AMD");
+        assert_eq!(employment.manager.clone().unwrap().name, "Dave Null");
+
+        let employment = &employments[1];
+
+        assert_eq!(employment.company.name, "ReportLab");
+        assert!(employment.manager.is_none());
+
+        employment_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("employments"))]
-    pub fn read_all_per_company(_pool: PgPool) {
-        todo!()
+    pub fn read_all_per_company(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut employment_repo = EmploymentRepository::new(arc_pool);
+
+        let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
+
+        let filter = EmploymentFilter {
+            limit: None,
+            offset: None,
+        };
+
+        let employments = employment_repo
+            .read_all_for_company(company_id, filter)
+            .await
+            .expect("Read should succeed");
+
+        assert_eq!(employments.len(), 3);
+
+        let employment = &employments[0];
+
+        assert_eq!(employment.hourly_wage, 200.0);
+        assert_eq!(employment.manager.clone().unwrap().name, "Dave Null");
+
+        let employment = &employments[1];
+
+        assert_eq!(employment.hourly_wage, 250.0);
+        assert_eq!(employment.manager.clone().unwrap().name, "Dave Null");
+
+        let employment = &employments[2];
+
+        assert_eq!(employment.hourly_wage, 300.0);
+        assert!(employment.manager.is_none());
+
+        employment_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("employments"))]
-    pub fn read_all_subordinates(_pool: PgPool) {
-        todo!()
+    pub fn read_all_subordinates(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut employment_repo = EmploymentRepository::new(arc_pool);
+
+        let user_id = uuid!("35341253-da20-40b6-96d8-ce069b1ba5d4");
+
+        let filter = EmploymentFilter {
+            limit: None,
+            offset: None,
+        };
+
+        let employments = employment_repo
+            .read_subordinates(user_id, filter)
+            .await
+            .expect("Read should succeed");
+
+        assert_eq!(employments.len(), 2);
+
+        let employment = &employments[0];
+
+        assert_eq!(employment.company.name, "AMD");
+        assert_eq!(employment.manager.clone().unwrap().name, "Dave Null");
+        assert_eq!(employment.hourly_wage, 250.0);
+        assert_eq!(
+            employment.user_id,
+            uuid!("0465041f-fe64-461f-9f71-71e3b97ca85f")
+        );
+
+        let employment = &employments[1];
+
+        assert_eq!(employment.company.name, "AMD");
+        assert_eq!(employment.manager.clone().unwrap().name, "Dave Null");
+        assert_eq!(employment.hourly_wage, 200.0);
+        assert_eq!(
+            employment.user_id,
+            uuid!("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c")
+        );
+
+        employment_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("employments"))]
-    pub fn update(_pool: PgPool) {
-        todo!()
+    pub fn update(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut employment_repo = EmploymentRepository::new(arc_pool);
+
+        // Valid update
+
+        {
+            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
+            let user_id = uuid!("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c");
+
+            let employment = employment_repo
+                .read_one(user_id, company_id)
+                .await
+                .expect("Read should succeed");
+
+            let new_employment_data = EmploymentData {
+                manager_id: None,
+                hourly_wage: Some(10000.0),
+                start_date: None,
+                end_date: None,
+                description: None,
+                employment_type: Some(EmployeeContract::Hpp),
+                level: Some(EmployeeLevel::CompanyAdministrator),
+            };
+
+            let updated_employment = employment_repo
+                .update(user_id, company_id, new_employment_data.clone())
+                .await
+                .expect("Update should succeed");
+
+            assert_eq!(updated_employment.user_id, employment.user_id);
+            assert_eq!(updated_employment.company_id, employment.company.id);
+            assert_eq!(
+                updated_employment.manager_id,
+                Some(employment.manager.unwrap().id)
+            );
+            assert_eq!(
+                updated_employment.hourly_wage,
+                new_employment_data.hourly_wage.unwrap()
+            );
+            assert_eq!(updated_employment.start_date, employment.start_date);
+            assert_eq!(updated_employment.end_date, employment.end_date);
+            assert_eq!(updated_employment.description, employment.description);
+            assert_eq!(
+                updated_employment.employment_type,
+                new_employment_data.employment_type.unwrap()
+            );
+            assert_eq!(updated_employment.level, new_employment_data.level.unwrap());
+
+            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
+
+            let time_difference_edited = time - updated_employment.edited_at;
+            assert!(time_difference_edited.num_seconds() < 2);
+
+            assert!(updated_employment.deleted_at.is_none());
+        }
+
+        // All are none
+
+        {
+            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
+            let user_id = uuid!("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c");
+
+            let new_employment_data = EmploymentData {
+                manager_id: None,
+                hourly_wage: None,
+                start_date: None,
+                end_date: None,
+                description: None,
+                employment_type: None,
+                level: None,
+            };
+
+            let _updated_employment = employment_repo
+                .update(user_id, company_id, new_employment_data)
+                .await
+                .expect_err("Update should fail - all fields are none");
+        }
+
+        // Non existent
+
+        {
+            let company_id = uuid!("71fa27d6-6f00-4ad0-8902-778e298aaed2");
+            let user_id = uuid!("35341253-da20-40b6-96d8-ce069b1ba5d4");
+
+            let new_employment_data = EmploymentData {
+                manager_id: None,
+                hourly_wage: Some(10000.0),
+                start_date: None,
+                end_date: None,
+                description: None,
+                employment_type: Some(EmployeeContract::Hpp),
+                level: Some(EmployeeLevel::CompanyAdministrator),
+            };
+
+            let _updated_employment = employment_repo
+                .update(user_id, company_id, new_employment_data)
+                .await
+                .expect_err("Update should fail - non existent employment");
+        }
+
+        // Already deleted
+
+        {
+            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
+            let user_id = uuid!("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c");
+
+            let employment = employment_repo
+                .read_one(user_id, company_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(employment.deleted_at.is_none());
+
+            employment_repo
+                .delete(user_id, company_id)
+                .await
+                .expect("Delete should succeed");
+
+            let deleted_employment = employment_repo
+                .read_one(user_id, company_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(deleted_employment.deleted_at.is_some());
+
+            let new_employment_data = EmploymentData {
+                manager_id: None,
+                hourly_wage: Some(10000.0),
+                start_date: None,
+                end_date: None,
+                description: None,
+                employment_type: Some(EmployeeContract::Hpp),
+                level: Some(EmployeeLevel::CompanyAdministrator),
+            };
+
+            let _updated_employment = employment_repo
+                .update(user_id, company_id, new_employment_data)
+                .await
+                .expect_err("Update should fail - already deleted employment");
+        }
+
+        employment_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("employments"))]
-    pub fn delete(_pool: PgPool) {
-        todo!()
+    pub fn delete(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut employment_repo = EmploymentRepository::new(arc_pool);
+
+        {
+            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
+            let user_id = uuid!("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c");
+
+            let employment = employment_repo
+                .read_one(user_id, company_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(employment.deleted_at.is_none());
+
+            employment_repo.delete(user_id, company_id).await.unwrap();
+
+            let new_employment = employment_repo
+                .read_one(user_id, company_id)
+                .await
+                .expect("Read should succeed");
+
+            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
+            let time_difference_edited = time - new_employment.edited_at;
+            let time_difference_deleted = time - new_employment.deleted_at.unwrap();
+
+            assert!(time_difference_edited.num_seconds() < 2);
+            assert!(time_difference_deleted.num_seconds() < 2);
+        }
+
+        // delete on already deleted employment
+
+        {
+            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
+            let user_id = uuid!("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c");
+
+            let employment = employment_repo
+                .read_one(user_id, company_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(employment.deleted_at.is_some());
+
+            employment_repo
+                .delete(user_id, company_id)
+                .await
+                .expect_err(
+                    "Repository should return error on deleting an already deleted employment",
+                );
+        }
+
+        // delete on non-existing employment
+
+        {
+            let company_id = uuid!("71fa27d6-6f00-4ad0-8902-778e298aaed2");
+            let user_id = uuid!("0465041f-fe64-461f-9f71-71e3b97ca85f");
+
+            employment_repo
+                .delete(user_id, company_id)
+                .await
+                .expect_err("Repository should return error on deleting a non-existing employment");
+        }
+
+        employment_repo.disconnect().await;
+
+        Ok(())
     }
 }
 

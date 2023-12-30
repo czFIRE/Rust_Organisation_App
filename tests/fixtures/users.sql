@@ -23,4 +23,13 @@ BEGIN
         (user1_id, 'Tana Smith', 't.smith@seznam.cz', '1994-02-10', 'tana.jpg',
         'female', 'user', 'available',
         '2023-12-26 07:33:20.288688', '2023-12-26 07:33:20.288688');
+
+    INSERT INTO user_record
+        (id, name, email, birth, avatar_url,
+        gender, role, status,
+        created_at, edited_at)
+        VALUES
+        (user2_id, 'John Doe', 'doe@gmail.com', '1998-06-23', 'doe.jpg',
+        'male', 'user', 'available',
+        '2023-12-22 08:38:20.288688', '2023-12-22 08:38:20.288688');
 END $$;

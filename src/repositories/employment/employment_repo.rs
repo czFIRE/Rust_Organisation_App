@@ -1,4 +1,5 @@
 use crate::common::DbResult;
+use async_trait::async_trait;
 use sqlx::postgres::PgPool;
 use std::sync::Arc;
 use uuid::Uuid;
@@ -15,12 +16,22 @@ pub struct EmploymentRepository {
     pub pool: Arc<PgPool>,
 }
 
-impl EmploymentRepository {
-    pub fn new(pool: Arc<PgPool>) -> Self {
+#[async_trait]
+impl crate::repositories::repository::DbRepository for EmploymentRepository {
+    /// Database repository constructor
+    #[must_use]
+    fn new(pool: Arc<PgPool>) -> Self {
         Self { pool }
     }
 
-    pub async fn _create(&self, data: NewEmployment) -> DbResult<Employment> {
+    /// Method allowing the database repository to disconnect from the database pool gracefully
+    async fn disconnect(&mut self) -> () {
+        self.pool.close().await;
+    }
+}
+
+impl EmploymentRepository {
+    pub async fn create(&self, data: NewEmployment) -> DbResult<Employment> {
         let executor = self.pool.as_ref();
 
         let new_employment: Employment = sqlx::query_as!(
@@ -59,7 +70,7 @@ impl EmploymentRepository {
         Ok(new_employment)
     }
 
-    pub async fn _read_one(
+    pub async fn read_one(
         &self,
         _user_uuid: Uuid,
         _company_uuid: Uuid,
@@ -92,17 +103,17 @@ impl EmploymentRepository {
                 employment.created_at AS employment_created_at, 
                 employment.edited_at AS employment_edited_at, 
                 employment.deleted_at AS employment_deleted_at, 
-                user_record.id AS user_id, 
-                user_record.name AS user_name, 
-                user_record.email AS user_email, 
-                user_record.birth AS user_birth, 
-                user_record.avatar_url AS user_avatar_url, 
-                user_record.gender AS "user_gender!: Gender", 
-                user_record.role AS "user_role!: UserRole", 
-                user_record.status AS "user_status!: UserStatus", 
-                user_record.created_at AS user_created_at, 
-                user_record.edited_at AS user_edited_at, 
-                user_record.deleted_at AS user_deleted_at, 
+                user_record.id AS "manager_id?", 
+                user_record.name AS "manager_name?", 
+                user_record.email AS "manager_email?", 
+                user_record.birth AS "manager_birth?", 
+                user_record.avatar_url AS "manager_avatar_url?", 
+                user_record.gender AS "manager_gender?: Gender", 
+                user_record.role AS "manager_role?: UserRole", 
+                user_record.status AS "manager_status?: UserStatus", 
+                user_record.created_at AS "manager_created_at?", 
+                user_record.edited_at AS "manager_edited_at?", 
+                user_record.deleted_at AS "manager_deleted_at?", 
                 company.id AS company_id, 
                 company.name AS company_name, 
                 company.description AS company_description, 
@@ -118,7 +129,7 @@ impl EmploymentRepository {
             FROM 
                 employment 
                 INNER JOIN company ON employment.company_id = company.id 
-                INNER JOIN user_record ON employment.user_id = user_record.id 
+                LEFT OUTER JOIN user_record ON employment.manager_id = user_record.id 
             WHERE 
                 employment.user_id = $1 
                 AND employment.company_id = $2          
@@ -133,7 +144,7 @@ impl EmploymentRepository {
     }
 
     // Retrieves all employments for a given user.
-    pub async fn _read_all_of_user(
+    pub async fn read_all_for_user(
         &self,
         user_uuid: Uuid,
         filter: EmploymentFilter,
@@ -156,17 +167,17 @@ impl EmploymentRepository {
                 employment.created_at AS employment_created_at, 
                 employment.edited_at AS employment_edited_at, 
                 employment.deleted_at AS employment_deleted_at, 
-                user_record.id AS user_id, 
-                user_record.name AS user_name, 
-                user_record.email AS user_email, 
-                user_record.birth AS user_birth, 
-                user_record.avatar_url AS user_avatar_url, 
-                user_record.gender AS "user_gender!: Gender", 
-                user_record.role AS "user_role!: UserRole", 
-                user_record.status AS "user_status!: UserStatus", 
-                user_record.created_at AS user_created_at, 
-                user_record.edited_at AS user_edited_at, 
-                user_record.deleted_at AS user_deleted_at, 
+                user_record.id AS "manager_id?", 
+                user_record.name AS "manager_name?", 
+                user_record.email AS "manager_email?", 
+                user_record.birth AS "manager_birth?", 
+                user_record.avatar_url AS "manager_avatar_url?", 
+                user_record.gender AS "manager_gender?: Gender", 
+                user_record.role AS "manager_role?: UserRole", 
+                user_record.status AS "manager_status?: UserStatus", 
+                user_record.created_at AS "manager_created_at?", 
+                user_record.edited_at AS "manager_edited_at?", 
+                user_record.deleted_at AS "manager_deleted_at?",
                 company.id AS company_id, 
                 company.name AS company_name, 
                 company.description AS company_description, 
@@ -182,7 +193,7 @@ impl EmploymentRepository {
             FROM 
                 employment 
                 INNER JOIN company ON employment.company_id = company.id 
-                INNER JOIN user_record ON employment.user_id = user_record.id 
+                LEFT OUTER JOIN user_record ON employment.manager_id = user_record.id 
             WHERE 
                 employment.user_id = $1 
             LIMIT $2 OFFSET $3          
@@ -198,7 +209,7 @@ impl EmploymentRepository {
     }
 
     // Retrieves all employments for a given company.
-    pub async fn _read_all_of_company(
+    pub async fn read_all_for_company(
         &self,
         company_uuid: Uuid,
         filter: EmploymentFilter,
@@ -221,17 +232,17 @@ impl EmploymentRepository {
                 employment.created_at AS employment_created_at, 
                 employment.edited_at AS employment_edited_at, 
                 employment.deleted_at AS employment_deleted_at, 
-                user_record.id AS user_id, 
-                user_record.name AS user_name, 
-                user_record.email AS user_email, 
-                user_record.birth AS user_birth, 
-                user_record.avatar_url AS user_avatar_url, 
-                user_record.gender AS "user_gender!: Gender", 
-                user_record.role AS "user_role!: UserRole", 
-                user_record.status AS "user_status!: UserStatus", 
-                user_record.created_at AS user_created_at, 
-                user_record.edited_at AS user_edited_at, 
-                user_record.deleted_at AS user_deleted_at, 
+                user_record.id AS "manager_id?", 
+                user_record.name AS "manager_name?", 
+                user_record.email AS "manager_email?", 
+                user_record.birth AS "manager_birth?", 
+                user_record.avatar_url AS "manager_avatar_url?", 
+                user_record.gender AS "manager_gender?: Gender", 
+                user_record.role AS "manager_role?: UserRole", 
+                user_record.status AS "manager_status?: UserStatus", 
+                user_record.created_at AS "manager_created_at?", 
+                user_record.edited_at AS "manager_edited_at?", 
+                user_record.deleted_at AS "manager_deleted_at?",
                 company.id AS company_id, 
                 company.name AS company_name, 
                 company.description AS company_description, 
@@ -247,7 +258,7 @@ impl EmploymentRepository {
             FROM 
                 employment 
                 INNER JOIN company ON employment.company_id = company.id 
-                INNER JOIN user_record ON employment.user_id = user_record.id 
+                LEFT OUTER JOIN user_record ON employment.manager_id = user_record.id 
             WHERE 
                 employment.company_id = $1 
             LIMIT $2 OFFSET $3          
@@ -263,7 +274,7 @@ impl EmploymentRepository {
     }
 
     // Retrieves all subordinates for a given manager.
-    pub async fn _read_subordinates(
+    pub async fn read_subordinates(
         &self,
         manager_uuid: Uuid,
         filter: EmploymentFilter,
@@ -286,17 +297,17 @@ impl EmploymentRepository {
                 employment.created_at AS employment_created_at, 
                 employment.edited_at AS employment_edited_at, 
                 employment.deleted_at AS employment_deleted_at, 
-                user_record.id AS user_id, 
-                user_record.name AS user_name, 
-                user_record.email AS user_email, 
-                user_record.birth AS user_birth, 
-                user_record.avatar_url AS user_avatar_url, 
-                user_record.gender AS "user_gender!: Gender", 
-                user_record.role AS "user_role!: UserRole", 
-                user_record.status AS "user_status!: UserStatus", 
-                user_record.created_at AS user_created_at, 
-                user_record.edited_at AS user_edited_at, 
-                user_record.deleted_at AS user_deleted_at, 
+                user_record.id AS "manager_id?", 
+                user_record.name AS "manager_name?", 
+                user_record.email AS "manager_email?", 
+                user_record.birth AS "manager_birth?", 
+                user_record.avatar_url AS "manager_avatar_url?", 
+                user_record.gender AS "manager_gender?: Gender", 
+                user_record.role AS "manager_role?: UserRole", 
+                user_record.status AS "manager_status?: UserStatus", 
+                user_record.created_at AS "manager_created_at?", 
+                user_record.edited_at AS "manager_edited_at?", 
+                user_record.deleted_at AS "manager_deleted_at?",
                 company.id AS company_id, 
                 company.name AS company_name, 
                 company.description AS company_description, 
@@ -312,7 +323,7 @@ impl EmploymentRepository {
             FROM 
                 employment 
                 INNER JOIN company ON employment.company_id = company.id 
-                INNER JOIN user_record ON employment.user_id = user_record.id 
+                LEFT OUTER JOIN user_record ON employment.manager_id = user_record.id 
             WHERE 
                 employment.manager_id = $1 
             LIMIT $2 OFFSET $3          
@@ -327,7 +338,7 @@ impl EmploymentRepository {
         Ok(employment.into_iter().map(|e| e.into()).collect())
     }
 
-    pub async fn _update_employment(
+    pub async fn update(
         &self,
         user_uuid: Uuid,
         company_uuid: Uuid,
@@ -346,6 +357,13 @@ impl EmploymentRepository {
 
         let executor = self.pool.as_ref();
 
+        let employment_check = self.read_one(user_uuid, company_uuid).await?;
+
+        if employment_check.deleted_at.is_some() {
+            // TODO - return better error
+            return Err(sqlx::Error::RowNotFound);
+        }
+
         let updated_employment: Employment = sqlx::query_as!(
             Employment,
             r#" UPDATE employment SET 
@@ -357,7 +375,8 @@ impl EmploymentRepository {
                 type = COALESCE($8, type), 
                 level = COALESCE($9, level),
                 edited_at = now() 
-                WHERE user_id=$1 AND company_id=$2 RETURNING 
+                WHERE user_id=$1 AND company_id=$2 
+                RETURNING 
                 user_id, 
                 company_id, 
                 manager_id, 
@@ -386,8 +405,15 @@ impl EmploymentRepository {
         Ok(updated_employment)
     }
 
-    pub async fn _delete_employment(&self, user_uuid: Uuid, company_uuid: Uuid) -> DbResult<()> {
+    pub async fn delete(&self, user_uuid: Uuid, company_uuid: Uuid) -> DbResult<()> {
         let executor = self.pool.as_ref();
+
+        let employment_check = self.read_one(user_uuid, company_uuid).await?;
+
+        if employment_check.deleted_at.is_some() {
+            // TODO - return better error
+            return Err(sqlx::Error::RowNotFound);
+        }
 
         sqlx::query!(
             r#"UPDATE employment
