@@ -29,7 +29,7 @@ pub enum StaffLevel {
     Organizer,
 }
 
-#[derive(Serialize, Debug, Deserialize)]
+#[derive(Serialize, Debug, PartialEq, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum AcceptanceStatus {
     Pending,

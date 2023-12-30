@@ -6,12 +6,12 @@ mod api_tests {
     use actix_web::http::header::ContentType;
     use actix_web::{test, App};
     use chrono::{NaiveDate, Utc, TimeZone};
-    use organization::models::{UserRole, StaffLevel};
+    use organization::models::{UserRole, StaffLevel, AcceptanceStatus};
     use organization::templates::comment::{CommentTemplate, CommentsTemplate};
     use organization::templates::company::{CompaniesTemplate, CompanyTemplate};
     use organization::templates::employment::{EmploymentTemplate, EmploymentsTemplate};
     use organization::templates::event::{EventsTemplate, EventTemplate};
-    use organization::templates::staff::{AllStaffTemplate, StaffTemplate, AllStaffTaskTemplate};
+    use organization::templates::staff::{AllStaffTemplate, StaffTemplate, AllStaffTaskTemplate, TaskStaffTemplate};
     use organization::templates::task::{TasksTemplate, TaskTemplate};
     use organization::templates::user::UserTemplate;
     use serde_json::json;
@@ -1863,47 +1863,126 @@ mod api_tests {
     #[actix_web::test]
     async fn get_assigned_staff() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+        
+        let req = test::TestRequest::get()
+                    .uri("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff/9281b570-4d02-4096-9136-338a613c71cd")
+                    .to_request();
+
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<TaskStaffTemplate>(body).unwrap();
+        assert_eq!(out.id, Uuid::from_str("9281b570-4d02-4096-9136-338a613c71cd").unwrap());
     }
 
     #[actix_web::test]
     async fn get_assigned_staff_errors() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+        
+        let req = test::TestRequest::get()
+                    .uri("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff/9281b570-4d02-4ab6-9cd6-3e8a613c71cd")
+                    .to_request();
+
+        let res = test::call_service(&app, req).await;
+        // Non-existent staff
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+
+        let req = test::TestRequest::get()
+                    .uri("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff/INVALIDUUIDZZ-4ab6-9cd6-3e8a613c71cd")
+                    .to_request();
+
+        let res = test::call_service(&app, req).await;
+        // Invalid UUID format
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
-    async fn create_assigned_staff() {
+    async fn create_update_delete_assigned_staff() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+        
+        let staff_data = json!({
+            "user_id": "0465041f-fe64-461f-9f71-71e3b97ca85f",
+            "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
+            "role": "basic"
+        });
+
+        let req = test::TestRequest::post()
+                    .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff")
+                    .set_form(staff_data)
+                    .to_request();
+        
+        let res = test::call_service(&app, req).await;
+
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::CREATED);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<StaffTemplate>(body).unwrap();
+        assert_eq!(out.user.id, Uuid::from_str("0465041f-fe64-461f-9f71-71e3b97ca85f").unwrap());
+        assert_eq!(out.company.id, Uuid::from_str("b5188eda-528d-48d4-8cee-498e0971f9f5").unwrap());
+        assert_eq!(out.event_id, Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap());
+
+        let user_id = out.user.id;
+        let staff_id = out.id;
+        
+        let data = json!({
+            "status": "rejected",
+            "decided_by": "35341253-da20-40b6-96d8-ce069b1ba5d4"
+        });
+
+        let req = test::TestRequest::patch()
+                    .uri(format!("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff/{}", staff_id.to_string()).as_str())
+                    .set_form(data)
+                    .to_request();
+
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<TaskStaffTemplate>(body).unwrap();
+        assert_eq!(out.user.id, user_id);
+        assert_eq!(out.status, AcceptanceStatus::Rejected);
+        assert_eq!(out.decided_by.id, Uuid::from_str("35341253-da20-40b6-96d8-ce069b1ba5d4").unwrap());
+
+        let data = json!({
+            "status": "accepted",
+        });
+
+        let req = test::TestRequest::patch()
+                    .uri(format!("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff/{}", staff_id.to_string()).as_str())
+                    .set_form(data)
+                    .to_request();
+
+        let res = test::call_service(&app, req).await;
+        // Data without decided_by
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+
+        let req = test::TestRequest::delete()
+                    .uri(format!("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff/{}", staff_id.to_string()).as_str())
+                    .to_request();
+
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
+        
+        let req = test::TestRequest::delete()
+                    .uri(format!("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff/{}", staff_id.to_string()).as_str())
+                    .to_request();
+
+        let res = test::call_service(&app, req).await;
+        // Trying to delete a non-existing entry.
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn create_assigned_staff_errors() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn update_assigned_staff() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn update_assigned_staff_errors() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn delete_assigned_staff() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn delete_assigned_staff_errors() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
