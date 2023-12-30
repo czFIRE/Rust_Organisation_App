@@ -1450,13 +1450,45 @@ mod api_tests {
     #[actix_web::test]
     async fn get_subordinates() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+        let req = test::TestRequest::get()
+                                .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4/employment/b5188eda-528d-48d4-8cee-498e0971f9f5/subordinates")
+                                .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<EmploymentsTemplate>(body).unwrap();
+        assert_eq!(out.employments.len(), 1);
+        assert_eq!(out.employments.first().unwrap().company.id, Uuid::from_str("b5188eda-528d-48d4-8cee-498e0971f9f5").unwrap());
     }
 
     #[actix_web::test]
     async fn get_subordinates_errors() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+        let req = test::TestRequest::get()
+                                .uri("/user/353ae253-dab6-55e6-96d8-ce069b1ba5d4/employment/b5188eda-528d-48d4-8cee-498e0971f9f5/subordinates")
+                                .to_request();
+        let res = test::call_service(&app, req).await;
+        // User does not exist.
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+
+        let req = test::TestRequest::get()
+                                .uri("/user/BADUUID/employment/b5188eda-528d-48d4-8cee-498e0971f9f5/subordinates")
+                                .to_request();
+        let res = test::call_service(&app, req).await;
+        // Bad UUID format.
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+
+        let req = test::TestRequest::get()
+                                .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4/employment/BADUUID/subordinates")
+                                .to_request();
+        let res = test::call_service(&app, req).await;
+        // Bad UUID at company ID
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
