@@ -10,7 +10,7 @@ mod api_tests {
     use organization::templates::company::{CompaniesTemplate, CompanyTemplate};
     use organization::templates::employment::{EmploymentTemplate, EmploymentsTemplate};
     use organization::templates::event::{EventsTemplate, EventTemplate};
-    use organization::templates::staff::AllStaffTemplate;
+    use organization::templates::staff::{AllStaffTemplate, StaffTemplate};
     use organization::templates::task::{TasksTemplate, TaskTemplate};
     use organization::templates::user::UserTemplate;
     use serde_json::json;
@@ -1564,33 +1564,67 @@ mod api_tests {
     async fn get_all_event_staff_errors() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
+        // This should be a non-existent event.
         let req = test::TestRequest::get()
-                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff")
+                            .uri("/event/beefdbce-caaa-410a-9bb4-70fc5c7748f8/staff")
                             .to_request();
         let res = test::call_service(&app, req).await;
 
-        assert!(res.status().is_success());
-        assert_eq!(res.status(), http::StatusCode::OK);
-        let body_bytes = test::read_body(res).await;
-        let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<AllStaffTemplate>(body).unwrap();
-        assert_eq!(out.staff.len(), 1);
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+
+        let req = test::TestRequest::get()
+                            .uri("/event/beezzzfdbce-caaa-4INVALIDFORMATbBOIYSb4-70fc5c7748f8/staff")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
     async fn get_event_staff() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+        let req = test::TestRequest::get()
+                    .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff/9281b570-4d02-4096-9136-338a613c71cd")
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<StaffTemplate>(body).unwrap();
+
+        assert_eq!(out.event_id, Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap());
+        assert_eq!(out.id, Uuid::from_str("9281b570-4d02-4096-9136-338a613c71cd").unwrap());
     }
 
     #[actix_web::test]
     async fn get_event_staff_errors() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let req = test::TestRequest::get()
+                    .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff/918ab570-adb3-4c9d-9136-338a613c71cd")
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+
+        // Staff does not exist
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+
+        let req = test::TestRequest::get()
+                    .uri("/event/b71fd7ce-c891INVALIDFORMAT4-zzzyzc7748f8/staff/918ab570-adb3-4c9d-9136-338a613c71cd")
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+
+        // Invalid UUID format.
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
-    async fn create_event_staff() {
+    async fn create_update_delete_event_staff() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
