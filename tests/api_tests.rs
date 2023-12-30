@@ -1064,7 +1064,7 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn create_event_comment() {
+    async fn create_update_delete_event_comment() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let data = json!({
@@ -1085,6 +1085,52 @@ mod api_tests {
         assert_eq!(out.author.id, Uuid::from_str("35341253-da20-40b6-96d8-ce069b1ba5d4").unwrap());
         assert_eq!(out.content, "Cool event, maaaaan!");
         assert_eq!(out.parent_category_id, Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap());
+        let comment_id = out.id;
+        let data = json!({
+            "author_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
+            "content": "Chill event, maaaaan!",
+        });
+
+        let req = test::TestRequest::put()
+                    .uri(format!("/comment/{}", comment_id.clone().to_string()).as_str())
+                    .set_form(data)
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<CommentTemplate>(body).unwrap();
+        assert_eq!(out.author.id, Uuid::from_str("35341253-da20-40b6-96d8-ce069b1ba5d4").unwrap());
+        assert_eq!(out.id, comment_id);
+        assert_eq!(out.content, "Chill event, maaaaan!".to_string());
+
+        // Empty Data Test
+        let data = json!({});
+
+        let req = test::TestRequest::put()
+                    .uri(format!("/comment/{}", comment_id.clone().to_string()).as_str())
+                    .set_form(data)
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+
+        let req = test::TestRequest::delete()
+                    .uri(format!("/comment/{}", comment_id.to_string()).as_str())
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
+        
+        // Deleting an already deleted comment.
+        let req = test::TestRequest::delete()
+                    .uri(format!("/comment/{}", comment_id.to_string()).as_str())
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+        
     }
 
     #[actix_web::test]
@@ -1124,7 +1170,7 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn update_event_comment() {
+    async fn update_comment_invalid_uuid() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let data = json!({
@@ -1132,31 +1178,13 @@ mod api_tests {
             "content": "One of the events of all time, maaaaan!",
         });
 
-        let req = test::TestRequest::post()
-                            .uri("/event/uuidied-writingthis/comment")
+        let req = test::TestRequest::put()
+                            .uri("/comment/uuidied-writingthis")
                             .set_form(data)
                             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
-    }
-
-    #[actix_web::test]
-    async fn update_event_comment_non_existent_event() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn update_event_comment_non_existent_comment() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn update_event_comment_invalid_uuid_format() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
     }
 
     #[actix_web::test]
@@ -1178,7 +1206,7 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn create_task_comment() {
+    async fn create_update_delete_task_comment() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
@@ -1191,30 +1219,6 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_task_comment_invalid_uuid_format() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn update_task_comment() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn update_task_comment_non_existent_task() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn update_task_comment_non_existent_comment() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn update_task_comment_invalid_uuid_format() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
