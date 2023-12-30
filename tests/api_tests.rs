@@ -1692,30 +1692,6 @@ mod api_tests {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
-
-    #[actix_web::test]
-    async fn patch_event_staff() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn patch_event_staff_errors() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn delete_event_staff() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn delete_event_staff_errors() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
     
     #[actix_web::test]
     async fn get_all_assigned_staff() {
