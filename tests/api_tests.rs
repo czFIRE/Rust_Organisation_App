@@ -1979,8 +1979,17 @@ mod api_tests {
         // Trying to delete a non-existing entry.
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+
+        // Cleanup of underyling event staff.
+        let req = test::TestRequest::delete()
+                    .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff")
+                    .to_request();
+        
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
     }
 
+    //ToDo:
     #[actix_web::test]
     async fn create_assigned_staff_errors() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
