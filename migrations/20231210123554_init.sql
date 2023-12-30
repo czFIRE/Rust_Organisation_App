@@ -214,7 +214,7 @@ CREATE TABLE timesheet
 );
 
 
-CREATE TABLE work_day
+CREATE TABLE workday
 (   
     timesheet_id UUID NOT NULL,
     date         DATE NOT NULL,

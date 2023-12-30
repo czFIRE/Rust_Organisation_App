@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE workday SET total_hours = 0, comment = NULL, edited_at = NOW() WHERE timesheet_id = $1;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "70c5f4f3db3bdae71a0b70c36a39af87383fa43b554d841ca19e7341f3d151d6"
+}

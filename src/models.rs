@@ -70,7 +70,7 @@ pub enum EmployeeContract {
     Hpp,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, sqlx::Type)]
 #[serde(rename_all = "snake_case")]
 pub enum ApprovalStatus {
     NotRequested,

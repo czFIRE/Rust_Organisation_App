@@ -1,6 +1,5 @@
 use crate::handlers::index::index;
-use crate::repositories::company::CompanyRepository;
-use crate::repositories::timesheet::TimesheetRepository;
+use crate::repositories::timesheet::repository::TimesheetRepository;
 use actix_web::{web, App, HttpServer};
 use dotenv::dotenv;
 use std::io::Result;
@@ -31,7 +30,6 @@ async fn main() -> Result<()> {
         App::new().route("/api", web::get().to(index)).service(
             web::scope("/api")
                 // add handlers here
-                .app_data(web::Data::new(CompanyRepository::new(arc_pool.clone())))
                 .app_data(web::Data::new(TimesheetRepository::new(arc_pool.clone()))),
         )
     })
