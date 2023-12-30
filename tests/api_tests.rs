@@ -7,7 +7,7 @@ mod api_tests {
     use actix_web::{test, App};
     use chrono::{NaiveDate, Utc, TimeZone};
     use organization::models::{UserRole, StaffLevel};
-    use organization::templates::comment::CommentTemplate;
+    use organization::templates::comment::{CommentTemplate, CommentsTemplate};
     use organization::templates::company::{CompaniesTemplate, CompanyTemplate};
     use organization::templates::employment::{EmploymentTemplate, EmploymentsTemplate};
     use organization::templates::event::{EventsTemplate, EventTemplate};
@@ -1049,19 +1049,37 @@ mod api_tests {
                             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/comment")
                             .to_request();
         let res = test::call_service(&app, req).await;
-        todo!()
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<CommentsTemplate>(body).unwrap();
+        assert_eq!(out.comments.len(), 1);
     }
 
     #[actix_web::test]
     async fn get_all_event_comments_non_existent_event() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+
+        let req = test::TestRequest::get()
+                            .uri("/event/beefdace-c1a1-410a-9bb4-70fc5c7748f8/comment")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn get_all_event_comments_invalid_uuid_format() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+
+        let req = test::TestRequest::get()
+                            .uri("/event/INVALIDFORMATZZZYYYXXX/comment")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]

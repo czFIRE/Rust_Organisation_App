@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 use super::user::UserLiteTemplate;
 
-#[derive(Template, Deserialize)]
+#[derive(Template, Debug, Deserialize)]
 #[template(path = "comment/comment.html")]
 pub struct CommentTemplate {
     pub id: Uuid,
@@ -15,4 +15,10 @@ pub struct CommentTemplate {
     pub content: String,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
+}
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "comment/comments.html")]
+pub struct CommentsTemplate {
+    pub comments: Vec<CommentTemplate>,
 }
