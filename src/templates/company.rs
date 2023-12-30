@@ -34,7 +34,7 @@ pub struct CompanyTemplate {
     pub edited_at: NaiveDateTime,
 }
 
-#[derive(Template, Deserialize)]
+#[derive(Template, Debug, Deserialize)]
 #[template(path = "company/company-lite.html")]
 pub struct CompanyLiteTemplate {
     pub id: Uuid,

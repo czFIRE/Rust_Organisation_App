@@ -33,28 +33,6 @@ pub async fn create_event_comment(
     todo!()
 }
 
-#[put("/event/{event_id}/comment/{comment_id}")]
-pub async fn update_event_comment(
-    _event_id: web::Path<Uuid>,
-    _comment_id: web::Path<Uuid>,
-    _comment_data: web::Form<CommentData>,
-) -> HttpResponse {
-    todo!()
-}
-
-#[delete("/event/{event_id}/comment")]
-pub async fn delete_all_event_comments(_event_id: web::Path<Uuid>) -> HttpResponse {
-    todo!()
-}
-
-#[delete("/event/{event_id}/comment/{comment_id}")]
-pub async fn delete_event_comment(
-    _event_id: web::Path<Uuid>,
-    _comment_id: web::Path<Uuid>,
-) -> HttpResponse {
-    todo!()
-}
-
 #[get("/task/{task_id}/comment")]
 pub async fn get_all_task_comments(
     _task_id: web::Path<Uuid>,
@@ -71,23 +49,16 @@ pub async fn create_task_comment(
     todo!()
 }
 
-#[put("/task/{task_id}/comment/{comment_id}")]
-pub async fn update_task_comment(
-    _task_id: web::Path<Uuid>,
+#[put("/comment/{comment_id}")]
+pub async fn update_comment(
     _comment_id: web::Path<Uuid>,
     _comment_data: web::Form<CommentData>,
 ) -> HttpResponse {
     todo!()
 }
 
-#[delete("/task/{task_id}/comment")]
-pub async fn delete_all_task_comments(_task_id: web::Path<Uuid>) -> HttpResponse {
-    todo!()
-}
-
-#[delete("/task/{task_id}/comment/{comment_id}")]
-pub async fn delete_task_comment(
-    _task_id: web::Path<Uuid>,
+#[delete("/comment/{comment_id}")]
+pub async fn delete_comment(
     _comment_id: web::Path<Uuid>,
 ) -> HttpResponse {
     todo!()

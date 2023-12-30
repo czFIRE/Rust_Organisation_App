@@ -1,20 +1,20 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UserRole {
     User,
     Admin,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum UserStatus {
     Available,
     Unavailable,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Gender {
     Male,
@@ -22,14 +22,14 @@ pub enum Gender {
     Other,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum StaffLevel {
     Basic,
     Organizer,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum AcceptanceStatus {
     Pending,
@@ -37,7 +37,7 @@ pub enum AcceptanceStatus {
     Rejected,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum TaskPriority {
     Low,
@@ -45,7 +45,7 @@ pub enum TaskPriority {
     High,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Association {
     Sponsor,
@@ -54,7 +54,7 @@ pub enum Association {
     Other,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum EmployeeLevel {
     Basic,
@@ -62,7 +62,7 @@ pub enum EmployeeLevel {
     CompanyAdministrator,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum EmployeeContract {
     Dpp,

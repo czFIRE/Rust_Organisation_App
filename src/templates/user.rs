@@ -20,7 +20,7 @@ pub struct UserTemplate {
     pub created_at: NaiveDateTime,
 }
 
-#[derive(Template, Deserialize)]
+#[derive(Template, Debug, Deserialize)]
 #[template(path = "user/user-lite.html")]
 pub struct UserLiteTemplate {
     pub id: Uuid,

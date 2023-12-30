@@ -46,7 +46,7 @@ pub async fn update_event_staff(
 }
 
 #[delete("/event/{event_id}/staff")]
-pub async fn delete_all_event_staff(
+pub async fn delete_all_rejected_event_staff(
     _event_id: web::Path<String>,
     _staff_id: web::Path<String>,
 ) -> HttpResponse {
