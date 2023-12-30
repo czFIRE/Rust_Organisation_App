@@ -213,4 +213,11 @@ BEGIN
 		'Joe will need 3 guitars on stage.',
     	'2023-05-03 11:55:10.4', '2023-05-03 11:55:10.4');
 
+	INSERT INTO comment
+		(id, event_id, task_id, author_id,
+		content, created_at, edited_at)
+		VALUES
+		(comment1_id, event0_id, NULL, user0_id,
+		'Mayyyn, this event is amazing!',
+		'2023-05-03 10:00:01.5', '2023-05-03 10:05:16.1');
 END $$;
