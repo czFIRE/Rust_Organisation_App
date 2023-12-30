@@ -100,7 +100,7 @@ BEGIN
     	created_at, edited_at)
     	VALUES
     	(user0_id, 'Dave Null', 'dave@null.com', '1996-06-23', 'dave.jpg',
-    	'male', 'user', 'available',
+    	'male', 'admin', 'available',
     	'2023-12-22 08:38:20.288688', '2023-12-22 08:38:20.288688');
 
     INSERT INTO user_record
@@ -126,8 +126,8 @@ BEGIN
     	gender, role, status,
     	created_at, edited_at)
     	VALUES
-    	(user3_id, 'Dee Scord Admen', 'dee@lmao.com', '1999-06-23', 'dave.jpg',
-    	'male', 'admin', 'available',
+    	(user3_id, 'Dee Scord', 'dee@lmao.com', '1999-06-23', 'dave.jpg',
+    	'male', 'user', 'available',
     	'2023-12-20 08:38:20.288688', '2023-12-20 08:38:20.288688');
 
     INSERT INTO employment
@@ -149,8 +149,19 @@ BEGIN
 		VALUES
 		(user1_id, company0_id, user0_id, 200,
 		'2023-02-01', '2025-01-01', '-',
-		'HPP', 'manager',
+		'hpp', 'manager',
 		'2023-12-30 15:00:03.4', '2023-12-30 15:00:03.4');
+
+	INSERT INTO employment
+        (user_id, company_id, manager_id, hourly_wage,
+    	start_date, end_date, description,
+    	type, level,
+    	created_at, edited_at)
+        VALUES
+    	(user3_id, company0_id, NULL, 150,
+    	'2023-01-01', '2025-01-01', '-',
+    	'hpp', 'basic',
+    	'2022-12-29 12:38:20.4', '2023-12-10 14:52:20.1');
 
     INSERT INTO event
         (id, name, description,
@@ -204,6 +215,15 @@ BEGIN
         VALUES
     	(event_staff0_id, user0_id, company0_id, event0_id,
     	event_staff0_id, 'organizer', 'accepted',
+    	'2023-05-03 10:40:20.1', '2023-05-04 08:11:20.4');
+
+	INSERT INTO event_staff
+        (id, user_id, company_id, event_id,
+    	decided_by, role, status,
+    	created_at, edited_at)
+        VALUES
+    	(event_staff1_id, user1_id, company0_id, event0_id,
+    	event_staff0_id, 'staff', 'accepted',
     	'2023-05-03 10:40:20.1', '2023-05-04 08:11:20.4');
 
     INSERT INTO task
