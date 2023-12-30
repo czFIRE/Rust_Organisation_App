@@ -1496,7 +1496,7 @@ mod api_tests {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let data = json!({
-            "user_id": "0465041f-fe64-461f-9f71-71e3b97ca85f",
+            "user_id": "ac9bf689-a713-4b66-a3d0-41faaf0f8d0c",
             "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
             "manager_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
             "employment_type": "hpp",
@@ -1517,7 +1517,7 @@ mod api_tests {
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         let out = serde_json::from_str::<EmploymentTemplate>(body).unwrap();
         assert_eq!(out.company.id, Uuid::from_str("b5188eda-528d-48d4-8cee-498e0971f9f5").unwrap());
-        assert_eq!(out.user_id, Uuid::from_str("0465041f-fe64-461f-9f71-71e3b97ca85f").unwrap());
+        assert_eq!(out.user_id, Uuid::from_str("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c").unwrap());
         assert_eq!(out.manager.id, Uuid::from_str("35341253-da20-40b6-96d8-ce069b1ba5d4").unwrap());
 
         let req = test::TestRequest::post()
@@ -1534,7 +1534,7 @@ mod api_tests {
         });
 
         let req = test::TestRequest::patch()
-                            .uri("/user/0465041f-fe64-461f-9f71-71e3b97ca85f/employment/b5188eda-528d-48d4-8cee-498e0971f9f5")
+                            .uri("/user/ac9bf689-a713-4b66-a3d0-41faaf0f8d0c/employment/b5188eda-528d-48d4-8cee-498e0971f9f5")
                             .set_form(data)
                             .to_request();
         let res = test::call_service(&app, req).await;
@@ -1544,14 +1544,14 @@ mod api_tests {
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         let out = serde_json::from_str::<EmploymentTemplate>(body).unwrap();
         assert_eq!(out.company.id, Uuid::from_str("b5188eda-528d-48d4-8cee-498e0971f9f5").unwrap());
-        assert_eq!(out.user_id, Uuid::from_str("0465041f-fe64-461f-9f71-71e3b97ca85f").unwrap());
+        assert_eq!(out.user_id, Uuid::from_str("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c").unwrap());
         assert_eq!(out.manager.id, Uuid::from_str("35341253-da20-40b6-96d8-ce069b1ba5d4").unwrap());
         assert_eq!(out.description, Some("Dirt Shoveller".to_string()));
 
         let data = json!({});
 
         let req = test::TestRequest::patch()
-                            .uri("/user/0465041f-fe64-461f-9f71-71e3b97ca85f/employment/b5188eda-528d-48d4-8cee-498e0971f9f5")
+                            .uri("/user/ac9bf689-a713-4b66-a3d0-41faaf0f8d0c/employment/b5188eda-528d-48d4-8cee-498e0971f9f5")
                             .set_form(data)
                             .to_request();
         let res = test::call_service(&app, req).await;
@@ -1560,14 +1560,14 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
 
         let req = test::TestRequest::delete()
-                            .uri("/user/0465041f-fe64-461f-9f71-71e3b97ca85f/employment/b5188eda-528d-48d4-8cee-498e0971f9f5")
+                            .uri("/user/ac9bf689-a713-4b66-a3d0-41faaf0f8d0c/employment/b5188eda-528d-48d4-8cee-498e0971f9f5")
                             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
 
         let req = test::TestRequest::delete()
-                            .uri("/user/0465041f-fe64-461f-9f71-71e3b97ca85f/employment/b5188eda-528d-48d4-8cee-498e0971f9f5")
+                            .uri("/user/ac9bf689-a713-4b66-a3d0-41faaf0f8d0c/employment/b5188eda-528d-48d4-8cee-498e0971f9f5")
                             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
