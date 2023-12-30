@@ -6,15 +6,14 @@ mod api_tests {
     use actix_web::http::header::ContentType;
     use actix_web::{test, App};
     use chrono::{NaiveDate, Utc, TimeZone};
-    use organization::models::{UserRole, TaskPriority};
     use organization::templates::comment::CommentTemplate;
     use organization::templates::company::{CompaniesTemplate, CompanyTemplate};
     use organization::templates::employment::{EmploymentTemplate, EmploymentsTemplate};
     use organization::templates::event::{EventsTemplate, EventTemplate};
+    use organization::templates::staff::AllStaffTemplate;
     use organization::templates::task::{TasksTemplate, TaskTemplate};
     use organization::templates::user::UserTemplate;
     use serde_json::json;
-    use organization::{self, templates};
     use uuid::Uuid;
     use std::str::{self, FromStr};
 
@@ -24,7 +23,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn index_get() {
-        let app = test::init_service(App::new().service(organization::handlers::index::index)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         let req = test::TestRequest::default().insert_header(ContentType::plaintext()).to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -32,8 +31,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_user() {
-        let app = test::init_service(App::new().service(organization::handlers::user::create_user)).await;
-        // let req = test::TestRequest::default().insert_header(ContentType::plaintext()).to_request();
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         let user = json!({
             "name": "Peepo Happy",
             "email": "peepo@happy.com",
@@ -55,7 +53,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_user_duplicate() {
-        let app = test::init_service(App::new().service(organization::handlers::user::create_user)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
         let user = json!({
             "name": "Peepo Sad",
@@ -77,7 +75,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn user_get_existing() {
-        let app = test::init_service(App::new().service(organization::handlers::user::get_user)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
         let req = test::TestRequest::get()
                             .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4")
@@ -95,7 +93,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn user_get_not_existing() {
-        let app = test::init_service(App::new().service(organization::handlers::user::get_user)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
         let req = test::TestRequest::get()
                             .uri("/user/35341289-d420-40b6-96d8-ce069b1ba5d4")
@@ -107,7 +105,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn user_get_invalid_uuid_format() {
-        let app = test::init_service(App::new().service(organization::handlers::user::get_user)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
         let req = test::TestRequest::get()
                             .uri("/user/Sleepyhead-d420-zzz6-ygd8-5d4")
@@ -119,7 +117,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn patch_existing_user() {
-        let app = test::init_service(App::new().service(organization::handlers::user::update_user)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
         let user_update = json!({
             "name": "Dave Nill",
@@ -142,7 +140,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn patch_non_existent_user() {
-        let app = test::init_service(App::new().service(organization::handlers::user::update_user)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
         let user_update = json!({
             "name": "Dave Nill",
@@ -159,7 +157,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn patch_user_invalid_uuid_format() {
-        let app = test::init_service(App::new().service(organization::handlers::user::update_user)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
         let user_update = json!({
             "name": "Dave Nill",
@@ -176,7 +174,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn patch_user_empty_data() {
-        let app = test::init_service(App::new().service(organization::handlers::user::delete_user)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
         let user_update = json!({});
 
@@ -191,7 +189,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn delete_user_exists() {
-        let app = test::init_service(App::new().service(organization::handlers::user::delete_user)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::delete()
                     .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4")
@@ -203,7 +201,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn delete_non_existent_user() {
-        let app = test::init_service(App::new().service(organization::handlers::user::delete_user)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::delete()
                     .uri("/user/35341289-d420-40b6-96d8-ce069b1ba5d4")
@@ -215,7 +213,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn delete_user_invalid_uuid_format () {
-        let app = test::init_service(App::new().service(organization::handlers::user::delete_user)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::delete()
                     .uri("/user/Sleepyhead-d420-zzz6-ygd8-5d4")
@@ -228,22 +226,25 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_user_avatar() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn upload_user_avatar() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn remove_user_avatar() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
     
     #[actix_web::test]
     async fn get_all_companies() {
-        let app = test::init_service(App::new().service(organization::handlers::company::get_all_companies)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
         let req = test::TestRequest::get()
                             .uri("/company")
@@ -259,7 +260,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_existing_company() {
-        let app = test::init_service(App::new().service(organization::handlers::company::get_company)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
         let req = test::TestRequest::get()
                             .uri("/company/b5188eda-528d-48d4-8cee-498e0971f9f5")
@@ -284,7 +285,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_non_existing_company() {
-        let app = test::init_service(App::new().service(organization::handlers::company::get_company)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
         let req = test::TestRequest::get()
                             .uri("/company/b548eed1-538d-48d4-8cee-498e0971f9f5")
@@ -296,7 +297,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_company_invalid_uuid_format() {
-        let app = test::init_service(App::new().service(organization::handlers::company::get_company)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
         let req = test::TestRequest::get()
                             .uri("/company/b548eed1-sleepy-head-123zzz")
@@ -308,7 +309,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_company() {
-        let app = test::init_service(App::new().service(organization::handlers::company::create_company)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
         let company = json!({
             "name": "Pepe Productions",
@@ -350,7 +351,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_duplicate_company() {
-        let app = test::init_service(App::new().service(organization::handlers::company::create_company)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
         let company = json!({
             "name": "Lethal Company",
@@ -388,7 +389,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn patch_company() {
-        let app = test::init_service(App::new().service(organization::handlers::company::update_company)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
         let data = json!({
             "crn": "amd_crn",
@@ -419,7 +420,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn patch_non_existent_company() {
-        let app = test::init_service(App::new().service(organization::handlers::company::update_company)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
         let data = json!({
             "crn": "amd_crn",
@@ -437,7 +438,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn patch_company_invalid_uuid_format() {
-        let app = test::init_service(App::new().service(organization::handlers::company::update_company)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
         let data = json!({
             "crn": "amd_crn",
@@ -455,7 +456,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn patch_company_empty_data() {
-        let app = test::init_service(App::new().service(organization::handlers::company::update_company)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
         let data = json!({});
 
@@ -470,7 +471,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn delete_company() {
-        let app= test::init_service(App::new().service(organization::handlers::company::delete_company)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::delete()
                             .uri("/company/b5188eda-528d-48d4-8cee-498e0971f9f5")
@@ -482,7 +483,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn delete_non_existent_company() {
-        let app= test::init_service(App::new().service(organization::handlers::company::delete_company)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::delete()
                             .uri("/company/b5188eda-528d-48d4-8cee-498e0971f9f5")
@@ -494,7 +495,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn delete_company_invalid_uuid_format() {
-        let app= test::init_service(App::new().service(organization::handlers::company::delete_company)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::delete()
                             .uri("/company/b5188eda-sleepy-head-123zzz")
@@ -506,22 +507,25 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_company_avatar() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn upload_company_avatar() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn remove_company_avatar() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn get_events() {
-        let app = test::init_service(App::new().service(organization::handlers::event::get_events)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
         let req = test::TestRequest::get()
                             .uri("/event")
@@ -537,7 +541,7 @@ mod api_tests {
     
     #[actix_web::test]
     async fn get_existing_event() {
-        let app = test::init_service(App::new().service(organization::handlers::event::get_event)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
         let req = test::TestRequest::get()
                             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8")
@@ -558,7 +562,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_non_existent_event() {
-        let app = test::init_service(App::new().service(organization::handlers::event::get_event)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
         let req = test::TestRequest::get()
                             .uri("/event/a71cd75e-a811-410a-9bb4-70fc5c7748f8")
@@ -570,7 +574,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_event_invalid_uuid_format() {
-        let app = test::init_service(App::new().service(organization::handlers::event::get_event)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         
         let req = test::TestRequest::get()
                             .uri("/event/a71cd75e-sleepy-head-111z3zz")
@@ -582,7 +586,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_event() {
-        let app = test::init_service(App::new().service(organization::handlers::event::create_event)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let start_date = Utc.with_ymd_and_hms(2027, 04, 06, 0, 0, 0).unwrap();
         let end_date = Utc.with_ymd_and_hms(2027, 04, 07, 0, 0, 0).unwrap();
@@ -614,7 +618,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_event_duplicate() {
-        let app = test::init_service(App::new().service(organization::handlers::event::create_event)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let start_date = Utc.with_ymd_and_hms(2027, 04, 06, 0, 0, 0).unwrap();
         let end_date = Utc.with_ymd_and_hms(2027, 04, 07, 0, 0, 0).unwrap();
@@ -645,7 +649,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn patch_event() {
-        let app = test::init_service(App::new().service(organization::handlers::event::update_event)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let data = json!({
             "name": "Ironstock"
@@ -671,7 +675,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn patch_non_existent_event() {
-        let app = test::init_service(App::new().service(organization::handlers::event::update_event)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let data = json!({
             "name": "Ironstock"
@@ -688,7 +692,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn patch_event_invalid_uuid_format() {
-        let app = test::init_service(App::new().service(organization::handlers::event::update_event)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let data = json!({});
 
@@ -703,7 +707,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn patch_event_empty_data() {
-        let app = test::init_service(App::new().service(organization::handlers::event::update_event)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let data = json!({});
 
@@ -718,7 +722,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn delete_event() {
-        let app = test::init_service(App::new().service(organization::handlers::event::delete_event)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::delete()
                             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8")
@@ -730,7 +734,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn delete_non_existent_event() {
-        let app = test::init_service(App::new().service(organization::handlers::event::delete_event)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::delete()
                             .uri("/event/b7afddce-c8fe-45aa-a12c-70fc5c7748f8")
@@ -742,7 +746,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn delete_event_invalid_uuid_format() {
-        let app = test::init_service(App::new().service(organization::handlers::event::delete_event)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::delete()
                             .uri("/event/b71fd7ce-im-rusty-boizzz-1")
@@ -754,22 +758,25 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_event_avatar() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn upload_event_avatar() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn remove_event_avatar() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
     
     #[actix_web::test]
     async fn get_all_tasks_per_event() {
-        let app = test::init_service(App::new().service(organization::handlers::event_task::get_event_tasks)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::get()
                     .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task")
@@ -787,7 +794,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_all_tasks_per_non_existent_event() {
-        let app = test::init_service(App::new().service(organization::handlers::event_task::get_event_tasks)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::get()
                     .uri("/event/ba1cd734-c571-42ea-9bb4-70fc5c7748f8/task")
@@ -799,7 +806,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_all_tasks_per_event_invalid_uuid_format() {
-        let app = test::init_service(App::new().service(organization::handlers::event_task::get_event_tasks)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::get()
                     .uri("/event/ba1cd734-tasks-boi-they-sure-are-difficult-are-they-not?")
@@ -811,7 +818,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_one_task() {
-        let app = test::init_service(App::new().service(organization::handlers::event_task::get_event_task)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::get()
                     .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task/7ae0c017-fe31-4aac-b767-100d18a8877b")
@@ -831,7 +838,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_one_task_non_existent_event() {
-        let app = test::init_service(App::new().service(organization::handlers::event_task::get_event_task)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::get()
                     .uri("/event/baaadfcf-c891-410a-9bb4-70fc5c7748f8/task/7ae0c017-fe31-4aac-b767-100d18a8877b")
@@ -843,7 +850,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_non_existent_task() {
-        let app = test::init_service(App::new().service(organization::handlers::event_task::get_event_task)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::get()
                     .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task/7ae0c017-fffe-4aac-b767-1aacca8877b")
@@ -855,7 +862,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_one_task_invalid_uuid_format() {
-        let app = test::init_service(App::new().service(organization::handlers::event_task::get_event_task)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::get()
                     .uri("/event/sleepy-head-I-am?-70fc5c7748f8/task/nowaythiscanbeavalidUUIDbrotherrr")
@@ -867,7 +874,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_task() {
-        let app = test::init_service(App::new().service(organization::handlers::event_task::create_task)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let data = json!({
             "creator_id": "9281b570-4d02-4096-9136-338a613c71cd",
@@ -895,7 +902,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_task_duplicate() {
-        let app = test::init_service(App::new().service(organization::handlers::event_task::create_task)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let data = json!({
             "creator_id": "9281b570-4d02-4096-9136-338a613c71cd",
@@ -922,7 +929,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn patch_task() {
-        let app = test::init_service(App::new().service(organization::handlers::event_task::update_task)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let data = json!({
             "title": "Help do stuff."
@@ -948,7 +955,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn patch_non_existent_task() {
-        let app = test::init_service(App::new().service(organization::handlers::event_task::update_task)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let data = json!({
             "title": "Help do stuff."
@@ -965,7 +972,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn patch_task_invalid_uuid_format() {
-        let app = test::init_service(App::new().service(organization::handlers::event_task::update_task)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let data = json!({
             "title": "Help do stuff."
@@ -982,7 +989,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn patch_task_empty_data() {
-        let app = test::init_service(App::new().service(organization::handlers::event_task::update_task)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let data = json!({});
 
@@ -997,7 +1004,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn delete_task() {
-        let app = test::init_service(App::new().service(organization::handlers::event_task::delete_task)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::delete()
                             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task/7ae0c017-fe31-4aac-b767-100d18a8877b")
@@ -1009,7 +1016,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn delete_non_existent_task() {
-        let app = test::init_service(App::new().service(organization::handlers::event_task::delete_task)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::delete()
                             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task/7ae0c017-fe31-4aac-b767-100d1fa88aac")
@@ -1021,7 +1028,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn delete_task_invalid_uuid_format() {
-        let app = test::init_service(App::new().service(organization::handlers::event_task::delete_task)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::delete()
                             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task/yesofficerIamanUUID.")
@@ -1035,7 +1042,7 @@ mod api_tests {
     //ToDo: Insert an event comment into the DB :|
     #[actix_web::test]
     async fn get_all_event_comments() {
-        let app = test::init_service(App::new().service(organization::handlers::comment::get_all_event_comments)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::get()
                             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/comment")
@@ -1046,17 +1053,19 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_all_event_comments_non_existent_event() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn get_all_event_comments_invalid_uuid_format() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn create_event_comment() {
-        let app = test::init_service(App::new().service(organization::handlers::comment::create_event_comment)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let data = json!({
             "author_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
@@ -1080,7 +1089,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_event_comment_non_existent_event() {
-        let app = test::init_service(App::new().service(organization::handlers::comment::create_event_comment)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let data = json!({
             "author_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
@@ -1098,7 +1107,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_event_comment_invalid_uuid_format() {
-        let app = test::init_service(App::new().service(organization::handlers::comment::create_event_comment)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let data = json!({
             "author_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
@@ -1116,7 +1125,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn update_event_comment() {
-        let app = test::init_service(App::new().service(organization::handlers::comment::create_event_comment)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let data = json!({
             "author_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
@@ -1134,72 +1143,85 @@ mod api_tests {
 
     #[actix_web::test]
     async fn update_event_comment_non_existent_event() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn update_event_comment_non_existent_comment() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn update_event_comment_invalid_uuid_format() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn get_all_task_comments() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn get_all_task_comments_non_existent_task() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn get_all_task_comments_invalid_uuid_format() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn create_task_comment() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn create_task_comment_non_existent_task() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn create_task_comment_invalid_uuid_format() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn update_task_comment() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn update_task_comment_non_existent_task() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn update_task_comment_non_existent_comment() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn update_task_comment_invalid_uuid_format() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn get_employments_per_user() {
-        let app = test::init_service(App::new().service(organization::handlers::employment::get_employments_per_user)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::get()
                             .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4/employment")
@@ -1215,7 +1237,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_employments_non_existent_user() {
-        let app = test::init_service(App::new().service(organization::handlers::employment::get_employments_per_user)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::get()
                             .uri("/user/35221a5b-da2c-4fe6-96d8-ce069b1ba5d4/employment")
@@ -1227,7 +1249,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_employments_invalid_uuid_format() {
-        let app = test::init_service(App::new().service(organization::handlers::employment::get_employments_per_user)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::get()
                             .uri("/user/wrongUUIDFormatBois/employment")
@@ -1239,7 +1261,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_employment() {
-        let app = test::init_service(App::new().service(organization::handlers::employment::get_employment)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::get()
                             .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4/employment/b5188eda-528d-48d4-8cee-498e0971f9f5")
@@ -1256,7 +1278,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_employment_non_existent_user() {
-        let app = test::init_service(App::new().service(organization::handlers::employment::get_employment)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::get()
                             .uri("/user/35341253-dade-4ac6-96dc-cede9b1ba5d4/employment/b5188eda-528d-48d4-8cee-498e0971f9f5")
@@ -1268,7 +1290,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_employment_non_existent_company() {
-        let app = test::init_service(App::new().service(organization::handlers::employment::get_employment)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::get()
                             .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4/employment/b5188eda-5bcd-4eda-8cae-498e0971f9f5")
@@ -1280,7 +1302,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_employment_invalid_uuid_format() {
-        let app = test::init_service(App::new().service(organization::handlers::employment::get_employment)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::get()
                             .uri("/user/35341y53-BADUUID6d8-ce06zzz/employment/b5188eda-5bcd-4eda-8cae-498e0971f9f5")
@@ -1293,20 +1315,19 @@ mod api_tests {
     //ToDo: No data for this yet.
     #[actix_web::test]
     async fn get_subordinates() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn get_subordinates_errors() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn create_update_delete_employment() {
-        let app = test::init_service(App::new()
-            .service(organization::handlers::employment::create_employment)
-            .service(organization::handlers::employment::update_employment)
-            .service(organization::handlers::employment::delete_employment)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let data = json!({
             "user_id": "0465041f-fe64-461f-9f71-71e3b97ca85f",
@@ -1390,7 +1411,7 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_employment_errors() {
-        let app = test::init_service(App::new().service(organization::handlers::employment::create_employment)).await;
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let data = json!({
             "user_id": "0465041f-INVALID4-461f-9f71-71aaagf",
@@ -1434,267 +1455,342 @@ mod api_tests {
     
     #[actix_web::test]
     async fn get_all_event_staff() {
-        todo!()
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+
+        let req = test::TestRequest::get()
+                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<AllStaffTemplate>(body).unwrap();
+        assert_eq!(out.staff.len(), 1);
     }
 
     #[actix_web::test]
     async fn get_all_event_staff_errors() {
-        todo!()
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+
+        let req = test::TestRequest::get()
+                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff")
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<AllStaffTemplate>(body).unwrap();
+        assert_eq!(out.staff.len(), 1);
     }
 
     #[actix_web::test]
     async fn get_event_staff() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn get_event_staff_errors() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn create_event_staff() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn create_event_staff_errors() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn patch_event_staff() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn patch_event_staff_errors() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn delete_event_staff() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn delete_event_staff_errors() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
     
     #[actix_web::test]
     async fn get_all_assigned_staff() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn get_all_assigned_staff_errors() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn get_assigned_staff() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn get_assigned_staff_errors() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn create_assigned_staff() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn create_assigned_staff_errors() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn update_assigned_staff() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn update_assigned_staff_errors() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn delete_assigned_staff() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn delete_assigned_staff_errors() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn delete_not_accepted_assigned_staff() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn delete_not_accepted_assigned_staff_errors() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn get_all_associated_companies_per_event() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn get_all_associated_companies_non_existent_event() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn get_all_associated_comapnies_invalid_uuid_format() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn create_associated_company() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn create_associated_company_duplicate() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn create_associated_company_invalid_uuid_format() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn update_associated_company() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
 
     #[actix_web::test]
     async fn update_associated_company_non_existent_event() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn update_associated_company_non_existent_company() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn update_associated_company_invalid_uuid_format() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn update_associated_company_empty_data() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn delete_associate_company() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn delete_associate_company_non_existent_event() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn delete_associate_company_non_existent_company() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn delete_associate_company_invalid_uuid_format() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn get_all_timesheets_for_employment() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn get_all_timesheets_for_non_existent_employment() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn get_all_timesheets_for_employment_invalid_uuid_format() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn get_timesheet() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn get_non_existent_timesheet() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn get_timesheet_invalid_uuid_format() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn create_timesheet() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn create_timesheet_non_existent_event() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn create_timesheet_non_existent_employment() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn create_timesheet_invalid_uuid_format() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn create_timesheet_duplicate() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     pub async fn update_timesheet() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     pub async fn update_timesheet_non_existent_event() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     pub async fn update_timesheet_non_existent_employment() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     pub async fn update_timesheet_invalid_uuid_format() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     pub async fn update_timesheet_empty_data() {
+        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 }

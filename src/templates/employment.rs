@@ -34,7 +34,7 @@ pub struct EmploymentLiteTemplate {
     pub end_date: NaiveDate,
 }
 
-#[derive(Template, Debug)]
+#[derive(Template, Debug, Deserialize)]
 #[template(path = "employment/employments.html")]
 pub struct EmploymentsTemplate {
     pub employments: Vec<EmploymentLiteTemplate>,
