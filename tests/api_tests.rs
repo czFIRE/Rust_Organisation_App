@@ -11,7 +11,7 @@ mod api_tests {
     use organization::templates::company::{CompaniesTemplate, CompanyTemplate};
     use organization::templates::employment::{EmploymentTemplate, EmploymentsTemplate};
     use organization::templates::event::{EventsTemplate, EventTemplate};
-    use organization::templates::staff::{AllStaffTemplate, StaffTemplate};
+    use organization::templates::staff::{AllStaffTemplate, StaffTemplate, AllStaffTaskTemplate};
     use organization::templates::task::{TasksTemplate, TaskTemplate};
     use organization::templates::user::UserTemplate;
     use serde_json::json;
@@ -1820,13 +1820,44 @@ mod api_tests {
     #[actix_web::test]
     async fn get_all_assigned_staff() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+        
+        let req = test::TestRequest::get()
+                    .uri("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff")
+                    .to_request();
+
+        let res = test::call_service(&app, req).await;
+
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<AllStaffTaskTemplate>(body).unwrap();
+        assert_eq!(out.staff.len(), 1);
     }
 
     #[actix_web::test]
     async fn get_all_assigned_staff_errors() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+        
+        let req = test::TestRequest::get()
+                    .uri("/task/7ae0c017-fe31-abcd-bea7-100d18a8877b/staff")
+                    .to_request();
+
+        let res = test::call_service(&app, req).await;
+
+        // Non-existent task
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+
+        let req = test::TestRequest::get()
+                    .uri("/task/BADUUIDBOIS/staff")
+                    .to_request();
+
+        let res = test::call_service(&app, req).await;
+
+        // Invalid uuid
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
