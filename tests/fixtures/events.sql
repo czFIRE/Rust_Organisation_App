@@ -40,4 +40,15 @@ BEGIN
         'https://woodstock.com', true,
         '1969-08-15', '1969-08-18', 'woodstock.png', 
         '2023-05-03 10:38:20.4', '2023-12-01 14:30:20.1');
+
+    INSERT INTO event
+        (id, name, description,
+        website, accepts_staff,
+        start_date, end_date, avatar_url,
+        created_at, edited_at)
+        VALUES
+        (event1_id, 'PyCon', 'The largest annual gathering for the community using and developing the open-source Python programming language.',
+        'https://pycon.com', false,
+        '2023-05-03', '2023-05-05', 'pycon.png', 
+        '2023-05-03 10:38:20.4', '2023-12-01 14:30:20.1');
 END $$;

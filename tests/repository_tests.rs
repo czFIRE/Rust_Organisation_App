@@ -825,7 +825,7 @@ pub mod event_repo_tests {
             let filter = EventFilter {
                 limit: None,
                 offset: None,
-                accepts_staff: Some(true),
+                accepts_staff: None,
             };
 
             let events = event_repo
@@ -833,11 +833,15 @@ pub mod event_repo_tests {
                 .await
                 .expect("Read all should succeed");
 
-            assert_eq!(events.len(), 1);
+            assert_eq!(events.len(), 2);
 
             let event = &events[0];
 
             assert_eq!(event.name, "Woodstock");
+
+            let event = &events[1];
+
+            assert_eq!(event.name, "PyCon");
         }
 
         {
@@ -852,7 +856,11 @@ pub mod event_repo_tests {
                 .await
                 .expect("Read all should succeed");
 
-            assert_eq!(events.len(), 0);
+            assert_eq!(events.len(), 1);
+
+            let event = &events[0];
+
+            assert_eq!(event.name, "PyCon");
         }
 
         event_repo.disconnect().await;
