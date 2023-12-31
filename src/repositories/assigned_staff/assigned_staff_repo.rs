@@ -33,33 +33,28 @@ impl crate::repositories::repository::DbRepository for AssignedStaffRepository {
 
 impl AssignedStaffRepository {
     // was AssignedStaffExtended
-    pub async fn _create(&self, data: NewAssignedStaff) -> DbResult<AssignedStaff> {
+    pub async fn create(&self, data: NewAssignedStaff) -> DbResult<AssignedStaff> {
         let executor = self.pool.as_ref();
 
         let assigned_staff = sqlx::query_as!(
             AssignedStaff,
             r#"
             INSERT INTO assigned_staff (
-                task_id, staff_id, status, decided_by, 
-                created_at, edited_at, deleted_at
+                task_id, staff_id
             ) 
             VALUES 
-                ($1, $2, $3, $4, $5, $6, $7) 
-            RETURNING task_id, 
+                ($1, $2) 
+            RETURNING 
+                task_id, 
                 staff_id, 
-                status AS "status!: AcceptanceStatus", 
                 decided_by, 
                 created_at, 
                 edited_at, 
-                deleted_at;
+                deleted_at,
+                status AS "status!: AcceptanceStatus";
             "#,
             data.task_id,
             data.staff_id,
-            AcceptanceStatus::Pending as AcceptanceStatus,
-            None::<Uuid>,
-            chrono::Utc::now().naive_utc(),
-            chrono::Utc::now().naive_utc(),
-            None::<chrono::NaiveDateTime>,
         )
         .fetch_one(executor)
         .await?;
@@ -68,11 +63,7 @@ impl AssignedStaffRepository {
         Ok(assigned_staff)
     }
 
-    pub async fn _read_one(
-        &self,
-        task_id: Uuid,
-        staff_id: Uuid,
-    ) -> DbResult<AssignedStaffExtended> {
+    pub async fn read_one(&self, task_id: Uuid, staff_id: Uuid) -> DbResult<AssignedStaffExtended> {
         // Redis here
         self.read_one_db(task_id, staff_id).await
     }
@@ -124,12 +115,25 @@ impl AssignedStaffRepository {
                 company.vatin AS company_vatin, 
                 company.created_at AS company_created_at, 
                 company.edited_at AS company_edited_at, 
-                company.deleted_at AS company_deleted_at
+                company.deleted_at AS company_deleted_at,
+                user_record_decided_by.id AS "decided_by_user_id?", 
+                user_record_decided_by.name AS "decided_by_user_name?",
+                user_record_decided_by.email AS "decided_by_user_email?", 
+                user_record_decided_by.birth AS "decided_by_user_birth?", 
+                user_record_decided_by.avatar_url AS "decided_by_user_avatar_url?", 
+                user_record_decided_by.gender AS "decided_by_user_gender?: Gender", 
+                user_record_decided_by.role AS "decided_by_user_role?: UserRole", 
+                user_record_decided_by.status AS "decided_by_user_status?: UserStatus", 
+                user_record_decided_by.created_at AS "decided_by_user_created_at?",
+                user_record_decided_by.edited_at AS "decided_by_user_edited_at?", 
+                user_record_decided_by.deleted_at AS "decided_by_user_deleted_at?"
             FROM 
                 assigned_staff 
                 INNER JOIN event_staff ON assigned_staff.staff_id = event_staff.id
                 INNER JOIN user_record ON event_staff.user_id = user_record.id
                 INNER JOIN company ON event_staff.company_id = company.id
+                LEFT OUTER JOIN event_staff AS event_staff_decided_by ON assigned_staff.decided_by = event_staff_decided_by.id
+                LEFT OUTER JOIN user_record AS user_record_decided_by ON event_staff_decided_by.user_id = user_record_decided_by.id
             WHERE 
                 assigned_staff.task_id = $1 AND assigned_staff.staff_id = $2;"#,
             task_id,
@@ -141,7 +145,7 @@ impl AssignedStaffRepository {
         Ok(assigned_staff.into())
     }
 
-    pub async fn _read_all_per_task(
+    pub async fn read_all_per_task(
         &self,
         task_id: Uuid,
         filter: AssignedStaffFilter,
@@ -191,12 +195,25 @@ impl AssignedStaffRepository {
                 company.vatin AS company_vatin, 
                 company.created_at AS company_created_at, 
                 company.edited_at AS company_edited_at, 
-                company.deleted_at AS company_deleted_at
+                company.deleted_at AS company_deleted_at,
+                user_record_decided_by.id AS "decided_by_user_id?", 
+                user_record_decided_by.name AS "decided_by_user_name?",
+                user_record_decided_by.email AS "decided_by_user_email?", 
+                user_record_decided_by.birth AS "decided_by_user_birth?", 
+                user_record_decided_by.avatar_url AS "decided_by_user_avatar_url?", 
+                user_record_decided_by.gender AS "decided_by_user_gender?: Gender", 
+                user_record_decided_by.role AS "decided_by_user_role?: UserRole", 
+                user_record_decided_by.status AS "decided_by_user_status?: UserStatus", 
+                user_record_decided_by.created_at AS "decided_by_user_created_at?",
+                user_record_decided_by.edited_at AS "decided_by_user_edited_at?", 
+                user_record_decided_by.deleted_at AS "decided_by_user_deleted_at?"
             FROM 
                 assigned_staff 
                 INNER JOIN event_staff ON assigned_staff.staff_id = event_staff.id
                 INNER JOIN user_record ON event_staff.user_id = user_record.id
                 INNER JOIN company ON event_staff.company_id = company.id
+                LEFT OUTER JOIN event_staff AS event_staff_decided_by ON assigned_staff.decided_by = event_staff_decided_by.id
+                LEFT OUTER JOIN user_record AS user_record_decided_by ON event_staff_decided_by.user_id = user_record_decided_by.id
             WHERE 
                 assigned_staff.task_id = $1
             LIMIT $2 OFFSET $3"#,
@@ -213,16 +230,23 @@ impl AssignedStaffRepository {
             .collect())
     }
 
-    pub async fn _update(
+    pub async fn update(
         &self,
-        staff_id: Uuid,
         task_id: Uuid,
+        staff_id: Uuid,
         data: AssignedStaffData,
     ) -> DbResult<AssignedStaff> {
         let executor = self.pool.as_ref();
 
         // both have to bet set for this to work
         if data.status.is_none() || data.decided_by.is_none() {
+            return Err(sqlx::Error::RowNotFound);
+        }
+
+        let assigned_staff_check = self.read_one_db(task_id, staff_id).await?;
+
+        if assigned_staff_check.deleted_at.is_some() {
+            // TODO - better error
             return Err(sqlx::Error::RowNotFound);
         }
 
@@ -254,7 +278,30 @@ impl AssignedStaffRepository {
         Ok(assigned_staff)
     }
 
-    pub async fn _delete(&self, _uuid: Uuid) -> DbResult<()> {
-        todo!()
+    pub async fn delete(&self, task_id: Uuid, staff_id: Uuid) -> DbResult<()> {
+        let executor = self.pool.as_ref();
+
+        let assigned_staff_check = self.read_one_db(task_id, staff_id).await?;
+
+        if assigned_staff_check.deleted_at.is_some() {
+            // TODO - better error
+            return Err(sqlx::Error::RowNotFound);
+        }
+
+        sqlx::query!(
+            r#"
+            UPDATE assigned_staff SET
+                deleted_at = now(),
+                edited_at = now()
+            WHERE
+                staff_id = $1 AND task_id = $2
+            "#,
+            staff_id,
+            task_id
+        )
+        .execute(executor)
+        .await?;
+
+        Ok(())
     }
 }

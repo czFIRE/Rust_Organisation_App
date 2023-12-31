@@ -286,7 +286,7 @@ CREATE TABLE assigned_staff
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at  TIMESTAMP,
     -------------------------------------------------------
-    decided_by  UUID NOT NULL,
+    decided_by  UUID,
     task_id     UUID NOT NULL,
     staff_id    UUID NOT NULL,
     -------------------------------------------------------

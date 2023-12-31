@@ -9,7 +9,7 @@ use crate::{
     },
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NewAssignedStaff {
     pub task_id: Uuid,
     pub staff_id: Uuid,
@@ -31,14 +31,14 @@ pub struct AssignedStaffExtended {
     pub task_id: Uuid,
     pub staff: StaffExtended,
     pub status: AcceptanceStatus,
-    pub decided_by: Option<Uuid>,
+    pub decided_by: Option<User>,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
     pub deleted_at: Option<NaiveDateTime>,
 }
 
 // TODO - remove this option if not needed
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AssignedStaffData {
     pub status: Option<AcceptanceStatus>,
     pub decided_by: Option<Uuid>,
@@ -48,20 +48,6 @@ pub struct AssignedStaffData {
 pub struct AssignedStaffFilter {
     pub limit: Option<i64>,
     pub offset: Option<i64>,
-}
-
-impl From<AssignedStaffExtended> for AssignedStaff {
-    fn from(assigned_staff: AssignedStaffExtended) -> Self {
-        Self {
-            task_id: assigned_staff.task_id,
-            staff_id: assigned_staff.staff.user.id,
-            status: assigned_staff.status,
-            decided_by: assigned_staff.decided_by,
-            created_at: assigned_staff.created_at,
-            edited_at: assigned_staff.edited_at,
-            deleted_at: assigned_staff.deleted_at,
-        }
-    }
 }
 
 //////////////////////////////////////
@@ -116,6 +102,18 @@ pub struct AssignedStaffStaffUserCompanyFlattened {
     pub company_created_at: NaiveDateTime,
     pub company_edited_at: NaiveDateTime,
     pub company_deleted_at: Option<NaiveDateTime>,
+
+    pub decided_by_user_id: Option<Uuid>,
+    pub decided_by_user_name: Option<String>,
+    pub decided_by_user_email: Option<String>,
+    pub decided_by_user_birth: Option<NaiveDate>,
+    pub decided_by_user_avatar_url: Option<String>, // TODO: Now is the same as in INIT.SQL but do we want this?
+    pub decided_by_user_gender: Option<Gender>,
+    pub decided_by_user_role: Option<UserRole>,
+    pub decided_by_user_status: Option<UserStatus>,
+    pub decided_by_user_created_at: Option<NaiveDateTime>,
+    pub decided_by_user_edited_at: Option<NaiveDateTime>,
+    pub decided_by_user_deleted_at: Option<NaiveDateTime>,
 }
 
 impl From<AssignedStaffStaffUserCompanyFlattened> for AssignedStaffExtended {
@@ -161,11 +159,28 @@ impl From<AssignedStaffStaffUserCompanyFlattened> for AssignedStaffExtended {
             deleted_at: value.staff_deleted_at,
         };
 
+        let decided_by_user: Option<User> = match value.decided_by_user_id {
+            None => None,
+            Some(_) => Some(User {
+                id: value.decided_by_user_id.unwrap(),
+                name: value.decided_by_user_name.unwrap(),
+                email: value.decided_by_user_email.unwrap(),
+                birth: value.decided_by_user_birth.unwrap(),
+                avatar_url: value.decided_by_user_avatar_url,
+                gender: value.decided_by_user_gender.unwrap(),
+                role: value.decided_by_user_role.unwrap(),
+                status: value.decided_by_user_status.unwrap(),
+                created_at: value.decided_by_user_created_at.unwrap(),
+                edited_at: value.decided_by_user_edited_at.unwrap(),
+                deleted_at: value.decided_by_user_deleted_at,
+            }),
+        };
+
         Self {
             task_id: value.assigned_staff_task_id,
             staff: tmp_event_staff,
             status: value.assigned_staff_status,
-            decided_by: value.assigned_staff_decided_by,
+            decided_by: decided_by_user,
             created_at: value.assigned_staff_created_at,
             edited_at: value.assigned_staff_edited_at,
             deleted_at: value.assigned_staff_deleted_at,

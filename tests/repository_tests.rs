@@ -2609,14 +2609,22 @@ pub mod task_repo_tests {
 pub mod assigned_staff_repo_tests {
     use std::sync::Arc;
 
+    use chrono::{NaiveDateTime, Utc};
     use organization_app::{
         common::DbResult,
+        models::AcceptanceStatus,
         repositories::{
-            assigned_staff::assigned_staff_repo::AssignedStaffRepository, repository::DbRepository,
+            assigned_staff::{
+                assigned_staff_repo::AssignedStaffRepository,
+                models::{AssignedStaffData, AssignedStaffFilter, NewAssignedStaff},
+            },
+            repository::DbRepository,
         },
     };
     use sqlx::PgPool;
-    use uuid::{uuid, Uuid};
+    use uuid::uuid;
+
+    use crate::test_constants;
 
     #[sqlx::test(fixtures("assigned_staff"))]
     pub fn create(pool: PgPool) -> DbResult<()> {
@@ -2624,65 +2632,356 @@ pub mod assigned_staff_repo_tests {
 
         let mut assigned_staff_repo = AssignedStaffRepository::new(arc_pool);
 
+        let assigned_staff_data = NewAssignedStaff {
+            staff_id: test_constants::EVENT_STAFF1_ID,
+            task_id: test_constants::TASK1_ID,
+        };
+
+        let new_assigned_staff = assigned_staff_repo
+            .create(assigned_staff_data.clone())
+            .await
+            .expect("Create should succeed");
+
+        assert_eq!(new_assigned_staff.staff_id, assigned_staff_data.staff_id);
+        assert_eq!(new_assigned_staff.task_id, assigned_staff_data.task_id);
+        assert_eq!(new_assigned_staff.status, AcceptanceStatus::Pending);
+
+        assert!(new_assigned_staff.decided_by.is_none());
+        assert!(new_assigned_staff.deleted_at.is_none());
+
+        let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
+
+        let time_difference_created = time - new_assigned_staff.created_at;
+        let time_difference_edited = time - new_assigned_staff.edited_at;
+
+        assert!(time_difference_created.num_seconds() < 2);
+        assert!(time_difference_edited.num_seconds() < 2);
+
         assigned_staff_repo.disconnect().await;
 
         Ok(())
     }
 
     #[sqlx::test(fixtures("assigned_staff"))]
-    pub fn read_one(_pool: PgPool) {
-        todo!()
+    pub fn read_one(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut assigned_staff_repo = AssignedStaffRepository::new(arc_pool);
+
+        let staff_id = test_constants::EVENT_STAFF0_ID;
+        let task_id = test_constants::TASK0_ID;
+
+        let assigned_staff = assigned_staff_repo
+            .read_one(task_id, staff_id)
+            .await
+            .expect("Read should succeed");
+
+        assert_eq!(assigned_staff.staff.user.name, "Dave Null");
+        assert_eq!(assigned_staff.decided_by.unwrap().name, "Dave Null");
+
+        assigned_staff_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("assigned_staff"))]
-    pub fn read_all_per_task(_pool: PgPool) {
-        todo!()
+    pub fn read_all_per_task(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut assigned_staff_repo = AssignedStaffRepository::new(arc_pool);
+
+        let task_id = test_constants::TASK0_ID;
+
+        let filter = AssignedStaffFilter {
+            limit: None,
+            offset: None,
+        };
+
+        let mut assigned_staffs = assigned_staff_repo
+            .read_all_per_task(task_id, filter)
+            .await
+            .expect("Read should succeed");
+
+        assert_eq!(assigned_staffs.len(), 2);
+
+        assigned_staffs.sort_by(|a, b| a.staff.user.name.cmp(&b.staff.user.name));
+
+        let assigned_staff = &assigned_staffs[0];
+
+        assert_eq!(assigned_staff.staff.user.name, "Dave Null");
+        assert_eq!(assigned_staff.decided_by.clone().unwrap().name, "Dave Null");
+
+        let assigned_staff = &assigned_staffs[1];
+
+        assert_eq!(assigned_staff.staff.user.name, "Tana Smith");
+        assert!(assigned_staff.decided_by.clone().is_none());
+
+        assigned_staff_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("assigned_staff"))]
-    pub fn update(_pool: PgPool) {
-        todo!()
+    pub fn update(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut assigned_staff_repo = AssignedStaffRepository::new(arc_pool);
+
+        // Valid update
+
+        {
+            let decider_staff_id = test_constants::EVENT_STAFF0_ID;
+
+            let staff_id = test_constants::EVENT_STAFF1_ID;
+            let task_id = test_constants::TASK0_ID;
+
+            let assigned_staff_data = AssignedStaffData {
+                status: Some(AcceptanceStatus::Accepted),
+                decided_by: Some(decider_staff_id),
+            };
+
+            let updated_assigned_staff = assigned_staff_repo
+                .update(task_id, staff_id, assigned_staff_data.clone())
+                .await
+                .expect("Update should succeed");
+
+            assert_eq!(updated_assigned_staff.status, AcceptanceStatus::Accepted);
+            assert_eq!(
+                updated_assigned_staff.decided_by,
+                Some(assigned_staff_data.decided_by.unwrap())
+            );
+
+            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
+
+            let time_difference_edited = time - updated_assigned_staff.edited_at;
+            assert!(time_difference_edited.num_seconds() < 2);
+
+            assert!(updated_assigned_staff.deleted_at.is_none());
+        }
+
+        // All are none
+
+        {
+            let staff_id = test_constants::EVENT_STAFF1_ID;
+            let task_id = test_constants::TASK0_ID;
+
+            let assigned_staff_data = AssignedStaffData {
+                status: None,
+                decided_by: None,
+            };
+
+            let _updated_assigned_staff = assigned_staff_repo
+                .update(task_id, staff_id, assigned_staff_data)
+                .await
+                .expect_err("Update should fail - all fields are none");
+        }
+
+        // Non existent
+
+        {
+            let staff_id = test_constants::EVENT_STAFF1_ID;
+            let task_id = uuid!("a96d1d99-93b5-469b-ac62-654b0cf7ebd9");
+
+            let assigned_staff_data = AssignedStaffData {
+                status: Some(AcceptanceStatus::Accepted),
+                decided_by: Some(test_constants::EVENT_STAFF0_ID),
+            };
+
+            let _updated_assigned_staff = assigned_staff_repo
+                .update(task_id, staff_id, assigned_staff_data)
+                .await
+                .expect_err("Update should fail - non existent assigned staff");
+        }
+
+        // Already deleted
+
+        {
+            let staff_id = test_constants::EVENT_STAFF1_ID;
+            let task_id = test_constants::TASK0_ID;
+
+            let assigned_staff = assigned_staff_repo
+                .read_one(task_id, staff_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(assigned_staff.deleted_at.is_none());
+
+            assigned_staff_repo
+                .delete(task_id, staff_id)
+                .await
+                .expect("Delete should succeed");
+
+            let deleted_assigned_staff = assigned_staff_repo
+                .read_one(task_id, staff_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(deleted_assigned_staff.deleted_at.is_some());
+
+            let assigned_staff_data = AssignedStaffData {
+                status: Some(AcceptanceStatus::Accepted),
+                decided_by: Some(test_constants::EVENT_STAFF0_ID),
+            };
+
+            let _updated_assigned_staff = assigned_staff_repo
+                .update(task_id, staff_id, assigned_staff_data)
+                .await
+                .expect_err("Update should fail - already deleted assigned staff");
+        }
+
+        assigned_staff_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("assigned_staff"))]
-    pub fn delete(_pool: PgPool) {
-        todo!()
+    pub fn delete(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut assigned_staff_repo = AssignedStaffRepository::new(arc_pool);
+
+        {
+            let staff_id = test_constants::EVENT_STAFF1_ID;
+            let task_id = test_constants::TASK0_ID;
+
+            let assigned_staff = assigned_staff_repo
+                .read_one(task_id, staff_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(assigned_staff.deleted_at.is_none());
+
+            assigned_staff_repo.delete(task_id, staff_id).await.unwrap();
+
+            let new_assigned_staff = assigned_staff_repo
+                .read_one(task_id, staff_id)
+                .await
+                .expect("Read should succeed");
+
+            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
+            let time_difference_edited = time - new_assigned_staff.edited_at;
+            let time_difference_deleted = time - new_assigned_staff.deleted_at.unwrap();
+
+            assert!(time_difference_edited.num_seconds() < 2);
+            assert!(time_difference_deleted.num_seconds() < 2);
+        }
+
+        // delete on already deleted assigned staff
+
+        {
+            let staff_id = test_constants::EVENT_STAFF1_ID;
+            let task_id = test_constants::TASK0_ID;
+
+            let assigned_staff = assigned_staff_repo
+                .read_one(task_id, staff_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(assigned_staff.deleted_at.is_some());
+
+            assigned_staff_repo
+                .delete(task_id, staff_id)
+                .await
+                .expect_err(
+                    "Repository should return error on deleting an already deleted assigned staff",
+                );
+        }
+
+        // delete on non-existing assigned staff
+
+        {
+            let staff_id = test_constants::EVENT_STAFF1_ID;
+            let task_id = uuid!("a96d1d99-93b5-469b-ac62-654b0cf7ebd9");
+
+            assigned_staff_repo
+                .delete(task_id, staff_id)
+                .await
+                .expect_err(
+                    "Repository should return error on deleting a non-existing assigned staff",
+                );
+        }
+
+        assigned_staff_repo.disconnect().await;
+
+        Ok(())
     }
 }
 
 // needs event, task, user
 #[cfg(test)]
 pub mod comment_repo_tests {
+    use std::sync::Arc;
+
+    use organization_app::{
+        common::DbResult,
+        repositories::{comment::comment_repo::CommentRepository, repository::DbRepository},
+    };
     use sqlx::PgPool;
-    use uuid::{uuid, Uuid};
+    use uuid::uuid;
 
     #[sqlx::test(fixtures("comments"))]
-    async fn create(_pool: PgPool) {
-        todo!()
+    async fn create(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut comment_repo = CommentRepository::new(arc_pool);
+
+        comment_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("comments"))]
-    async fn read_one(_pool: PgPool) {
-        todo!()
+    async fn read_one(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut comment_repo = CommentRepository::new(arc_pool);
+
+        comment_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("comments"))]
-    async fn read_all_per_event(_pool: PgPool) {
-        todo!()
+    async fn read_all_per_event(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut comment_repo = CommentRepository::new(arc_pool);
+
+        comment_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("comments"))]
-    async fn read_all_per_task(_pool: PgPool) {
-        todo!()
+    async fn read_all_per_task(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut comment_repo = CommentRepository::new(arc_pool);
+
+        comment_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("comments"))]
-    async fn update(_pool: PgPool) {
-        todo!()
+    async fn update(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut comment_repo = CommentRepository::new(arc_pool);
+
+        comment_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("comments"))]
-    async fn delete(_pool: PgPool) {
-        todo!()
+    async fn delete(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut comment_repo = CommentRepository::new(arc_pool);
+
+        comment_repo.disconnect().await;
+
+        Ok(())
     }
 }

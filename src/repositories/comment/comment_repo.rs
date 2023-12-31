@@ -1,4 +1,5 @@
 use crate::common::DbResult;
+use async_trait::async_trait;
 use sqlx::postgres::PgPool;
 use std::sync::Arc;
 use uuid::Uuid;
@@ -14,12 +15,22 @@ pub struct CommentRepository {
     pub pool: Arc<PgPool>,
 }
 
-impl CommentRepository {
-    pub fn new(pool: Arc<PgPool>) -> Self {
+#[async_trait]
+impl crate::repositories::repository::DbRepository for CommentRepository {
+    /// Database repository constructor
+    #[must_use]
+    fn new(pool: Arc<PgPool>) -> Self {
         Self { pool }
     }
 
-    pub async fn _create(&self, data: NewComment) -> DbResult<Comment> {
+    /// Method allowing the database repository to disconnect from the database pool gracefully
+    async fn disconnect(&mut self) -> () {
+        self.pool.close().await;
+    }
+}
+
+impl CommentRepository {
+    pub async fn create(&self, data: NewComment) -> DbResult<Comment> {
         let executor = self.pool.as_ref();
 
         let comment: Comment = sqlx::query_as!(
@@ -40,7 +51,7 @@ impl CommentRepository {
         Ok(comment)
     }
 
-    pub async fn _read_one(&self, comment_id: Uuid) -> DbResult<CommentExtended> {
+    pub async fn read_one(&self, comment_id: Uuid) -> DbResult<CommentExtended> {
         // Redis here
         self.read_one_db(comment_id).await
     }
@@ -85,7 +96,7 @@ impl CommentRepository {
         Ok(comment.into())
     }
 
-    pub async fn _read_all_per_event(
+    pub async fn read_all_per_event(
         &self,
         event_id: Uuid,
         filter: CommentFilter,
@@ -132,7 +143,7 @@ impl CommentRepository {
         Ok(comments.into_iter().map(|c| c.into()).collect())
     }
 
-    pub async fn _read_all_per_task(
+    pub async fn read_all_per_task(
         &self,
         task_id: Uuid,
         filter: CommentFilter,
@@ -179,8 +190,15 @@ impl CommentRepository {
         Ok(comments.into_iter().map(|c| c.into()).collect())
     }
 
-    pub async fn _update(&self, comment_id: Uuid, data: CommentData) -> DbResult<Comment> {
+    pub async fn update(&self, comment_id: Uuid, data: CommentData) -> DbResult<Comment> {
         let executor = self.pool.as_ref();
+
+        let comment_check = self.read_one_db(comment_id).await?;
+
+        if comment_check.deleted_at.is_some() {
+            // TODO - better error
+            return Err(sqlx::Error::RowNotFound);
+        }
 
         let comment: Comment = sqlx::query_as!(
             Comment,
@@ -200,8 +218,15 @@ impl CommentRepository {
         Ok(comment)
     }
 
-    pub async fn _delete(&self, comment_id: Uuid) -> DbResult<()> {
+    pub async fn delete(&self, comment_id: Uuid) -> DbResult<()> {
         let executor = self.pool.as_ref();
+
+        let comment_check = self.read_one_db(comment_id).await?;
+
+        if comment_check.deleted_at.is_some() {
+            // TODO - better error
+            return Err(sqlx::Error::RowNotFound);
+        }
 
         sqlx::query!(
             r#"
