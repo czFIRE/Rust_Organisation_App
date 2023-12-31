@@ -2,18 +2,18 @@ use actix_web::{delete, get, patch, post, web, HttpResponse};
 use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::models::{AcceptanceStatus, StaffLevel};
+use crate::models::{AcceptanceStatus, EventRole};
 
 #[derive(Deserialize)]
 pub struct NewEventStaffData {
     user_id: Uuid,
     company_id: Uuid,
-    role: StaffLevel,
+    role: EventRole,
 }
 
 #[derive(Deserialize)]
 pub struct EventStaffData {
-    role: Option<StaffLevel>,
+    role: Option<EventRole>,
     status: Option<AcceptanceStatus>,
     decided_by: Option<Uuid>,
 }

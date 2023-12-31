@@ -6,13 +6,14 @@ mod api_tests {
     use actix_web::http::header::ContentType;
     use actix_web::{test, App};
     use chrono::{NaiveDate, Utc, TimeZone};
-    use organization::models::{UserRole, StaffLevel, AcceptanceStatus};
+    use organization::models::{UserRole, EventRole, AcceptanceStatus, Association};
     use organization::templates::comment::{CommentTemplate, CommentsTemplate};
-    use organization::templates::company::{CompaniesTemplate, CompanyTemplate};
+    use organization::templates::company::{CompaniesTemplate, CompanyTemplate, AssociatedCompanyTemplate, AssociatedCompaniesTemplate};
     use organization::templates::employment::{EmploymentTemplate, EmploymentsTemplate};
     use organization::templates::event::{EventsTemplate, EventTemplate};
     use organization::templates::staff::{AllStaffTemplate, StaffTemplate, AllStaffTaskTemplate, TaskStaffTemplate};
     use organization::templates::task::{TasksTemplate, TaskTemplate};
+    use organization::templates::timesheet::{TimesheetsTemplate, TimesheetTemplate};
     use organization::templates::user::UserTemplate;
     use serde_json::json;
     use uuid::Uuid;
@@ -1744,7 +1745,7 @@ mod api_tests {
         assert_eq!(out.user.id, Uuid::from_str("51a01dbf-dcd5-43a0-809c-94ed8e61d420").unwrap());
         assert_eq!(out.company.id, Uuid::from_str("b5188eda-528d-48d4-8cee-498e0971f9f5").unwrap());
         assert_eq!(out.event_id, Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap());
-        assert_eq!(out.role, StaffLevel::Organizer);
+        assert_eq!(out.role, EventRole::Organizer);
 
         let req = test::TestRequest::delete()
                     .uri(format!("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff/{}", staff_id.to_string()).as_str())
@@ -1908,12 +1909,6 @@ mod api_tests {
             "staff_id": "a96d1d99-93b5-469b-ac62-654b0cf7ebd3"
         });
 
-        let staff_data = json!({
-            "user_id": "0465041f-fe64-461f-9f71-71e3b97ca85f",
-            "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
-            "role": "basic"
-        });
-
         let req = test::TestRequest::post()
                     .uri("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff")
                     .set_form(data)
@@ -1989,15 +1984,59 @@ mod api_tests {
     #[actix_web::test]
     async fn create_assigned_staff_errors() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+        let data = json!({
+            "staff_id": "a96d1d99-93b5-469b-ac62-654b0cf7ebd3"
+        });
+
+        let req = test::TestRequest::post()
+                    .uri("/task/7aey-FEELZ-INVALIDUUIDUDE767-100d18a8877b/staff")
+                    .set_form(data)
+                    .to_request();
+        
+        let res = test::call_service(&app, req).await;
+
+        // Invalid UUID
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+
+        let data = json!({
+            "staff_id": "a96d1d99-93b5-469b-ac62-654b0cf7ebd3"
+        });
+
+        let req = test::TestRequest::post()
+                    .uri("/task/7ae0c017-fe31-4dde-b653-1acd18a8877b/staff")
+                    .set_form(data)
+                    .to_request();
+        
+        let res = test::call_service(&app, req).await;
+
+        // Task doesn't exit
+        assert!(res.status().is_client_err());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+
+        let data = json!({
+        });
+
+        let req = test::TestRequest::post()
+                    .uri("/task/7ae0c017-fe31-4dde-b653-1acd18a8877b/staff")
+                    .set_form(data)
+                    .to_request();
+        
+        let res = test::call_service(&app, req).await;
+
+        // Empty data
+        assert!(res.status().is_client_err());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
+    // ToDo
     #[actix_web::test]
     async fn delete_not_accepted_assigned_staff() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
+    // ToDo
     #[actix_web::test]
     async fn delete_not_accepted_assigned_staff_errors() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
@@ -2007,187 +2046,251 @@ mod api_tests {
     #[actix_web::test]
     async fn get_all_associated_companies_per_event() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+        
+        let req = test::TestRequest::get()
+                    .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/company")
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<AssociatedCompaniesTemplate>(body).unwrap();
+        assert_eq!(out.associated_companies.len(), 1);
     }
 
     #[actix_web::test]
     async fn get_all_associated_companies_non_existent_event() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+        
+        let req = test::TestRequest::get()
+                    .uri("/event/b7acd7ce-caac-410a-9bb4-70fc5c7748f8/company")
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn get_all_associated_comapnies_invalid_uuid_format() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+        
+        let req = test::TestRequest::get()
+                    .uri("/event/BADUUIDZZZZZZZZZc7748f8/company")
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
-    async fn create_associated_company() {
+    async fn create_update_delete_associated_company() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+        
+        let data = json!({
+          "company_id": "134d5286-5f55-4637-9b98-223a5820a464",
+          "association_type": "sponsor",
+        });
+
+        let req = test::TestRequest::post()
+                    .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/company")
+                    .set_form(data)
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_req!(res.status, http::StatusCode::CREATED);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<AssociatedCompanyTemplate>(body).unwrap();
+        assert_eq!(out.association_type, Association::Sponsor);
+        assert_eq!(out.company.id, Uuid::from_str("134d5286-5f55-4637-9b98-223a5820a464").unwrap());
+        assert_eq!(out.event_id, Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap());
+
+        //Duplicate creation should fail
+        let req = test::TestRequest::post()
+                    .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/company")
+                    .set_form(data)
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_req!(res.status, http::StatusCode::BAD_REQUEST);
+
+        // Invalid UUID should fail
+        let req = test::TestRequest::post()
+                    .uri("/event/BADUUIDFORMATZZZ/company")
+                    .set_form(data)
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_req!(res.status, http::StatusCode::BAD_REQUEST);
+
+        let data = json!({
+            "association_type": "other",
+        });
+
+        let req = test::TestRequest::patch()
+                    .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/company/134d5286-5f55-4637-9b98-223a5820a464")
+                    .set_form(data)
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_req!(res.status, http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<AssociatedCompanyTemplate>(body).unwrap();
+        ssert_eq!(out.association_type, Association::Other);
+        assert_eq!(out.company.id, Uuid::from_str("134d5286-5f55-4637-9b98-223a5820a464").unwrap());
+        assert_eq!(out.event_id, Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap());
+
+        let data = json!({
+        });
+
+        let req = test::TestRequest::patch()
+                    .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/company/134d5286-5f55-4637-9b98-223a5820a464")
+                    .set_form(data)
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_req!(res.status, http::StatusCode::BAD_REQUEST);
+
+        let data = json!({
+            "association_type": "other",
+        });
+
+        let req = test::TestRequest::patch()
+                    .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/company/INVALIDUUID")
+                    .set_form(data)
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_req!(res.status, http::StatusCode::BAD_REQUEST);
+
+        let req = test::TestRequest::delete()
+                    .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/company/134d5286-5f55-4637-9b98-223a5820a464")
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_req!(res.status, http::StatusCode::NO_CONTENT);
     }
-
-    #[actix_web::test]
-    async fn create_associated_company_duplicate() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn create_associated_company_invalid_uuid_format() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn update_associated_company() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-
-    #[actix_web::test]
-    async fn update_associated_company_non_existent_event() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn update_associated_company_non_existent_company() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn update_associated_company_invalid_uuid_format() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn update_associated_company_empty_data() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn delete_associate_company() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn delete_associate_company_non_existent_event() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn delete_associate_company_non_existent_company() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn delete_associate_company_invalid_uuid_format() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
+    
     #[actix_web::test]
     async fn get_all_timesheets_for_employment() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+        let req = test::TestRequest::get()
+                    .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4/employment/b5188eda-528d-48d4-8cee-498e0971f9f5/sheet")
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<TimesheetsTemplate>(body).unwrap();
+        assert_eq!(out.timesheets.len(), 1);
     }
 
     #[actix_web::test]
     async fn get_all_timesheets_for_non_existent_employment() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+        let req = test::TestRequest::get()
+                    .uri("/user/3abc12e3-dad0-40b6-96d8-ce069b1ba5d4/employment/b5188eda-528d-48d4-8cee-498e0971f9f5/sheet")
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn get_all_timesheets_for_employment_invalid_uuid_format() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+        let req = test::TestRequest::get()
+                    .uri("/user/3aZZZBADUUIDY/employment/b5188eda-528d-48d4-8cee-498e0971f9f5/sheet")
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
     async fn get_timesheet() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+        let req = test::TestRequest::get()
+                    .uri("/timesheet/d47e8141-a77e-4d55-a2d5-4a77de24b6d0")
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert!(res.status(), http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<TimesheetTemplate>(body).unwrap();
+        assert!(out.work_days.len(), 2);
+        assert!(out.id, Uuid::from_str("d47e8141-a77e-4d55-a2d5-4a77de24b6d0").unwrap());
     }
 
     #[actix_web::test]
     async fn get_non_existent_timesheet() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+        let req = test::TestRequest::get()
+                    .uri("/timesheet/dabe8141-a27e-4c55-a2d5-4a77de24b6d0")
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn get_timesheet_invalid_uuid_format() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+        let req = test::TestRequest::get()
+                    .uri("/timesheet/BADFORMATZ12")
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
-    async fn create_timesheet() {
+    async fn create_update_timesheet() {
         let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
+        
+        let data = json!({
+             "user_id": "0465041f-fe64-461f-9f71-71e3b97ca85f",
+             "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
+             "event_id": "b71fd7ce-c891-410a-9bb4-70fc5c7748f8",
+             "start_date": "1969-08-15",
+             "end_date": "1969-08-18"
+        });
 
-    #[actix_web::test]
-    async fn create_timesheet_non_existent_event() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
+        let req = test::TestRequest::post()
+                    .uri("/timesheet")
+                    .set_form(data)
+                    .to_request();
+        let res = test::call_service(&app, req).await;
 
-    #[actix_web::test]
-    async fn create_timesheet_non_existent_employment() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::CREATED);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<TimesheetTemplate>(body).unwrap();
+        assert_eq!(out.work_days.len(), 4);
+        assert_eq!(out.company_id, Uuid::from_str("b5188eda-528d-48d4-8cee-498e0971f9f5").unwrap());
+        assert_eq!(out.user_id, Uuid::from_str("0465041f-fe64-461f-9f71-71e3b97ca85f").unwrap());
+        assert_eq!(out.event.id, Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap());
+        
+        let timesheet_id = out.id;
+        let data = json!({
+            "manager_note": "Hey, fill out your sheet.",
+        });
+        let req = test::TestRequest::patch()
+                    .uri(format!("/timesheet/{}", timesheet_id.to_string()).as_str())
+                    .set_form(data)
+                    .to_request();
+        let res = test::call_service(&app, req).await;
 
-    #[actix_web::test]
-    async fn create_timesheet_invalid_uuid_format() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    async fn create_timesheet_duplicate() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    pub async fn update_timesheet() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    pub async fn update_timesheet_non_existent_event() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    pub async fn update_timesheet_non_existent_employment() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    pub async fn update_timesheet_invalid_uuid_format() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    #[actix_web::test]
-    pub async fn update_timesheet_empty_data() {
-        let app = test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        let out = serde_json::from_str::<TimesheetTemplate>(body).unwrap();
+        assert_eq!(out.manager_note, Some("Hey, fill out your sheet.".to_string()));
     }
 }

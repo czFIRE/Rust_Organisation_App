@@ -42,13 +42,13 @@ pub struct CompanyLiteTemplate {
     pub avatar_url: String,
 }
 
-#[derive(Template, Deserialize)]
+#[derive(Template, Debug, Deserialize)]
 #[template(path = "company/companies.html")]
 pub struct CompaniesTemplate {
     pub companies: Vec<CompanyLiteTemplate>
 }
 
-#[derive(Template, Deserialize)]
+#[derive(Template, Debug, Deserialize)]
 #[template(path = "company/associated-company.html")]
 pub struct AssociatedCompanyTemplate {
     pub event_id: Uuid,
@@ -56,4 +56,11 @@ pub struct AssociatedCompanyTemplate {
     pub association_type: Association,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
+}
+
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "company/associated-companies.html")]
+pub struct AssociatedCompaniesTemplate {
+    pub associated_companies: Vec<AssociatedCompanyTemplate>,
 }

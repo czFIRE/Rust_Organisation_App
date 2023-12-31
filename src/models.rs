@@ -24,7 +24,7 @@ pub enum Gender {
 
 #[derive(Serialize, Debug, PartialEq, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum StaffLevel {
+pub enum EventRole {
     Basic,
     Organizer,
 }
