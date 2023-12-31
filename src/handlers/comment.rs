@@ -58,8 +58,6 @@ pub async fn update_comment(
 }
 
 #[delete("/comment/{comment_id}")]
-pub async fn delete_comment(
-    _comment_id: web::Path<Uuid>,
-) -> HttpResponse {
+pub async fn delete_comment(_comment_id: web::Path<Uuid>) -> HttpResponse {
     todo!()
 }

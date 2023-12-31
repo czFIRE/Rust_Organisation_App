@@ -26,5 +26,5 @@ pub struct TaskTemplate {
 #[derive(Template, Deserialize)]
 #[template(path = "event/task/tasks.html")]
 pub struct TasksTemplate {
-    pub tasks: Vec<TaskTemplate>
+    pub tasks: Vec<TaskTemplate>,
 }

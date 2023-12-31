@@ -45,7 +45,7 @@ pub struct CompanyLiteTemplate {
 #[derive(Template, Debug, Deserialize)]
 #[template(path = "company/companies.html")]
 pub struct CompaniesTemplate {
-    pub companies: Vec<CompanyLiteTemplate>
+    pub companies: Vec<CompanyLiteTemplate>,
 }
 
 #[derive(Template, Debug, Deserialize)]
@@ -57,7 +57,6 @@ pub struct AssociatedCompanyTemplate {
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
 }
-
 
 #[derive(Template, Debug, Deserialize)]
 #[template(path = "company/associated-companies.html")]

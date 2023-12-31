@@ -3,7 +3,7 @@ use chrono::Utc;
 use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::models::{EmployeeLevel, EmployeeContract};
+use crate::models::{EmployeeContract, EmployeeLevel};
 
 #[derive(Deserialize)]
 pub struct NewEmploymentData {
@@ -35,12 +35,18 @@ pub async fn get_employments_per_user(_user_id: web::Path<String>) -> HttpRespon
 }
 
 #[get("/user/{user_id}/employment/{company_id}")]
-pub async fn get_employment(_user_id: web::Path<String>, _company_id: web::Path<String>) -> HttpResponse {
+pub async fn get_employment(
+    _user_id: web::Path<String>,
+    _company_id: web::Path<String>,
+) -> HttpResponse {
     todo!()
 }
 
 #[get("/user/{user_id}/employment/{company_id}/subordinates")]
-pub async fn get_subordinates(_user_id: web::Path<String>, _company_id: web::Path<String>) -> HttpResponse {
+pub async fn get_subordinates(
+    _user_id: web::Path<String>,
+    _company_id: web::Path<String>,
+) -> HttpResponse {
     todo!()
 }
 
@@ -50,11 +56,17 @@ pub async fn create_employment(_new_employment: web::Form<NewEmploymentData>) ->
 }
 
 #[patch("/user/{user_id}/employment/{company_id}")]
-pub async fn update_employment(_user_id: web::Path<String>, _employment_data: web::Form<EmploymentData>) -> HttpResponse {
+pub async fn update_employment(
+    _user_id: web::Path<String>,
+    _employment_data: web::Form<EmploymentData>,
+) -> HttpResponse {
     todo!()
 }
 
 #[delete("/user/{user_id}/employment/{company_id}")]
-pub async fn delete_employment(_user_id: web::Path<String>, _company_id: web::Path<String>) -> HttpResponse {
+pub async fn delete_employment(
+    _user_id: web::Path<String>,
+    _company_id: web::Path<String>,
+) -> HttpResponse {
     todo!()
 }

@@ -16,9 +16,8 @@ async fn main() -> Result<()> {
     dotenv().ok();
 
     println!("Starting server on {HOST}");
-    HttpServer::new(move || {
-        App::new().configure(configure_app)
-    }).bind(HOST)?
-      .run()
-      .await
+    HttpServer::new(move || App::new().configure(configure_app))
+        .bind(HOST)?
+        .run()
+        .await
 }
