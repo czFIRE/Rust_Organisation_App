@@ -2912,18 +2912,90 @@ pub mod assigned_staff_repo_tests {
 pub mod comment_repo_tests {
     use std::sync::Arc;
 
+    use actix_web::rt::time;
+    use chrono::{NaiveDateTime, Utc};
     use organization_app::{
         common::DbResult,
-        repositories::{comment::comment_repo::CommentRepository, repository::DbRepository},
+        repositories::{
+            comment::{
+                comment_repo::CommentRepository,
+                models::{CommentData, CommentFilter, NewComment},
+            },
+            repository::DbRepository,
+        },
     };
     use sqlx::PgPool;
     use uuid::uuid;
+
+    use crate::test_constants;
 
     #[sqlx::test(fixtures("comments"))]
     async fn create(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
         let mut comment_repo = CommentRepository::new(arc_pool);
+
+        // Valid create
+
+        {
+            let new_comment_data = NewComment {
+                author_id: test_constants::USER0_ID,
+                event_id: Some(test_constants::EVENT0_ID),
+                task_id: None,
+                content: "Test Content".to_string(),
+            };
+
+            let new_comment = comment_repo
+                .create(new_comment_data.clone())
+                .await
+                .expect("Create should succeed");
+
+            assert_eq!(new_comment.author_id, new_comment_data.author_id);
+            assert_eq!(new_comment.event_id, new_comment_data.event_id);
+            assert_eq!(new_comment.task_id, new_comment_data.task_id);
+            assert_eq!(new_comment.content, new_comment_data.content);
+            assert_eq!(new_comment.deleted_at, None);
+
+            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
+
+            let time_difference_created = time - new_comment.created_at;
+            let time_difference_edited = time - new_comment.edited_at;
+
+            assert!(time_difference_created.num_seconds() < 2);
+            assert!(time_difference_edited.num_seconds() < 2);
+        }
+
+        // All are none
+
+        {
+            let new_comment_data = NewComment {
+                author_id: test_constants::USER0_ID,
+                event_id: None,
+                task_id: None,
+                content: "Test Content".to_string(),
+            };
+
+            let _new_comment = comment_repo
+                .create(new_comment_data)
+                .await
+                .expect_err("Create should fail - all fields are none");
+        }
+
+        // Both are some
+
+        {
+            let new_comment_data = NewComment {
+                author_id: test_constants::USER0_ID,
+                event_id: Some(test_constants::EVENT0_ID),
+                task_id: Some(test_constants::TASK0_ID),
+                content: "Test Content".to_string(),
+            };
+
+            let _new_comment = comment_repo
+                .create(new_comment_data)
+                .await
+                .expect_err("Create should fail - both event and task are some");
+        }
 
         comment_repo.disconnect().await;
 
@@ -2936,6 +3008,16 @@ pub mod comment_repo_tests {
 
         let mut comment_repo = CommentRepository::new(arc_pool);
 
+        let comment_id = test_constants::COMMENT0_ID;
+
+        let comment = comment_repo
+            .read_one(comment_id)
+            .await
+            .expect("Read should succeed");
+
+        assert_eq!(comment.content, "Joe will need 3 guitars on stage.");
+        assert_eq!(comment.author.name, "Dave Null");
+
         comment_repo.disconnect().await;
 
         Ok(())
@@ -2946,6 +3028,32 @@ pub mod comment_repo_tests {
         let arc_pool = Arc::new(pool);
 
         let mut comment_repo = CommentRepository::new(arc_pool);
+
+        let event_id = test_constants::EVENT0_ID;
+
+        let filter = CommentFilter {
+            limit: None,
+            offset: None,
+        };
+
+        let mut comments = comment_repo
+            .read_all_per_event(event_id, filter)
+            .await
+            .expect("Read should succeed");
+
+        assert_eq!(comments.len(), 2);
+
+        comments.sort_by(|a, b| a.author.name.cmp(&b.author.name));
+
+        let comment = &comments[0];
+
+        assert_eq!(comment.content, "Oh nooo!");
+        assert_eq!(comment.author.name, "Dave Null");
+
+        let comment = &comments[1];
+
+        assert_eq!(comment.content, "I have a problem.");
+        assert_eq!(comment.author.name, "Tana Smith");
 
         comment_repo.disconnect().await;
 
@@ -2958,6 +3066,32 @@ pub mod comment_repo_tests {
 
         let mut comment_repo = CommentRepository::new(arc_pool);
 
+        let task_id = test_constants::TASK0_ID;
+
+        let filter = CommentFilter {
+            limit: None,
+            offset: None,
+        };
+
+        let mut comments = comment_repo
+            .read_all_per_task(task_id, filter)
+            .await
+            .expect("Read should succeed");
+
+        assert_eq!(comments.len(), 2);
+
+        comments.sort_by(|a, b| a.author.name.cmp(&b.author.name));
+
+        let comment = &comments[0];
+
+        assert_eq!(comment.content, "Joe will need 3 guitars on stage.");
+        assert_eq!(comment.author.name, "Dave Null");
+
+        let comment = &comments[1];
+
+        assert_eq!(comment.content, "I will take care of it.");
+        assert_eq!(comment.author.name, "Tana Smith");
+
         comment_repo.disconnect().await;
 
         Ok(())
@@ -2969,6 +3103,99 @@ pub mod comment_repo_tests {
 
         let mut comment_repo = CommentRepository::new(arc_pool);
 
+        // Valid update
+
+        {
+            let comment_id = test_constants::COMMENT0_ID;
+
+            let comment = comment_repo
+                .read_one(comment_id)
+                .await
+                .expect("Read should succeed");
+
+            let new_comment_data = CommentData {
+                content: "New Content".to_string(),
+            };
+
+            let updated_comment = comment_repo
+                .update(comment_id, new_comment_data.clone())
+                .await
+                .expect("Update should succeed");
+
+            assert_eq!(updated_comment.content, new_comment_data.content);
+
+            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
+
+            let time_difference_edited = time - updated_comment.edited_at;
+            assert!(time_difference_edited.num_seconds() < 2);
+
+            assert!(updated_comment.deleted_at.is_none());
+        }
+
+        // All are none
+
+        {
+            let comment_id = test_constants::COMMENT0_ID;
+
+            let new_comment_data = CommentData {
+                content: "".to_string(),
+            };
+
+            let _updated_comment = comment_repo
+                .update(comment_id, new_comment_data)
+                .await
+                .expect_err("Update should fail - all fields are none");
+        }
+
+        // Non existent
+
+        {
+            let comment_id = uuid!("a96d1d99-93b5-469b-ac62-654b0cf7ebd9");
+
+            let new_comment_data = CommentData {
+                content: "New Content".to_string(),
+            };
+
+            let _updated_comment = comment_repo
+                .update(comment_id, new_comment_data)
+                .await
+                .expect_err("Update should fail - non existent comment");
+        }
+
+        // Already deleted
+
+        {
+            let comment_id = test_constants::COMMENT0_ID;
+
+            let comment = comment_repo
+                .read_one(comment_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(comment.deleted_at.is_none());
+
+            comment_repo
+                .delete(comment_id)
+                .await
+                .expect("Delete should succeed");
+
+            let deleted_comment = comment_repo
+                .read_one(comment_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(deleted_comment.deleted_at.is_some());
+
+            let new_comment_data = CommentData {
+                content: "New Content".to_string(),
+            };
+
+            let _updated_comment = comment_repo
+                .update(comment_id, new_comment_data)
+                .await
+                .expect_err("Update should fail - already deleted comment");
+        }
+
         comment_repo.disconnect().await;
 
         Ok(())
@@ -2979,6 +3206,61 @@ pub mod comment_repo_tests {
         let arc_pool = Arc::new(pool);
 
         let mut comment_repo = CommentRepository::new(arc_pool);
+
+        // Valid delete
+
+        {
+            let comment_id = test_constants::COMMENT0_ID;
+
+            let comment = comment_repo
+                .read_one(comment_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(comment.deleted_at.is_none());
+
+            comment_repo.delete(comment_id).await.unwrap();
+
+            let new_comment = comment_repo
+                .read_one(comment_id)
+                .await
+                .expect("Read should succeed");
+
+            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
+            let time_difference_edited = time - new_comment.edited_at;
+            let time_difference_deleted = time - new_comment.deleted_at.unwrap();
+
+            assert!(time_difference_edited.num_seconds() < 2);
+            assert!(time_difference_deleted.num_seconds() < 2);
+        }
+
+        // delete on already deleted comment
+
+        {
+            let comment_id = test_constants::COMMENT0_ID;
+
+            let comment = comment_repo
+                .read_one(comment_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(comment.deleted_at.is_some());
+
+            comment_repo.delete(comment_id).await.expect_err(
+                "Repository should return error on deleting an already deleted comment",
+            );
+        }
+
+        // delete on non-existing comment
+
+        {
+            let comment_id = uuid!("a96d1d99-93b5-469b-ac62-654b0cf7ebd9");
+
+            comment_repo
+                .delete(comment_id)
+                .await
+                .expect_err("Repository should return error on deleting a non-existing comment");
+        }
 
         comment_repo.disconnect().await;
 

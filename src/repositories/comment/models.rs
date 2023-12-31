@@ -7,7 +7,7 @@ use crate::{
     repositories::user::models::User,
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NewComment {
     pub author_id: Uuid,
     pub event_id: Option<Uuid>,
@@ -15,7 +15,7 @@ pub struct NewComment {
     pub content: String,
 }
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, FromRow, Clone)]
 pub struct Comment {
     pub id: Uuid,
     pub author_id: Uuid,
@@ -27,7 +27,7 @@ pub struct Comment {
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CommentExtended {
     pub comment_id: Uuid,
     pub author: User,
@@ -39,12 +39,12 @@ pub struct CommentExtended {
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CommentData {
     pub content: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CommentFilter {
     pub limit: Option<i64>,
     pub offset: Option<i64>,

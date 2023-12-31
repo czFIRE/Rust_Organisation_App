@@ -31,6 +31,18 @@ impl crate::repositories::repository::DbRepository for CommentRepository {
 
 impl CommentRepository {
     pub async fn create(&self, data: NewComment) -> DbResult<Comment> {
+        if data.content.chars().count() < 1 {
+            // TODO - better error
+            return Err(sqlx::Error::RowNotFound);
+        }
+
+        if (data.event_id.is_none() && data.task_id.is_none())
+            || (data.event_id.is_some() && data.task_id.is_some())
+        {
+            // TODO - better error
+            return Err(sqlx::Error::RowNotFound);
+        }
+
         let executor = self.pool.as_ref();
 
         let comment: Comment = sqlx::query_as!(
@@ -191,6 +203,11 @@ impl CommentRepository {
     }
 
     pub async fn update(&self, comment_id: Uuid, data: CommentData) -> DbResult<Comment> {
+        if data.content.chars().count() < 1 {
+            // TODO - better error
+            return Err(sqlx::Error::RowNotFound);
+        }
+
         let executor = self.pool.as_ref();
 
         let comment_check = self.read_one_db(comment_id).await?;
