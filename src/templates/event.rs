@@ -4,7 +4,7 @@ use serde::Deserialize;
 use sqlx::types::uuid;
 use uuid::Uuid;
 
-#[derive(Template, Deserialize)]
+#[derive(Template, Debug, Deserialize)]
 #[template(path = "event/event.html")]
 pub struct EventTemplate {
     pub id: Uuid,
@@ -19,7 +19,7 @@ pub struct EventTemplate {
     pub edited_at: NaiveDateTime,
 }
 
-#[derive(Template, Deserialize)]
+#[derive(Template, Debug, Deserialize)]
 #[template(path = "event/event-lite.html")]
 pub struct EventLiteTemplate {
     pub id: Uuid,
@@ -30,7 +30,7 @@ pub struct EventLiteTemplate {
     pub end_date: NaiveDate,
 }
 
-#[derive(Template, Deserialize)]
+#[derive(Template, Debug, Deserialize)]
 #[template(path = "event/events.html")]
 pub struct EventsTemplate {
     pub events: Vec<EventLiteTemplate>,
