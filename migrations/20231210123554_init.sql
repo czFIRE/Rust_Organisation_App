@@ -238,7 +238,7 @@ CREATE TABLE event_staff
     -------------------------------------------------------
     user_id     UUID NOT NULL,
     company_id  UUID NOT NULL,
-    decided_by  UUID NOT NULL,
+    decided_by  UUID,
     event_id    UUID NOT NULL,
     -------------------------------------------------------
     FOREIGN KEY (user_id) REFERENCES user_record (id),

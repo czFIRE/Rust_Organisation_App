@@ -3,7 +3,7 @@ use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
 
 use crate::{
-    models::{AcceptanceStatus, Gender, StaffLevel, UserRole, UserStatus},
+    models::{AcceptanceStatus, EventRole, Gender, UserRole, UserStatus},
     repositories::{
         company::models::Company, event_staff::models::StaffExtended, user::models::User,
     },
@@ -85,7 +85,7 @@ pub struct AssignedStaffStaffUserCompanyFlattened {
     pub staff_user_id: Uuid,
     pub staff_company_id: Uuid,
     pub staff_event_id: Uuid,
-    pub staff_role: StaffLevel,
+    pub staff_role: EventRole,
     pub staff_status: AcceptanceStatus,
     pub staff_decided_by: Option<Uuid>,
     pub staff_created_at: NaiveDateTime,

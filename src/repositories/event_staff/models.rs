@@ -3,25 +3,25 @@ use sqlx::FromRow;
 use uuid::Uuid;
 
 use crate::{
-    models::{AcceptanceStatus, Gender, StaffLevel, UserRole, UserStatus},
+    models::{AcceptanceStatus, EventRole, Gender, UserRole, UserStatus},
     repositories::{company::models::Company, user::models::User},
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NewStaff {
     pub user_id: Uuid,
     pub company_id: Uuid,
     pub event_id: Uuid,
-    pub role: StaffLevel,
+    pub role: EventRole,
 }
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, FromRow, Clone)]
 pub struct Staff {
     pub id: Uuid,
     pub user_id: Uuid,
     pub company_id: Uuid,
     pub event_id: Uuid,
-    pub role: StaffLevel,
+    pub role: EventRole,
     pub status: AcceptanceStatus,
     pub decided_by: Option<Uuid>,
     pub created_at: NaiveDateTime,
@@ -29,12 +29,12 @@ pub struct Staff {
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, FromRow, Clone)]
 pub struct StaffExtended {
     pub user: User,
     pub company: Company,
     pub event_id: Uuid,
-    pub role: StaffLevel,
+    pub role: EventRole,
     pub status: AcceptanceStatus,
     pub decided_by: Option<Uuid>,
     pub created_at: NaiveDateTime,
@@ -42,14 +42,14 @@ pub struct StaffExtended {
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct StaffData {
-    pub role: Option<StaffLevel>,
+    pub role: Option<EventRole>,
     pub status: Option<AcceptanceStatus>,
-    pub decided_by: Option<Uuid>,
+    pub decided_by: Uuid,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct StaffFilter {
     pub limit: Option<i64>,
     pub offset: Option<i64>,
@@ -66,7 +66,7 @@ pub struct StaffUserCompanyFlattened {
     pub staff_user_id: Uuid,
     pub staff_company_id: Uuid,
     pub staff_event_id: Uuid,
-    pub staff_role: StaffLevel,
+    pub staff_role: EventRole,
     pub staff_status: AcceptanceStatus,
     pub staff_decided_by: Option<Uuid>,
     pub staff_created_at: NaiveDateTime,

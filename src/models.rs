@@ -25,15 +25,15 @@ pub enum Gender {
     Other,
 }
 
-#[derive(Serialize, Deserialize, Debug, sqlx::Type)]
+#[derive(Serialize, Deserialize, Debug, sqlx::Type, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
-#[sqlx(type_name = "staff_level", rename_all = "lowercase")]
-pub enum StaffLevel {
-    Basic,
+#[sqlx(type_name = "event_role", rename_all = "lowercase")]
+pub enum EventRole {
+    Staff,
     Organizer,
 }
 
-#[derive(Serialize, Deserialize, Debug, sqlx::Type)]
+#[derive(Serialize, Deserialize, Debug, sqlx::Type, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 #[sqlx(type_name = "acceptance_status", rename_all = "snake_case")]
 pub enum AcceptanceStatus {

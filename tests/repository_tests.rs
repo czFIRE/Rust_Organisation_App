@@ -1491,7 +1491,7 @@ pub mod employment_repo_tests {
             end_date: NaiveDate::from_ymd_opt(2024, 9, 16).unwrap(),
             description: Some("Test Description".to_string()),
             employment_type: EmployeeContract::Hpp,
-            level: EmployeeLevel::Basic,
+            level: EmployeeLevel::CompanyAdministrator,
         };
 
         let new_employment = employment_repo
@@ -1912,32 +1912,312 @@ pub mod employment_repo_tests {
 // needs user, company, event
 #[cfg(test)]
 pub mod event_staff_repo_tests {
+    use std::sync::Arc;
+
+    use chrono::{NaiveDateTime, Utc};
+    use organization_app::{
+        common::DbResult,
+        models::{AcceptanceStatus, EventRole},
+        repositories::{
+            event_staff::{
+                event_staff_repo::StaffRepository,
+                models::{NewStaff, Staff, StaffData, StaffFilter},
+            },
+            repository::DbRepository,
+        },
+    };
     use sqlx::PgPool;
-    use uuid::{uuid, Uuid};
+    use uuid::uuid;
 
     #[sqlx::test(fixtures("event_staff"))]
-    async fn create(_pool: PgPool) {
-        todo!()
+    async fn create(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut event_staff_repo = StaffRepository::new(arc_pool);
+
+        let event_staff_data = NewStaff {
+            user_id: uuid!("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c"),
+            event_id: uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"),
+            company_id: uuid!("71fa27d6-6f00-4ad0-8902-778e298aaed2"),
+            role: EventRole::Organizer,
+        };
+
+        let new_event_staff = event_staff_repo
+            .create(event_staff_data.clone())
+            .await
+            .expect("Create should succeed");
+
+        assert_eq!(new_event_staff.user_id, event_staff_data.user_id);
+        assert_eq!(new_event_staff.event_id, event_staff_data.event_id);
+        assert_eq!(new_event_staff.company_id, event_staff_data.company_id);
+        assert_eq!(new_event_staff.role, event_staff_data.role);
+
+        assert_eq!(new_event_staff.status, AcceptanceStatus::Pending);
+        assert!(new_event_staff.decided_by.is_none());
+
+        assert!(new_event_staff.deleted_at.is_none());
+
+        let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
+
+        let time_difference_created = time - new_event_staff.created_at;
+        let time_difference_edited = time - new_event_staff.edited_at;
+
+        assert!(time_difference_created.num_seconds() < 2);
+        assert!(time_difference_edited.num_seconds() < 2);
+
+        event_staff_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("event_staff"))]
-    async fn read(_pool: PgPool) {
-        todo!()
+    async fn read(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut event_staff_repo = StaffRepository::new(arc_pool);
+
+        let event_staff_id = uuid!("9281b570-4d02-4096-9136-338a613c71cd");
+
+        let event_staff = event_staff_repo
+            .read_one(event_staff_id)
+            .await
+            .expect("Read should succeed");
+
+        assert_eq!(event_staff.user.name, "Dave Null");
+        assert_eq!(event_staff.company.name, "AMD");
+        assert_eq!(event_staff.role, EventRole::Organizer);
+        assert_eq!(event_staff.status, AcceptanceStatus::Accepted);
+        assert!(event_staff.decided_by.is_none());
+
+        event_staff_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("event_staff"))]
-    async fn read_all_per_event(_pool: PgPool) {
-        todo!()
+    async fn read_all_per_event(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut event_staff_repo = StaffRepository::new(arc_pool);
+
+        let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8");
+
+        let filter = StaffFilter {
+            limit: None,
+            offset: None,
+        };
+
+        let event_staffs = event_staff_repo
+            .read_all_for_event(event_id, filter)
+            .await
+            .expect("Read should succeed");
+
+        assert_eq!(event_staffs.len(), 2);
+
+        let event_staff = &event_staffs[0];
+
+        assert_eq!(event_staff.user.name, "Dave Null");
+
+        let event_staff = &event_staffs[1];
+
+        assert_eq!(event_staff.user.name, "Tana Smith");
+
+        event_staff_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("event_staff"))]
-    async fn update(_pool: PgPool) {
-        todo!()
+    async fn update(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut event_staff_repo = StaffRepository::new(arc_pool);
+
+        // Valid update
+
+        {
+            let decider_staff_id = uuid!("9281b570-4d02-4096-9136-338a613c71cd");
+
+            let event_staff_id = uuid!("a96d1d99-93b5-469b-ac62-654b0cf7ebd3");
+
+            let event_staff = event_staff_repo
+                .read_one(event_staff_id)
+                .await
+                .expect("Read should succeed");
+
+            let new_event_staff_data = StaffData {
+                role: Some(EventRole::Staff),
+                status: Some(AcceptanceStatus::Rejected),
+                decided_by: decider_staff_id,
+            };
+
+            let updated_event_staff = event_staff_repo
+                .update(event_staff_id, new_event_staff_data.clone())
+                .await
+                .expect("Update should succeed");
+
+            assert_eq!(updated_event_staff.user_id, event_staff.user.id);
+            assert_eq!(updated_event_staff.company_id, event_staff.company.id);
+            assert_eq!(updated_event_staff.role, new_event_staff_data.role.unwrap());
+            assert_eq!(
+                updated_event_staff.status,
+                new_event_staff_data.status.unwrap()
+            );
+            assert_eq!(
+                updated_event_staff.decided_by,
+                Some(new_event_staff_data.decided_by)
+            );
+
+            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
+
+            let time_difference_edited = time - updated_event_staff.edited_at;
+            assert!(time_difference_edited.num_seconds() < 2);
+
+            assert!(updated_event_staff.deleted_at.is_none());
+        }
+
+        // All are none
+
+        {
+            let decider_staff_id = uuid!("9281b570-4d02-4096-9136-338a613c71cd");
+
+            let event_staff_id_wrong = uuid!("a96d1d99-93b5-469b-ac62-654b0cf7ebd3");
+
+            let new_event_staff_data = StaffData {
+                role: None,
+                status: None,
+                decided_by: decider_staff_id,
+            };
+
+            let _updated_event_staff = event_staff_repo
+                .update(event_staff_id_wrong, new_event_staff_data)
+                .await
+                .expect_err("Update should fail - all fields are none");
+        }
+
+        // Non existent
+
+        {
+            let decider_staff_id = uuid!("9281b570-4d02-4096-9136-338a613c71cd");
+
+            let event_staff_id = uuid!("a96d1d99-93b5-469b-ac62-654b0cf7ebd9");
+
+            let new_event_staff_data = StaffData {
+                role: None,
+                status: Some(AcceptanceStatus::Rejected),
+                decided_by: decider_staff_id,
+            };
+
+            let _updated_event_staff = event_staff_repo
+                .update(event_staff_id, new_event_staff_data)
+                .await
+                .expect_err("Update should fail - non existent event staff");
+        }
+
+        // Already deleted
+
+        {
+            let decider_staff_id = uuid!("9281b570-4d02-4096-9136-338a613c71cd");
+
+            let event_staff_id = uuid!("a96d1d99-93b5-469b-ac62-654b0cf7ebd3");
+
+            let event_staff = event_staff_repo
+                .read_one(event_staff_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(event_staff.deleted_at.is_none());
+
+            event_staff_repo
+                .delete(event_staff_id)
+                .await
+                .expect("Delete should succeed");
+
+            let deleted_event_staff = event_staff_repo
+                .read_one(event_staff_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(deleted_event_staff.deleted_at.is_some());
+
+            let new_event_staff_data = StaffData {
+                role: None,
+                status: Some(AcceptanceStatus::Rejected),
+                decided_by: decider_staff_id,
+            };
+
+            let _updated_event_staff = event_staff_repo
+                .update(event_staff_id, new_event_staff_data)
+                .await
+                .expect_err("Update should fail - already deleted event staff");
+        }
+
+        event_staff_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("event_staff"))]
-    async fn delete(_pool: PgPool) {
-        todo!()
+    async fn delete(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut event_staff_repo = StaffRepository::new(arc_pool);
+
+        {
+            let event_staff_id = uuid!("a96d1d99-93b5-469b-ac62-654b0cf7ebd3");
+
+            let event_staff = event_staff_repo
+                .read_one(event_staff_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(event_staff.deleted_at.is_none());
+
+            event_staff_repo.delete(event_staff_id).await.unwrap();
+
+            let new_event_staff = event_staff_repo
+                .read_one(event_staff_id)
+                .await
+                .expect("Read should succeed");
+
+            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
+            let time_difference_edited = time - new_event_staff.edited_at;
+            let time_difference_deleted = time - new_event_staff.deleted_at.unwrap();
+
+            assert!(time_difference_edited.num_seconds() < 2);
+            assert!(time_difference_deleted.num_seconds() < 2);
+        }
+
+        // delete on already deleted event staff
+
+        {
+            let event_staff_id = uuid!("a96d1d99-93b5-469b-ac62-654b0cf7ebd3");
+
+            let event_staff = event_staff_repo
+                .read_one(event_staff_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(event_staff.deleted_at.is_some());
+
+            event_staff_repo.delete(event_staff_id).await.expect_err(
+                "Repository should return error on deleting an already deleted event staff",
+            );
+        }
+
+        // delete on non-existing event staff
+
+        {
+            let event_staff_id = uuid!("a96d1d99-93b5-469b-ac62-654b0cf7ebd9");
+
+            event_staff_repo.delete(event_staff_id).await.expect_err(
+                "Repository should return error on deleting a non-existing event staff",
+            );
+        }
+
+        event_staff_repo.disconnect().await;
+
+        Ok(())
     }
 }
 
@@ -1976,12 +2256,26 @@ pub mod task_repo_tests {
 // needs event_staff, task
 #[cfg(test)]
 pub mod assigned_staff_repo_tests {
+    use std::sync::Arc;
+
+    use organization_app::{
+        common::DbResult,
+        repositories::{
+            assigned_staff::assigned_staff_repo::AssignedStaffRepository, repository::DbRepository,
+        },
+    };
     use sqlx::PgPool;
     use uuid::{uuid, Uuid};
 
     #[sqlx::test(fixtures("assigned_staff"))]
-    pub fn create(_pool: PgPool) {
-        todo!()
+    pub fn create(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut assigned_staff_repo = AssignedStaffRepository::new(arc_pool);
+
+        assigned_staff_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("assigned_staff"))]

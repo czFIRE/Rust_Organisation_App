@@ -106,7 +106,7 @@ This table contains information about staff for events. It connects an employee 
 - staff_id - Primary Key
 - (user_id, company_id) - FK to employment, user_id is FK to user, company_id is FK to company
 - event_id - FK to event
-- staff_level - denotes the competency of a given staff member within an event. See the StaffLevel enum for more.
+- staff_level - denotes the competency of a given staff member within an event. See the EventRole enum for more.
 - acceptance_status - this column is used to track whether given staff has been accepted or rejected for an event. Or whether no decisions have been made yet. Used for registration of users for events they want to work on.
 - decided_by - FK to event_staff. The default is null, this attribute is populated when acceptance_status changes to accepted or rejected and contains the ID of the organizer that made the decision.
 
@@ -148,7 +148,7 @@ Currently, the enums in the model are as follows:
 - AssociationType { 'Sponsor', 'Organizer', 'Other' } -> Denotes the type of association that a company has with an event.
 - EmploymentType { 'DPP', 'DPC', 'HPP' } -> Denotes the type of employment an employee may have with a company.
 - EmployeeLevel { 'Basic', 'Manager', 'Upper Manager' } -> Denotes whether the employee has managerial responsibilities / privileges within a company, or not. The Upper Manager role represents the overall responsible person (people) that take care of the company in the system.
-- StaffLevel { 'Basic', 'Organizer' } -> Denotes whether the employee has additional (organizer) privileges within a given event.
+- EventRole { 'Basic', 'Organizer' } -> Denotes whether the employee has additional (organizer) privileges within a given event.
 - UserStatus { 'available', 'unavailable' } -> Denotes the availability of a user in terms of employment and task opportunities.
 - AssignmentStatus { 'pending', 'accepted', 'rejected' } -> Denotes the status of a staff request to work on a task.
 - AcceptanceStatus { 'pending', 'accepted', 'rejected' } -> Denotes the status of an employee's request to work on an event./

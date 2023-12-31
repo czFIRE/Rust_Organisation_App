@@ -1,4 +1,5 @@
 use crate::common::DbResult;
+use async_trait::async_trait;
 use sqlx::postgres::PgPool;
 use std::sync::Arc;
 use uuid::Uuid;
@@ -7,19 +8,29 @@ use super::models::{
     NewStaff, Staff, StaffData, StaffExtended, StaffFilter, StaffUserCompanyFlattened,
 };
 
-use crate::models::{AcceptanceStatus, Gender, StaffLevel, UserRole, UserStatus};
+use crate::models::{AcceptanceStatus, EventRole, Gender, UserRole, UserStatus};
 
 #[derive(Clone)]
 pub struct StaffRepository {
     pub pool: Arc<PgPool>,
 }
 
-impl StaffRepository {
-    pub fn new(pool: Arc<PgPool>) -> Self {
+#[async_trait]
+impl crate::repositories::repository::DbRepository for StaffRepository {
+    /// Database repository constructor
+    #[must_use]
+    fn new(pool: Arc<PgPool>) -> Self {
         Self { pool }
     }
 
-    pub async fn _create(&self, data: NewStaff) -> DbResult<Staff> {
+    /// Method allowing the database repository to disconnect from the database pool gracefully
+    async fn disconnect(&mut self) -> () {
+        self.pool.close().await;
+    }
+}
+
+impl StaffRepository {
+    pub async fn create(&self, data: NewStaff) -> DbResult<Staff> {
         let executor = self.pool.as_ref();
 
         let new_staff: Staff = sqlx::query_as!(
@@ -32,7 +43,7 @@ impl StaffRepository {
                 user_id, 
                 company_id, 
                 event_id, 
-                role AS "role!: StaffLevel", 
+                role AS "role!: EventRole", 
                 status AS "status!: AcceptanceStatus", 
                 decided_by, 
                 created_at, 
@@ -42,7 +53,7 @@ impl StaffRepository {
             data.user_id,
             data.company_id,
             data.event_id,
-            data.role as StaffLevel,
+            data.role as EventRole,
         )
         .fetch_one(executor)
         .await?;
@@ -66,7 +77,7 @@ impl StaffRepository {
                 event_staff.user_id AS staff_user_id, 
                 event_staff.company_id AS staff_company_id, 
                 event_staff.event_id AS staff_event_id, 
-                event_staff.role AS "staff_role!: StaffLevel", 
+                event_staff.role AS "staff_role!: EventRole", 
                 event_staff.status AS "staff_status!: AcceptanceStatus", 
                 event_staff.decided_by AS staff_decided_by, 
                 event_staff.created_at AS staff_created_at, 
@@ -110,7 +121,7 @@ impl StaffRepository {
         Ok(staff.into())
     }
 
-    pub async fn _read_all(
+    pub async fn read_all_for_event(
         &self,
         event_id: Uuid,
         filter: StaffFilter,
@@ -125,7 +136,7 @@ impl StaffRepository {
                 event_staff.user_id AS staff_user_id, 
                 event_staff.company_id AS staff_company_id, 
                 event_staff.event_id AS staff_event_id, 
-                event_staff.role AS "staff_role!: StaffLevel", 
+                event_staff.role AS "staff_role!: EventRole", 
                 event_staff.status AS "staff_status!: AcceptanceStatus", 
                 event_staff.decided_by AS staff_decided_by, 
                 event_staff.created_at AS staff_created_at, 
@@ -172,13 +183,20 @@ impl StaffRepository {
         Ok(staff.into_iter().map(|s| s.into()).collect())
     }
 
-    pub async fn _update(&self, event_staff_id: Uuid, data: StaffData) -> DbResult<Staff> {
-        if data.role.is_none() && data.status.is_none() && data.decided_by.is_none() {
+    pub async fn update(&self, event_staff_id: Uuid, data: StaffData) -> DbResult<Staff> {
+        if data.role.is_none() && data.status.is_none() {
             // TODO - better error
             return Err(sqlx::Error::RowNotFound);
         }
 
         let executor = self.pool.as_ref();
+
+        let staff_check = self.read_one(event_staff_id).await?;
+
+        if staff_check.deleted_at.is_some() {
+            // TODO - better error
+            return Err(sqlx::Error::RowNotFound);
+        }
 
         let updated_staff: Staff = sqlx::query_as!(
             Staff,
@@ -192,14 +210,14 @@ impl StaffRepository {
                 user_id, 
                 company_id, 
                 event_id, 
-                role AS "role!: StaffLevel", 
+                role AS "role!: EventRole", 
                 status AS "status!: AcceptanceStatus", 
                 decided_by, 
                 created_at, 
                 edited_at, 
                 deleted_at;
             "#,
-            data.role as Option<StaffLevel>,
+            data.role as Option<EventRole>,
             data.status as Option<AcceptanceStatus>,
             data.decided_by,
             event_staff_id,
@@ -210,10 +228,17 @@ impl StaffRepository {
         Ok(updated_staff)
     }
 
-    pub async fn _delete(&self, event_staff_id: Uuid) -> DbResult<()> {
+    pub async fn delete(&self, event_staff_id: Uuid) -> DbResult<()> {
         let executor = self.pool.as_ref();
 
-        let _deleted_staff = sqlx::query!(
+        let staff_check = self.read_one(event_staff_id).await?;
+
+        if staff_check.deleted_at.is_some() {
+            // TODO - better error
+            return Err(sqlx::Error::RowNotFound);
+        }
+
+        sqlx::query!(
             r#" UPDATE event_staff SET 
                 deleted_at = now(), 
                 edited_at = now() 

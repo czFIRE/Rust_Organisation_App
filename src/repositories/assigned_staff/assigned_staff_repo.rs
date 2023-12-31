@@ -1,11 +1,12 @@
 use crate::{
     common::DbResult, repositories::assigned_staff::models::AssignedStaffStaffUserCompanyFlattened,
 };
+use async_trait::async_trait;
 use sqlx::postgres::PgPool;
 use std::sync::Arc;
 use uuid::Uuid;
 
-use crate::models::{AcceptanceStatus, Gender, StaffLevel, UserRole, UserStatus};
+use crate::models::{AcceptanceStatus, EventRole, Gender, UserRole, UserStatus};
 
 use super::models::{
     AssignedStaff, AssignedStaffData, AssignedStaffExtended, AssignedStaffFilter, NewAssignedStaff,
@@ -16,11 +17,21 @@ pub struct AssignedStaffRepository {
     pub pool: Arc<PgPool>,
 }
 
-impl AssignedStaffRepository {
-    pub fn new(pool: Arc<PgPool>) -> Self {
+#[async_trait]
+impl crate::repositories::repository::DbRepository for AssignedStaffRepository {
+    /// Database repository constructor
+    #[must_use]
+    fn new(pool: Arc<PgPool>) -> Self {
         Self { pool }
     }
 
+    /// Method allowing the database repository to disconnect from the database pool gracefully
+    async fn disconnect(&mut self) -> () {
+        self.pool.close().await;
+    }
+}
+
+impl AssignedStaffRepository {
     // was AssignedStaffExtended
     pub async fn _create(&self, data: NewAssignedStaff) -> DbResult<AssignedStaff> {
         let executor = self.pool.as_ref();
@@ -85,7 +96,7 @@ impl AssignedStaffRepository {
                 event_staff.user_id AS staff_user_id, 
                 event_staff.company_id AS staff_company_id, 
                 event_staff.event_id AS staff_event_id, 
-                event_staff.role AS "staff_role!: StaffLevel", 
+                event_staff.role AS "staff_role!: EventRole", 
                 event_staff.status AS "staff_status!: AcceptanceStatus", 
                 event_staff.decided_by AS staff_decided_by, 
                 event_staff.created_at AS staff_created_at, 
@@ -152,7 +163,7 @@ impl AssignedStaffRepository {
                 event_staff.user_id AS staff_user_id, 
                 event_staff.company_id AS staff_company_id, 
                 event_staff.event_id AS staff_event_id, 
-                event_staff.role AS "staff_role!: StaffLevel", 
+                event_staff.role AS "staff_role!: EventRole", 
                 event_staff.status AS "staff_status!: AcceptanceStatus", 
                 event_staff.decided_by AS staff_decided_by, 
                 event_staff.created_at AS staff_created_at, 
