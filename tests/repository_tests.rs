@@ -1,3 +1,36 @@
+pub mod test_constants {
+    use uuid::{uuid, Uuid};
+
+    pub const COMPANY0_ID: Uuid = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
+    pub const COMPANY1_ID: Uuid = uuid!("134d5286-5f55-4637-9b98-223a5820a464");
+    pub const COMPANY2_ID: Uuid = uuid!("71fa27d6-6f00-4ad0-8902-778e298aaed2");
+
+    pub const USER0_ID: Uuid = uuid!("35341253-da20-40b6-96d8-ce069b1ba5d4");
+    pub const USER1_ID: Uuid = uuid!("0465041f-fe64-461f-9f71-71e3b97ca85f");
+    pub const USER2_ID: Uuid = uuid!("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c");
+    pub const USER3_ID: Uuid = uuid!("51a01dbf-dcd5-43a0-809c-94ed8e61d420");
+
+    pub const EVENT0_ID: Uuid = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8");
+    pub const EVENT1_ID: Uuid = uuid!("3f152d12-0bbd-429a-a9c5-28967d6370cc");
+
+    pub const TIMESHEET0_ID: Uuid = uuid!("d47e8141-a77e-4d55-a2d5-4a77de24b6d0");
+    pub const TIMESHEET1_ID: Uuid = uuid!("0f0f0ff5-0073-47cc-bd1f-540a04fee9ea");
+    pub const TIMESHEET2_ID: Uuid = uuid!("c51e77aa-bd80-42c7-8b8a-003f018328f6");
+    pub const TIMESHEET3_ID: Uuid = uuid!("8446b2ba-8223-4388-be5f-9efdfc4ea265");
+    pub const TIMESHEET4_ID: Uuid = uuid!("a19a0ac6-3bd2-4ebd-bc8d-ec111ec9f705");
+    pub const TIMESHEET5_ID: Uuid = uuid!("ced9f31c-8662-4812-9005-b8ae85d3b951");
+
+    pub const EVENT_STAFF0_ID: Uuid = uuid!("9281b570-4d02-4096-9136-338a613c71cd");
+    pub const EVENT_STAFF1_ID: Uuid = uuid!("a96d1d99-93b5-469b-ac62-654b0cf7ebd3");
+    pub const EVENT_STAFF2_ID: Uuid = uuid!("aa7f3d0e-ab48-473b-ac69-b84cb74f34f7");
+
+    pub const TASK0_ID: Uuid = uuid!("7ae0c017-fe31-4aac-b767-100d18a8877b");
+    pub const TASK1_ID: Uuid = uuid!("bd9b422d-33c1-42a2-88bf-a56ce6cc55a6");
+
+    pub const COMMENT0_ID: Uuid = uuid!("0d6cec6a-4fe8-4e44-bf68-e33de0ed121b");
+    pub const COMMENT1_ID: Uuid = uuid!("daac23ec-fb36-434a-823b-49716ed2002c");
+}
+
 #[cfg(test)]
 pub mod user_repo_tests {
     use std::sync::Arc;
@@ -17,6 +50,8 @@ pub mod user_repo_tests {
         },
     };
     use uuid::uuid;
+
+    use crate::test_constants::{self, USER0_ID};
 
     #[sqlx::test(fixtures("users"))]
     async fn create(pool: PgPool) -> DbResult<()> {
@@ -68,7 +103,7 @@ pub mod user_repo_tests {
 
         let mut user_repo = UserRepository::new(arc_pool);
 
-        let user_id = uuid!("35341253-da20-40b6-96d8-ce069b1ba5d4");
+        let user_id = test_constants::USER0_ID;
 
         let user = user_repo
             .read_one(user_id)
@@ -106,11 +141,11 @@ pub mod user_repo_tests {
 
             let user2 = &users[1];
 
-            assert_eq!(user2.name, "John Doe");
+            assert_eq!(user2.name, "Tana Smith");
 
             let user3 = &users[2];
 
-            assert_eq!(user3.name, "Jane Doe");
+            assert_eq!(user3.name, "John Doe");
         }
 
         user_repo.disconnect().await;
@@ -124,7 +159,7 @@ pub mod user_repo_tests {
 
         let mut user_repo = UserRepository::new(arc_pool);
 
-        let user_id = uuid!("35341253-da20-40b6-96d8-ce069b1ba5d4");
+        let user_id = test_constants::USER0_ID;
 
         // Correct update
 
@@ -249,7 +284,7 @@ pub mod user_repo_tests {
         let mut user_repo = UserRepository::new(arc_pool);
 
         {
-            let user_id = uuid!("35341253-da20-40b6-96d8-ce069b1ba5d4");
+            let user_id = test_constants::USER0_ID;
 
             let user = user_repo.read_one(user_id).await.unwrap();
 
@@ -270,7 +305,7 @@ pub mod user_repo_tests {
         // delete on already deleted user
 
         {
-            let user_id = uuid!("35341253-da20-40b6-96d8-ce069b1ba5d4");
+            let user_id = test_constants::USER0_ID;
 
             let user = user_repo.read_one(user_id).await.unwrap();
 
@@ -316,6 +351,8 @@ pub mod company_repo_tests {
     };
     use sqlx::PgPool;
     use uuid::uuid;
+
+    use crate::test_constants;
 
     #[sqlx::test(fixtures("companies"))]
     async fn create_company_test(pool: PgPool) -> DbResult<()> {
@@ -387,7 +424,7 @@ pub mod company_repo_tests {
         let mut company_repo = CompanyRepository::new(arc_pool);
 
         {
-            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
+            let company_id = test_constants::COMPANY0_ID;
 
             let company = company_repo
                 .read_one(company_id)
@@ -484,7 +521,7 @@ pub mod company_repo_tests {
         // Correct update
 
         {
-            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
+            let company_id = test_constants::COMPANY0_ID;
 
             let company = company_repo
                 .read_one_extended(company_id)
@@ -529,7 +566,7 @@ pub mod company_repo_tests {
         // update address
 
         {
-            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
+            let company_id = test_constants::COMPANY0_ID;
 
             let company = company_repo
                 .read_one_extended(company_id)
@@ -588,7 +625,7 @@ pub mod company_repo_tests {
         // All are none
 
         {
-            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
+            let company_id = test_constants::COMPANY0_ID;
 
             let company = company_repo
                 .read_one_extended(company_id)
@@ -637,7 +674,7 @@ pub mod company_repo_tests {
         // Already deleted
 
         {
-            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
+            let company_id = test_constants::COMPANY0_ID;
 
             let company = company_repo
                 .read_one_extended(company_id)
@@ -687,7 +724,7 @@ pub mod company_repo_tests {
         let mut company_repo = CompanyRepository::new(arc_pool);
 
         {
-            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
+            let company_id = test_constants::COMPANY0_ID;
 
             let company = company_repo
                 .read_one_extended(company_id)
@@ -714,7 +751,7 @@ pub mod company_repo_tests {
         // delete on already deleted company
 
         {
-            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
+            let company_id = test_constants::COMPANY0_ID;
 
             let company = company_repo
                 .read_one_extended(company_id)
@@ -762,6 +799,8 @@ pub mod event_repo_tests {
     };
     use sqlx::PgPool;
     use uuid::{uuid, Uuid};
+
+    use crate::test_constants;
 
     #[sqlx::test(fixtures("events"))]
     async fn create(pool: PgPool) -> DbResult<()> {
@@ -814,7 +853,7 @@ pub mod event_repo_tests {
 
         let mut event_repo = EventRepository::new(arc_pool);
 
-        let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8");
+        let event_id = test_constants::EVENT0_ID;
 
         let event = event_repo
             .read_one(event_id)
@@ -903,7 +942,7 @@ pub mod event_repo_tests {
 
         let mut event_repo = EventRepository::new(arc_pool);
 
-        let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8");
+        let event_id = test_constants::EVENT0_ID;
 
         // Correct update
 
@@ -917,8 +956,8 @@ pub mod event_repo_tests {
                 name: Some("Test Event".to_string()),
                 description: Some("Test Description".to_string()),
                 website: Some("test.com".to_string()),
-                start_date: Some(NaiveDate::from_ymd_opt(2021, 9, 15).unwrap()),
-                end_date: Some(NaiveDate::from_ymd_opt(2021, 9, 16).unwrap()),
+                start_date: Some(NaiveDate::from_ymd_opt(2025, 9, 15).unwrap()),
+                end_date: Some(NaiveDate::from_ymd_opt(2025, 9, 16).unwrap()),
                 avatar_url: Some("test.jpg".to_string()),
             };
 
@@ -933,6 +972,7 @@ pub mod event_repo_tests {
             assert_eq!(updated_event.website, new_event_data.website);
             assert_eq!(updated_event.start_date, new_event_data.start_date.unwrap());
             assert_eq!(updated_event.end_date, new_event_data.end_date.unwrap());
+            assert_eq!(updated_event.avatar_url, new_event_data.avatar_url);
 
             let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
             let time_difference_edited = time - updated_event.edited_at;
@@ -1028,7 +1068,7 @@ pub mod event_repo_tests {
         let mut event_repo = EventRepository::new(arc_pool);
 
         {
-            let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8");
+            let event_id = test_constants::EVENT0_ID;
 
             let event = event_repo
                 .read_one(event_id)
@@ -1055,7 +1095,7 @@ pub mod event_repo_tests {
         // delete on already deleted event
 
         {
-            let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8");
+            let event_id = test_constants::EVENT0_ID;
 
             let event = event_repo
                 .read_one(event_id)
@@ -1106,6 +1146,8 @@ pub mod associated_company_repo_tests {
     use sqlx::PgPool;
     use uuid::uuid;
 
+    use crate::test_constants;
+
     #[sqlx::test(fixtures("associated_company"))]
     async fn create(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
@@ -1113,8 +1155,8 @@ pub mod associated_company_repo_tests {
         let mut associated_company_repo = AssociatedCompanyRepository::new(arc_pool);
 
         let associated_company_data = NewAssociatedCompany {
-            event_id: uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"),
-            company_id: uuid!("71fa27d6-6f00-4ad0-8902-778e298aaed2"),
+            event_id: test_constants::EVENT0_ID,
+            company_id: test_constants::COMPANY2_ID,
             association_type: Association::Media,
         };
 
@@ -1157,8 +1199,8 @@ pub mod associated_company_repo_tests {
 
         let mut associated_company_repo = AssociatedCompanyRepository::new(arc_pool);
 
-        let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
-        let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8");
+        let company_id = test_constants::COMPANY0_ID;
+        let event_id = test_constants::EVENT0_ID;
 
         let associated_company = associated_company_repo
             .read_one(company_id, event_id)
@@ -1215,7 +1257,7 @@ pub mod associated_company_repo_tests {
         // Read all for an event
 
         {
-            let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8");
+            let event_id = test_constants::EVENT0_ID;
 
             let filter = AssociatedCompanyFilter {
                 limit: None,
@@ -1241,7 +1283,7 @@ pub mod associated_company_repo_tests {
         // Read all for a company
 
         {
-            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
+            let company_id = test_constants::COMPANY0_ID;
 
             let filter = AssociatedCompanyFilter {
                 limit: None,
@@ -1275,8 +1317,8 @@ pub mod associated_company_repo_tests {
 
         let mut associated_company_repo = AssociatedCompanyRepository::new(arc_pool);
 
-        let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
-        let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8");
+        let company_id = test_constants::COMPANY0_ID;
+        let event_id = test_constants::EVENT0_ID;
 
         // Correct update
 
@@ -1387,8 +1429,8 @@ pub mod associated_company_repo_tests {
         let mut associated_company_repo = AssociatedCompanyRepository::new(arc_pool);
 
         {
-            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
-            let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8");
+            let company_id = test_constants::COMPANY0_ID;
+            let event_id = test_constants::EVENT0_ID;
 
             let associated_company = associated_company_repo
                 .read_one(company_id, event_id)
@@ -1418,8 +1460,8 @@ pub mod associated_company_repo_tests {
         // delete on already deleted associated company
 
         {
-            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
-            let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8");
+            let company_id = test_constants::COMPANY0_ID;
+            let event_id = test_constants::EVENT0_ID;
 
             let associated_company = associated_company_repo
                 .read_one(company_id, event_id)
@@ -1440,7 +1482,7 @@ pub mod associated_company_repo_tests {
 
         {
             let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f9");
-            let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8");
+            let event_id = test_constants::EVENT0_ID;
 
             associated_company_repo
                 .delete(company_id, event_id)
@@ -1476,6 +1518,8 @@ pub mod employment_repo_tests {
     use sqlx::PgPool;
     use uuid::uuid;
 
+    use crate::test_constants;
+
     #[sqlx::test(fixtures("employments"))]
     async fn create(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
@@ -1483,9 +1527,9 @@ pub mod employment_repo_tests {
         let mut employment_repo = EmploymentRepository::new(arc_pool);
 
         let employment_data = NewEmployment {
-            user_id: uuid!("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c"),
-            company_id: uuid!("71fa27d6-6f00-4ad0-8902-778e298aaed2"),
-            manager_id: Some(uuid!("35341253-da20-40b6-96d8-ce069b1ba5d4")),
+            user_id: test_constants::USER2_ID,
+            company_id: test_constants::COMPANY2_ID,
+            manager_id: Some(test_constants::USER0_ID),
             hourly_wage: 100.0,
             start_date: NaiveDate::from_ymd_opt(2021, 9, 15).unwrap(),
             end_date: NaiveDate::from_ymd_opt(2024, 9, 16).unwrap(),
@@ -1535,8 +1579,8 @@ pub mod employment_repo_tests {
         // Manager exists
 
         {
-            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
-            let user_id = uuid!("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c");
+            let company_id = test_constants::COMPANY0_ID;
+            let user_id = test_constants::USER2_ID;
 
             let employment = employment_repo
                 .read_one(user_id, company_id)
@@ -1551,8 +1595,8 @@ pub mod employment_repo_tests {
         // Manager doesn't exist
 
         {
-            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
-            let user_id = uuid!("35341253-da20-40b6-96d8-ce069b1ba5d4");
+            let company_id = test_constants::COMPANY0_ID;
+            let user_id = test_constants::USER0_ID;
 
             let employment = employment_repo
                 .read_one(user_id, company_id)
@@ -1575,7 +1619,7 @@ pub mod employment_repo_tests {
 
         let mut employment_repo = EmploymentRepository::new(arc_pool);
 
-        let user_id = uuid!("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c");
+        let user_id = test_constants::USER2_ID;
 
         let filter = EmploymentFilter {
             limit: None,
@@ -1610,7 +1654,7 @@ pub mod employment_repo_tests {
 
         let mut employment_repo = EmploymentRepository::new(arc_pool);
 
-        let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
+        let company_id = test_constants::COMPANY0_ID;
 
         let filter = EmploymentFilter {
             limit: None,
@@ -1650,7 +1694,7 @@ pub mod employment_repo_tests {
 
         let mut employment_repo = EmploymentRepository::new(arc_pool);
 
-        let user_id = uuid!("35341253-da20-40b6-96d8-ce069b1ba5d4");
+        let user_id = test_constants::USER0_ID;
 
         let filter = EmploymentFilter {
             limit: None,
@@ -1669,20 +1713,14 @@ pub mod employment_repo_tests {
         assert_eq!(employment.company.name, "AMD");
         assert_eq!(employment.manager.clone().unwrap().name, "Dave Null");
         assert_eq!(employment.hourly_wage, 250.0);
-        assert_eq!(
-            employment.user_id,
-            uuid!("0465041f-fe64-461f-9f71-71e3b97ca85f")
-        );
+        assert_eq!(employment.user_id, test_constants::USER1_ID);
 
         let employment = &employments[1];
 
         assert_eq!(employment.company.name, "AMD");
         assert_eq!(employment.manager.clone().unwrap().name, "Dave Null");
         assert_eq!(employment.hourly_wage, 200.0);
-        assert_eq!(
-            employment.user_id,
-            uuid!("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c")
-        );
+        assert_eq!(employment.user_id, test_constants::USER2_ID);
 
         employment_repo.disconnect().await;
 
@@ -1698,8 +1736,8 @@ pub mod employment_repo_tests {
         // Valid update
 
         {
-            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
-            let user_id = uuid!("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c");
+            let company_id = test_constants::COMPANY0_ID;
+            let user_id = test_constants::USER2_ID;
 
             let employment = employment_repo
                 .read_one(user_id, company_id)
@@ -1707,11 +1745,11 @@ pub mod employment_repo_tests {
                 .expect("Read should succeed");
 
             let new_employment_data = EmploymentData {
-                manager_id: None,
+                manager_id: Some(test_constants::USER0_ID),
                 hourly_wage: Some(10000.0),
-                start_date: None,
-                end_date: None,
-                description: None,
+                start_date: Some(NaiveDate::from_ymd_opt(2027, 9, 15).unwrap()),
+                end_date: Some(NaiveDate::from_ymd_opt(2027, 9, 16).unwrap()),
+                description: Some("Test Description".to_string()),
                 employment_type: Some(EmployeeContract::Hpp),
                 level: Some(EmployeeLevel::CompanyAdministrator),
             };
@@ -1723,17 +1761,27 @@ pub mod employment_repo_tests {
 
             assert_eq!(updated_employment.user_id, employment.user_id);
             assert_eq!(updated_employment.company_id, employment.company.id);
+
             assert_eq!(
                 updated_employment.manager_id,
-                Some(employment.manager.unwrap().id)
+                new_employment_data.manager_id
             );
             assert_eq!(
                 updated_employment.hourly_wage,
                 new_employment_data.hourly_wage.unwrap()
             );
-            assert_eq!(updated_employment.start_date, employment.start_date);
-            assert_eq!(updated_employment.end_date, employment.end_date);
-            assert_eq!(updated_employment.description, employment.description);
+            assert_eq!(
+                updated_employment.start_date,
+                new_employment_data.start_date.unwrap()
+            );
+            assert_eq!(
+                updated_employment.end_date,
+                new_employment_data.end_date.unwrap()
+            );
+            assert_eq!(
+                updated_employment.description,
+                new_employment_data.description
+            );
             assert_eq!(
                 updated_employment.employment_type,
                 new_employment_data.employment_type.unwrap()
@@ -1751,8 +1799,8 @@ pub mod employment_repo_tests {
         // All are none
 
         {
-            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
-            let user_id = uuid!("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c");
+            let company_id = test_constants::COMPANY0_ID;
+            let user_id = test_constants::USER2_ID;
 
             let new_employment_data = EmploymentData {
                 manager_id: None,
@@ -1773,8 +1821,8 @@ pub mod employment_repo_tests {
         // Non existent
 
         {
-            let company_id = uuid!("71fa27d6-6f00-4ad0-8902-778e298aaed2");
-            let user_id = uuid!("35341253-da20-40b6-96d8-ce069b1ba5d4");
+            let company_id = test_constants::COMPANY2_ID;
+            let user_id = test_constants::USER0_ID;
 
             let new_employment_data = EmploymentData {
                 manager_id: None,
@@ -1795,8 +1843,8 @@ pub mod employment_repo_tests {
         // Already deleted
 
         {
-            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
-            let user_id = uuid!("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c");
+            let company_id = test_constants::COMPANY0_ID;
+            let user_id = test_constants::USER2_ID;
 
             let employment = employment_repo
                 .read_one(user_id, company_id)
@@ -1845,8 +1893,8 @@ pub mod employment_repo_tests {
         let mut employment_repo = EmploymentRepository::new(arc_pool);
 
         {
-            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
-            let user_id = uuid!("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c");
+            let company_id = test_constants::COMPANY0_ID;
+            let user_id = test_constants::USER2_ID;
 
             let employment = employment_repo
                 .read_one(user_id, company_id)
@@ -1873,8 +1921,8 @@ pub mod employment_repo_tests {
         // delete on already deleted employment
 
         {
-            let company_id = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
-            let user_id = uuid!("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c");
+            let company_id = test_constants::COMPANY0_ID;
+            let user_id = test_constants::USER2_ID;
 
             let employment = employment_repo
                 .read_one(user_id, company_id)
@@ -1894,8 +1942,8 @@ pub mod employment_repo_tests {
         // delete on non-existing employment
 
         {
-            let company_id = uuid!("71fa27d6-6f00-4ad0-8902-778e298aaed2");
-            let user_id = uuid!("0465041f-fe64-461f-9f71-71e3b97ca85f");
+            let company_id = test_constants::COMPANY2_ID;
+            let user_id = test_constants::USER1_ID;
 
             employment_repo
                 .delete(user_id, company_id)
@@ -1929,6 +1977,8 @@ pub mod event_staff_repo_tests {
     use sqlx::PgPool;
     use uuid::uuid;
 
+    use crate::test_constants;
+
     #[sqlx::test(fixtures("event_staff"))]
     async fn create(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
@@ -1936,9 +1986,9 @@ pub mod event_staff_repo_tests {
         let mut event_staff_repo = StaffRepository::new(arc_pool);
 
         let event_staff_data = NewStaff {
-            user_id: uuid!("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c"),
-            event_id: uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"),
-            company_id: uuid!("71fa27d6-6f00-4ad0-8902-778e298aaed2"),
+            user_id: test_constants::USER2_ID,
+            event_id: test_constants::EVENT0_ID,
+            company_id: test_constants::COMPANY2_ID,
             role: EventRole::Organizer,
         };
 
@@ -1976,7 +2026,7 @@ pub mod event_staff_repo_tests {
 
         let mut event_staff_repo = StaffRepository::new(arc_pool);
 
-        let event_staff_id = uuid!("9281b570-4d02-4096-9136-338a613c71cd");
+        let event_staff_id = test_constants::EVENT_STAFF0_ID;
 
         let event_staff = event_staff_repo
             .read_one(event_staff_id)
@@ -2000,7 +2050,7 @@ pub mod event_staff_repo_tests {
 
         let mut event_staff_repo = StaffRepository::new(arc_pool);
 
-        let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f8");
+        let event_id = test_constants::EVENT0_ID;
 
         let filter = StaffFilter {
             limit: None,
@@ -2036,9 +2086,9 @@ pub mod event_staff_repo_tests {
         // Valid update
 
         {
-            let decider_staff_id = uuid!("9281b570-4d02-4096-9136-338a613c71cd");
+            let decider_staff_id = test_constants::EVENT_STAFF0_ID;
 
-            let event_staff_id = uuid!("a96d1d99-93b5-469b-ac62-654b0cf7ebd3");
+            let event_staff_id = test_constants::EVENT_STAFF1_ID;
 
             let event_staff = event_staff_repo
                 .read_one(event_staff_id)
@@ -2079,9 +2129,9 @@ pub mod event_staff_repo_tests {
         // All are none
 
         {
-            let decider_staff_id = uuid!("9281b570-4d02-4096-9136-338a613c71cd");
+            let decider_staff_id = test_constants::EVENT_STAFF0_ID;
 
-            let event_staff_id_wrong = uuid!("a96d1d99-93b5-469b-ac62-654b0cf7ebd3");
+            let event_staff_id_wrong = test_constants::EVENT_STAFF1_ID;
 
             let new_event_staff_data = StaffData {
                 role: None,
@@ -2098,7 +2148,7 @@ pub mod event_staff_repo_tests {
         // Non existent
 
         {
-            let decider_staff_id = uuid!("9281b570-4d02-4096-9136-338a613c71cd");
+            let decider_staff_id = test_constants::EVENT_STAFF0_ID;
 
             let event_staff_id = uuid!("a96d1d99-93b5-469b-ac62-654b0cf7ebd9");
 
@@ -2117,9 +2167,9 @@ pub mod event_staff_repo_tests {
         // Already deleted
 
         {
-            let decider_staff_id = uuid!("9281b570-4d02-4096-9136-338a613c71cd");
+            let decider_staff_id = test_constants::EVENT_STAFF0_ID;
 
-            let event_staff_id = uuid!("a96d1d99-93b5-469b-ac62-654b0cf7ebd3");
+            let event_staff_id = test_constants::EVENT_STAFF1_ID;
 
             let event_staff = event_staff_repo
                 .read_one(event_staff_id)
@@ -2164,7 +2214,7 @@ pub mod event_staff_repo_tests {
         let mut event_staff_repo = StaffRepository::new(arc_pool);
 
         {
-            let event_staff_id = uuid!("a96d1d99-93b5-469b-ac62-654b0cf7ebd3");
+            let event_staff_id = test_constants::EVENT_STAFF1_ID;
 
             let event_staff = event_staff_repo
                 .read_one(event_staff_id)
@@ -2191,7 +2241,7 @@ pub mod event_staff_repo_tests {
         // delete on already deleted event staff
 
         {
-            let event_staff_id = uuid!("a96d1d99-93b5-469b-ac62-654b0cf7ebd3");
+            let event_staff_id = test_constants::EVENT_STAFF1_ID;
 
             let event_staff = event_staff_repo
                 .read_one(event_staff_id)
@@ -2224,32 +2274,333 @@ pub mod event_staff_repo_tests {
 // event, event_staff
 #[cfg(test)]
 pub mod task_repo_tests {
+    use chrono::{NaiveDateTime, Utc};
+    use organization_app::{
+        common::DbResult,
+        models::TaskPriority,
+        repositories::{
+            repository::DbRepository,
+            task::{
+                models::{NewTask, TaskData, TaskFilter},
+                task_repo::TaskRepository,
+            },
+        },
+    };
     use sqlx::PgPool;
-    use uuid::{uuid, Uuid};
+    use std::sync::Arc;
+    use uuid::uuid;
+
+    use crate::test_constants;
 
     #[sqlx::test(fixtures("task"))]
-    async fn create(_pool: PgPool) {
-        todo!()
+    async fn create(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut task_repo = TaskRepository::new(arc_pool);
+
+        let new_task_data = NewTask {
+            event_id: test_constants::EVENT0_ID,
+            creator_id: test_constants::EVENT_STAFF1_ID,
+            description: Some("Test Description".to_string()),
+            title: "Test Title".to_string(),
+            priority: TaskPriority::High,
+        };
+
+        let new_task = task_repo
+            .create(new_task_data.clone())
+            .await
+            .expect("Create should succeed");
+
+        assert_eq!(new_task.event_id, new_task_data.event_id);
+        assert_eq!(new_task.creator_id, new_task_data.creator_id);
+        assert_eq!(new_task.description, new_task_data.description);
+        assert_eq!(new_task.title, new_task_data.title);
+        assert_eq!(new_task.priority, new_task_data.priority);
+
+        assert!(new_task.deleted_at.is_none());
+
+        let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
+
+        let time_difference_created = time - new_task.created_at;
+        let time_difference_edited = time - new_task.edited_at;
+
+        assert!(time_difference_created.num_seconds() < 2);
+        assert!(time_difference_edited.num_seconds() < 2);
+
+        task_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("task"))]
-    async fn read_one(_pool: PgPool) {
-        todo!()
+    async fn read_one(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut task_repo = TaskRepository::new(arc_pool);
+
+        let task_id = test_constants::TASK0_ID;
+
+        let task = task_repo
+            .read_one(task_id)
+            .await
+            .expect("Read should succeed");
+
+        assert_eq!(task.title, "Prepare stage for Joe Cocker");
+        assert!(task.description.is_none());
+        assert_eq!(task.priority, TaskPriority::Medium);
+        assert_eq!(task.creator.name, "Dave Null");
+
+        task_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("task"))]
-    async fn read_all_per_event(_pool: PgPool) {
-        todo!()
+    async fn read_all_per_event(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut task_repo = TaskRepository::new(arc_pool);
+
+        let filter = TaskFilter {
+            limit: None,
+            offset: None,
+        };
+
+        {
+            let event_id = test_constants::EVENT0_ID;
+
+            let tasks = task_repo
+                .read_all_for_event(event_id, filter.clone())
+                .await
+                .expect("Read should succeed");
+
+            assert_eq!(tasks.len(), 2);
+
+            let task = &tasks[0];
+
+            assert_eq!(task.title, "Prepare stage for Joe Cocker");
+
+            let task = &tasks[1];
+
+            assert_eq!(task.title, "Prepare stage for Santa");
+        }
+
+        {
+            let tasks = task_repo
+                .read_all(filter)
+                .await
+                .expect("Read should succeed");
+
+            // TODO - better test
+
+            assert_eq!(tasks.len(), 2);
+
+            let task = &tasks[0];
+
+            assert_eq!(task.title, "Prepare stage for Santa");
+
+            let task = &tasks[1];
+
+            assert_eq!(task.title, "Prepare stage for Joe Cocker");
+        }
+
+        task_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("task"))]
-    async fn update(_pool: PgPool) {
-        todo!()
+    async fn update(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut task_repo = TaskRepository::new(arc_pool);
+
+        // Valid update
+
+        {
+            let task_id = test_constants::TASK0_ID;
+
+            let task = task_repo
+                .read_one(task_id)
+                .await
+                .expect("Read should succeed");
+
+            let new_task_data = TaskData {
+                title: Some("New Title".to_string()),
+                description: Some("New Description".to_string()),
+                finished_at: Some(
+                    NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap(),
+                ),
+                priority: Some(TaskPriority::Low),
+                accepts_staff: Some(false),
+            };
+
+            let updated_task = task_repo
+                .update(task_id, new_task_data.clone())
+                .await
+                .expect("Update should succeed");
+
+            assert_eq!(updated_task.title, new_task_data.title.unwrap());
+            assert_eq!(updated_task.description, new_task_data.description);
+            assert_eq!(updated_task.priority, new_task_data.priority.unwrap());
+            assert_eq!(
+                updated_task.accepts_staff,
+                new_task_data.accepts_staff.unwrap()
+            );
+            assert_eq!(updated_task.finished_at, new_task_data.finished_at);
+
+            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
+
+            let time_difference_edited = time - updated_task.edited_at;
+            assert!(time_difference_edited.num_seconds() < 2);
+
+            assert!(updated_task.deleted_at.is_none());
+        }
+
+        // All are none
+
+        {
+            let task_id = test_constants::TASK0_ID;
+
+            let new_task_data = TaskData {
+                title: None,
+                description: None,
+                finished_at: None,
+                priority: None,
+                accepts_staff: None,
+            };
+
+            let _updated_task = task_repo
+                .update(task_id, new_task_data)
+                .await
+                .expect_err("Update should fail - all fields are none");
+        }
+
+        // Non existent
+
+        {
+            let task_id = uuid!("a96d1d99-93b5-469b-ac62-654b0cf7ebd9");
+
+            let new_task_data = TaskData {
+                title: Some("New Title".to_string()),
+                description: Some("New Description".to_string()),
+                finished_at: None,
+                priority: Some(TaskPriority::Low),
+                accepts_staff: Some(false),
+            };
+
+            let _updated_task = task_repo
+                .update(task_id, new_task_data)
+                .await
+                .expect_err("Update should fail - non existent task");
+        }
+
+        // Already deleted
+
+        {
+            let task_id = test_constants::TASK0_ID;
+
+            let task = task_repo
+                .read_one(task_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(task.deleted_at.is_none());
+
+            task_repo
+                .delete(task_id)
+                .await
+                .expect("Delete should succeed");
+
+            let deleted_task = task_repo
+                .read_one(task_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(deleted_task.deleted_at.is_some());
+
+            let new_task_data = TaskData {
+                title: Some("New Title".to_string()),
+                description: Some("New Description".to_string()),
+                finished_at: None,
+                priority: Some(TaskPriority::Low),
+                accepts_staff: Some(false),
+            };
+
+            let _updated_task = task_repo
+                .update(task_id, new_task_data)
+                .await
+                .expect_err("Update should fail - already deleted task");
+        }
+
+        task_repo.disconnect().await;
+
+        Ok(())
     }
 
     #[sqlx::test(fixtures("task"))]
-    async fn delete(_pool: PgPool) {
-        todo!()
+    async fn delete(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut task_repo = TaskRepository::new(arc_pool);
+
+        {
+            let task_id = test_constants::TASK0_ID;
+
+            let task = task_repo
+                .read_one(task_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(task.deleted_at.is_none());
+
+            task_repo.delete(task_id).await.unwrap();
+
+            let new_task = task_repo
+                .read_one(task_id)
+                .await
+                .expect("Read should succeed");
+
+            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
+            let time_difference_edited = time - new_task.edited_at;
+            let time_difference_deleted = time - new_task.deleted_at.unwrap();
+
+            assert!(time_difference_edited.num_seconds() < 2);
+            assert!(time_difference_deleted.num_seconds() < 2);
+        }
+
+        // delete on already deleted task
+
+        {
+            let task_id = test_constants::TASK0_ID;
+
+            let task = task_repo
+                .read_one(task_id)
+                .await
+                .expect("Read should succeed");
+
+            assert!(task.deleted_at.is_some());
+
+            task_repo
+                .delete(task_id)
+                .await
+                .expect_err("Repository should return error on deleting an already deleted task");
+        }
+
+        // delete on non-existing task
+
+        {
+            let task_id = uuid!("a96d1d99-93b5-469b-ac62-654b0cf7ebd9");
+
+            task_repo
+                .delete(task_id)
+                .await
+                .expect_err("Repository should return error on deleting a non-existing task");
+        }
+
+        task_repo.disconnect().await;
+
+        Ok(())
     }
 }
 

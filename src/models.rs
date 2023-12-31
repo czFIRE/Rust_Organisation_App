@@ -42,7 +42,7 @@ pub enum AcceptanceStatus {
     Rejected,
 }
 
-#[derive(Serialize, Deserialize, Debug, sqlx::Type)]
+#[derive(Serialize, Deserialize, Debug, sqlx::Type, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 #[sqlx(type_name = "task_priority", rename_all = "lowercase")]
 pub enum TaskPriority {

@@ -4,13 +4,13 @@ use uuid::Uuid;
 
 use crate::{
     models::{Gender, TaskPriority, UserRole, UserStatus},
-    repositories::user::models::User,
+    repositories::{event_staff::models::Staff, user::models::User},
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct NewTask {
     pub event_id: Uuid,
-    pub creator_id: Uuid,
+    pub creator_id: Uuid, // references event_staff
     pub title: String,
     pub description: Option<String>,
     pub priority: TaskPriority,
@@ -21,7 +21,7 @@ pub struct NewTask {
 pub struct Task {
     pub id: Uuid,
     pub event_id: Uuid,
-    pub creator_id: Uuid,
+    pub creator_id: Uuid, // references event_staff
     pub title: String,
     pub description: Option<String>,
     pub finished_at: Option<NaiveDateTime>, // TODO: In the db it was a Date
@@ -47,7 +47,7 @@ pub struct TaskExtended {
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TaskData {
     pub title: Option<String>,
     pub description: Option<String>,
@@ -56,7 +56,7 @@ pub struct TaskData {
     pub accepts_staff: Option<bool>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TaskFilter {
     pub limit: Option<i64>,
     pub offset: Option<i64>,
