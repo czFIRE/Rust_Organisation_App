@@ -25,7 +25,7 @@ pub enum Gender {
 #[derive(Serialize, Debug, PartialEq, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum EventRole {
-    Basic,
+    Staff,
     Organizer,
 }
 
@@ -68,4 +68,13 @@ pub enum EmployeeContract {
     Dpp,
     Dpc,
     Hpp,
+}
+
+#[derive(Serialize, Debug, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ApprovalStatus {
+    Accepted,
+    NotRequested,
+    Pending,
+    Rejected,
 }

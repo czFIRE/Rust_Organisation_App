@@ -3,10 +3,10 @@ mod api_tests {
     use std::borrow::Borrow;
 
     use actix_web::http::header::ContentType;
-    use actix_web::http::{self, Method, StatusCode};
+    use actix_web::http;
     use actix_web::{test, App};
     use chrono::{NaiveDate, TimeZone, Utc};
-    use organization::models::{AcceptanceStatus, Association, EventRole, UserRole};
+    use organization::models::{AcceptanceStatus, Association, EventRole};
     use organization::templates::comment::{CommentTemplate, CommentsTemplate};
     use organization::templates::company::{
         AssociatedCompaniesTemplate, AssociatedCompanyTemplate, CompaniesTemplate, CompanyTemplate,
@@ -22,10 +22,6 @@ mod api_tests {
     use serde_json::json;
     use std::str::{self, FromStr};
     use uuid::Uuid;
-
-    struct Error {
-        error: String,
-    }
 
     #[actix_web::test]
     async fn index_get() {
@@ -255,21 +251,21 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_user_avatar() {
-        let app =
+        let _app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn upload_user_avatar() {
-        let app =
+        let _app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn remove_user_avatar() {
-        let app =
+        let _app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
@@ -550,21 +546,21 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_company_avatar() {
-        let app =
+        let _app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn upload_company_avatar() {
-        let app =
+        let _app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn remove_company_avatar() {
-        let app =
+        let _app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
@@ -830,21 +826,21 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_event_avatar() {
-        let app =
+        let _app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn upload_event_avatar() {
-        let app =
+        let _app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
     async fn remove_event_avatar() {
-        let app =
+        let _app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
@@ -1876,8 +1872,6 @@ mod api_tests {
     async fn get_event_staff_errors() {
         let app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         let req = test::TestRequest::get()
                     .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff/918ab570-adb3-4c9d-9136-338a613c71cd")
                     .to_request();
@@ -2308,7 +2302,7 @@ mod api_tests {
     // ToDo
     #[actix_web::test]
     async fn delete_not_accepted_assigned_staff() {
-        let app =
+        let _app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
@@ -2316,7 +2310,7 @@ mod api_tests {
     // ToDo
     #[actix_web::test]
     async fn delete_not_accepted_assigned_staff_errors() {
-        let app =
+        let _app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }

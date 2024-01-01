@@ -3,7 +3,7 @@ use chrono::Utc;
 use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::handlers::common::QueryParams;
+use crate::{handlers::common::QueryParams, models::ApprovalStatus};
 
 #[derive(Deserialize)]
 pub struct NewTimesheetData {
@@ -25,6 +25,7 @@ pub struct WorkDay {
 pub struct TimesheetData {
     work_days: Option<Vec<WorkDay>>,
     is_editable: Option<bool>,
+    status: Option<ApprovalStatus>,
     manager_note: Option<String>,
 }
 
@@ -40,6 +41,7 @@ pub async fn get_all_timesheets_for_employment(
 // Note: This is done automatically whenever event_staff is accepted to work on an event.
 #[post("/timesheet")]
 pub async fn create_timesheet(_new_timesheet: web::Form<NewTimesheetData>) -> HttpResponse {
+    // Default approval status: NotRequested
     todo!()
 }
 
