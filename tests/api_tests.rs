@@ -2,8 +2,8 @@
 mod api_tests {
     use std::borrow::Borrow;
 
-    use actix_web::http::header::ContentType;
     use actix_web::http;
+    use actix_web::http::header::ContentType;
     use actix_web::{test, App};
     use chrono::{NaiveDate, TimeZone, Utc};
     use organization::models::{AcceptanceStatus, Association, EventRole};
