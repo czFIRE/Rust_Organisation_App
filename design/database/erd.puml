@@ -1,78 +1,117 @@
 @startuml erd
 skinparam Linetype ortho
 skinparam classFontSize 20
-scale 1800 * 1800
+scale 2000 * 2000
 hide circle
 
-enum TaskPriority {
-    Low
-	Medium
-	High
-}
-
-enum AssociationType {
-    Sponsor
-	Organizer
-	Other
-}
-
-enum EmploymentType {
-    DPP
-	DPC
-	HPP
-}
-
-enum EmployeeLevel {
-    Basic
-	Manager
-	Upper Manager
-}
-
-enum StaffLevel {
-    Basic
-    Organizer
-}
-
-enum UserStatus {
-    OK
-	Sick
-	Vacation
-}
-
-enum AssignmentStatus {
-    Pending
-	Accepted
-	Rejected
-}
-
+/'
+  Denotes the status of an employee\'s request to work on an event.
+'/
 enum AcceptanceStatus {
     Pending
     Accepted
     Rejected
 }
 
-enum UserLevel {
-    User
-	Admin
+enum ApprovalStatus {
+    /'
+      A temporary state which preceeds a `Pending` state.
+
+      Suggests an employee currently modifies its workdays
+      and does not want to get his/her timesheet verified yet.
+    '/
+    NotRequested
+    Pending
+    Accepted
+    Rejected
 }
 
-enum UserSex {
-    Female
-	Male
+/'
+  Denotes the type of association that a company has with an event.
+'/
+enum Association {
+    Sponsor
+    Organizer
+    Media
     Other
+}
+
+/'
+  Denotes the type of employment an employee may have with a company.
+'/
+enum EmploymentContract {
+    DPP
+    DPC
+    HPP
+}
+
+/'
+  Denotes whether the employee has managerial responsibilities / privileges
+  within a company, or not. The Upper Manager role represents the overall
+  responsible person (people) that take care of the company in the system.
+'/
+enum EmployeeLevel {
+    Basic
+    Manager
+    CompanyAdministrator
+}
+
+/'
+  Denotes whether the employee has additional (organizer) privileges
+  within a given event.
+'/
+enum EventRole {
+    Basic
+    Organizer
+}
+
+/'
+  Denotes a gender types that user is allowed to choose from.
+'/
+enum Gender {
+    Female
+    Male
+    Other
+}
+
+/'
+  Denotes the priority of a task assigned to event staff.
+'/
+enum TaskPriority {
+    Low
+    Medium
+    High
+}
+
+/'
+  Denotes the privileges of a user in terms of interactions with the system
+  as a whole.
+'/
+enum UserRole {
+    User
+    Admin
+}
+
+/'
+  Denotes the availability of a user in terms of employment
+  and task opportunities.
+'/
+enum UserStatus {
+    Available
+    Unavailable
 }
 
 entity user {
     *<u>user_id</u>: <<uuid>>
     ---
     ' Full name. They will log in using their email.
-    *name: varchar(255) 
-    *user_level: <<enum UserLevel>>
-    *user_status <<enum UserStatus>>
+    *name: varchar(255)
     *email: varchar(45)
-	*date_of_birth: date
-    *avatar_url: varchar(255)
-	*sex: <<enum UserSex>>
+    *date_of_birth: date
+    *avatar_path: varchar(255)
+    *gender: <<enum Gender>>
+    *role: <<enum UserRole>>
+    *status <<enum UserStatus>>
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
@@ -86,8 +125,9 @@ entity timesheet {
     *event_id: <<uuid>> (FK event)
     *start_date: date
     *end_date: date
-    *worked_hours: float
+    *total_hours: float
     *is_editable: boolean
+    *status: <<enum ApprovalStatus>>,
     ' allows managers to leave notes in case of errors.
     manager_note: text
     *created_at: timestamp
@@ -99,29 +139,27 @@ entity work_day {
     *<u>timesheet_id</u>: <<uuid>>
     *<u>work_date</u>: date
     ---
-    *worked_hours: float
-    commentary: text
+    *total_hours: float
+    comment: text
     *is_editable: boolean
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
 }
 
-together {
-    entity event {
-        *<u>event_id</u>: <<uuid>>
-        ---
-        *name: varchar(255)
-        description: text
-        website: url
-        *accepts_staff: boolean
-        *work_start: date
-        *work_end: date
-        *avatar_url: varchar(255)
-        *created_at: timestamp
-        *edited_at: timestamp
-        deleted_at: timestamp
-    }
+entity event {
+    *<u>event_id</u>: <<uuid>>
+    ---
+    *name: varchar(255)
+    description: text
+    website: varchar(255)
+    *accepts_staff: boolean
+    *start_date: date
+    *end_date: date
+    *avatar_path: varchar(255)
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
 }
 
 entity task {
@@ -130,8 +168,8 @@ entity task {
     *event_id: uuid (FK event)
     *creator_id: uuid (FK event_staff)
     *title: text
-    *description: text
-    date_accomplished: timestamp
+    description: text
+    finished_at: timestamp
     *priority: <<enum TaskPriority>>
     *accepts_staff: boolean
     *created_at: timestamp
@@ -142,63 +180,61 @@ entity task {
 entity assigned_staff {
     *<u>task_id</u>: <<uuid>> (FK task)
     *<u>staff_id</u>: <<uuid>> (FK event_staff)
+    decided_by: <<uuid>> (FK event_staff)
     ---
-    *assignment_status: <<enum AssignmentStatus>>
-    decided_by: <<uuid>>
+    *status: <<enum AcceptanceStatus>>
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
 }
 
-together {
-    entity company {
-        *<u>company_id</u>: <<uuid>>
-        ---
-        *name: varchar(255)
-        description: text
-        website: url
-        /' A Company Registration Number.
+entity company {
+    *<u>company_id</u>: <<uuid>>
+    ---
+    *name: varchar(255)
+    description: text
+    website: varchar(255)
+    /' A Company Registration Number.
 
-        Note: Different European countries use different format, some just
-                numbers, some letters as well, but they all fit into 16 characters.
-        '/
-        *CRN: varchar(16)
-        /'
-        A Value-Added Tax Identification Number.
-
-        Note: China seems to have a longest format with 18 characters.
-        '/
-        *VATIN: varchar(18)
-        *contact_phone: string
-        *contact_email: string
-        *avatar_url: varchar(255)
-        *created_at: timestamp
-        *edited_at: timestamp
-        deleted_at: timestamp
-    }
-
-    /' 
-        Normalization for compound type address.
-        In case we want to expand some filtering.
-        Also normalization.
+    Note: Different European countries use different format, some just
+            numbers, some letters as well, but they all fit into 16 characters.
     '/
-    entity company_address {
-        *<u>company_id<u>: <<uuid>>
-        ---
-        country: varchar(255)
-        region: varchar(255)
-        city: varchar(255)
-        street: varchar(255)
-        address_number: varchar(255)
-        postal_code: varchar(255)
-    }
+    *CRN: varchar(16)
+    /'
+    A Value-Added Tax Identification Number.
+
+    Note: China seems to have a longest format with 18 characters.
+    '/
+    *VATIN: varchar(18)
+    *phone: varchar(255)
+    *email: varchar(255)
+    *avatar_path: varchar(255)
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
+}
+
+/'
+    Normalization for compound type address.
+    In case we want to expand some filtering.
+    Also normalization.
+'/
+entity address {
+    *<u>company_id<u>: <<uuid>>
+    ---
+    country: varchar(255)
+    region: varchar(255)
+    city: varchar(255)
+    street: varchar(255)
+    street_number: varchar(255)
+    postal_code: varchar(255)
 }
 
 entity associated_company {
-    *<u>event_id</u>: <<uuid>>
     *<u>company_id</u>: <<uuid>>
+    *<u>event_id</u>: <<uuid>>
     ---
-    *association_type: <<enum AssociationType>>
+    *association_type: <<enum Association>>
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
@@ -209,17 +245,17 @@ entity employment {
     *<u>company_id</u>: <<uuid>>
     ---
     /' 
-        manager_id and company_id give us the manager's employment record.
+        manager_id and company_id give us the manager\'s employment record.
         manager_id is therefore the user ID of the manager.
     '/
-    *manager_id: <<uuid>> 
-    *employment_type: <<enum EmploymentType>>
-    *hourly_rate: float
-    *employee_level: <<enum EmployeeLevel>>
-    ' Allows for descriptions of the employment's purpose.
-    description: text
+    manager_id: <<uuid>> (FK user)
+    *hourly_wage: float
     *start_date: date
     *end_date: date
+    ' Allows for descriptions of the employment's purpose.
+    description: text
+    *employment_type: <<enum EmploymentContract>>
+    *employee_level: <<enum EmployeeLevel>>
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
@@ -231,9 +267,9 @@ entity event_staff {
     *user_id: <<uuid>> (FK user, part of FK employment)
     *company_id: <<uuid>> (FK company, part of FK employment)
     *event_id: <<uuid>> (FK event)
-    *staff_level: <<enum StaffLevel>>
-    *acceptance_status: <<enum AcceptanceStatus>>
     decided_by: <<uuid>> (FK event_staff)
+    *role: <<enum EventRole>>
+    *acceptance_status: <<enum AcceptanceStatus>>
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
@@ -246,7 +282,7 @@ entity comment {
         Note that the nullability of event_id 
         and task_id is a xor relationship.
         So either event_id is null, and task_id is not null, or the opposite.
-        They can't both be null, or both not be null.
+        They can\'t both be null, or both not be null.
     '/
     event_id: <<uuid>>
     task_id: <<uuid>>
@@ -257,25 +293,36 @@ entity comment {
     deleted_at: timestamp
 }
 
+/'
+  Class relations, possibly with labels.
+
+  Note: One can use `u`, `r`, `d`, `b` values in relation syntax
+        (e.g. `author|o-b-o{books`).
+
+
+        It allows to request some table to be put `up` / `right`
+        / `bottom` / `left` relative to some other table.
+
+        This seems to be undocumented, but it works.
+'/
 user||..|{employment
 timesheet}o..||employment
-timesheet||..o{work_day
-timesheet}o..||event
+timesheet||.l.o{work_day : can\nhave\n <
+timesheet}o.r.||event
 employment||..o{event_staff
 employment}o..||company
 employment|o..o{employment : manages
 event||.o{associated_company
-company||..o{associated_company
-company||..||company_address
-company||..o{event_staff
-event||..o{event_staff
-event||..o{task
-event|o...o{comment
-task|o...o{comment
-comment}o..||user
-task||..||event_staff : task_creator
+company||.r.o{associated_company
+company||.u.||address : has\nheadquaters\nat <
+event||..o{event_staff : is\norganized\nby >
+event||.r.o{task : can\nhave\nassociated >
+event|o...o{comment : can\nhave >
+task|o...o{comment : can\nhave >
+comment}o..||user : is sent by >
+task||..||event_staff : was\ncreated\nby >
 task||..o{assigned_staff
 assigned_staff}o..||event_staff
-assigned_staff||..||event_staff : decided_by
-user||..o{event_staff
+assigned_staff||..||event_staff : is\ndecided\nby >
+event_staff}o..||event_staff : appointed\n as an\n organizer
 @enduml
