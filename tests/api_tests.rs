@@ -2288,7 +2288,7 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
 
         // Task doesn't exit
-        assert!(res.status().is_client_err());
+        assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
 
         let data = json!({});
@@ -2301,7 +2301,7 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
 
         // Empty data
-        assert!(res.status().is_client_err());
+        assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
@@ -2376,11 +2376,11 @@ mod api_tests {
 
         let req = test::TestRequest::post()
             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/company")
-            .set_form(data)
+            .set_form(data.clone())
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
-        assert_req!(res.status, http::StatusCode::CREATED);
+        assert_eq!(res.status(), http::StatusCode::CREATED);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         let out = serde_json::from_str::<AssociatedCompanyTemplate>(body).unwrap();
@@ -2397,11 +2397,11 @@ mod api_tests {
         //Duplicate creation should fail
         let req = test::TestRequest::post()
             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/company")
-            .set_form(data)
+            .set_form(data.clone())
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
-        assert_req!(res.status, http::StatusCode::BAD_REQUEST);
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
 
         // Invalid UUID should fail
         let req = test::TestRequest::post()
@@ -2410,7 +2410,7 @@ mod api_tests {
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
-        assert_req!(res.status, http::StatusCode::BAD_REQUEST);
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
 
         let data = json!({
             "association_type": "other",
@@ -2422,11 +2422,11 @@ mod api_tests {
                     .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
-        assert_req!(res.status, http::StatusCode::OK);
+        assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         let out = serde_json::from_str::<AssociatedCompanyTemplate>(body).unwrap();
-        ssert_eq!(out.association_type, Association::Other);
+        assert_eq!(out.association_type, Association::Other);
         assert_eq!(
             out.company.id,
             Uuid::from_str("134d5286-5f55-4637-9b98-223a5820a464").unwrap()
@@ -2444,7 +2444,7 @@ mod api_tests {
                     .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
-        assert_req!(res.status, http::StatusCode::BAD_REQUEST);
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
 
         let data = json!({
             "association_type": "other",
@@ -2456,14 +2456,14 @@ mod api_tests {
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
-        assert_req!(res.status, http::StatusCode::BAD_REQUEST);
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
 
         let req = test::TestRequest::delete()
                     .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/company/134d5286-5f55-4637-9b98-223a5820a464")
                     .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
-        assert_req!(res.status, http::StatusCode::NO_CONTENT);
+        assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
     }
 
     #[actix_web::test]
@@ -2515,12 +2515,12 @@ mod api_tests {
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
-        assert!(res.status(), http::StatusCode::OK);
+        assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         let out = serde_json::from_str::<TimesheetTemplate>(body).unwrap();
-        assert!(out.work_days.len(), 2);
-        assert!(
+        assert_eq!(out.work_days.len(), 2);
+        assert_eq!(
             out.id,
             Uuid::from_str("d47e8141-a77e-4d55-a2d5-4a77de24b6d0").unwrap()
         );
@@ -2535,7 +2535,7 @@ mod api_tests {
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
-        assert!(res.status(), http::StatusCode::NOT_FOUND);
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
@@ -2547,7 +2547,7 @@ mod api_tests {
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
-        assert!(res.status(), http::StatusCode::BAD_REQUEST);
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]

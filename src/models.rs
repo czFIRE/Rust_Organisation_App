@@ -45,7 +45,7 @@ pub enum TaskPriority {
     High,
 }
 
-#[derive(Serialize, Debug, Deserialize)]
+#[derive(Serialize, PartialEq, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Association {
     Sponsor,
