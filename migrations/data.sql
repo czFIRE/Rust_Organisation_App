@@ -228,11 +228,13 @@ BEGIN
 
     INSERT INTO task
         (id, event_id, creator_id, title,
-        description, finished_at, priority,
+        description,
+        finished_at, priority,
         accepts_staff, created_at, edited_at)
         VALUES
         (task0_id, event0_id, event_staff0_id, 'Prepare stage for Joe Cocker',
-        NULL, NULL, 'medium', true,
+        NULL,
+        NULL, 'medium', true,
         '2023-05-03 10:42:10.4', '2023-05-03 10:42:10.4');
 
     INSERT INTO assigned_staff
