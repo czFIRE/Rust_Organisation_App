@@ -105,47 +105,57 @@ BEGIN
 --------------------------------------------------------------------------------
 
     INSERT INTO user_record
-        (id, name, email, birth, avatar_path,
+        (id, name, email,
+        birth, avatar_path,
         gender, role, status,
         created_at, edited_at)
         VALUES
-        (user0_id, 'Dave Null', 'dave@null.com', '1996-06-23', 'dave.jpg',
+        (user0_id, 'Dave Null', 'dave@null.com',
+        '1996-06-23', 'dave.jpg',
         'male', 'admin', 'available',
         '2023-12-22 08:38:20.288688', '2023-12-22 08:38:20.288688');
 
     INSERT INTO user_record
-        (id, name, email, birth, avatar_path,
+        (id, name, email,
+        birth, avatar_path,
         gender, role, status,
         created_at, edited_at)
         VALUES
-        (user1_id, 'Tana Smith', 't.smith@seznam.cz', '1994-02-10', 'tana.jpg',
+        (user1_id, 'Tana Smith', 't.smith@seznam.cz',
+        '1994-02-10', 'tana.jpg',
         'female', 'user', 'available',
         '2023-12-26 07:33:20.288688', '2023-12-26 07:33:20.288688');
 
     INSERT INTO user_record
-        (id, name, email, birth, avatar_path,
+        (id, name, email,
+        birth, avatar_path,
         gender, role, status,
         created_at, edited_at)
         VALUES
-        (user2_id, 'Anna Smeth', 'a.smeth@sezam.cz', '1998-02-10', 'anna.jpg',
+        (user2_id, 'Anna Smeth', 'a.smeth@sezam.cz',
+        '1998-02-10', 'anna.jpg',
         'female', 'user', 'available',
         '2023-12-27 07:33:20.288688', '2023-12-27 07:33:20.288688');
 
     INSERT INTO user_record
-        (id, name, email, birth, avatar_path,
+        (id, name, email,
+        birth, avatar_path,
         gender, role, status,
         created_at, edited_at)
         VALUES
-        (user3_id, 'Dee Scord', 'dee@lmao.com', '1999-06-23', 'dee.jpg',
+        (user3_id, 'Dee Scord', 'dee@lmao.com',
+        '1999-06-23', 'dee.jpg',
         'male', 'user', 'available',
         '2023-12-20 08:38:20.288688', '2023-12-20 08:38:20.288688');
 
     INSERT INTO user_record
-        (id, name, email, birth, avatar_path,
+        (id, name, email,
+        birth, avatar_path,
         gender, role, status,
         created_at, edited_at)
         VALUES
-        (user4_id, 'Joanna Dural', 'j.dural@centrum.cz', '1995-08-10', 'joanna.jpg',
+        (user4_id, 'Joanna Dural', 'j.dural@centrum.cz',
+        '1995-08-10', 'joanna.jpg',
         'female', 'user', 'unavailable',
         '2023-12-31 09:33', '2024-01-01 12:33');
 
@@ -477,5 +487,5 @@ BEGIN
         '2023-05-03 10:00:01.5', '2023-05-03 10:05:16.1');
 
 --------------------------------------------------------------------------------
-		
+
 END $$;
