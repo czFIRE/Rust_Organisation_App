@@ -44,6 +44,8 @@ DECLARE
 
 
 BEGIN
+--------------------------------------------------------------------------------
+
     INSERT INTO company
         (id, name, description,
         website, crn, vatin,
@@ -77,6 +79,8 @@ BEGIN
         '123 456 789', 'info@prusa3d.com', 'prusa_design.png',
         '2023-12-24 15:55:20.288688', '2023-12-24 19:38:20.288688');
 
+--------------------------------------------------------------------------------
+
     INSERT INTO address
         (company_id, country, region, city,
         street, street_number, postal_code)
@@ -97,6 +101,8 @@ BEGIN
         VALUES
         (company2_id, 'Czech republic', 'Prague', 'Prague',
         'Partyzanska', '188/7A', '170 00');
+
+--------------------------------------------------------------------------------
 
     INSERT INTO user_record
         (id, name, email, birth, avatar_path,
@@ -151,6 +157,8 @@ BEGIN
         (user5_id, 'Alan Papalochus', 'alan@pap.cz', '1968-08-01', 'alan.jpg',
         'male', 'user', 'available',
         '2024-01-01 10:33', '2024-01-01 10:33');
+
+--------------------------------------------------------------------------------
 
     INSERT INTO employment
         (user_id, company_id, manager_id, hourly_wage,
@@ -207,6 +215,8 @@ BEGIN
         'DPC', 'basic',
         '2023-12-30 11:38:20.4', '2023-12-31 14:52');
 
+--------------------------------------------------------------------------------
+
     INSERT INTO event
         (id, name, description,
         website, accepts_staff,
@@ -228,6 +238,8 @@ BEGIN
         'https://darkness2024.com', true,
         '2024-01-01', '2024-01-03', 'darkness_2024.png',
         '2023-06-06 06:06:6.66', '2023-06-06 16:26:6.66');
+
+--------------------------------------------------------------------------------
 
     INSERT INTO associated_company
         (company_id, event_id, type,
@@ -256,6 +268,8 @@ BEGIN
         VALUES
         (company2_id, event1_id, 'sponsor',
         '2023-12-12 12:38:20.4', '2023-12-12 12:38:20.4');
+
+--------------------------------------------------------------------------------
 
     INSERT INTO timesheet
         (id, user_id, company_id, event_id,
@@ -289,6 +303,8 @@ BEGIN
         '2024-01-01', '2024-01-02', 15,
         false, 'pending', NULL,
         '2024-01-03 18:26:0.0', '2024-01-03 18:29');
+
+--------------------------------------------------------------------------------
 
     INSERT INTO work_day
         (timesheet_id, date, total_hours, comment, is_editable,
@@ -339,6 +355,8 @@ BEGIN
         (timesheet2_id, '2024-01-02', 7, '', false,
         '2024-01-02 20:10', '2024-01-02 21:12');
 
+--------------------------------------------------------------------------------
+
     INSERT INTO event_staff
         (id, user_id, company_id, event_id,
         decided_by, role, status,
@@ -384,6 +402,8 @@ BEGIN
         event_staff2_id, 'staff', 'accepted',
         '2024-01-01 11:45:20.1', '2024-01-01 11:45:20.1');
 
+--------------------------------------------------------------------------------
+
     INSERT INTO task
         (id, event_id, creator_id, title,
         description,
@@ -406,6 +426,7 @@ BEGIN
         NULL, 'high', true,
         '2023-12-30 11:42', '2023-12-30 11:42');
 
+--------------------------------------------------------------------------------
 
     INSERT INTO assigned_staff
         (task_id, staff_id, decided_by, status,
@@ -427,6 +448,8 @@ BEGIN
         VALUES
         (task1_id, event_staff4_id, NULL, 'pending',
         '2024-01-01 11:45:20.1', '2024-01-01 11:45:20.1');
+
+--------------------------------------------------------------------------------
 
     INSERT INTO comment
         (id, event_id, task_id, author_id,
@@ -452,4 +475,7 @@ BEGIN
         (comment2_id, event1_id, NULL, user2_id,
         'This gets organized for the 3rd time ;)',
         '2023-05-03 10:00:01.5', '2023-05-03 10:05:16.1');
+
+--------------------------------------------------------------------------------
+		
 END $$;
