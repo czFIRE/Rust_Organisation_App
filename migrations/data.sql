@@ -117,7 +117,7 @@ BEGIN
         gender, role, status,
         created_at, edited_at)
         VALUES
-        (user2_id, 'Annna Smeth', 'a.smeth@sezam.cz', '1998-02-10', 'tana.jpg',
+        (user2_id, 'Anna Smeth', 'a.smeth@sezam.cz', '1998-02-10', 'anna.jpg',
         'female', 'user', 'available',
         '2023-12-27 07:33:20.288688', '2023-12-27 07:33:20.288688');
 
@@ -126,7 +126,7 @@ BEGIN
         gender, role, status,
         created_at, edited_at)
         VALUES
-        (user3_id, 'Dee Scord', 'dee@lmao.com', '1999-06-23', 'dave.jpg',
+        (user3_id, 'Dee Scord', 'dee@lmao.com', '1999-06-23', 'dee.jpg',
         'male', 'user', 'available',
         '2023-12-20 08:38:20.288688', '2023-12-20 08:38:20.288688');
 
