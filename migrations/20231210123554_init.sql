@@ -250,7 +250,7 @@ CREATE TABLE event_staff
     user_id     UUID NOT NULL,
     company_id  UUID NOT NULL,
     event_id    UUID NOT NULL,
-    decided_by  UUID NOT NULL,
+    decided_by  UUID,
     -------------------------------------------------------
     role        event_role NOT NULL,
     status      acceptance_status NOT NULL,
@@ -301,7 +301,7 @@ CREATE TABLE assigned_staff
     task_id     UUID NOT NULL,
     staff_id    UUID NOT NULL,
     -------------------------------------------------------
-    decided_by  UUID NOT NULL,
+    decided_by  UUID,
     -------------------------------------------------------
     status      acceptance_status NOT NULL,
     -------------------------------------------------------
