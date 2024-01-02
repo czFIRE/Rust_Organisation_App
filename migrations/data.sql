@@ -149,7 +149,7 @@ BEGIN
         VALUES
         (user1_id, company0_id, user0_id, 200,
         '2023-02-01', '2025-01-01', '-',
-        'hpp', 'manager',
+        'HPP', 'manager',
         '2023-12-30 15:00:03.4', '2023-12-30 15:00:03.4');
 
     INSERT INTO employment
@@ -160,7 +160,7 @@ BEGIN
         VALUES
         (user3_id, company0_id, NULL, 150,
         '2023-01-01', '2025-01-01', '-',
-        'hpp', 'basic',
+        'HPP', 'basic',
         '2022-12-29 12:38:20.4', '2023-12-10 14:52:20.1');
 
     INSERT INTO event
