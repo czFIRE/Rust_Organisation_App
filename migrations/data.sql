@@ -147,7 +147,7 @@ BEGIN
         type, level,
         created_at, edited_at)
         VALUES
-        (user1_id, company0_id, user0_id, 200,
+        (user1_id, company1_id, user0_id, 200,
         '2023-02-01', '2025-01-01', '-',
         'DPC', 'manager',
         '2023-12-30 15:00:03.4', '2023-12-30 15:00:03.4');
@@ -158,7 +158,7 @@ BEGIN
         type, level,
         created_at, edited_at)
         VALUES
-        (user3_id, company0_id, NULL, 150,
+        (user3_id, company1_id, NULL, 150,
         '2023-01-01', '2025-01-01', '-',
         'DPP', 'basic',
         '2022-12-29 12:38:20.4', '2023-12-10 14:52:20.1');
