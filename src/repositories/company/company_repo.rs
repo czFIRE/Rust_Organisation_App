@@ -4,7 +4,9 @@ use sqlx::postgres::PgPool;
 use std::sync::Arc;
 use uuid::Uuid;
 
-use super::models::{Address, AddressData, CompanyData, CompanyExtended, CompanyFilter, NewCompany, Company};
+use super::models::{
+    Address, AddressData, Company, CompanyData, CompanyExtended, CompanyFilter, NewCompany,
+};
 
 #[derive(Clone)]
 pub struct CompanyRepository {
@@ -28,7 +30,11 @@ impl crate::repositories::repository::DbRepository for CompanyRepository {
 impl CompanyRepository {
     // CRUD
 
-    pub async fn create(&self, data: NewCompany, address: AddressData) -> DbResult<CompanyExtended> {
+    pub async fn create(
+        &self,
+        data: NewCompany,
+        address: AddressData,
+    ) -> DbResult<CompanyExtended> {
         let executor = self.pool.as_ref();
 
         let company = sqlx::query_as!(
@@ -101,10 +107,7 @@ impl CompanyRepository {
     pub async fn read_one_db(&self, company_id: Uuid) -> DbResult<Company> {
         let executor = self.pool.as_ref();
 
-        let company = sqlx::query_as!(
-            Company, 
-            "SELECT * FROM company WHERE id = $1;", 
-            company_id)
+        let company = sqlx::query_as!(Company, "SELECT * FROM company WHERE id = $1;", company_id)
             .fetch_one(executor)
             .await?;
 
@@ -120,7 +123,7 @@ impl CompanyRepository {
         let executor = self.pool.as_ref();
 
         let company = sqlx::query_as!(
-            CompanyExtended, 
+            CompanyExtended,
             "SELECT  
                 company_id,
                 name,
@@ -197,7 +200,12 @@ impl CompanyRepository {
         Ok(companies)
     }
 
-    pub async fn update(&self, company_id: Uuid, data: CompanyData, address: Option<AddressData>) -> DbResult<CompanyExtended> {
+    pub async fn update(
+        &self,
+        company_id: Uuid,
+        data: CompanyData,
+        address: Option<AddressData>,
+    ) -> DbResult<CompanyExtended> {
         let executor = self.pool.as_ref();
 
         let company_check = self.read_one_extended(company_id).await?;
