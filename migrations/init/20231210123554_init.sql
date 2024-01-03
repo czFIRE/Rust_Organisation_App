@@ -137,7 +137,7 @@ CREATE TABLE employment
     CONSTRAINT check_employment_hourly_wage_gte_0
         CHECK (hourly_wage >= 0.0),
     CONSTRAINT check_employment_start_date_lte_end_date
-        CHECK (start_date >= end_date),
+        CHECK (start_date <= end_date),
     CONSTRAINT check_employment_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
@@ -164,7 +164,7 @@ CREATE TABLE event
     CONSTRAINT check_event_name_len
         CHECK (char_length(name) >= 1),
     CONSTRAINT check_event_start_date_lte_end_date
-        CHECK (start_date >= end_date),
+        CHECK (start_date <= end_date),
     CONSTRAINT check_event_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
@@ -209,12 +209,14 @@ CREATE TABLE timesheet
     edited_at    TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at   TIMESTAMP,
     --------------------------------------------------------
-    FOREIGN KEY  (user_id) REFERENCES user_record (id),
-    FOREIGN KEY  (company_id) REFERENCES company (id),
+	FOREIGN KEY (user_id, company_id)
+	    REFERENCES employment (user_id, company_id),
     FOREIGN KEY  (event_id) REFERENCES event (id),
     --------------------------------------------------------
+    CONSTRAINT check_timesheet_is_editable_iff_not_requested_or_rejected
+        CHECK (NOT(is_editable IS TRUE AND status IN ('pending', 'accepted'))),
     CONSTRAINT check_timesheet_start_date_lte_end_date
-        CHECK (start_date >= end_date),
+        CHECK (start_date <= end_date),
     CONSTRAINT check_timesheet_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
@@ -250,7 +252,7 @@ CREATE TABLE event_staff
     user_id     UUID NOT NULL,
     company_id  UUID NOT NULL,
     event_id    UUID NOT NULL,
-    decided_by  UUID NOT NULL,
+    decided_by  UUID,
     -------------------------------------------------------
     role        event_role NOT NULL,
     status      acceptance_status NOT NULL,
@@ -264,6 +266,8 @@ CREATE TABLE event_staff
     FOREIGN KEY (event_id) REFERENCES event (id),
     FOREIGN KEY (decided_by) REFERENCES event_staff (id),
     -------------------------------------------------------
+    CONSTRAINT check_event_staff_decided_by_null_iff_pending
+        CHECK (NOT(decided_by IS NULL AND status != 'pending')),
     CONSTRAINT check_event_staff_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
@@ -301,7 +305,7 @@ CREATE TABLE assigned_staff
     task_id     UUID NOT NULL,
     staff_id    UUID NOT NULL,
     -------------------------------------------------------
-    decided_by  UUID NOT NULL,
+    decided_by  UUID,
     -------------------------------------------------------
     status      acceptance_status NOT NULL,
     -------------------------------------------------------
@@ -314,6 +318,8 @@ CREATE TABLE assigned_staff
     FOREIGN KEY (staff_id) REFERENCES event_staff (id),
     FOREIGN KEY (decided_by) REFERENCES event_staff (id),
     -------------------------------------------------------
+    CONSTRAINT check_assigned_staff_decided_by_null_iff_pending
+        CHECK (NOT(decided_by IS NULL AND status != 'pending')),
     CONSTRAINT check_assigned_staff_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
