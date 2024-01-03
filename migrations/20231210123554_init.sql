@@ -264,6 +264,8 @@ CREATE TABLE event_staff
     FOREIGN KEY (event_id) REFERENCES event (id),
     FOREIGN KEY (decided_by) REFERENCES event_staff (id),
     -------------------------------------------------------
+    CONSTRAINT check_event_staff_decided_by_null_iff_pending
+        CHECK (NOT(decided_by IS NULL AND status != 'pending')),
     CONSTRAINT check_event_staff_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
@@ -314,6 +316,8 @@ CREATE TABLE assigned_staff
     FOREIGN KEY (staff_id) REFERENCES event_staff (id),
     FOREIGN KEY (decided_by) REFERENCES event_staff (id),
     -------------------------------------------------------
+    CONSTRAINT check_assigned_staff_decided_by_null_iff_pending
+        CHECK (NOT(decided_by IS NULL AND status != 'pending')),
     CONSTRAINT check_assigned_staff_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
