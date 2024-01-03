@@ -209,8 +209,8 @@ CREATE TABLE timesheet
     edited_at    TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at   TIMESTAMP,
     --------------------------------------------------------
-    FOREIGN KEY  (user_id) REFERENCES user_record (id),
-    FOREIGN KEY  (company_id) REFERENCES company (id),
+	FOREIGN KEY (user_id, company_id)
+	    REFERENCES employment (user_id, company_id),
     FOREIGN KEY  (event_id) REFERENCES event (id),
     --------------------------------------------------------
     CONSTRAINT check_timesheet_is_editable_iff_not_requested_or_rejected
