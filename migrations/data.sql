@@ -55,7 +55,7 @@ BEGIN
         (company0_id, 'AMD', 'Advanced Micro Devices, Inc.',
         'https://amd.com', 'crn_amd', 'vatin_amd',
         '+1 408-749-4000', 'info@amd.com', 'amd.png',
-        '2023-12-22 08:38:20.288688', '2023-12-22 08:38:20.288688');
+        '2023-12-22 08:38', '2023-12-22 08:38');
 
     INSERT INTO company
         (id, name, description,
@@ -66,7 +66,7 @@ BEGIN
         (company1_id, 'ReportLab', 'ReportLab Europe Ltd.',
         'https://reportlab.com', 'crn_reportlab', 'vatin_reportlab',
         '+44 20 8191 7277', 'support@reportlab.com', 'reportlab.png',
-        '2023-12-24 08:38:20.288688', '2023-12-24 08:38:20.288688');
+        '2023-12-24 08:38', '2023-12-24 08:38');
 
     INSERT INTO company
         (id, name, description,
@@ -77,7 +77,7 @@ BEGIN
         (company2_id, 'Prusa Research', 'Prusa Research a.s.',
         'https://prusa3d.com', 'CRN_prusa', 'CZ06649114',
         '123 456 789', 'info@prusa3d.com', 'prusa_design.png',
-        '2023-12-24 15:55:20.288688', '2023-12-24 19:38:20.288688');
+        '2023-12-24 15:55', '2023-12-24 19:38');
 
 --------------------------------------------------------------------------------
 
@@ -113,7 +113,7 @@ BEGIN
         (user0_id, 'Dave Null', 'dave@null.com',
         '1996-06-23', 'dave.jpg',
         'male', 'admin', 'available',
-        '2023-12-22 08:38:20.288688', '2023-12-22 08:38:20.288688');
+        '2023-12-22 08:38', '2023-12-22 08:38');
 
     INSERT INTO user_record
         (id, name, email,
@@ -124,7 +124,7 @@ BEGIN
         (user1_id, 'Tana Smith', 't.smith@seznam.cz',
         '1994-02-10', 'tana.jpg',
         'female', 'user', 'available',
-        '2023-12-26 07:33:20.288688', '2023-12-26 07:33:20.288688');
+        '2023-12-26 07:33', '2023-12-26 07:33');
 
     INSERT INTO user_record
         (id, name, email,
@@ -135,7 +135,7 @@ BEGIN
         (user2_id, 'Anna Smeth', 'a.smeth@sezam.cz',
         '1998-02-10', 'anna.jpg',
         'female', 'user', 'available',
-        '2023-12-27 07:33:20.288688', '2023-12-27 07:33:20.288688');
+        '2023-12-27 07:33', '2023-12-27 07:33');
 
     INSERT INTO user_record
         (id, name, email,
@@ -146,7 +146,7 @@ BEGIN
         (user3_id, 'Dee Scord', 'dee@lmao.com',
         '1999-06-23', 'dee.jpg',
         'male', 'user', 'available',
-        '2023-12-20 08:38:20.288688', '2023-12-20 08:38:20.288688');
+        '2023-12-20 08:38', '2023-12-20 08:38');
 
     INSERT INTO user_record
         (id, name, email,
@@ -179,7 +179,7 @@ BEGIN
         (user0_id, company0_id, NULL, 300,
         '2023-01-01', '2025-01-01', '-',
         'HPP', 'company_administrator',
-        '2022-12-29 12:38:20.4', '2023-12-10 14:52:20.1');
+        '2022-12-29 12:38', '2023-12-10 14:52');
 
     INSERT INTO employment
         (user_id, company_id, manager_id, hourly_wage,
@@ -190,7 +190,7 @@ BEGIN
         (user1_id, company1_id, user0_id, 200,
         '2023-02-01', '2025-01-01', '-',
         'DPC', 'manager',
-        '2023-12-30 15:00:03.4', '2023-12-30 15:00:03.4');
+        '2023-12-30 15:00', '2023-12-30 15:00');
 
     INSERT INTO employment
         (user_id, company_id, manager_id, hourly_wage,
@@ -212,7 +212,7 @@ BEGIN
         (user3_id, company2_id, NULL, 150,
         '2023-01-01', '2025-01-01', '-',
         'DPP', 'basic',
-        '2022-12-29 12:38:20.4', '2023-12-10 14:52:20.1');
+        '2022-12-29 12:38', '2023-12-10 14:52');
 
     INSERT INTO employment
         (user_id, company_id, manager_id, hourly_wage,
@@ -223,7 +223,7 @@ BEGIN
         (user5_id, company1_id, NULL, 135,
         '2024-01-01', '2025-01-01', '-',
         'DPC', 'basic',
-        '2023-12-30 11:38:20.4', '2023-12-31 14:52');
+        '2023-12-30 11:38', '2023-12-31 14:52');
 
 --------------------------------------------------------------------------------
 
@@ -236,7 +236,7 @@ BEGIN
         (event0_id, 'Woodstock', 'A legendary music festival.',
         'https://woodstock.com', true,
         '1969-08-15', '1969-08-18', 'woodstock.png', 
-        '2023-05-03 10:38:20.4', '2023-12-01 14:30:20.1');
+        '2023-05-03 10:38', '2023-12-01 14:30');
 
     INSERT INTO event
         (id, name, description,
@@ -256,28 +256,28 @@ BEGIN
         created_at, edited_at)
         VALUES
         (company0_id, event0_id, 'organizer',
-        '2023-05-03 10:38:20.4', '2023-12-01 14:30:20.1');
+        '2023-05-03 10:38', '2023-12-01 14:30');
 
     INSERT INTO associated_company
         (company_id, event_id, type,
         created_at, edited_at)
         VALUES
         (company0_id, event1_id, 'media',
-        '2023-12-14 08:38:20.4', '2023-12-14 08:38:20.4');
+        '2023-12-14 08:38', '2023-12-14 08:38');
 
     INSERT INTO associated_company
         (company_id, event_id, type,
         created_at, edited_at)
         VALUES
         (company1_id, event1_id, 'other',
-        '2023-12-12 07:38:20.4', '2023-12-12 07:38:20.4');
+        '2023-12-12 07:38', '2023-12-12 07:38');
 
     INSERT INTO associated_company
         (company_id, event_id, type,
         created_at, edited_at)
         VALUES
         (company2_id, event1_id, 'sponsor',
-        '2023-12-12 12:38:20.4', '2023-12-12 12:38:20.4');
+        '2023-12-12 12:38', '2023-12-12 12:38');
 
 --------------------------------------------------------------------------------
 
@@ -290,7 +290,7 @@ BEGIN
         (timesheet0_id, user0_id, company0_id, event0_id,
         '1969-08-16', '1969-08-17', 22,
         true, 'not_requested', NULL,
-        '1969-08-16 18:26:0.0', '1969-08-17 20:00:0.0');
+        '1969-08-16 18:26', '1969-08-17 20:00');
 
     INSERT INTO timesheet
         (id, user_id, company_id, event_id,
@@ -312,7 +312,7 @@ BEGIN
         (timesheet2_id, user3_id, company1_id, event1_id,
         '2024-01-01', '2024-01-02', 15,
         false, 'pending', NULL,
-        '2024-01-03 18:26:0.0', '2024-01-03 18:29');
+        '2024-01-03 18:26', '2024-01-03 18:29');
 
 --------------------------------------------------------------------------------
 
@@ -321,21 +321,21 @@ BEGIN
         created_at, edited_at)
         VALUES
         (timesheet0_id, '1969-08-15', 12, '', true,
-        '1969-08-16 18:28:5.4', '1969-08-17 08:22:32.4');
+        '1969-08-16 18:28', '1969-08-17 08:22');
 
     INSERT INTO work_day
         (timesheet_id, date, total_hours, comment, is_editable,
         created_at, edited_at)
         VALUES
         (timesheet0_id, '1969-08-16', 10, '', true,
-        '1969-08-17 20:00:0.0', '1969-08-17 20:00:0.0');
+        '1969-08-17 20:00', '1969-08-17 20:00');
 
     INSERT INTO work_day
         (timesheet_id, date, total_hours, comment, is_editable,
         created_at, edited_at)
         VALUES
         (timesheet1_id, '1969-08-14', 10, '', false,
-        '1969-08-17 19:58:0.0', '1969-08-17 19:59:0.0');
+        '1969-08-17 19:58', '1969-08-17 19:59');
 
     INSERT INTO work_day
         (timesheet_id, date, total_hours, comment, is_editable,
@@ -356,7 +356,7 @@ BEGIN
         created_at, edited_at)
         VALUES
         (timesheet2_id, '2024-01-01', 8, '', false,
-        '2024-01-01 22:33:5.4', '2024-01-01 22:33:5.4');
+        '2024-01-01 22:33', '2024-01-01 22:33');
 
     INSERT INTO work_day
         (timesheet_id, date, total_hours, comment, is_editable,
@@ -374,7 +374,7 @@ BEGIN
         VALUES
         (event_staff0_id, user0_id, company0_id, event0_id,
         event_staff0_id, 'organizer', 'accepted',
-        '2023-05-03 10:40:20.1', '2023-05-04 08:11:20.4');
+        '2023-05-03 10:40', '2023-05-04 08:11');
 
     INSERT INTO event_staff
         (id, user_id, company_id, event_id,
@@ -383,7 +383,7 @@ BEGIN
         VALUES
         (event_staff1_id, user1_id, company1_id, event0_id,
         event_staff0_id, 'staff', 'accepted',
-        '2023-05-03 10:40:20.1', '2023-05-04 08:11:20.4');
+        '2023-05-03 10:40', '2023-05-04 08:11');
 
     INSERT INTO event_staff
         (id, user_id, company_id, event_id,
@@ -392,7 +392,7 @@ BEGIN
         VALUES
         (event_staff2_id, user2_id, company1_id, event1_id,
         event_staff2_id, 'organizer', 'accepted',
-        '2023-06-01 11:40:20.1', '2023-06-01 11:40:20.1');
+        '2023-06-01 11:40', '2023-06-01 11:40');
 
     INSERT INTO event_staff
         (id, user_id, company_id, event_id,
@@ -401,7 +401,7 @@ BEGIN
         VALUES
         (event_staff3_id, user3_id, company2_id, event1_id,
         event_staff2_id, 'staff', 'pending',
-        '2023-06-02 11:45:20.1', '2023-06-03 19:41:20.1');
+        '2023-06-02 11:45', '2023-06-03 19:41');
 
     INSERT INTO event_staff
         (id, user_id, company_id, event_id,
@@ -410,7 +410,7 @@ BEGIN
         VALUES
         (event_staff4_id, user5_id, company1_id, event1_id,
         event_staff2_id, 'staff', 'accepted',
-        '2024-01-01 11:45:20.1', '2024-01-01 11:45:20.1');
+        '2024-01-01 11:45', '2024-01-01 11:45');
 
 --------------------------------------------------------------------------------
 
@@ -423,7 +423,7 @@ BEGIN
         (task0_id, event0_id, event_staff0_id, 'Prepare stage for Joe Cocker',
         NULL,
         NULL, 'medium', true,
-        '2023-05-03 10:42:10.4', '2023-05-03 10:42:10.4');
+        '2023-05-03 10:42', '2023-05-03 10:42');
 
     INSERT INTO task
         (id, event_id, creator_id, title,
@@ -443,21 +443,21 @@ BEGIN
         created_at, edited_at)
         VALUES
         (task0_id, event_staff0_id, event_staff0_id, 'accepted',
-        '2023-05-03 11:45:10.4', '2023-05-03 11:45:10.4');
+        '2023-05-03 11:45', '2023-05-03 11:45');
 
     INSERT INTO assigned_staff
         (task_id, staff_id, decided_by, status,
         created_at, edited_at)
         VALUES
         (task1_id, event_staff2_id, event_staff2_id, 'accepted',
-        '2023-05-03 11:45:10.4', '2023-05-03 11:45:10.4');
+        '2023-05-03 11:45', '2023-05-03 11:45');
 
     INSERT INTO assigned_staff
         (task_id, staff_id, decided_by, status,
         created_at, edited_at)
         VALUES
         (task1_id, event_staff4_id, NULL, 'pending',
-        '2024-01-01 11:45:20.1', '2024-01-01 11:45:20.1');
+        '2024-01-01 11:45', '2024-01-01 11:45');
 
 --------------------------------------------------------------------------------
 
@@ -468,7 +468,7 @@ BEGIN
         VALUES
         (comment0_id, NULL, task0_id, user0_id,
         'Joe will need 3 guitars on stage.',
-        '2023-05-03 11:55:10.4', '2023-05-03 11:55:10.4');
+        '2023-05-03 11:55', '2023-05-03 11:55');
 
     INSERT INTO comment
         (id, event_id, task_id, author_id,
@@ -476,7 +476,7 @@ BEGIN
         VALUES
         (comment1_id, event0_id, NULL, user0_id,
         'Mayyyn, this event is amazing!',
-        '2023-05-03 10:00:01.5', '2023-05-03 10:05:16.1');
+        '2023-05-03 10:00', '2023-05-03 10:05');
 
     INSERT INTO comment
         (id, event_id, task_id, author_id,
@@ -484,7 +484,7 @@ BEGIN
         VALUES
         (comment2_id, event1_id, NULL, user2_id,
         'This gets organized for the 3rd time ;)',
-        '2023-05-03 10:00:01.5', '2023-05-03 10:05:16.1');
+        '2023-05-03 10:00', '2023-05-03 10:05');
 
 --------------------------------------------------------------------------------
 
