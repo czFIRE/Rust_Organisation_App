@@ -1146,7 +1146,6 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    //ToDo: Insert an event comment into the DB :|
     #[actix_web::test]
     async fn get_all_event_comments() {
         let app =
