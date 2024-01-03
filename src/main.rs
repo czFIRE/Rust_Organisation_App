@@ -1,22 +1,23 @@
-use anyhow::Result;
+mod common;
+mod handlers;
+mod models;
+mod repositories;
+mod templates;
+
+use actix_web::{App, HttpServer};
 use dotenv::dotenv;
-use sqlx::migrate::{MigrateDatabase, Migrator};
-use sqlx::Postgres;
-use std::path::Path;
+use organization::initialize::configure_app;
+use std::io::Result;
+
+const HOST: &str = "0.0.0.0:8000";
 
 #[tokio::main]
 async fn main() -> Result<()> {
     dotenv().ok();
-    let database_url = dotenv::var("DATABASE_URL")?;
 
-    Postgres::drop_database(&database_url).await?;
-    Postgres::create_database(&database_url).await?;
-
-    let pool = sqlx::PgPool::connect(&database_url).await?;
-
-    let migrator = Migrator::new(Path::new("./migrations")).await?;
-    migrator.run(&pool).await?;
-    println!("All migrations were successfully applied \\o/");
-
-    Ok(())
+    println!("Starting server on {HOST}");
+    HttpServer::new(move || App::new().configure(configure_app))
+        .bind(HOST)?
+        .run()
+        .await
 }

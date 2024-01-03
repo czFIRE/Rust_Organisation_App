@@ -1,1 +1,12 @@
-// For allowing handler includes to the rest of the project.
+pub mod assigned_staff;
+pub mod associated_company;
+pub mod comment;
+pub mod common;
+pub mod company;
+pub mod employment;
+pub mod event;
+pub mod event_staff;
+pub mod event_task;
+pub mod index;
+pub mod timesheet;
+pub mod user;
