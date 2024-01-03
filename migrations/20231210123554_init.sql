@@ -213,6 +213,8 @@ CREATE TABLE timesheet
     FOREIGN KEY  (company_id) REFERENCES company (id),
     FOREIGN KEY  (event_id) REFERENCES event (id),
     --------------------------------------------------------
+    CONSTRAINT check_timesheet_is_editable_iff_not_requested_or_rejected
+        CHECK (NOT(is_editable IS TRUE AND status IN ('pending', 'accepted'))),
     CONSTRAINT check_timesheet_start_date_lte_end_date
         CHECK (start_date <= end_date),
     CONSTRAINT check_timesheet_created_at_lte_edited_at
