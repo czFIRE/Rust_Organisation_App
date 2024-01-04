@@ -42,7 +42,7 @@ pub struct WorkdayUpdateData {
     pub date: NaiveDate,
     pub total_hours: Option<f32>,
     pub comment: Option<String>,
-    pub is_editable: Option<bool>
+    pub is_editable: Option<bool>,
 }
 
 #[derive(Debug, Clone, FromRow)]
@@ -53,7 +53,7 @@ pub struct TimesheetUpdateData {
     pub is_editable: Option<bool>,
     pub status: Option<ApprovalStatus>,
     pub manager_note: Option<String>,
-    pub workdays: Option<Vec<WorkdayUpdateData>>
+    pub workdays: Option<Vec<WorkdayUpdateData>>,
 }
 
 #[derive(Debug, FromRow)]
@@ -70,7 +70,7 @@ pub struct Workday {
     pub comment: Option<String>,
     pub is_editable: bool,
     pub created_at: NaiveDate,
-    pub edited_at: NaiveDate
+    pub edited_at: NaiveDate,
 }
 
 #[allow(dead_code)]

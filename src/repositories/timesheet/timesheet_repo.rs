@@ -4,9 +4,9 @@ use crate::repositories::timesheet::models::{
     TimesheetCreateData, TimesheetDb, TimesheetReadAllData, TimesheetUpdateData,
     TimesheetWithWorkdays, Workday,
 };
-use chrono::{NaiveDate, Duration};
-use sqlx::{Transaction, Postgres};
+use chrono::{Duration, NaiveDate};
 use sqlx::postgres::PgPool;
+use sqlx::{Postgres, Transaction};
 use std::ops::DerefMut;
 use std::sync::Arc;
 use uuid::Uuid;
@@ -22,8 +22,14 @@ impl TimesheetRepository {
     }
 
     // CRUD
-    async fn create_workdays(&self, mut tx: Transaction<'_, Postgres>, timesheet_id: Uuid, start_date: NaiveDate, end_date: NaiveDate) -> DbResult<Vec<Workday>> {
-        let mut workdays = vec!();
+    async fn create_workdays(
+        &self,
+        mut tx: Transaction<'_, Postgres>,
+        timesheet_id: Uuid,
+        start_date: NaiveDate,
+        end_date: NaiveDate,
+    ) -> DbResult<Vec<Workday>> {
+        let mut workdays = vec![];
         let mut workdate = start_date;
         while workdate <= end_date {
             let workday = sqlx::query_as!(
@@ -57,8 +63,12 @@ impl TimesheetRepository {
         // let executor = self.pool.as_ref();
         let mut tx = self.pool.begin().await?;
 
-        if data.manager_note.is_some() && data.manager_note.clone().expect("Should be some").len() == 0 {
-            return Err(sqlx::Error::ColumnNotFound("Manager note is some and empty.".to_string())); // ToDo: Rewrite for a proper error. 
+        if data.manager_note.is_some()
+            && data.manager_note.clone().expect("Should be some").len() == 0
+        {
+            return Err(sqlx::Error::ColumnNotFound(
+                "Manager note is some and empty.".to_string(),
+            )); // ToDo: Rewrite for a proper error.
         }
 
         let timesheet = sqlx::query_as!(
@@ -81,11 +91,18 @@ impl TimesheetRepository {
         .fetch_one(tx.deref_mut())
         .await?;
 
-        let workdays = Self::create_workdays(&self, tx, timesheet.id, timesheet.start_date, timesheet.end_date).await?;
+        let workdays = Self::create_workdays(
+            &self,
+            tx,
+            timesheet.id,
+            timesheet.start_date,
+            timesheet.end_date,
+        )
+        .await?;
 
         let result = TimesheetWithWorkdays {
             timesheet,
-            workdays
+            workdays,
         };
 
         Ok(result)
@@ -165,13 +182,13 @@ impl TimesheetRepository {
     }
 
     fn _is_data_empty(data: TimesheetUpdateData) -> bool {
-        data.start_date.is_none() 
-        && data.end_date.is_none()
-        && data.total_hours.is_none()
-        && data.is_editable.is_none()
-        && data.status.is_none()
-        && data.manager_note.is_none()
-        && data.workdays.is_none()
+        data.start_date.is_none()
+            && data.end_date.is_none()
+            && data.total_hours.is_none()
+            && data.is_editable.is_none()
+            && data.status.is_none()
+            && data.manager_note.is_none()
+            && data.workdays.is_none()
     }
 
     pub async fn _update(
@@ -182,7 +199,9 @@ impl TimesheetRepository {
         let mut tx = self.pool.begin().await?;
 
         if Self::_is_data_empty(data.clone()) {
-            return Err(sqlx::Error::TypeNotFound { type_name: "User error.".to_string() });
+            return Err(sqlx::Error::TypeNotFound {
+                type_name: "User error.".to_string(),
+            });
         }
 
         let timesheet = sqlx::query_as!(
@@ -249,11 +268,11 @@ impl TimesheetRepository {
                 .await?;
             }
         }
-        
+
         /* You may think this is redundant, BUT
-        *  since not all workdays may be edited,
-        *  it's better to just retrieve all of them after the change.
-        */
+         *  since not all workdays may be edited,
+         *  it's better to just retrieve all of them after the change.
+         */
         let workdays = sqlx::query_as!(
             Workday,
             r#"
@@ -273,7 +292,7 @@ impl TimesheetRepository {
 
         let result = TimesheetWithWorkdays {
             timesheet,
-            workdays
+            workdays,
         };
 
         Ok(result)
@@ -319,7 +338,7 @@ impl TimesheetRepository {
              SET edited_at = NOW(),
                  deleted_at = NOW()
              WHERE timesheet_id = $1;",
-             timesheet_id
+            timesheet_id
         )
         .execute(executor)
         .await?;
@@ -376,7 +395,7 @@ impl TimesheetRepository {
 
         let edited_data = TimesheetWithWorkdays {
             timesheet,
-            workdays
+            workdays,
         };
 
         Ok(edited_data)
