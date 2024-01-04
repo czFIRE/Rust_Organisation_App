@@ -134,7 +134,6 @@ BEGIN
 		'hpp', 'basic',
 		'2022-12-29 12:38:20.4', '2023-12-10 14:52:20.1');
     
-
     INSERT INTO event
         (id, name, description,
         website, accepts_staff,

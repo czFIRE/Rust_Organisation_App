@@ -1,3 +1,7 @@
-pub mod common;
+// This is here for testing purposes!!!
+mod common;
+pub mod handlers;
+pub mod initialize;
 pub mod models;
-pub mod repositories;
+mod repositories;
+pub mod templates;

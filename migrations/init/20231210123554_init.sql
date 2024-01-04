@@ -201,10 +201,12 @@ CREATE TABLE timesheet
     edited_at    TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at   TIMESTAMP,
     --------------------------------------------------------
-    FOREIGN KEY  (user_id) REFERENCES user_record (id),
-    FOREIGN KEY  (company_id) REFERENCES company (id),
+	FOREIGN KEY (user_id, company_id)
+	    REFERENCES employment (user_id, company_id),
     FOREIGN KEY  (event_id) REFERENCES event (id),
     --------------------------------------------------------
+    CONSTRAINT check_timesheet_is_editable_iff_not_requested_or_rejected
+        CHECK (NOT(is_editable IS TRUE AND status IN ('pending', 'accepted'))),
     CONSTRAINT check_total_hours_lte_744
         CHECK (total_hours <= 744.0),
     -- max hours per month: 24.0 * 31.0 = 744.0
@@ -262,6 +264,8 @@ CREATE TABLE event_staff
     FOREIGN KEY (decided_by) REFERENCES event_staff (id),
     FOREIGN KEY (event_id) REFERENCES event (id),
     -------------------------------------------------------
+    CONSTRAINT check_event_staff_decided_by_null_iff_pending
+        CHECK (NOT(decided_by IS NULL AND status != 'pending')),
     CONSTRAINT check_event_staff_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
@@ -313,6 +317,8 @@ CREATE TABLE assigned_staff
     FOREIGN KEY (staff_id) REFERENCES event_staff (id),
     FOREIGN KEY (decided_by) REFERENCES event_staff (id),
     -------------------------------------------------------
+    CONSTRAINT check_assigned_staff_decided_by_null_iff_pending
+        CHECK (NOT(decided_by IS NULL AND status != 'pending')),
     CONSTRAINT check_assigned_staff_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );

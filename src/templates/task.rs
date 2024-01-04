@@ -1,5 +1,6 @@
 use askama::Template;
 use chrono::{NaiveDate, NaiveDateTime};
+use serde::Deserialize;
 use sqlx::types::uuid;
 use uuid::Uuid;
 
@@ -7,7 +8,7 @@ use crate::models::TaskPriority;
 
 use super::user::UserLiteTemplate;
 
-#[derive(Template)]
+#[derive(Template, Deserialize)]
 #[template(path = "event/task/task.html")]
 pub struct TaskTemplate {
     pub id: Uuid,
@@ -20,4 +21,10 @@ pub struct TaskTemplate {
     pub accepts_staff: bool,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
+}
+
+#[derive(Template, Deserialize)]
+#[template(path = "event/task/tasks.html")]
+pub struct TasksTemplate {
+    pub tasks: Vec<TaskTemplate>,
 }
