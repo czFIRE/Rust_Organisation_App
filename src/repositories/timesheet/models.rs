@@ -36,7 +36,16 @@ pub struct TimesheetCreateData {
     pub event_id: Uuid,
 }
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, Clone, FromRow)]
+pub struct WorkdayUpdateData {
+    pub timesheet_id: Uuid,
+    pub date: NaiveDate,
+    pub total_hours: Option<f32>,
+    pub comment: Option<String>,
+    pub is_editable: Option<bool>
+}
+
+#[derive(Debug, Clone, FromRow)]
 pub struct TimesheetUpdateData {
     pub start_date: Option<NaiveDate>,
     pub end_date: Option<NaiveDate>,
@@ -44,10 +53,7 @@ pub struct TimesheetUpdateData {
     pub is_editable: Option<bool>,
     pub status: Option<ApprovalStatus>,
     pub manager_note: Option<String>,
-    // foreign keys
-    pub user_id: Option<Uuid>,
-    pub company_id: Option<Uuid>,
-    pub event_id: Option<Uuid>,
+    pub workdays: Option<Vec<WorkdayUpdateData>>
 }
 
 #[derive(Debug, FromRow)]
@@ -58,10 +64,13 @@ pub struct TimesheetReadAllData {
 
 #[derive(Debug, FromRow)]
 pub struct Workday {
+    pub timesheet_id: Uuid,
     pub date: NaiveDate,
     pub total_hours: f32,
     pub comment: Option<String>,
     pub is_editable: bool,
+    pub created_at: NaiveDate,
+    pub edited_at: NaiveDate
 }
 
 #[allow(dead_code)]
