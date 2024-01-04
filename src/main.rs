@@ -8,6 +8,7 @@ use crate::repositories::event::event_repo::EventRepository;
 use crate::repositories::event_staff::event_staff_repo::StaffRepository;
 use crate::repositories::repository::DbRepository;
 use crate::repositories::task::task_repo::TaskRepository;
+use crate::repositories::timesheet::timesheet_repo::TimesheetRepository;
 use crate::repositories::user::user_repo::UserRepository;
 use actix_web::{web, App, HttpServer};
 use dotenv::dotenv;
@@ -42,6 +43,7 @@ async fn main() -> Result<()> {
     let comment_repo = CommentRepository::new(arc_pool.clone());
     let assigned_staff_repo = AssignedStaffRepository::new(arc_pool.clone());
     let associated_company_repo = AssociatedCompanyRepository::new(arc_pool.clone());
+    let timesheet_repo = TimesheetRepository::new(arc_pool.clone());
 
     println!("API is running on http://{}/api", HOST);
 
@@ -56,6 +58,7 @@ async fn main() -> Result<()> {
             .app_data(web::Data::new(comment_repo.clone()))
             .app_data(web::Data::new(assigned_staff_repo.clone()))
             .app_data(web::Data::new(associated_company_repo.clone()))
+            .app_data(web::Data::new(timesheet_repo.clone()))
             .service(index)
     })
     .bind(HOST)?

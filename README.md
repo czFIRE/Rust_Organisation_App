@@ -4,7 +4,10 @@ Team project: PV281 Programming in Rust (Autumn 2023)
 
 ## Usage
 
-TODO
+```bash
+cp .env.docker .env
+docker compose up --build
+```
 
 ## Assignment
 
