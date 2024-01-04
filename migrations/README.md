@@ -3,7 +3,7 @@
 ## psql
 
 The database can be controled using a CLI utility *psql*:
-
+```
     # export variables from the config file into the shell.
     source ../.env
 
@@ -12,4 +12,4 @@ The database can be controled using a CLI utility *psql*:
 
     # execute the SQL script
     \i data/data.sql
-
+```
