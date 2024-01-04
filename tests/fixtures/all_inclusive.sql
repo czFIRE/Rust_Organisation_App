@@ -118,7 +118,7 @@ BEGIN
 		VALUES
 		(user0_id, company0_id, NULL, 300,
 		'2023-01-01', '2025-01-01', '-',
-		'HPP', 'company_administrator',
+		'hpp', 'company_administrator',
 		'2022-12-29 12:38:20.4', '2023-12-10 14:52:20.1');
 	
 	INSERT INTO event
