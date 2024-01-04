@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO company (name, description, phone, email, avatar_url, website, crn, vatin) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;",
+  "query": " SELECT * FROM event WHERE id = $1;",
   "describe": {
     "columns": [
       {
@@ -25,55 +25,43 @@
       },
       {
         "ordinal": 4,
-        "name": "crn",
-        "type_info": "Varchar"
+        "name": "accepts_staff",
+        "type_info": "Bool"
       },
       {
         "ordinal": 5,
-        "name": "vatin",
-        "type_info": "Varchar"
+        "name": "start_date",
+        "type_info": "Date"
       },
       {
         "ordinal": 6,
-        "name": "phone",
-        "type_info": "Varchar"
+        "name": "end_date",
+        "type_info": "Date"
       },
       {
         "ordinal": 7,
-        "name": "email",
-        "type_info": "Varchar"
-      },
-      {
-        "ordinal": 8,
         "name": "avatar_url",
         "type_info": "Varchar"
       },
       {
-        "ordinal": 9,
+        "ordinal": 8,
         "name": "created_at",
         "type_info": "Timestamp"
       },
       {
-        "ordinal": 10,
+        "ordinal": 9,
         "name": "edited_at",
         "type_info": "Timestamp"
       },
       {
-        "ordinal": 11,
+        "ordinal": 10,
         "name": "deleted_at",
         "type_info": "Timestamp"
       }
     ],
     "parameters": {
       "Left": [
-        "Varchar",
-        "Text",
-        "Varchar",
-        "Varchar",
-        "Varchar",
-        "Varchar",
-        "Varchar",
-        "Varchar"
+        "Uuid"
       ]
     },
     "nullable": [
@@ -84,12 +72,11 @@
       false,
       false,
       false,
-      false,
       true,
       false,
       false,
       true
     ]
   },
-  "hash": "b6b2263f6b5d951c76bdfbabb2acc58966ca4727ced5c542b5b73f80c8f5316a"
+  "hash": "ddf0299cc5bb665df9b5bcc756e66978b20ab6fbf2b82ae7cb7f9436ab029f7e"
 }

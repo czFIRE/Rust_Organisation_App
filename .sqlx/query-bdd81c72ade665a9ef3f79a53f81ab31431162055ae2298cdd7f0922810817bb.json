@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE employment\n            SET deleted_at = NOW(), edited_at = NOW()\n            WHERE user_id = $1 AND company_id = $2\n            AND deleted_at IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "bdd81c72ade665a9ef3f79a53f81ab31431162055ae2298cdd7f0922810817bb"
+}

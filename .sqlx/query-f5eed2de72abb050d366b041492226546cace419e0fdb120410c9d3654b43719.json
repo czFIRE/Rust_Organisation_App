@@ -1,0 +1,138 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO user_record (name, email, birth, gender, role) \n            VALUES \n                ($1, $2, $3, $4, $5) \n            RETURNING id, \n                name, \n                email, \n                birth, \n                avatar_url, \n                gender AS \"gender!: Gender\", \n                role AS \"role!: UserRole\", \n                status AS \"status!: UserStatus\", \n                created_at, \n                edited_at, \n                deleted_at\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "email",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "birth",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 4,
+        "name": "avatar_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "gender!: Gender",
+        "type_info": {
+          "Custom": {
+            "name": "gender",
+            "kind": {
+              "Enum": [
+                "male",
+                "female",
+                "other"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "role!: UserRole",
+        "type_info": {
+          "Custom": {
+            "name": "role",
+            "kind": {
+              "Enum": [
+                "user",
+                "admin"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "status!: UserStatus",
+        "type_info": {
+          "Custom": {
+            "name": "status",
+            "kind": {
+              "Enum": [
+                "available",
+                "unavailable"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 9,
+        "name": "edited_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 10,
+        "name": "deleted_at",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Date",
+        {
+          "Custom": {
+            "name": "gender",
+            "kind": {
+              "Enum": [
+                "male",
+                "female",
+                "other"
+              ]
+            }
+          }
+        },
+        {
+          "Custom": {
+            "name": "role",
+            "kind": {
+              "Enum": [
+                "user",
+                "admin"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "f5eed2de72abb050d366b041492226546cace419e0fdb120410c9d3654b43719"
+}

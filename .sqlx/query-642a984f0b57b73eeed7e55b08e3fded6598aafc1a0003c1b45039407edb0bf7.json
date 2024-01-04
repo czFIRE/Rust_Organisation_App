@@ -1,0 +1,281 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT \n                employment.user_id AS employment_user_id, \n                employment.company_id AS employment_company_id, \n                employment.manager_id AS employment_manager_id, \n                employment.hourly_wage AS employment_hourly_wage, \n                employment.start_date AS employment_start_date, \n                employment.end_date AS employment_end_date, \n                employment.description AS employment_description, \n                employment.type AS \"employment_type!: EmployeeContract\", \n                employment.level AS \"employment_level!: EmployeeLevel\", \n                employment.created_at AS employment_created_at, \n                employment.edited_at AS employment_edited_at, \n                employment.deleted_at AS employment_deleted_at, \n                user_record.id AS \"manager_id?\", \n                user_record.name AS \"manager_name?\", \n                user_record.email AS \"manager_email?\", \n                user_record.birth AS \"manager_birth?\", \n                user_record.avatar_url AS \"manager_avatar_url?\", \n                user_record.gender AS \"manager_gender?: Gender\", \n                user_record.role AS \"manager_role?: UserRole\", \n                user_record.status AS \"manager_status?: UserStatus\", \n                user_record.created_at AS \"manager_created_at?\", \n                user_record.edited_at AS \"manager_edited_at?\", \n                user_record.deleted_at AS \"manager_deleted_at?\",\n                company.id AS company_id, \n                company.name AS company_name, \n                company.description AS company_description, \n                company.phone AS company_phone, \n                company.email AS company_email, \n                company.avatar_url AS company_avatar_url, \n                company.website AS company_website, \n                company.crn AS company_crn, \n                company.vatin AS company_vatin, \n                company.created_at AS company_created_at, \n                company.edited_at AS company_edited_at, \n                company.deleted_at AS company_deleted_at \n            FROM \n                employment \n                INNER JOIN company ON employment.company_id = company.id \n                LEFT OUTER JOIN user_record ON employment.manager_id = user_record.id \n            WHERE \n                employment.company_id = $1 \n            LIMIT $2 OFFSET $3          \n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "employment_user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "employment_company_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "employment_manager_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "employment_hourly_wage",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 4,
+        "name": "employment_start_date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 5,
+        "name": "employment_end_date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 6,
+        "name": "employment_description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "employment_type!: EmployeeContract",
+        "type_info": {
+          "Custom": {
+            "name": "employee_contract",
+            "kind": {
+              "Enum": [
+                "dpp",
+                "dpc",
+                "hpp"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "employment_level!: EmployeeLevel",
+        "type_info": {
+          "Custom": {
+            "name": "employee_level",
+            "kind": {
+              "Enum": [
+                "basic",
+                "manager",
+                "company_administrator"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "employment_created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 10,
+        "name": "employment_edited_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 11,
+        "name": "employment_deleted_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 12,
+        "name": "manager_id?",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 13,
+        "name": "manager_name?",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 14,
+        "name": "manager_email?",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 15,
+        "name": "manager_birth?",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 16,
+        "name": "manager_avatar_url?",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 17,
+        "name": "manager_gender?: Gender",
+        "type_info": {
+          "Custom": {
+            "name": "gender",
+            "kind": {
+              "Enum": [
+                "male",
+                "female",
+                "other"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "manager_role?: UserRole",
+        "type_info": {
+          "Custom": {
+            "name": "role",
+            "kind": {
+              "Enum": [
+                "user",
+                "admin"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "manager_status?: UserStatus",
+        "type_info": {
+          "Custom": {
+            "name": "status",
+            "kind": {
+              "Enum": [
+                "available",
+                "unavailable"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "manager_created_at?",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 21,
+        "name": "manager_edited_at?",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 22,
+        "name": "manager_deleted_at?",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 23,
+        "name": "company_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 24,
+        "name": "company_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 25,
+        "name": "company_description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 26,
+        "name": "company_phone",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 27,
+        "name": "company_email",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 28,
+        "name": "company_avatar_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 29,
+        "name": "company_website",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 30,
+        "name": "company_crn",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 31,
+        "name": "company_vatin",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 32,
+        "name": "company_created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 33,
+        "name": "company_edited_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 34,
+        "name": "company_deleted_at",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "642a984f0b57b73eeed7e55b08e3fded6598aafc1a0003c1b45039407edb0bf7"
+}

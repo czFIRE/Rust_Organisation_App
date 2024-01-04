@@ -3287,7 +3287,7 @@ components:
           example: e40c9874-c743-48e2-9295-0625f5d5a068
         staff_level:
           type: string
-          format: StaffLevel
+          format: EventRole
           example: Organizer
         acceptance_status:
           type: string
@@ -3311,7 +3311,7 @@ components:
           example: s40c9874-c743-48e2-9295-0625f5d5a068
         staff_level:
           type: string
-          format: StaffLevel
+          format: EventRole
           example: Organizer 
 
     EventStaffData:
@@ -3319,7 +3319,7 @@ components:
       properties:
         staff_level:
           type: string
-          format: StaffLevel
+          format: EventRole
           example: Organizer
         acceptance_status:
           type: string

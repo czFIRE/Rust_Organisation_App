@@ -3,7 +3,7 @@ use chrono::NaiveDateTime;
 use sqlx::types::uuid;
 use uuid::Uuid;
 
-use crate::models::{AcceptanceStatus, StaffLevel};
+use crate::models::{AcceptanceStatus, EventRole};
 
 use super::{company::CompanyLiteTemplate, user::UserLiteTemplate};
 
@@ -14,7 +14,7 @@ pub struct StaffTemplate {
     pub user: UserLiteTemplate,
     pub company: CompanyLiteTemplate,
     pub event_id: Uuid,
-    pub role: StaffLevel,
+    pub role: EventRole,
     pub status: AcceptanceStatus,
     pub decided_by: UserLiteTemplate,
     pub created_at: NaiveDateTime,

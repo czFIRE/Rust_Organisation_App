@@ -1,0 +1,109 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE \n                task \n            SET \n                title = COALESCE($1, title), \n                description = COALESCE($2, description), \n                finished_at = COALESCE($3, finished_at), \n                priority = COALESCE($4, priority),\n                accepts_staff = COALESCE($5, accepts_staff),\n                edited_at = NOW() \n            WHERE \n                id = $6 \n                AND deleted_at IS NULL \n            RETURNING id, \n                event_id, \n                creator_id, \n                title, \n                description, \n                finished_at, \n                priority as \"priority!: TaskPriority\", \n                accepts_staff, \n                created_at, \n                deleted_at, \n                edited_at\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "event_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "creator_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "title",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "finished_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 6,
+        "name": "priority!: TaskPriority",
+        "type_info": {
+          "Custom": {
+            "name": "task_priority",
+            "kind": {
+              "Enum": [
+                "low",
+                "medium",
+                "high"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "accepts_staff",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 8,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 9,
+        "name": "deleted_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 10,
+        "name": "edited_at",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Text",
+        "Timestamp",
+        {
+          "Custom": {
+            "name": "task_priority",
+            "kind": {
+              "Enum": [
+                "low",
+                "medium",
+                "high"
+              ]
+            }
+          }
+        },
+        "Bool",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "5c2d61f35e4095f36f8abc9cf985de563b4ac5d9589ecda9f11484d0a4c324d4"
+}
