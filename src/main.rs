@@ -8,7 +8,7 @@ use crate::repositories::event::event_repo::EventRepository;
 use crate::repositories::event_staff::event_staff_repo::StaffRepository;
 use crate::repositories::repository::DbRepository;
 use crate::repositories::task::task_repo::TaskRepository;
-use crate::repositories::timesheet::repository::TimesheetRepository;
+use crate::repositories::timesheet::timesheet_repo::TimesheetRepository;
 use crate::repositories::user::user_repo::UserRepository;
 use actix_web::{web, App, HttpServer};
 use dotenv::dotenv;

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            UPDATE timesheet SET start_date = $1, end_date = $2, total_hours = $3, is_editable = $4, status = $5, manager_note = $6, user_id = $7, company_id = $8, event_id = $9, edited_at = NOW() \n            WHERE id = $10 RETURNING id, start_date, end_date, total_hours, is_editable, status AS \"status!:ApprovalStatus\", manager_note, user_id, company_id, event_id, created_at, edited_at, deleted_at;\n            ",
+  "query": "\n            SELECT id, \n                   start_date, \n                   end_date, \n                   total_hours, \n                   is_editable, \n                   status AS \"status!:ApprovalStatus\", \n                   manager_note, \n                   user_id, \n                   company_id, \n                   event_id, \n                   created_at, \n                   edited_at, \n                   deleted_at \n            FROM timesheet WHERE id = $1 AND deleted_at IS NULL;\n            ",
   "describe": {
     "columns": [
       {
@@ -83,27 +83,6 @@
     ],
     "parameters": {
       "Left": [
-        "Date",
-        "Date",
-        "Float4",
-        "Bool",
-        {
-          "Custom": {
-            "name": "approval_status",
-            "kind": {
-              "Enum": [
-                "not_requested",
-                "pending",
-                "accepted",
-                "rejected"
-              ]
-            }
-          }
-        },
-        "Text",
-        "Uuid",
-        "Uuid",
-        "Uuid",
         "Uuid"
       ]
     },
@@ -123,5 +102,5 @@
       true
     ]
   },
-  "hash": "61d1eaa7525ba545650d738a7ce66808d575abe84a44e944b491f01053f19425"
+  "hash": "f887a8627e08fdeca15e8c03fcfe907b5cf123dd4964fc47830c1b393e79fca9"
 }
