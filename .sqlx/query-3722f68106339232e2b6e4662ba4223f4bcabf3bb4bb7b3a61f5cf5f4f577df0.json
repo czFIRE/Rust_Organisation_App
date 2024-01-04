@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE task\n            SET deleted_at = NOW(), edited_at = NOW()\n            WHERE id = $1\n            AND deleted_at IS NULL\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3722f68106339232e2b6e4662ba4223f4bcabf3bb4bb7b3a61f5cf5f4f577df0"
+}

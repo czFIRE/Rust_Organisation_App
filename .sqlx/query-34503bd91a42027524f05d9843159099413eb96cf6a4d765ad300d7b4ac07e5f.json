@@ -1,0 +1,121 @@
+{
+  "db_name": "PostgreSQL",
+  "query": " UPDATE event_staff SET \n                role = COALESCE($1, role), \n                status = COALESCE($2, status), \n                decided_by = COALESCE($3, decided_by), \n                edited_at = now() \n            WHERE id = $4 \n            RETURNING id, \n                user_id, \n                company_id, \n                event_id, \n                role AS \"role!: EventRole\", \n                status AS \"status!: AcceptanceStatus\", \n                decided_by, \n                created_at, \n                edited_at, \n                deleted_at;\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "company_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "event_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "role!: EventRole",
+        "type_info": {
+          "Custom": {
+            "name": "event_role",
+            "kind": {
+              "Enum": [
+                "staff",
+                "organizer"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "status!: AcceptanceStatus",
+        "type_info": {
+          "Custom": {
+            "name": "acceptance_status",
+            "kind": {
+              "Enum": [
+                "pending",
+                "accepted",
+                "rejected"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "decided_by",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 8,
+        "name": "edited_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 9,
+        "name": "deleted_at",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        {
+          "Custom": {
+            "name": "event_role",
+            "kind": {
+              "Enum": [
+                "staff",
+                "organizer"
+              ]
+            }
+          }
+        },
+        {
+          "Custom": {
+            "name": "acceptance_status",
+            "kind": {
+              "Enum": [
+                "pending",
+                "accepted",
+                "rejected"
+              ]
+            }
+          }
+        },
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "34503bd91a42027524f05d9843159099413eb96cf6a4d765ad300d7b4ac07e5f"
+}

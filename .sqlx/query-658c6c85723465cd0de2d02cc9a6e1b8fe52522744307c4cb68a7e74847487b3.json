@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "UPDATE company SET name = $1, description = $2, phone = $3, email = $4, avatar_url = $5, website = $6, crn = $7, vatin = $8, edited_at = NOW() WHERE id = $9 RETURNING *;",
+  "query": " SELECT * FROM event WHERE accepts_staff = $1 LIMIT $2 OFFSET $3;",
   "describe": {
     "columns": [
       {
@@ -25,56 +25,45 @@
       },
       {
         "ordinal": 4,
-        "name": "crn",
-        "type_info": "Varchar"
+        "name": "accepts_staff",
+        "type_info": "Bool"
       },
       {
         "ordinal": 5,
-        "name": "vatin",
-        "type_info": "Varchar"
+        "name": "start_date",
+        "type_info": "Date"
       },
       {
         "ordinal": 6,
-        "name": "phone",
-        "type_info": "Varchar"
+        "name": "end_date",
+        "type_info": "Date"
       },
       {
         "ordinal": 7,
-        "name": "email",
-        "type_info": "Varchar"
-      },
-      {
-        "ordinal": 8,
         "name": "avatar_url",
         "type_info": "Varchar"
       },
       {
-        "ordinal": 9,
+        "ordinal": 8,
         "name": "created_at",
         "type_info": "Timestamp"
       },
       {
-        "ordinal": 10,
+        "ordinal": 9,
         "name": "edited_at",
         "type_info": "Timestamp"
       },
       {
-        "ordinal": 11,
+        "ordinal": 10,
         "name": "deleted_at",
         "type_info": "Timestamp"
       }
     ],
     "parameters": {
       "Left": [
-        "Varchar",
-        "Text",
-        "Varchar",
-        "Varchar",
-        "Varchar",
-        "Varchar",
-        "Varchar",
-        "Varchar",
-        "Uuid"
+        "Bool",
+        "Int8",
+        "Int8"
       ]
     },
     "nullable": [
@@ -85,12 +74,11 @@
       false,
       false,
       false,
-      false,
       true,
       false,
       false,
       true
     ]
   },
-  "hash": "8d83338dd917a41896460dabfe77c94e123997c502f4aea14a6943976feed825"
+  "hash": "658c6c85723465cd0de2d02cc9a6e1b8fe52522744307c4cb68a7e74847487b3"
 }

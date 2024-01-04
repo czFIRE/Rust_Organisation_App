@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT * FROM company;",
+  "query": "INSERT INTO company (name, description, phone, email, website, crn, vatin) \n             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;",
   "describe": {
     "columns": [
       {
@@ -65,12 +65,20 @@
       }
     ],
     "parameters": {
-      "Left": []
+      "Left": [
+        "Varchar",
+        "Text",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Varchar"
+      ]
     },
     "nullable": [
       false,
       false,
-      true,
+      false,
       true,
       false,
       false,
@@ -82,5 +90,5 @@
       true
     ]
   },
-  "hash": "891d2d5169de0b4068f71db298336f4f58f500c9ba5ea5cdd4f90bde7b880740"
+  "hash": "f097dd32a09aab43fc31b91397b4d7f3cc3bc3e888177b9b875ff50de826cf3f"
 }
