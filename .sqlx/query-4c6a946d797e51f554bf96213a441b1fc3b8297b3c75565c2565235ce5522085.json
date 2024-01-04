@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE comment \n            SET deleted_at = NOW(), \n            edited_at = NOW()\n            WHERE id = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4c6a946d797e51f554bf96213a441b1fc3b8297b3c75565c2565235ce5522085"
+}

@@ -1,0 +1,140 @@
+{
+  "db_name": "PostgreSQL",
+  "query": " INSERT INTO employment (\n                    user_id, company_id, manager_id, hourly_wage, \n                    start_date, end_date, description, \n                    type, level\n                ) \n                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) \n                RETURNING user_id, \n                    company_id, \n                    manager_id, \n                    hourly_wage, \n                    start_date, \n                    end_date, \n                    description, \n                    type AS \"employment_type!: EmployeeContract\", \n                    level AS \"level!: EmployeeLevel\", \n                    created_at, \n                    edited_at, \n                    deleted_at;",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "company_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "manager_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "hourly_wage",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 4,
+        "name": "start_date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 5,
+        "name": "end_date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 6,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "employment_type!: EmployeeContract",
+        "type_info": {
+          "Custom": {
+            "name": "employee_contract",
+            "kind": {
+              "Enum": [
+                "dpp",
+                "dpc",
+                "hpp"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "level!: EmployeeLevel",
+        "type_info": {
+          "Custom": {
+            "name": "employee_level",
+            "kind": {
+              "Enum": [
+                "basic",
+                "manager",
+                "company_administrator"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 10,
+        "name": "edited_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 11,
+        "name": "deleted_at",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Float8",
+        "Date",
+        "Date",
+        "Text",
+        {
+          "Custom": {
+            "name": "employee_contract",
+            "kind": {
+              "Enum": [
+                "dpp",
+                "dpc",
+                "hpp"
+              ]
+            }
+          }
+        },
+        {
+          "Custom": {
+            "name": "employee_level",
+            "kind": {
+              "Enum": [
+                "basic",
+                "manager",
+                "company_administrator"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "5dea543140a1bf95313b93ddac8667d460ac626258326e7b4b6b6541fa12557a"
+}

@@ -1,16 +1,17 @@
 -- Enums
 
+CREATE TYPE role                    AS ENUM ('user', 'admin');
+CREATE TYPE status                  AS ENUM ('available', 'unavailable');
 CREATE TYPE acceptance_status       AS ENUM ('pending', 'accepted', 'rejected');
 CREATE TYPE approval_status         AS ENUM ('not_requested', 'pending',
                                              'accepted', 'rejected');
 CREATE TYPE association             AS ENUM ('sponsor', 'organizer', 'media', 'other');
 CREATE TYPE employment_contract     AS ENUM ('DPP', 'DPC', 'HPP');
 CREATE TYPE employee_level          AS ENUM ('basic', 'manager', 'company_administrator');
+CREATE TYPE employee_contract       AS ENUM ('dpp', 'dpc', 'hpp');
 CREATE TYPE event_role              AS ENUM ('staff', 'organizer');
 CREATE TYPE gender                  AS ENUM ('male', 'female', 'other');
 CREATE TYPE task_priority           AS ENUM ('low', 'medium', 'high');
-CREATE TYPE user_role               AS ENUM ('user', 'admin');
-CREATE TYPE user_status             AS ENUM ('available', 'unavailable');
 
 -- Tables
 
@@ -23,10 +24,10 @@ CREATE TABLE user_record
     name        VARCHAR(255) NOT NULL,
     email       VARCHAR(255) NOT NULL UNIQUE,
     birth       DATE NOT NULL,
-    avatar_path VARCHAR(255) NOT NULL DEFAULT 'default.jpg',
+    avatar_url  VARCHAR(255) DEFAULT 'img/default/user.jpg',
     gender      gender NOT NULL,
-    role        user_role NOT NULL,
-    status      user_status NOT NULL,
+    role        role NOT NULL DEFAULT 'user',
+    status      status NOT NULL DEFAULT 'available',
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
@@ -46,13 +47,13 @@ CREATE TABLE company
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     -------------------------------------------------------
     name        VARCHAR(255) NOT NULL,
-    description TEXT,
+    description TEXT NOT NULL DEFAULT '',
     website     VARCHAR(255),
     crn         VARCHAR(16) NOT NULL UNIQUE,
     vatin       VARCHAR(18) NOT NULL UNIQUE,
     phone       VARCHAR(255) NOT NULL UNIQUE,
     email       VARCHAR(255) NOT NULL UNIQUE,
-    avatar_path VARCHAR(255) NOT NULL DEFAULT 'default.jpg',
+    avatar_url  VARCHAR(255) DEFAULT 'img/default/company.jpg',
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
@@ -113,8 +114,8 @@ CREATE TABLE employment
     start_date  DATE NOT NULL,
     end_date    DATE NOT NULL,
     description TEXT,
-    type        employment_contract NOT NULL,
-    level       employee_level NOT NULL,
+    type        employee_contract NOT NULL,
+    level       employee_level NOT NULL DEFAULT 'basic',
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
@@ -128,7 +129,7 @@ CREATE TABLE employment
     CONSTRAINT check_employment_hourly_wage_gte_0
         CHECK (hourly_wage >= 0.0),
     CONSTRAINT check_employment_start_date_lte_end_date
-        CHECK (start_date >= end_date),
+        CHECK (start_date <= end_date),
     CONSTRAINT check_employment_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
@@ -143,10 +144,10 @@ CREATE TABLE event
     name           VARCHAR(255) NOT NULL,
     description    TEXT,
     website        VARCHAR(255),
-    accepts_staff  BOOLEAN NOT NULL,
+    accepts_staff  BOOLEAN NOT NULL DEFAULT true,
     start_date     DATE NOT NULL,
     end_date       DATE NOT NULL,
-    avatar_path    VARCHAR(255) NOT NULL DEFAULT 'default.jpg',
+    avatar_url     VARCHAR(255) DEFAULT 'img/default/event.jpg',
     -------------------------------------------------------
     created_at     TIMESTAMP NOT NULL DEFAULT now(),
     edited_at      TIMESTAMP NOT NULL DEFAULT now(),
@@ -155,7 +156,7 @@ CREATE TABLE event
     CONSTRAINT check_event_name_len
         CHECK (char_length(name) >= 1),
     CONSTRAINT check_event_start_date_lte_end_date
-        CHECK (start_date >= end_date),
+        CHECK (start_date <= end_date),
     CONSTRAINT check_event_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
@@ -208,7 +209,7 @@ CREATE TABLE timesheet
         CHECK (total_hours <= 744.0),
     -- max hours per month: 24.0 * 31.0 = 744.0
     CONSTRAINT check_timesheet_start_date_lte_end_date
-        CHECK (start_date >= end_date),
+        CHECK (start_date <= end_date),
     CONSTRAINT check_timesheet_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
@@ -220,7 +221,7 @@ CREATE TABLE workday
     date         DATE NOT NULL,
     total_hours  REAL NOT NULL DEFAULT 0.0,
     comment      TEXT,
-    is_editable  BOOLEAN NOT NULL,
+    is_editable  BOOLEAN NOT NULL DEFAULT true,
     --------------------------------------------------------
     created_at   TIMESTAMP NOT NULL DEFAULT now(),
     edited_at    TIMESTAMP NOT NULL DEFAULT now(),
@@ -242,22 +243,24 @@ CREATE TABLE event_staff
 (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     -------------------------------------------------------
-    user_id     UUID NOT NULL,
-    company_id  UUID NOT NULL,
-    event_id    UUID NOT NULL,
-    decided_by  UUID NOT NULL,
-    -------------------------------------------------------
-    role        event_role NOT NULL,
-    status      acceptance_status NOT NULL,
+    role        event_role NOT NULL DEFAULT 'staff',
+    status      acceptance_status NOT NULL DEFAULT 'pending',
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at  TIMESTAMP,
     -------------------------------------------------------
+    user_id     UUID NOT NULL,
+    company_id  UUID NOT NULL,
+    decided_by  UUID,
+    event_id    UUID NOT NULL,
+    -------------------------------------------------------
+    FOREIGN KEY (user_id) REFERENCES user_record (id),
+    FOREIGN KEY (company_id) REFERENCES company (id),
 	FOREIGN KEY (user_id, company_id)
 	    REFERENCES employment (user_id, company_id),
-    FOREIGN KEY (event_id) REFERENCES event (id),
     FOREIGN KEY (decided_by) REFERENCES event_staff (id),
+    FOREIGN KEY (event_id) REFERENCES event (id),
     -------------------------------------------------------
     CONSTRAINT check_event_staff_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
@@ -274,8 +277,8 @@ CREATE TABLE task
     title           VARCHAR(255) NOT NULL,
     description     TEXT,
     finished_at     TIMESTAMP,
-    priority        task_priority NOT NULL,
-    accepts_staff   BOOLEAN NOT NULL,
+    priority        task_priority NOT NULL DEFAULT 'medium',
+    accepts_staff   BOOLEAN NOT NULL DEFAULT true,
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
@@ -296,15 +299,16 @@ CREATE TABLE assigned_staff
     task_id     UUID NOT NULL,
     staff_id    UUID NOT NULL,
     -------------------------------------------------------
-    decided_by  UUID NOT NULL,
+    decided_by  UUID,
     -------------------------------------------------------
-    status      acceptance_status NOT NULL,
+    status      acceptance_status NOT NULL DEFAULT 'pending',
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at  TIMESTAMP,
     -------------------------------------------------------
-    PRIMARY KEY (task_id, staff_id),
+    PRIMARY KEY (staff_id, task_id),
+    FOREIGN KEY (decided_by) REFERENCES event_staff (id),
     FOREIGN KEY (task_id) REFERENCES task (id),
     FOREIGN KEY (staff_id) REFERENCES event_staff (id),
     FOREIGN KEY (decided_by) REFERENCES event_staff (id),

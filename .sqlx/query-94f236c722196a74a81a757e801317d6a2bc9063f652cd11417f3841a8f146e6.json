@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE assigned_staff SET\n                deleted_at = now(),\n                edited_at = now()\n            WHERE\n                staff_id = $1 AND task_id = $2\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "94f236c722196a74a81a757e801317d6a2bc9063f652cd11417f3841a8f146e6"
+}

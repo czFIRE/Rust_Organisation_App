@@ -106,7 +106,7 @@ This table contains information about staff for events. It connects an employee 
 - staff_id - Primary Key
 - (user_id, company_id) - FK to employment, user_id is FK to user, company_id is FK to company
 - event_id - FK to event
-- staff_level - denotes the competency of a given staff member within an event. See the StaffLevel enum for more.
+- staff_level - denotes the competency of a given staff member within an event. See the EventRole enum for more.
 - acceptance_status - this column is used to track whether given staff has been accepted or rejected for an event. Or whether no decisions have been made yet. Used for registration of users for events they want to work on.
 - decided_by - FK to event_staff. The default is null, this attribute is populated when acceptance_status changes to accepted or rejected and contains the ID of the organizer that made the decision.
 
