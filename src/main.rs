@@ -7,15 +7,12 @@ mod templates;
 
 use actix_web::{App, HttpServer};
 use dotenv::dotenv;
-use organization::initialize::configure_app;
+use sqlx::{Postgres, Pool};
 use std::io::Result;
 
 use std::sync::Arc;
 
 use actix_web::web;
-use actix_web::web::ServiceConfig;
-use tokio::runtime::Runtime;
-
 use crate::repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository;
 use crate::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
 use crate::repositories::comment::comment_repo::CommentRepository;
@@ -73,17 +70,9 @@ const HOST: &str = "0.0.0.0:8000";
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    dotenv().ok();
-
-    let database_url = dotenv::var("DATABASE_URL").expect("DATABASE_URL is not set in .env file");
-    let pool = sqlx::PgPool::connect(&database_url).await.expect("Failed to connect to the database.");
-
-    // let rt = Runtime::new().unwrap();
-
-    // let received_pool = rt
-    //     .block_on(pool)
-    //     .expect("Failed to connect to the database.");
-
+    dotenv().expect("Failed to load .env file");
+    
+    let pool = setup_db_pool().await;
     let arc_pool = Arc::new(pool);
 
     // Add repositories here.
@@ -109,86 +98,89 @@ async fn main() -> Result<()> {
     let timesheet_repo = web::Data::new(timesheet_repository);
     let comment_repo = web::Data::new(comment_repository);
 
-    HttpServer::new(move || App::new()
-        .app_data(user_repo.clone())
-        .app_data(company_repo.clone())
-        .app_data(event_repo.clone())
-        .app_data(employment_repo.clone())
-        .app_data(event_staff_repo.clone())
-        .app_data(task_repo.clone())
-        .app_data(assigned_staff_repo.clone())
-        .app_data(associated_company_repo.clone())
-        .app_data(timesheet_repo.clone())
-        .app_data(comment_repo.clone())
-        .service(index)
-        .service(get_user)
-        .service(create_user)
-        .service(update_user)
-        .service(delete_user)
-        .service(get_user_avatar)
-        .service(upload_user_avatar)
-        .service(remove_user_avatar)
-        .service(get_company)
-        .service(get_all_companies)
-        .service(create_company)
-        .service(update_company)
-        .service(delete_company)
-        .service(get_company_avatar)
-        .service(upload_company_avatar)
-        .service(remove_company_avatar)
-        .service(get_events)
-        .service(get_event)
-        .service(create_event)
-        .service(update_event)
-        .service(delete_event)
-        .service(get_event_avatar)
-        .service(upload_event_avatar)
-        .service(remove_event_avatar)
-        .service(get_employment)
-        .service(get_employments_per_user)
-        .service(get_subordinates)
-        .service(create_employment)
-        .service(update_employment)
-        .service(delete_employment)
-        .service(get_all_assigned_staff)
-        .service(get_assigned_staff)
-        .service(create_assigned_staff)
-        .service(update_assigned_staff)
-        .service(delete_not_accepted_assigned_staff)
-        .service(delete_assigned_staff)
-        .service(get_event_tasks)
-        .service(get_event_task)
-        .service(create_task)
-        .service(update_task)
-        .service(delete_task)
-        .service(get_all_event_staff)
-        .service(get_event_staff)
-        .service(create_event_staff)
-        .service(update_event_staff)
-        .service(delete_all_rejected_event_staff)
-        .service(delete_event_staff)
-        .service(get_all_associated_companies)
-        .service(create_associated_company)
-        .service(update_associated_company)
-        .service(delete_associated_company)
-        .service(get_all_event_comments)
-        .service(create_event_comment)
-        .service(get_all_task_comments)
-        .service(create_task_comment)
-        .service(update_comment)
-        .service(delete_comment)
-        .service(get_all_timesheets_for_employment)
-        .service(get_timesheet)
-        .service(create_timesheet)
-        .service(update_timesheet)
-        .service(reset_timesheet_data))
-        .bind(HOST)?
-        .run()
-        .await
+    HttpServer::new(move || {
+        App::new()
+            .app_data(user_repo.clone())
+            .app_data(company_repo.clone())
+            .app_data(event_repo.clone())
+            .app_data(employment_repo.clone())
+            .app_data(event_staff_repo.clone())
+            .app_data(task_repo.clone())
+            .app_data(assigned_staff_repo.clone())
+            .app_data(associated_company_repo.clone())
+            .app_data(timesheet_repo.clone())
+            .app_data(comment_repo.clone())
+            .service(index)
+            .service(get_user)
+            .service(create_user)
+            .service(update_user)
+            .service(delete_user)
+            .service(get_user_avatar)
+            .service(upload_user_avatar)
+            .service(remove_user_avatar)
+            .service(get_company)
+            .service(get_all_companies)
+            .service(create_company)
+            .service(update_company)
+            .service(delete_company)
+            .service(get_company_avatar)
+            .service(upload_company_avatar)
+            .service(remove_company_avatar)
+            .service(get_events)
+            .service(get_event)
+            .service(create_event)
+            .service(update_event)
+            .service(delete_event)
+            .service(get_event_avatar)
+            .service(upload_event_avatar)
+            .service(remove_event_avatar)
+            .service(get_employment)
+            .service(get_employments_per_user)
+            .service(get_subordinates)
+            .service(create_employment)
+            .service(update_employment)
+            .service(delete_employment)
+            .service(get_all_assigned_staff)
+            .service(get_assigned_staff)
+            .service(create_assigned_staff)
+            .service(update_assigned_staff)
+            .service(delete_not_accepted_assigned_staff)
+            .service(delete_assigned_staff)
+            .service(get_event_tasks)
+            .service(get_event_task)
+            .service(create_task)
+            .service(update_task)
+            .service(delete_task)
+            .service(get_all_event_staff)
+            .service(get_event_staff)
+            .service(create_event_staff)
+            .service(update_event_staff)
+            .service(delete_all_rejected_event_staff)
+            .service(delete_event_staff)
+            .service(get_all_associated_companies)
+            .service(create_associated_company)
+            .service(update_associated_company)
+            .service(delete_associated_company)
+            .service(get_all_event_comments)
+            .service(create_event_comment)
+            .service(get_all_task_comments)
+            .service(create_task_comment)
+            .service(update_comment)
+            .service(delete_comment)
+            .service(get_all_timesheets_for_employment)
+            .service(get_timesheet)
+            .service(create_timesheet)
+            .service(update_timesheet)
+            .service(reset_timesheet_data)
+    })
+    .bind(HOST)?
+    .run()
+    .await
+}
 
-    // println!("Starting server on {HOST}");
-    // HttpServer::new(move || App::new().configure(configure_app))
-    //     .bind(HOST)?
-    //     .run()
-    //     .await
+async fn setup_db_pool() -> Pool<Postgres> {
+    let database_url = dotenv::var("DATABASE_URL").expect("DATABASE_URL is not set in .env file");
+    sqlx::PgPool::connect(&database_url)
+        .await
+        .expect("Failed to connect to the database.")
 }
