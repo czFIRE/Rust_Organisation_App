@@ -4,5 +4,5 @@ mod errors;
 pub mod handlers;
 pub mod initialize;
 pub mod models;
-mod repositories;
+pub mod repositories;
 pub mod templates;

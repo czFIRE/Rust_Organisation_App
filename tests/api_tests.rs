@@ -1,12 +1,18 @@
 #[cfg(test)]
 mod api_tests {
     use std::borrow::Borrow;
+    use std::sync::Arc;
 
-    use actix_web::http;
+    use actix_web::{http, web};
     use actix_web::http::header::ContentType;
     use actix_web::{test, App};
     use chrono::{NaiveDate, TimeZone, Utc};
+    use dotenv::dotenv;
+    use organization::handlers::index::index;
+    use organization::handlers::user::create_user;
     use organization::models::{AcceptanceStatus, Association, EventRole};
+    use organization::repositories::repository::DbRepository;
+    use organization::repositories::user::user_repo::UserRepository;
     use organization::templates::comment::{CommentTemplate, CommentsTemplate};
     use organization::templates::company::{
         AssociatedCompaniesTemplate, AssociatedCompanyTemplate, CompaniesTemplate, CompanyTemplate,
@@ -26,7 +32,7 @@ mod api_tests {
     #[actix_web::test]
     async fn index_get() {
         let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+            test::init_service(App::new().service(index)).await;
         let req = test::TestRequest::default()
             .insert_header(ContentType::plaintext())
             .to_request();
@@ -35,13 +41,23 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn create_user() {
+    async fn create_user_test() {
+        dotenv().ok();
+
+        let database_url = dotenv::var("DATABASE_URL").expect("DATABASE_URL is not set in .env file");
+        let pool = sqlx::PgPool::connect(&database_url).await.expect("Failed to connect to the database.");
+        let arc_pool = Arc::new(pool);
+        let user_repository = UserRepository::new(arc_pool.clone());
+        let user_repo = web::Data::new(user_repository);
+
         let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+            test::init_service(App::new()
+                                    .app_data(user_repo.clone())
+                                    .service(create_user)).await;
         let user = json!({
             "name": "Peepo Happy",
             "email": "peepo@happy.com",
-            "birth": "1999-01-01 00:00:00",
+            "birth": "1999-01-01",
             "gender": "male",
             "role": "user"
         });

@@ -11,7 +11,7 @@ use actix_web::{
     patch, post, put, web, HttpResponse,
 };
 use askama::Template;
-use chrono::Utc;
+use chrono::{Utc, NaiveDateTime, NaiveDate};
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -24,7 +24,7 @@ use crate::{
 pub struct NewUserData {
     name: String,
     email: String,
-    birth: chrono::DateTime<Utc>,
+    birth: NaiveDate,
     gender: Gender,
     role: UserRole,
 }
@@ -86,7 +86,7 @@ pub async fn create_user(
     let user_data = NewUser {
         name: new_user.name.clone(),
         email: new_user.email.clone(),
-        birth: new_user.birth.date_naive(),
+        birth: new_user.birth.clone(),
         gender: new_user.gender.clone(),
         role: new_user.role.clone(),
     };
