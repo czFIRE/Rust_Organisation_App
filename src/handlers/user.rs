@@ -5,13 +5,9 @@ use crate::{
     repositories::user::models::{NewUser, UserData},
     templates::user::UserTemplate,
 };
-use actix_web::{
-    delete, get,
-    http,
-    patch, post, put, web, HttpResponse,
-};
+use actix_web::{delete, get, http, patch, post, put, web, HttpResponse};
 use askama::Template;
-use chrono::{Utc, NaiveDateTime, NaiveDate};
+use chrono::{NaiveDate, NaiveDateTime, Utc};
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -114,14 +110,27 @@ pub async fn create_user(
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
 
-        return HttpResponse::Created().body(body.expect("Should be okay."));
+        let unwrapped_body = body.unwrap();
+
+        println!("{}", unwrapped_body);
+
+        return HttpResponse::Created()
+            .content_type("text/html")
+            .body(unwrapped_body);
     }
 
     let error = created_user.err().expect("Should be error.");
     match error {
         sqlx::Error::RowNotFound => {
             HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
+        },
+        sqlx::Error::Database(err) => {
+            if err.is_check_violation() || err.is_foreign_key_violation() || err.is_unique_violation() {
+                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
+            } else {
+                HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
+            }
+        },
         _ => HttpResponse::InternalServerError()
             .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
     }
@@ -174,14 +183,23 @@ pub async fn update_user(
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
 
-        return HttpResponse::Created().body(body.expect("Should be okay."));
+        return HttpResponse::Ok()
+                .content_type("text/html")
+                .body(body.expect("Should be okay."));
     }
 
     let error = updated_user.err().expect("Should be error.");
     match error {
         sqlx::Error::RowNotFound => {
             HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
+        },
+        sqlx::Error::Database(err) => {
+            if err.is_check_violation() || err.is_foreign_key_violation() || err.is_unique_violation() {
+                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
+            } else {
+                HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
+            }
+        },
         _ => HttpResponse::InternalServerError()
             .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
     }
