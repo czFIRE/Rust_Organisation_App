@@ -3,16 +3,68 @@ mod api_tests {
     use std::borrow::Borrow;
     use std::sync::Arc;
 
-    use actix_web::{http, web};
     use actix_web::http::header::ContentType;
+    use actix_web::{http, web};
     use actix_web::{test, App};
+    use askama::Template;
     use chrono::{NaiveDate, TimeZone, Utc};
     use dotenv::dotenv;
-    use organization::handlers::index::index;
-    use organization::handlers::user::create_user;
-    use organization::models::{AcceptanceStatus, Association, EventRole};
+    use organization::repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository;
+    use organization::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
+    use organization::repositories::comment::comment_repo::CommentRepository;
+    use organization::repositories::company::company_repo::CompanyRepository;
+    use organization::repositories::employment::employment_repo::EmploymentRepository;
+    use organization::repositories::event::event_repo::EventRepository;
+    use organization::repositories::event_staff::event_staff_repo::StaffRepository;
     use organization::repositories::repository::DbRepository;
+    use organization::repositories::task::task_repo::TaskRepository;
+    use organization::repositories::timesheet::timesheet_repo::TimesheetRepository;
     use organization::repositories::user::user_repo::UserRepository;
+
+    use organization::handlers::{
+        assigned_staff::{
+            create_assigned_staff, delete_assigned_staff, delete_not_accepted_assigned_staff,
+            get_all_assigned_staff, get_assigned_staff, update_assigned_staff,
+        },
+        associated_company::{
+            create_associated_company, delete_associated_company, get_all_associated_companies,
+            update_associated_company,
+        },
+        comment::{
+            create_event_comment, create_task_comment, delete_comment, get_all_event_comments,
+            get_all_task_comments, update_comment,
+        },
+        company::{
+            create_company, delete_company, get_all_companies, get_company, get_company_avatar,
+            remove_company_avatar, update_company, upload_company_avatar,
+        },
+        employment::{
+            create_employment, delete_employment, get_employment, get_employments_per_user,
+            get_subordinates, update_employment,
+        },
+        event::{
+            create_event, delete_event, get_event, get_event_avatar, get_events, remove_event_avatar,
+            update_event, upload_event_avatar,
+        },
+        event_staff::{
+            create_event_staff, delete_all_rejected_event_staff, delete_event_staff,
+            get_all_event_staff, get_event_staff, update_event_staff,
+        },
+        event_task::{create_task, delete_task, get_event_task, get_event_tasks, update_task},
+        index::index,
+        timesheet::{
+            create_timesheet, get_all_timesheets_for_employment, get_timesheet, reset_timesheet_data,
+            update_timesheet,
+        },
+        user::{
+            create_user, delete_user, get_user, get_user_avatar, remove_user_avatar, update_user,
+            upload_user_avatar,
+        },
+    };
+    
+    use organization::models::{
+        AcceptanceStatus, Association, EventRole, Gender, UserRole, UserStatus,
+    };
     use organization::templates::comment::{CommentTemplate, CommentsTemplate};
     use organization::templates::company::{
         AssociatedCompaniesTemplate, AssociatedCompanyTemplate, CompaniesTemplate, CompanyTemplate,
@@ -26,13 +78,25 @@ mod api_tests {
     use organization::templates::timesheet::{TimesheetTemplate, TimesheetsTemplate};
     use organization::templates::user::UserTemplate;
     use serde_json::json;
+    use sqlx::{Pool, Postgres};
     use std::str::{self, FromStr};
     use uuid::Uuid;
+    use regex::Regex;
+
+    async fn get_db_pool() -> Arc<Pool<Postgres>> {
+        dotenv().ok();
+
+        let database_url =
+            dotenv::var("DATABASE_URL").expect("DATABASE_URL is not set in .env file");
+        let pool = sqlx::PgPool::connect(&database_url)
+            .await
+            .expect("Failed to connect to the database.");
+        Arc::new(pool)
+    }
 
     #[actix_web::test]
     async fn index_get() {
-        let app =
-            test::init_service(App::new().service(index)).await;
+        let app = test::init_service(App::new().service(index)).await;
         let req = test::TestRequest::default()
             .insert_header(ContentType::plaintext())
             .to_request();
@@ -41,19 +105,19 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn create_user_test() {
-        dotenv().ok();
-
-        let database_url = dotenv::var("DATABASE_URL").expect("DATABASE_URL is not set in .env file");
-        let pool = sqlx::PgPool::connect(&database_url).await.expect("Failed to connect to the database.");
-        let arc_pool = Arc::new(pool);
+    async fn create_patch_delete_user_test() {
+        let arc_pool = get_db_pool().await;
         let user_repository = UserRepository::new(arc_pool.clone());
         let user_repo = web::Data::new(user_repository);
 
         let app =
             test::init_service(App::new()
-                                    .app_data(user_repo.clone())
-                                    .service(create_user)).await;
+                    .app_data(user_repo.clone())
+                    .service(create_user)
+                    .service(update_user)
+                    .service(delete_user))
+                    .await;
+
         let user = json!({
             "name": "Peepo Happy",
             "email": "peepo@happy.com",
@@ -63,37 +127,23 @@ mod api_tests {
         });
         let req = test::TestRequest::post()
             .uri("/user")
-            .set_form(user)
+            .set_form(user.clone())
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::CREATED);
 
+
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let user_template = serde_json::from_str::<UserTemplate>(body).unwrap();
-        assert_eq!(user_template.name, "Peepo Happy");
-        assert_eq!(user_template.email, "peepo@happy.com");
-    }
-
-    #[actix_web::test]
-    async fn create_user_duplicate() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-
-        let user = json!({
-            "name": "Peepo Sad",
-            "email": "peepo@sad.com",
-            "birth": "1999-01-01 00:00:00",
-            "gender": "male",
-            "role": "user"
-        });
-        let req = test::TestRequest::post()
-            .uri("/user")
-            .set_form(user.clone())
-            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_success());
+        assert!(body.contains("Peepo Happy"));
+        assert!(body.contains("peepo@happy.com"));
+        assert!(body.contains("img/default/user.jpg"));
+        
+        let uuid_regex = Regex::new(r"[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}").unwrap();
+        let uuid_caps = uuid_regex.captures(body).unwrap();
+        let uuid_str = &uuid_caps[0];
+        let user_uuid = Uuid::from_str(uuid_str).expect("Should be a valid UUID");
 
         let req = test::TestRequest::post()
             .uri("/user")
@@ -103,12 +153,60 @@ mod api_tests {
         // Email should be unique.
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+
+        let user_update = json!({
+            "name": "Peepo Sad",
+        });
+
+        let req = test::TestRequest::patch()
+            .uri(format!("/user/{}", uuid_str).as_str())
+            .set_form(user_update)
+            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        
+        assert!(body.contains("Peepo Sad"));
+        assert!(body.contains("peepo@happy.com"));
+        assert!(body.contains("img/default/user.jpg"));
+
+        // Update with no data should fail
+        let req = test::TestRequest::patch()
+            .uri(format!("/user/{}", uuid_str).as_str())
+            .set_form(json!({}))
+            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+
+        let req = test::TestRequest::delete()
+            .uri(format!("/user/{}", uuid_str).as_str())
+            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
+
+        let req = test::TestRequest::delete()
+            .uri(format!("/user/{}", uuid_str).as_str())
+            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn user_get_existing() {
+        let arc_pool = get_db_pool().await;
+        let user_repository = UserRepository::new(arc_pool.clone());
+        let user_repo = web::Data::new(user_repository);
+
         let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+            test::init_service(App::new()
+                    .app_data(user_repo.clone())
+                    .service(get_user))
+                    .await;
 
         let req = test::TestRequest::get()
             .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4")
@@ -117,18 +215,23 @@ mod api_tests {
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
-        let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let user_template = serde_json::from_str::<UserTemplate>(body).unwrap();
-        assert_eq!(user_template.name, "Dave Null");
-        assert_eq!(user_template.email, "dave@null.com");
-        assert_eq!(user_template.avatar_url, "dave.jpg");
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();    
+        assert!(body.contains("Dave Null"));
+        assert!(body.contains("dave@null.com"));
     }
 
     #[actix_web::test]
     async fn user_get_not_existing() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let user_repository = UserRepository::new(arc_pool.clone());
+        let user_repo = web::Data::new(user_repository);
 
+        let app =
+            test::init_service(App::new()
+                    .app_data(user_repo.clone())
+                    .service(get_user))
+                    .await;
+        
         let req = test::TestRequest::get()
             .uri("/user/35341289-d420-40b6-96d8-ce069b1ba5d4")
             .to_request();
@@ -139,9 +242,16 @@ mod api_tests {
 
     #[actix_web::test]
     async fn user_get_invalid_uuid_format() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let user_repository = UserRepository::new(arc_pool.clone());
+        let user_repo = web::Data::new(user_repository);
 
+        let app =
+            test::init_service(App::new()
+                    .app_data(user_repo.clone())
+                    .service(get_user))
+                    .await;
+        
         let req = test::TestRequest::get()
             .uri("/user/Sleepyhead-d420-zzz6-ygd8-5d4")
             .to_request();
@@ -151,33 +261,16 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn patch_existing_user() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-
-        let user_update = json!({
-            "name": "Dave Nill",
-        });
-
-        let req = test::TestRequest::patch()
-            .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4")
-            .set_form(user_update)
-            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_success());
-        assert_eq!(res.status(), http::StatusCode::OK);
-        let body_bytes = test::read_body(res).await;
-        let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let user_template = serde_json::from_str::<UserTemplate>(body).unwrap();
-        assert_eq!(user_template.name, "Dave Nill");
-        assert_eq!(user_template.email, "dave@null.com");
-        assert_eq!(user_template.avatar_url, "dave.jpg");
-    }
-
-    #[actix_web::test]
     async fn patch_non_existent_user() {
+        let arc_pool = get_db_pool().await;
+        let user_repository = UserRepository::new(arc_pool.clone());
+        let user_repo = web::Data::new(user_repository);
+
         let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+            test::init_service(App::new()
+                    .app_data(user_repo.clone())
+                    .service(update_user))
+                    .await;
 
         let user_update = json!({
             "name": "Dave Nill",
@@ -194,8 +287,17 @@ mod api_tests {
 
     #[actix_web::test]
     async fn patch_user_invalid_uuid_format() {
+        let arc_pool = get_db_pool().await;
+        let user_repository = UserRepository::new(arc_pool.clone());
+        let user_repo = web::Data::new(user_repository);
+
         let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+            test::init_service(App::new()
+                    .app_data(user_repo.clone())
+                    .service(create_user)
+                    .service(update_user)
+                    .service(delete_user))
+                    .await;
 
         let user_update = json!({
             "name": "Dave Nill",
@@ -211,51 +313,18 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn patch_user_empty_data() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-
-        let user_update = json!({});
-
-        let req = test::TestRequest::patch()
-            .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4")
-            .set_form(user_update)
-            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
-    }
-
-    #[actix_web::test]
-    async fn delete_user_exists() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-
-        let req = test::TestRequest::delete()
-            .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4")
-            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_success());
-        assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
-    }
-
-    #[actix_web::test]
-    async fn delete_non_existent_user() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-
-        let req = test::TestRequest::delete()
-            .uri("/user/35341289-d420-40b6-96d8-ce069b1ba5d4")
-            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
-    }
-
-    #[actix_web::test]
     async fn delete_user_invalid_uuid_format() {
+        let arc_pool = get_db_pool().await;
+        let user_repository = UserRepository::new(arc_pool.clone());
+        let user_repo = web::Data::new(user_repository);
+
         let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+            test::init_service(App::new()
+                    .app_data(user_repo.clone())
+                    .service(create_user)
+                    .service(update_user)
+                    .service(delete_user))
+                    .await;
 
         let req = test::TestRequest::delete()
             .uri("/user/Sleepyhead-d420-zzz6-ygd8-5d4")
@@ -266,28 +335,28 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn get_user_avatar() {
+    async fn get_user_avatar_test() {
         let _app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
-    async fn upload_user_avatar() {
+    async fn upload_user_avatar_test() {
         let _app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
-    async fn remove_user_avatar() {
+    async fn remove_user_avatar_test() {
         let _app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
-    async fn get_all_companies() {
+    async fn get_all_companies_test() {
         let app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
@@ -302,7 +371,7 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn get_existing_company() {
+    async fn get_existing_company_test() {
         let app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
@@ -328,7 +397,7 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn get_non_existing_company() {
+    async fn get_non_existing_company_test() {
         let app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
@@ -354,7 +423,7 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn create_company() {
+    async fn create_company_test() {
         let app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
@@ -522,7 +591,7 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn delete_company() {
+    async fn delete_company_test() {
         let app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
@@ -561,28 +630,28 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn get_company_avatar() {
+    async fn get_company_avatar_test() {
         let _app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
-    async fn upload_company_avatar() {
+    async fn upload_company_avatar_test() {
         let _app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
-    async fn remove_company_avatar() {
+    async fn remove_company_avatar_test() {
         let _app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
-    async fn get_events() {
+    async fn get_events_test() {
         let app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
@@ -651,7 +720,7 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn create_event() {
+    async fn create_event_test() {
         let app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
@@ -802,7 +871,7 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn delete_event() {
+    async fn delete_event_test() {
         let app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
@@ -841,21 +910,21 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn get_event_avatar() {
+    async fn get_event_avatar_test() {
         let _app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
-    async fn upload_event_avatar() {
+    async fn upload_event_avatar_test() {
         let _app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
     }
 
     #[actix_web::test]
-    async fn remove_event_avatar() {
+    async fn remove_event_avatar_test() {
         let _app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
@@ -976,7 +1045,7 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn create_task() {
+    async fn create_task_test() {
         let app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
@@ -1124,7 +1193,7 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn delete_task() {
+    async fn delete_task_test() {
         let app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
@@ -1163,7 +1232,7 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn get_all_event_comments() {
+    async fn get_all_event_comments_test() {
         let app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
@@ -1347,7 +1416,7 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn get_all_task_comments() {
+    async fn get_all_task_comments_test() {
         let app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
@@ -1512,7 +1581,7 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn get_employments_per_user() {
+    async fn get_employments_per_user_test() {
         let app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
@@ -1555,7 +1624,7 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn get_employment() {
+    async fn get_employment_test() {
         let app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
@@ -1621,7 +1690,7 @@ mod api_tests {
 
     //ToDo: No data for this yet.
     #[actix_web::test]
-    async fn get_subordinates() {
+    async fn get_subordinates_test() {
         let app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         let req = test::TestRequest::get()
@@ -1817,7 +1886,7 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn get_all_event_staff() {
+    async fn get_all_event_staff_test() {
         let app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
@@ -1858,7 +1927,7 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn get_event_staff() {
+    async fn get_event_staff_test() {
         let app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         let req = test::TestRequest::get()
@@ -2063,7 +2132,7 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn get_all_assigned_staff() {
+    async fn get_all_assigned_staff_test() {
         let app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
@@ -2108,7 +2177,7 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn get_assigned_staff() {
+    async fn get_assigned_staff_test() {
         let app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
@@ -2316,7 +2385,7 @@ mod api_tests {
 
     // ToDo
     #[actix_web::test]
-    async fn delete_not_accepted_assigned_staff() {
+    async fn delete_not_accepted_assigned_staff_test() {
         let _app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         todo!()
@@ -2476,7 +2545,7 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn get_all_timesheets_for_employment() {
+    async fn get_all_timesheets_for_employment_test() {
         let app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         let req = test::TestRequest::get()
@@ -2516,7 +2585,7 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn get_timesheet() {
+    async fn get_timesheet_test() {
         let app =
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
         let req = test::TestRequest::get()
