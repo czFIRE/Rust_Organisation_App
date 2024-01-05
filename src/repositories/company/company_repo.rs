@@ -107,7 +107,13 @@ impl CompanyRepository {
     pub async fn read_one_db(&self, company_id: Uuid) -> DbResult<Company> {
         let executor = self.pool.as_ref();
 
-        let company = sqlx::query_as!(Company, "SELECT * FROM company WHERE id = $1;", company_id)
+        let company = sqlx::query_as!(
+            Company, 
+            "SELECT * 
+             FROM company 
+             WHERE id = $1
+               AND deleted_at IS NULL;", 
+            company_id)
             .fetch_one(executor)
             .await?;
 
@@ -143,7 +149,10 @@ impl CompanyRepository {
                 street,
                 postal_code,
                 street_number
-            FROM company INNER JOIN address on company.id = address.company_id WHERE company.id = $1;", 
+            FROM company 
+                 INNER JOIN address on company.id = address.company_id 
+                 WHERE company.id = $1
+                   AND deleted_at IS NULL;", 
             company_id)
             .fetch_one(executor)
             .await?;
@@ -250,8 +259,8 @@ impl CompanyRepository {
                     crn = COALESCE($7, crn),
                     vatin = COALESCE($8, vatin),
                     edited_at = NOW()
-                WHERE
-                    id = $9;
+                WHERE id = $9
+                  AND deleted_at IS NULL  ;
                 ",
                 data.name,
                 data.description,

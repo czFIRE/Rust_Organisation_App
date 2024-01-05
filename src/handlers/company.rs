@@ -1,8 +1,11 @@
+use std::str::FromStr;
+
 use actix_web::{delete, get, patch, post, put, web, HttpResponse, http};
 use askama::Template;
 use serde::Deserialize;
+use uuid::Uuid;
 
-use crate::{repositories::company::{company_repo::CompanyRepository, models::CompanyFilter}, handlers::common::QueryParams, templates::company::{CompaniesTemplate, CompanyLiteTemplate}, errors::parse_error};
+use crate::{repositories::company::{company_repo::CompanyRepository, models::CompanyFilter}, handlers::common::QueryParams, templates::company::{CompaniesTemplate, CompanyLiteTemplate, CompanyTemplate, Address}, errors::parse_error};
 
 #[derive(Deserialize)]
 pub struct NewCompanyData {
@@ -78,12 +81,62 @@ pub async fn get_all_companies(params: web::Query<QueryParams>, company_repo: we
 }
 
 #[get("/company/{company_id}")]
-pub async fn get_company(_id: web::Path<String>) -> HttpResponse {
-    todo!()
+pub async fn get_company(company_id: web::Path<String>, company_repo: web::Data<CompanyRepository>) -> HttpResponse {
+    let id_parse = Uuid::from_str(company_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let parsed_id = id_parse.expect("Should be valid.");
+    let result = company_repo.read_one_extended(parsed_id).await;
+
+    if let Ok(company) = result {
+        let address = Address {
+            country: company.country,
+            region: company.region,
+            city: company.city,
+            street: company.street,
+            postal_code: company.postal_code,
+            address_number: company.street_number
+        };
+
+        let template = CompanyTemplate {
+            id: company.company_id,
+            name: company.name,
+            description: company.description,
+            address,
+            phone: company.phone,
+            email: company.email,
+            avatar_url: company.avatar_url,
+            website: company.website,
+            crn: company.crn,
+            vatin: company.vatin,
+            created_at: company.created_at,
+            edited_at: company.edited_at
+        };
+
+        let body = template.render();
+
+        if body.is_err() {
+            return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Ok().body(body.expect("Should be valid."));
+    }
+
+    let error = result.err().expect("Should be an error");
+    match error {
+        sqlx::Error::RowNotFound => {
+            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
+        }
+        _ => HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
+    }
 }
 
 #[post("/company")]
-pub async fn create_company(_new_company: web::Form<NewCompanyData>) -> HttpResponse {
+pub async fn create_company(new_company: web::Form<NewCompanyData>, company_repo: web::Data<CompanyRepository>) -> HttpResponse {
+    
     todo!()
 }
 
