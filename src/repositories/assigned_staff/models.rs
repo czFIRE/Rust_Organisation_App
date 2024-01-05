@@ -82,7 +82,7 @@ pub struct AssignedStaffStaffUserCompanyFlattened {
     pub user_name: String,
     pub user_email: String,
     pub user_birth: NaiveDate,
-    pub user_avatar_url: Option<String>, // TODO: Now is the same as in INIT.SQL but do we want this?
+    pub user_avatar_url:String,
     pub user_gender: Gender,
     pub user_role: UserRole,
     pub user_status: UserStatus,
@@ -95,7 +95,7 @@ pub struct AssignedStaffStaffUserCompanyFlattened {
     pub company_description: Option<String>,
     pub company_phone: String,
     pub company_email: String,
-    pub company_avatar_url: Option<String>,
+    pub company_avatar_url: String,
     pub company_website: Option<String>,
     pub company_crn: String,
     pub company_vatin: String,
@@ -107,7 +107,7 @@ pub struct AssignedStaffStaffUserCompanyFlattened {
     pub decided_by_user_name: Option<String>,
     pub decided_by_user_email: Option<String>,
     pub decided_by_user_birth: Option<NaiveDate>,
-    pub decided_by_user_avatar_url: Option<String>, // TODO: Now is the same as in INIT.SQL but do we want this?
+    pub decided_by_user_avatar_url: String,
     pub decided_by_user_gender: Option<Gender>,
     pub decided_by_user_role: Option<UserRole>,
     pub decided_by_user_status: Option<UserStatus>,

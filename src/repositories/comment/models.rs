@@ -69,7 +69,7 @@ pub struct CommentUserFlattened {
     pub user_name: String,
     pub user_email: String,
     pub user_birth: NaiveDate,
-    pub user_avatar_url: Option<String>, // TODO: Now is the same as in INIT.SQL but do we want this?
+    pub user_avatar_url: String,
     pub user_gender: Gender,
     pub user_role: UserRole,
     pub user_status: UserStatus,

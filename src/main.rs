@@ -3,6 +3,7 @@ mod handlers;
 mod models;
 mod repositories;
 mod templates;
+mod errors;
 
 use actix_web::{App, HttpServer};
 use dotenv::dotenv;

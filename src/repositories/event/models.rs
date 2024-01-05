@@ -2,8 +2,6 @@ use chrono::NaiveDate;
 use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
 
-use crate::models::Association;
-
 #[derive(Debug, Clone)]
 pub struct NewEvent {
     pub name: String,
@@ -22,7 +20,7 @@ pub struct Event {
     pub accepts_staff: bool,
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
-    pub avatar_url: Option<String>,
+    pub avatar_url: String,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
     pub deleted_at: Option<NaiveDateTime>,

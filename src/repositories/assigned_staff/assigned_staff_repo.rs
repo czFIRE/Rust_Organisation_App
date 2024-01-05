@@ -72,6 +72,7 @@ impl AssignedStaffRepository {
         // TODO - use transaction here
         let executor = self.pool.as_ref();
 
+        //TODO Note to self, make sure that removing the ? from the end of decided_by:avatar_url did not break anything.
         let assigned_staff: AssignedStaffStaffUserCompanyFlattened = sqlx::query_as!(
             AssignedStaffStaffUserCompanyFlattened,
             r#"
@@ -120,7 +121,7 @@ impl AssignedStaffRepository {
                 user_record_decided_by.name AS "decided_by_user_name?",
                 user_record_decided_by.email AS "decided_by_user_email?", 
                 user_record_decided_by.birth AS "decided_by_user_birth?", 
-                user_record_decided_by.avatar_url AS "decided_by_user_avatar_url?", 
+                user_record_decided_by.avatar_url AS "decided_by_user_avatar_url", 
                 user_record_decided_by.gender AS "decided_by_user_gender?: Gender", 
                 user_record_decided_by.role AS "decided_by_user_role?: UserRole", 
                 user_record_decided_by.status AS "decided_by_user_status?: UserStatus", 
@@ -152,6 +153,7 @@ impl AssignedStaffRepository {
     ) -> DbResult<Vec<AssignedStaffExtended>> {
         let executor = self.pool.as_ref();
 
+        //TODO Note to self, make sure that removing the ? from the end of decided_by:avatar_url did not break anything.
         let assigned_staff_to_task: Vec<AssignedStaffStaffUserCompanyFlattened> = sqlx::query_as!(
             AssignedStaffStaffUserCompanyFlattened,
             r#"
@@ -200,7 +202,7 @@ impl AssignedStaffRepository {
                 user_record_decided_by.name AS "decided_by_user_name?",
                 user_record_decided_by.email AS "decided_by_user_email?", 
                 user_record_decided_by.birth AS "decided_by_user_birth?", 
-                user_record_decided_by.avatar_url AS "decided_by_user_avatar_url?", 
+                user_record_decided_by.avatar_url AS "decided_by_user_avatar_url", 
                 user_record_decided_by.gender AS "decided_by_user_gender?: Gender", 
                 user_record_decided_by.role AS "decided_by_user_role?: UserRole", 
                 user_record_decided_by.status AS "decided_by_user_status?: UserStatus", 

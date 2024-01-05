@@ -94,7 +94,7 @@ pub struct EmploymentUserCompanyFlattened {
     pub manager_name: Option<String>,
     pub manager_email: Option<String>,
     pub manager_birth: Option<NaiveDate>,
-    pub manager_avatar_url: Option<String>, // TODO: Now is the same as in INIT.SQL but do we want this?
+    pub manager_avatar_url: String,
     pub manager_gender: Option<Gender>,
     pub manager_role: Option<UserRole>,
     pub manager_status: Option<UserStatus>,
@@ -107,7 +107,7 @@ pub struct EmploymentUserCompanyFlattened {
     pub company_description: Option<String>,
     pub company_phone: String,
     pub company_email: String,
-    pub company_avatar_url: Option<String>,
+    pub company_avatar_url: String,
     pub company_website: Option<String>,
     pub company_crn: String,
     pub company_vatin: String,

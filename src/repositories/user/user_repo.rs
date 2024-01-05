@@ -93,8 +93,8 @@ impl UserRepository {
                 deleted_at 
             FROM 
                 user_record 
-            WHERE 
-                id = $1
+            WHERE id = $1
+              AND deleted_at IS NULL
             "#,
             user_id,
         )

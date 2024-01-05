@@ -1,8 +1,14 @@
-use actix_web::{delete, get, patch, post, put, web, HttpResponse};
-use chrono::Utc;
-use serde::Deserialize;
+use std::str::FromStr;
 
-use crate::models::{Gender, UserRole};
+use actix_web::{delete, get, patch, post, put, web, HttpResponse, http};
+use askama::Template;
+use chrono::Utc;
+use sqlx::error::DatabaseError;
+use crate::{errors::parse_error, templates::user::UserTemplate};
+use serde::Deserialize;
+use uuid::Uuid;
+
+use crate::{models::{Gender, UserRole}, repositories::user::user_repo::UserRepository};
 
 #[derive(Deserialize)]
 pub struct NewUserData {
@@ -23,8 +29,41 @@ pub struct UserData {
 }
 
 #[get("/user/{user_id}")]
-pub async fn get_user(_id: web::Path<String>) -> HttpResponse {
-    todo!()
+pub async fn get_user(user_id: web::Path<String>, user_repo: web::Data<UserRepository>) -> HttpResponse {
+    let id_parse = Uuid::from_str(user_id.into_inner().as_str());
+    if id_parse.is_err() {
+        let error = parse_error(http::StatusCode::BAD_REQUEST);
+        return HttpResponse::BadRequest().body(error)
+    }
+
+    let parsed_id = id_parse.expect("Should be valid.");
+    let query_result = user_repo.read_one(parsed_id).await;
+
+    if let Ok(user) = query_result {
+        let template = UserTemplate {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            birth: user.birth,
+            avatar_url: user.avatar_url,
+            role: user.role,
+            status: user.status,
+            gender: user.gender,
+            created_at: user.created_at
+        };
+
+        let body = template.render();
+
+        if body.is_err() {
+            return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Ok()
+                    .content_type("text/html")
+                    .body(body.expect("Should be valid"));
+    }
+
+    HttpResponse::Ok().body("eMPTY")
 }
 
 #[post("/user")]
