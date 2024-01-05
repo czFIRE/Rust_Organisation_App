@@ -156,7 +156,9 @@ impl CompanyRepository {
 
         let companies = sqlx::query_as!(
             Company,
-            "SELECT * FROM company LIMIT $1 OFFSET $2;",
+            "SELECT * FROM company 
+             WHERE deleted_at IS NULL 
+             LIMIT $1 OFFSET $2;",
             filter.limit,
             filter.offset,
         )
