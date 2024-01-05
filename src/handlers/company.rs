@@ -10,7 +10,7 @@ use crate::{
     handlers::common::QueryParams,
     repositories::company::{
         company_repo::CompanyRepository,
-        models::{Address, AddressData, AddressUpdateData, CompanyData, CompanyFilter, NewCompany},
+        models::{AddressData, AddressUpdateData, CompanyData, CompanyFilter, NewCompany},
     },
     templates::{
         self,
@@ -113,26 +113,31 @@ pub async fn get_company(
     let result = company_repo.read_one_extended(parsed_id).await;
 
     if let Ok(company) = result {
-        let address = templates::company::Address {
-            country: company.country,
-            region: company.region,
-            city: company.city,
-            street: company.street,
-            postal_code: company.postal_code,
-            address_number: company.street_number,
-        };
+        // let address = templates::company::Address {
+        //     country: company.country,
+        //     region: company.region,
+        //     city: company.city,
+        //     street: company.street,
+        //     postal_code: company.postal_code,
+        //     address_number: company.street_number,
+        // };
 
         let template = CompanyTemplate {
             id: company.company_id,
             name: company.name,
             description: company.description,
-            address,
             phone: company.phone,
             email: company.email,
             avatar_url: company.avatar_url,
             website: company.website,
             crn: company.crn,
             vatin: company.vatin,
+            country: company.country,
+            region: company.region,
+            city: company.city,
+            street: company.street,
+            postal_code: company.postal_code,
+            address_number: company.street_number,
             created_at: company.created_at,
             edited_at: company.edited_at,
         };
@@ -144,7 +149,9 @@ pub async fn get_company(
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
 
-        return HttpResponse::Ok().body(body.expect("Should be valid."));
+        return HttpResponse::Ok()
+                .content_type("text/html")
+                .body(body.expect("Should be valid."));
     }
 
     let error = result.err().expect("Should be an error");
@@ -184,26 +191,31 @@ pub async fn create_company(
     let result = company_repo.create(company_data, address).await;
 
     if let Ok(company) = result {
-        let address = templates::company::Address {
-            country: company.country,
-            region: company.region,
-            city: company.city,
-            street: company.street,
-            postal_code: company.postal_code,
-            address_number: company.street_number,
-        };
+        // let address = templates::company::Address {
+        //     country: company.country,
+        //     region: company.region,
+        //     city: company.city,
+        //     street: company.street,
+        //     postal_code: company.postal_code,
+        //     address_number: company.street_number,
+        // };
 
         let template = CompanyTemplate {
             id: company.company_id,
             name: company.name,
             description: company.description,
-            address,
             phone: company.phone,
             email: company.email,
             avatar_url: company.avatar_url,
             website: company.website,
             crn: company.crn,
             vatin: company.vatin,
+            country: company.country,
+            region: company.region,
+            city: company.city,
+            street: company.street,
+            postal_code: company.postal_code,
+            address_number: company.street_number,
             created_at: company.created_at,
             edited_at: company.edited_at,
         };
@@ -215,7 +227,9 @@ pub async fn create_company(
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
 
-        return HttpResponse::Created().body(body.expect("Should be valid."));
+        return HttpResponse::Created()
+                    .content_type("text/html")
+                    .body(body.expect("Should be valid."));
     }
 
     let error = result.err().expect("Should be error.");
@@ -299,26 +313,31 @@ pub async fn update_company(
         .await;
 
     if let Ok(company) = result {
-        let address = templates::company::Address {
-            country: company.country,
-            region: company.region,
-            city: company.city,
-            street: company.street,
-            postal_code: company.postal_code,
-            address_number: company.street_number,
-        };
+        // let address = templates::company::Address {
+        //     country: company.country,
+        //     region: company.region,
+        //     city: company.city,
+        //     street: company.street,
+        //     postal_code: company.postal_code,
+        //     address_number: company.street_number,
+        // };
 
         let template = CompanyTemplate {
             id: company.company_id,
             name: company.name,
             description: company.description,
-            address,
             phone: company.phone,
             email: company.email,
             avatar_url: company.avatar_url,
             website: company.website,
             crn: company.crn,
             vatin: company.vatin,
+            country: company.country,
+            region: company.region,
+            city: company.city,
+            street: company.street,
+            postal_code: company.postal_code,
+            address_number: company.street_number,
             created_at: company.created_at,
             edited_at: company.edited_at,
         };
@@ -330,7 +349,9 @@ pub async fn update_company(
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
 
-        return HttpResponse::Ok().body(body.expect("Should be valid."));
+        return HttpResponse::Ok()
+                    .content_type("text/html")
+                    .body(body.expect("Should be valid."));
     }
 
     let error = result.err().expect("Should be error.");

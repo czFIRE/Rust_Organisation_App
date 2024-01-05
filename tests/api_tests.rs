@@ -350,24 +350,35 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_all_companies_test() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let company_repository = CompanyRepository::new(arc_pool.clone());
+        let company_repo = web::Data::new(company_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(company_repo.clone())
+                .service(get_all_companies)
+        )
+        .await;
 
         let req = test::TestRequest::get().uri("/company").to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::OK);
-        let body_bytes = test::read_body(res).await;
-        let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let companies_template = serde_json::from_str::<CompaniesTemplate>(body).unwrap();
-        assert_eq!(companies_template.companies.len(), 3);
     }
 
     #[actix_web::test]
     async fn get_existing_company_test() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let company_repository = CompanyRepository::new(arc_pool.clone());
+        let company_repo = web::Data::new(company_repository);
 
+        let app = test::init_service(
+            App::new()
+                .app_data(company_repo.clone())
+                .service(get_company)
+        )
+        .await;
         let req = test::TestRequest::get()
             .uri("/company/b5188eda-528d-48d4-8cee-498e0971f9f5")
             .to_request();
@@ -376,23 +387,30 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<CompanyTemplate>(body).unwrap();
-        assert_eq!(out.name, "AMD");
-        assert_eq!(out.crn, "crn_amd");
-        assert_eq!(out.vatin, "vatin_amd");
-        assert_eq!(out.phone, "+1 408-749-4000");
-        assert_eq!(out.email, "info@amd.com");
-        assert_eq!(out.address.address_number, "2485");
-        assert_eq!(out.address.country, "United States");
-        assert_eq!(out.address.region, "CA");
-        assert_eq!(out.address.city, "Santa Clara");
-        assert_eq!(out.address.street, "Augustine Drive");
+        assert!(body.contains("AMD"));
+        assert!(body.contains("crn_amd"));
+        assert!(body.contains("vatin_amd"));
+        assert!(body.contains("+1 408-749-4000"));
+        assert!(body.contains("info@amd.com"));
+        assert!(body.contains("2485"));
+        assert!(body.contains("United States"));
+        assert!(body.contains("CA"));
+        assert!(body.contains("Santa Clara"));
+        assert!(body.contains("Augustine Drive"));
     }
 
     #[actix_web::test]
     async fn get_non_existing_company_test() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let company_repository = CompanyRepository::new(arc_pool.clone());
+        let company_repo = web::Data::new(company_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(company_repo.clone())
+                .service(get_company)
+        )
+        .await;
 
         let req = test::TestRequest::get()
             .uri("/company/b548eed1-538d-48d4-8cee-498e0971f9f5")
@@ -404,8 +422,16 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_company_invalid_uuid_format() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let company_repository = CompanyRepository::new(arc_pool.clone());
+        let company_repo = web::Data::new(company_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(company_repo.clone())
+                .service(get_company)
+        )
+        .await;
 
         let req = test::TestRequest::get()
             .uri("/company/b548eed1-sleepy-head-123zzz")
@@ -416,52 +442,19 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn create_company_test() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+    async fn create_update_delete_company_test() {
+        let arc_pool = get_db_pool().await;
+        let company_repository = CompanyRepository::new(arc_pool.clone());
+        let company_repo = web::Data::new(company_repository);
 
-        let company = json!({
-            "name": "Pepe Productions",
-            "description": "For all your meemz and needz",
-            "website": "www.trollfacecomics.com",
-            "crn": "pepe_crn",
-            "vatin": "pepe_vatin",
-            "country": "Landia",
-            "region": "Landenten",
-            "city": "Citia",
-            "street": "Roadton Ave.",
-            "number": "69",
-            "postal_code": "420 00",
-            "phone": "+0 123456789",
-            "email": "pepe@products.com"
-        });
-
-        let req = test::TestRequest::post()
-            .uri("/company")
-            .set_form(company)
-            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_success());
-        assert_eq!(res.status(), http::StatusCode::CREATED);
-        let body_bytes = test::read_body(res).await;
-        let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<CompanyTemplate>(body).unwrap();
-        assert_eq!(out.name, "Pepe Productions");
-        assert_eq!(out.crn, "pepe_crn");
-        assert_eq!(out.vatin, "pepe_vatin");
-        assert_eq!(out.phone, "+0 123456789");
-        assert_eq!(out.email, "pepe@products.com");
-        assert_eq!(out.address.address_number, "69");
-        assert_eq!(out.address.country, "Landia");
-        assert_eq!(out.address.region, "Landenten");
-        assert_eq!(out.address.city, "Citia");
-        assert_eq!(out.address.street, "Roadton Ave.");
-    }
-
-    #[actix_web::test]
-    async fn create_duplicate_company() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let app = test::init_service(
+            App::new()
+                .app_data(company_repo.clone())
+                .service(create_company)
+                .service(update_company)
+                .service(delete_company)
+        )
+        .await;
 
         let company = json!({
             "name": "Lethal Company",
@@ -469,12 +462,12 @@ mod api_tests {
             "website": "https://store.steampowered.com/app/1966720/Lethal_Company/",
             "crn": "1234",
             "vatin": "123456",
-            "country": "???",
-            "region": "???",
-            "city": "???",
-            "street": "???",
-            "number": "???",
-            "postal_code": "???",
+            "country": "ctr",
+            "region": "reg",
+            "city": "city",
+            "street": "strt",
+            "number": "nmbr",
+            "postal_code": "pstl",
             "phone": "+0 123456789",
             "email": "meet@the.quota"
         });
@@ -484,10 +477,30 @@ mod api_tests {
             .set_form(company.clone())
             .to_request();
         let res = test::call_service(&app, req).await;
-
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::CREATED);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        
+        let uuid_regex = Regex::new(
+            r"[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}",
+        )
+        .unwrap();
+        let uuid_caps = uuid_regex.captures(body).unwrap();
+        let uuid_str = &uuid_caps[0];
 
+        assert!(body.contains("Lethal Company"));
+        assert!(body.contains("1234"));
+        assert!(body.contains("123456"));
+        assert!(body.contains("+0 123456789"));
+        assert!(body.contains("meet@the.quota"));
+        assert!(body.contains("nmbr"));
+        assert!(body.contains("ctr"));
+        assert!(body.contains("reg"));
+        assert!(body.contains("city"));
+        assert!(body.contains("strt"));
+
+        // Attempt to create a duplicate.
         let req = test::TestRequest::post()
             .uri("/company")
             .set_form(company)
@@ -495,20 +508,13 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
-    }
-
-    #[actix_web::test]
-    async fn patch_company() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let data = json!({
-            "crn": "amd_crn",
-            "vatin": "amd_vatin"
+            "crn": "crn1234",
         });
 
         let req = test::TestRequest::patch()
-            .uri("/company/b5188eda-528d-48d4-8cee-498e0971f9f5")
+            .uri(format!("/company/{}", uuid_str).as_str())
             .set_form(data)
             .to_request();
         let res = test::call_service(&app, req).await;
@@ -516,23 +522,45 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<CompanyTemplate>(body).unwrap();
-        assert_eq!(out.name, "AMD");
-        assert_eq!(out.crn, "amd_crn");
-        assert_eq!(out.vatin, "amd_vatin");
-        assert_eq!(out.phone, "+1 408-749-4000");
-        assert_eq!(out.email, "info@amd.com");
-        assert_eq!(out.address.address_number, "2485");
-        assert_eq!(out.address.country, "United States");
-        assert_eq!(out.address.region, "CA");
-        assert_eq!(out.address.city, "Santa Clara");
-        assert_eq!(out.address.street, "Augustine Drive");
+        assert!(body.contains("crn1234"));
+        assert!(body.contains("Lethal Company"));
+
+        // Empty data body.
+        let req = test::TestRequest::patch()
+            .uri(format!("/company/{}", uuid_str).as_str())
+            .set_form(json!({}))
+            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+        
+        let req = test::TestRequest::delete()
+            .uri(format!("/company/{}", uuid_str).as_str())
+            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
+
+        let req = test::TestRequest::delete()
+            .uri(format!("/company/{}", uuid_str).as_str())
+            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn patch_non_existent_company() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let company_repository = CompanyRepository::new(arc_pool.clone());
+        let company_repo = web::Data::new(company_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(company_repo.clone())
+                .service(update_company)
+        )
+        .await;
 
         let data = json!({
             "crn": "amd_crn",
@@ -550,8 +578,16 @@ mod api_tests {
 
     #[actix_web::test]
     async fn patch_company_invalid_uuid_format() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let company_repository = CompanyRepository::new(arc_pool.clone());
+        let company_repo = web::Data::new(company_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(company_repo.clone())
+                .service(update_company)
+        )
+        .await;
 
         let data = json!({
             "crn": "amd_crn",
@@ -568,51 +604,17 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn patch_company_empty_data() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-
-        let data = json!({});
-
-        let req = test::TestRequest::patch()
-            .uri("/company/b5188eda-528d-48d4-8cee-498e0971f9f5")
-            .set_form(data)
-            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
-    }
-
-    #[actix_web::test]
-    async fn delete_company_test() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-
-        let req = test::TestRequest::delete()
-            .uri("/company/b5188eda-528d-48d4-8cee-498e0971f9f5")
-            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_success());
-        assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
-    }
-
-    #[actix_web::test]
-    async fn delete_non_existent_company() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-
-        let req = test::TestRequest::delete()
-            .uri("/company/b5188eda-528d-48d4-8cee-498e0971f9f5")
-            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
-    }
-
-    #[actix_web::test]
     async fn delete_company_invalid_uuid_format() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let company_repository = CompanyRepository::new(arc_pool.clone());
+        let company_repo = web::Data::new(company_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(company_repo.clone())
+                .service(delete_company)
+        )
+        .await;
 
         let req = test::TestRequest::delete()
             .uri("/company/b5188eda-sleepy-head-123zzz")
