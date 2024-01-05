@@ -4,6 +4,18 @@ use actix_web::web;
 use actix_web::web::ServiceConfig;
 use tokio::runtime::Runtime;
 
+use crate::repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository;
+use crate::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
+use crate::repositories::comment::comment_repo::CommentRepository;
+use crate::repositories::company::company_repo::CompanyRepository;
+use crate::repositories::employment::employment_repo::EmploymentRepository;
+use crate::repositories::event::event_repo::EventRepository;
+use crate::repositories::event_staff::event_staff_repo::StaffRepository;
+use crate::repositories::repository::DbRepository;
+use crate::repositories::task::task_repo::TaskRepository;
+use crate::repositories::timesheet::timesheet_repo::TimesheetRepository;
+use crate::repositories::user::user_repo::UserRepository;
+
 use crate::handlers::{
     assigned_staff::{
         create_assigned_staff, delete_assigned_staff, delete_not_accepted_assigned_staff,
@@ -58,19 +70,19 @@ pub fn configure_app(config: &mut ServiceConfig) {
         .block_on(pool)
         .expect("Failed to connect to the database.");
 
-    let _arc_pool = Arc::new(received_pool);
+    let arc_pool = Arc::new(received_pool);
 
     // Add repositories here.
-    let user_repository = ();
-    let company_repository = ();
-    let event_repository = ();
-    let employment_repository = ();
-    let event_staff_repository = ();
-    let task_repository = ();
-    let assigned_staff_repository = ();
-    let associated_company_repository = ();
-    let timesheet_repository = ();
-    let comment_repository = ();
+    let user_repository = UserRepository::new(arc_pool.clone());
+    let company_repository = CompanyRepository::new(arc_pool.clone());
+    let event_repository = EventRepository::new(arc_pool.clone());
+    let employment_repository = EmploymentRepository::new(arc_pool.clone());
+    let event_staff_repository = StaffRepository::new(arc_pool.clone());
+    let task_repository = TaskRepository::new(arc_pool.clone());
+    let assigned_staff_repository = AssignedStaffRepository::new(arc_pool.clone());
+    let associated_company_repository = AssociatedCompanyRepository::new(arc_pool.clone());
+    let timesheet_repository = TimesheetRepository::new(arc_pool.clone());
+    let comment_repository = CommentRepository::new(arc_pool.clone());
 
     let user_repo = web::Data::new(user_repository);
     let company_repo = web::Data::new(company_repository);
