@@ -5,7 +5,7 @@ use askama::Template;
 use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::{repositories::company::{company_repo::CompanyRepository, models::CompanyFilter}, handlers::common::QueryParams, templates::company::{CompaniesTemplate, CompanyLiteTemplate, CompanyTemplate, Address}, errors::parse_error};
+use crate::{repositories::company::{company_repo::CompanyRepository, models::{CompanyFilter, NewCompany, Address, AddressData}}, handlers::common::QueryParams, templates::{company::{CompaniesTemplate, CompanyLiteTemplate, CompanyTemplate}, self}, errors::parse_error};
 
 #[derive(Deserialize)]
 pub struct NewCompanyData {
@@ -91,7 +91,7 @@ pub async fn get_company(company_id: web::Path<String>, company_repo: web::Data<
     let result = company_repo.read_one_extended(parsed_id).await;
 
     if let Ok(company) = result {
-        let address = Address {
+        let address = templates::company::Address {
             country: company.country,
             region: company.region,
             city: company.city,
@@ -136,8 +136,80 @@ pub async fn get_company(company_id: web::Path<String>, company_repo: web::Data<
 
 #[post("/company")]
 pub async fn create_company(new_company: web::Form<NewCompanyData>, company_repo: web::Data<CompanyRepository>) -> HttpResponse {
+    let company_data = NewCompany {
+        name: new_company.name.clone(),
+        description: new_company.description.clone(),
+        phone: new_company.phone.clone(),
+        email: new_company.email.clone(),
+        website: new_company.website.clone(),
+        crn: new_company.crn.clone(),
+        vatin: new_company.vatin.clone()
+    };
+
+    let address = AddressData {
+        country: new_company.country.clone(),
+        region: new_company.region.clone(),
+        city: new_company.city.clone(),
+        postal_code: new_company.postal_code.clone(),
+        street: new_company.street.clone(),
+        street_number: new_company.number.clone()
+    };
+
+    let result = company_repo.create(company_data, address).await;
     
-    todo!()
+    if let Ok(company) = result {
+        let address = templates::company::Address {
+            country: company.country,
+            region: company.region,
+            city: company.city,
+            street: company.street,
+            postal_code: company.postal_code,
+            address_number: company.street_number
+        };
+
+        let template = CompanyTemplate {
+            id: company.company_id,
+            name: company.name,
+            description: company.description,
+            address,
+            phone: company.phone,
+            email: company.email,
+            avatar_url: company.avatar_url,
+            website: company.website,
+            crn: company.crn,
+            vatin: company.vatin,
+            created_at: company.created_at,
+            edited_at: company.edited_at
+        };
+
+        let body = template.render();
+
+        if body.is_err() {
+            return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Created().body(body.expect("Should be valid."));
+    }
+    
+    let error = result.err().expect("Should be error.");
+    match error {
+        sqlx::Error::RowNotFound => {
+            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
+        }
+        sqlx::Error::Database(err) => {
+            if err.is_check_violation()
+                || err.is_foreign_key_violation()
+                || err.is_unique_violation()
+            {
+                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
+            } else {
+                HttpResponse::InternalServerError()
+                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
+            }
+        }
+        _ => HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
+    }
 }
 
 #[patch("/company/{company_id}")]
