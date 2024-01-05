@@ -7,7 +7,7 @@ use crate::{
 };
 use actix_web::{
     delete, get,
-    http::{self, StatusCode},
+    http::self,
     patch, post, put, web, HttpResponse,
 };
 use askama::Template;
