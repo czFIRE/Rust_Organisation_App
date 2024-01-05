@@ -1,4 +1,5 @@
 use chrono::{NaiveDate, NaiveDateTime};
+use serde::Deserialize;
 use sqlx::FromRow;
 use uuid::Uuid;
 
@@ -32,7 +33,7 @@ pub struct User {
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug, FromRow, Clone)]
+#[derive(Debug, FromRow, Deserialize, Clone)]
 pub struct UserData {
     pub name: Option<String>,
     pub email: Option<String>,

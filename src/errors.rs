@@ -3,7 +3,7 @@ use serde::Serialize;
 
 #[derive(Serialize)]
 pub struct ErrorResponse {
-    error: String
+    error: String,
 }
 
 pub fn parse_error(code: http::StatusCode) -> String {
@@ -13,8 +13,8 @@ pub fn parse_error(code: http::StatusCode) -> String {
             http::StatusCode::NOT_FOUND => "Not found".to_string(),
             http::StatusCode::FORBIDDEN => "Forbidden".to_string(),
             http::StatusCode::INTERNAL_SERVER_ERROR => "Internal error.".to_string(),
-            _ => "Unknown error".to_string()
-        }
+            _ => "Unknown error".to_string(),
+        },
     };
 
     serde_json::to_string(&response).expect("Should be parsed correctly.")

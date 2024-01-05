@@ -38,7 +38,7 @@ pub mod user_repo_tests {
     use chrono::{NaiveDate, NaiveDateTime, Utc};
     use sqlx::PgPool;
 
-    use organization_app::{
+    use organization::{
         common::DbResult,
         models::{Gender, UserRole, UserStatus},
         repositories::{

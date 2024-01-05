@@ -18,6 +18,7 @@ pub struct UserTemplate {
     pub status: UserStatus,
     pub gender: Gender,
     pub created_at: NaiveDateTime,
+    pub edited_at: NaiveDateTime,
 }
 
 #[derive(Template, Debug, Deserialize)]
