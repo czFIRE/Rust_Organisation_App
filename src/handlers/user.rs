@@ -3,8 +3,7 @@ use std::str::FromStr;
 use actix_web::{delete, get, patch, post, put, web, HttpResponse, http};
 use askama::Template;
 use chrono::Utc;
-use sqlx::error::DatabaseError;
-use crate::{errors::parse_error, templates::user::UserTemplate};
+use crate::{templates::user::UserTemplate, errors::parse_error};
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -63,7 +62,13 @@ pub async fn get_user(user_id: web::Path<String>, user_repo: web::Data<UserRepos
                     .body(body.expect("Should be valid"));
     }
 
-    HttpResponse::Ok().body("eMPTY")
+    let error = query_result.err().expect("Should be an error");
+    match (error) {
+        sqlx::Error::RowNotFound => {
+            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
+        }
+        _ => HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
+    }
 }
 
 #[post("/user")]
