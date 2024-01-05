@@ -1,11 +1,11 @@
 use crate::common::DbResult;
 use async_trait::async_trait;
-use sqlx::postgres::PgPool;
-use std::sync::Arc;
+use sqlx::{postgres::PgPool, Postgres, Transaction};
+use std::{sync::Arc, ops::DerefMut};
 use uuid::Uuid;
 
 use super::models::{
-    Address, AddressData, Company, CompanyData, CompanyExtended, CompanyFilter, NewCompany,
+    Address, AddressData, Company, CompanyData, CompanyExtended, CompanyFilter, NewCompany, AddressUpdateData,
 };
 
 #[derive(Clone)]
@@ -211,41 +211,44 @@ impl CompanyRepository {
         Ok(companies)
     }
 
+    fn is_company_data_empty(data: CompanyData) -> bool {
+        data.name.is_none()
+        && data.description.is_none()
+        && data.phone.is_none()
+        && data.email.is_none()
+        && data.avatar_url.is_none()
+        && data.website.is_none()
+        && data.crn.is_none()
+        && data.vatin.is_none()
+    }
+
+    fn is_address_data_empty(data: AddressUpdateData) -> bool {
+        data.country.is_none()
+        && data.region.is_none()
+        && data.city.is_none()
+        && data.postal_code.is_none()
+        && data.street.is_none()
+        && data.street_number.is_none()
+    }
+
     pub async fn update(
         &self,
         company_id: Uuid,
         data: CompanyData,
-        address: Option<AddressData>,
+        address: AddressUpdateData,
     ) -> DbResult<CompanyExtended> {
-        let executor = self.pool.as_ref();
+        let is_company_update_empty = Self::is_company_data_empty(data.clone());
+        let is_address_update_empty = Self::is_address_data_empty(address.clone());
 
-        let company_check = self.read_one_extended(company_id).await?;
-
-        if company_check.deleted_at.is_some() {
-            // TODO - return better error
-            return Err(sqlx::Error::RowNotFound);
+        if is_company_update_empty && is_address_update_empty {
+            // ToDo: Improve this.
+            return Err(sqlx::Error::TypeNotFound { type_name: "Empty data".to_string() });
         }
 
-        let mut changed_anything = false;
+        let mut tx = self.pool.begin().await?;
 
-        // we have something to modify
-        if !(data.name.is_none()
-            && data.description.is_none()
-            && data.phone.is_none()
-            && data.email.is_none()
-            && data.avatar_url.is_none()
-            && data.website.is_none()
-            && data.crn.is_none()
-            && data.vatin.is_none())
-        {
-            changed_anything = true;
-
-            if company_check.deleted_at.is_some() {
-                // TODO - return better error
-                return Err(sqlx::Error::RowNotFound);
-            }
-
-            sqlx::query_as!(
+        if !is_company_update_empty {
+            let updated = sqlx::query_as!(
                 Company,
                 "UPDATE
                     company 
@@ -260,7 +263,19 @@ impl CompanyRepository {
                     vatin = COALESCE($8, vatin),
                     edited_at = NOW()
                 WHERE id = $9
-                  AND deleted_at IS NULL  ;
+                  AND deleted_at IS NULL
+                RETURNING id,
+                          name,
+                          description,
+                          phone,
+                          email,
+                          avatar_url,
+                          website,
+                          crn,
+                          vatin,
+                          company.created_at,
+                          company.edited_at,
+                          company.deleted_at;
                 ",
                 data.name,
                 data.description,
@@ -272,14 +287,16 @@ impl CompanyRepository {
                 data.vatin,
                 company_id
             )
-            .execute(executor)
+            .fetch_optional(tx.deref_mut())
             .await?;
+
+            if updated.is_none() {
+                tx.commit().await;
+                return Err(sqlx::Error::RowNotFound);
+            }
         }
 
-        if let Some(address) = address {
-            changed_anything = true;
-
-            // TODO - coalesce is not needed here
+        if !is_address_update_empty {
             let _address = sqlx::query_as!(
                 Address,
                 "UPDATE
@@ -292,7 +309,14 @@ impl CompanyRepository {
                     postal_code = COALESCE($5, postal_code),
                     street_number = COALESCE($6, street_number)
                 WHERE
-                    company_id = $7;
+                    company_id = $7
+                RETURNING company_id,
+                          country,
+                          region,
+                          city,
+                          street,
+                          postal_code,
+                          street_number;
                 ",
                 address.country,
                 address.region,
@@ -302,34 +326,80 @@ impl CompanyRepository {
                 address.street_number,
                 company_id
             )
-            .execute(executor)
+            .fetch_optional(tx.deref_mut())
             .await?;
+
+            if _address.is_none() {
+                tx.commit();
+                return Err(sqlx::Error::RowNotFound);
+            }
         }
 
-        if !changed_anything {
-            // TODO - return better error
-            return Err(sqlx::Error::RowNotFound);
-        }
+        //ToDo: This is currently duplicate.
+        let company = sqlx::query_as!(
+            CompanyExtended,
+            "SELECT  
+                company_id,
+                name,
+                description,
+                phone,
+                email,
+                avatar_url,
+                website,
+                crn,
+                vatin,
+                company.created_at,
+                company.edited_at,
+                company.deleted_at,
+                country,
+                region,
+                city,
+                street,
+                postal_code,
+                street_number
+            FROM company 
+                 INNER JOIN address on company.id = address.company_id 
+                 WHERE company.id = $1
+                   AND deleted_at IS NULL;", 
+            company_id)
+            .fetch_one(tx.deref_mut())
+            .await?;
 
-        self.read_one_extended(company_id).await
+        tx.commit().await;
+
+        Ok(company)
     }
 
     pub async fn delete(&self, company_id: Uuid) -> DbResult<()> {
         let executor = self.pool.as_ref();
 
-        let company_check = self.read_one(company_id).await?;
-
-        if company_check.deleted_at.is_some() {
-            // TODO - return better error
-            return Err(sqlx::Error::RowNotFound);
-        }
-
-        sqlx::query!(
-            "UPDATE company SET deleted_at = NOW(), edited_at = NOW() WHERE id = $1;",
+        let result = sqlx::query_as!(
+            Company,
+            "UPDATE company 
+            SET deleted_at = NOW(), 
+                edited_at = NOW() 
+            WHERE id = $1
+              AND deleted_at IS NULL
+            RETURNING id,
+                      name,
+                      description,
+                      phone,
+                      email,
+                      avatar_url,
+                      website,
+                      crn,
+                      vatin,
+                      company.created_at,
+                      company.edited_at,
+                      company.deleted_at;",
             company_id
         )
-        .execute(executor)
+        .fetch_optional(executor)
         .await?;
+
+        if result.is_none() {
+            return Err(sqlx::Error::RowNotFound);
+        }
 
         Ok(())
     }

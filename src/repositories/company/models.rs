@@ -93,3 +93,13 @@ pub struct AddressData {
     pub street: String,
     pub street_number: String,
 }
+
+#[derive(Debug, Clone)]
+pub struct AddressUpdateData {
+    pub country: Option<String>,
+    pub region: Option<String>,
+    pub city: Option<String>,
+    pub postal_code: Option<String>,
+    pub street: Option<String>,
+    pub street_number: Option<String>,
+}

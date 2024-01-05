@@ -2,10 +2,11 @@ use std::str::FromStr;
 
 use actix_web::{delete, get, patch, post, put, web, HttpResponse, http};
 use askama::Template;
+use organization::repositories::company::models::AddressData;
 use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::{repositories::company::{company_repo::CompanyRepository, models::{CompanyFilter, NewCompany, Address, AddressData}}, handlers::common::QueryParams, templates::{company::{CompaniesTemplate, CompanyLiteTemplate, CompanyTemplate}, self}, errors::parse_error};
+use crate::{repositories::company::{company_repo::CompanyRepository, models::{CompanyFilter, NewCompany, Address, AddressData, CompanyData, AddressUpdateData}}, handlers::common::QueryParams, templates::{company::{CompaniesTemplate, CompanyLiteTemplate, CompanyTemplate}, self}, errors::parse_error};
 
 #[derive(Deserialize)]
 pub struct NewCompanyData {
@@ -24,8 +25,8 @@ pub struct NewCompanyData {
     email: String,
 }
 
-#[derive(Deserialize)]
-pub struct CompanyData {
+#[derive(Deserialize, Clone)]
+pub struct CompanyUpdateData {
     name: Option<String>,
     description: Option<String>,
     website: Option<String>,
@@ -212,12 +213,116 @@ pub async fn create_company(new_company: web::Form<NewCompanyData>, company_repo
     }
 }
 
+fn is_update_data_empty(company_data: CompanyUpdateData) -> bool {
+    company_data.name.is_none()
+    && company_data.description.is_none()
+    && company_data.website.is_none()
+    && company_data.crn.is_none()
+    && company_data.vatin.is_none()
+    && company_data.country.is_none()
+    && company_data.region.is_none()
+    && company_data.city.is_none()
+    && company_data.street.is_none()
+    && company_data.number.is_none()
+    && company_data.postal_code.is_none()
+    && company_data.phone.is_none()
+    && company_data.email.is_none()
+}
+
 #[patch("/company/{company_id}")]
 pub async fn update_company(
-    _id: web::Path<String>,
-    _company_data: web::Form<CompanyData>,
+    company_id: web::Path<String>,
+    company_data: web::Form<CompanyUpdateData>,
+    company_repo: web::Data<CompanyRepository>
 ) -> HttpResponse {
-    todo!()
+    let data = company_data.into_inner();
+
+    if is_update_data_empty(data.clone()) {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let id_parse = Uuid::from_str(company_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let parsed_id = id_parse.expect("Should be valid.");
+    
+    let company_update_data = CompanyData {
+        name: data.name.clone(),
+        description: data.description.clone(),
+        phone: data.phone.clone(),
+        email: data.email.clone(),
+        avatar_url: None, //ToDo: Include avatar in company update?
+        website: data.website.clone(),
+        crn: data.crn.clone(),
+        vatin: data.vatin.clone()
+    };
+
+    let address_update_data = AddressUpdateData {
+        country: data.country.clone(),
+        city: data.city.clone(),
+        region: data.region.clone(),
+        postal_code: data.postal_code.clone(),
+        street: data.street.clone(),
+        street_number: data.number.clone()
+    };
+
+    let result = company_repo.update(parsed_id, company_update_data, address_update_data).await;
+    
+    if let Ok(company) = result {
+        let address = templates::company::Address {
+            country: company.country,
+            region: company.region,
+            city: company.city,
+            street: company.street,
+            postal_code: company.postal_code,
+            address_number: company.street_number
+        };
+
+        let template = CompanyTemplate {
+            id: company.company_id,
+            name: company.name,
+            description: company.description,
+            address,
+            phone: company.phone,
+            email: company.email,
+            avatar_url: company.avatar_url,
+            website: company.website,
+            crn: company.crn,
+            vatin: company.vatin,
+            created_at: company.created_at,
+            edited_at: company.edited_at
+        };
+
+        let body = template.render();
+
+        if body.is_err() {
+            return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Ok().body(body.expect("Should be valid."));
+    }
+
+    let error = result.err().expect("Should be error.");
+    match error {
+        sqlx::Error::RowNotFound => {
+            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
+        }
+        sqlx::Error::Database(err) => {
+            if err.is_check_violation()
+                || err.is_foreign_key_violation()
+                || err.is_unique_violation()
+            {
+                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
+            } else {
+                HttpResponse::InternalServerError()
+                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
+            }
+        }
+        _ => HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
+    }
 }
 
 #[delete("/company/{company_id}")]
