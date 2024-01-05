@@ -7,12 +7,11 @@ mod templates;
 
 use actix_web::{App, HttpServer};
 use dotenv::dotenv;
-use sqlx::{Postgres, Pool};
+use sqlx::{Pool, Postgres};
 use std::io::Result;
 
 use std::sync::Arc;
 
-use actix_web::web;
 use crate::repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository;
 use crate::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
 use crate::repositories::comment::comment_repo::CommentRepository;
@@ -24,6 +23,7 @@ use crate::repositories::repository::DbRepository;
 use crate::repositories::task::task_repo::TaskRepository;
 use crate::repositories::timesheet::timesheet_repo::TimesheetRepository;
 use crate::repositories::user::user_repo::UserRepository;
+use actix_web::web;
 
 use crate::handlers::{
     assigned_staff::{
@@ -71,7 +71,7 @@ const HOST: &str = "0.0.0.0:8000";
 #[tokio::main]
 async fn main() -> Result<()> {
     dotenv().expect("Failed to load .env file");
-    
+
     let pool = setup_db_pool().await;
     let arc_pool = Arc::new(pool);
 

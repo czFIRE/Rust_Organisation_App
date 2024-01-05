@@ -43,8 +43,8 @@ mod api_tests {
             get_subordinates, update_employment,
         },
         event::{
-            create_event, delete_event, get_event, get_event_avatar, get_events, remove_event_avatar,
-            update_event, upload_event_avatar,
+            create_event, delete_event, get_event, get_event_avatar, get_events,
+            remove_event_avatar, update_event, upload_event_avatar,
         },
         event_staff::{
             create_event_staff, delete_all_rejected_event_staff, delete_event_staff,
@@ -53,15 +53,15 @@ mod api_tests {
         event_task::{create_task, delete_task, get_event_task, get_event_tasks, update_task},
         index::index,
         timesheet::{
-            create_timesheet, get_all_timesheets_for_employment, get_timesheet, reset_timesheet_data,
-            update_timesheet,
+            create_timesheet, get_all_timesheets_for_employment, get_timesheet,
+            reset_timesheet_data, update_timesheet,
         },
         user::{
             create_user, delete_user, get_user, get_user_avatar, remove_user_avatar, update_user,
             upload_user_avatar,
         },
     };
-    
+
     use organization::models::{
         AcceptanceStatus, Association, EventRole, Gender, UserRole, UserStatus,
     };
@@ -77,11 +77,11 @@ mod api_tests {
     use organization::templates::task::{TaskTemplate, TasksTemplate};
     use organization::templates::timesheet::{TimesheetTemplate, TimesheetsTemplate};
     use organization::templates::user::UserTemplate;
+    use regex::Regex;
     use serde_json::json;
     use sqlx::{Pool, Postgres};
     use std::str::{self, FromStr};
     use uuid::Uuid;
-    use regex::Regex;
 
     async fn get_db_pool() -> Arc<Pool<Postgres>> {
         dotenv().ok();
@@ -110,13 +110,14 @@ mod api_tests {
         let user_repository = UserRepository::new(arc_pool.clone());
         let user_repo = web::Data::new(user_repository);
 
-        let app =
-            test::init_service(App::new()
-                    .app_data(user_repo.clone())
-                    .service(create_user)
-                    .service(update_user)
-                    .service(delete_user))
-                    .await;
+        let app = test::init_service(
+            App::new()
+                .app_data(user_repo.clone())
+                .service(create_user)
+                .service(update_user)
+                .service(delete_user),
+        )
+        .await;
 
         let user = json!({
             "name": "Peepo Happy",
@@ -133,14 +134,16 @@ mod api_tests {
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::CREATED);
 
-
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         assert!(body.contains("Peepo Happy"));
         assert!(body.contains("peepo@happy.com"));
         assert!(body.contains("img/default/user.jpg"));
-        
-        let uuid_regex = Regex::new(r"[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}").unwrap();
+
+        let uuid_regex = Regex::new(
+            r"[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}",
+        )
+        .unwrap();
         let uuid_caps = uuid_regex.captures(body).unwrap();
         let uuid_str = &uuid_caps[0];
         let user_uuid = Uuid::from_str(uuid_str).expect("Should be a valid UUID");
@@ -167,7 +170,7 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        
+
         assert!(body.contains("Peepo Sad"));
         assert!(body.contains("peepo@happy.com"));
         assert!(body.contains("img/default/user.jpg"));
@@ -203,10 +206,7 @@ mod api_tests {
         let user_repo = web::Data::new(user_repository);
 
         let app =
-            test::init_service(App::new()
-                    .app_data(user_repo.clone())
-                    .service(get_user))
-                    .await;
+            test::init_service(App::new().app_data(user_repo.clone()).service(get_user)).await;
 
         let req = test::TestRequest::get()
             .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4")
@@ -215,7 +215,7 @@ mod api_tests {
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
-        let body = str::from_utf8(body_bytes.borrow()).unwrap();    
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
         assert!(body.contains("Dave Null"));
         assert!(body.contains("dave@null.com"));
     }
@@ -227,11 +227,8 @@ mod api_tests {
         let user_repo = web::Data::new(user_repository);
 
         let app =
-            test::init_service(App::new()
-                    .app_data(user_repo.clone())
-                    .service(get_user))
-                    .await;
-        
+            test::init_service(App::new().app_data(user_repo.clone()).service(get_user)).await;
+
         let req = test::TestRequest::get()
             .uri("/user/35341289-d420-40b6-96d8-ce069b1ba5d4")
             .to_request();
@@ -247,11 +244,8 @@ mod api_tests {
         let user_repo = web::Data::new(user_repository);
 
         let app =
-            test::init_service(App::new()
-                    .app_data(user_repo.clone())
-                    .service(get_user))
-                    .await;
-        
+            test::init_service(App::new().app_data(user_repo.clone()).service(get_user)).await;
+
         let req = test::TestRequest::get()
             .uri("/user/Sleepyhead-d420-zzz6-ygd8-5d4")
             .to_request();
@@ -267,10 +261,7 @@ mod api_tests {
         let user_repo = web::Data::new(user_repository);
 
         let app =
-            test::init_service(App::new()
-                    .app_data(user_repo.clone())
-                    .service(update_user))
-                    .await;
+            test::init_service(App::new().app_data(user_repo.clone()).service(update_user)).await;
 
         let user_update = json!({
             "name": "Dave Nill",
@@ -291,13 +282,14 @@ mod api_tests {
         let user_repository = UserRepository::new(arc_pool.clone());
         let user_repo = web::Data::new(user_repository);
 
-        let app =
-            test::init_service(App::new()
-                    .app_data(user_repo.clone())
-                    .service(create_user)
-                    .service(update_user)
-                    .service(delete_user))
-                    .await;
+        let app = test::init_service(
+            App::new()
+                .app_data(user_repo.clone())
+                .service(create_user)
+                .service(update_user)
+                .service(delete_user),
+        )
+        .await;
 
         let user_update = json!({
             "name": "Dave Nill",
@@ -318,13 +310,14 @@ mod api_tests {
         let user_repository = UserRepository::new(arc_pool.clone());
         let user_repo = web::Data::new(user_repository);
 
-        let app =
-            test::init_service(App::new()
-                    .app_data(user_repo.clone())
-                    .service(create_user)
-                    .service(update_user)
-                    .service(delete_user))
-                    .await;
+        let app = test::init_service(
+            App::new()
+                .app_data(user_repo.clone())
+                .service(create_user)
+                .service(update_user)
+                .service(delete_user),
+        )
+        .await;
 
         let req = test::TestRequest::delete()
             .uri("/user/Sleepyhead-d420-zzz6-ygd8-5d4")

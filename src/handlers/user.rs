@@ -123,14 +123,18 @@ pub async fn create_user(
     match error {
         sqlx::Error::RowNotFound => {
             HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        },
+        }
         sqlx::Error::Database(err) => {
-            if err.is_check_violation() || err.is_foreign_key_violation() || err.is_unique_violation() {
+            if err.is_check_violation()
+                || err.is_foreign_key_violation()
+                || err.is_unique_violation()
+            {
                 HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
             } else {
-                HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
+                HttpResponse::InternalServerError()
+                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
             }
-        },
+        }
         _ => HttpResponse::InternalServerError()
             .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
     }
@@ -184,22 +188,26 @@ pub async fn update_user(
         }
 
         return HttpResponse::Ok()
-                .content_type("text/html")
-                .body(body.expect("Should be okay."));
+            .content_type("text/html")
+            .body(body.expect("Should be okay."));
     }
 
     let error = updated_user.err().expect("Should be error.");
     match error {
         sqlx::Error::RowNotFound => {
             HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        },
+        }
         sqlx::Error::Database(err) => {
-            if err.is_check_violation() || err.is_foreign_key_violation() || err.is_unique_violation() {
+            if err.is_check_violation()
+                || err.is_foreign_key_violation()
+                || err.is_unique_violation()
+            {
                 HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
             } else {
-                HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
+                HttpResponse::InternalServerError()
+                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
             }
-        },
+        }
         _ => HttpResponse::InternalServerError()
             .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
     }
