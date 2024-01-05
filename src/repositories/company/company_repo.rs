@@ -1,11 +1,12 @@
 use crate::common::DbResult;
 use async_trait::async_trait;
-use sqlx::{postgres::PgPool, Postgres, Transaction};
-use std::{sync::Arc, ops::DerefMut};
+use sqlx::postgres::PgPool;
+use std::{ops::DerefMut, sync::Arc};
 use uuid::Uuid;
 
 use super::models::{
-    Address, AddressData, Company, CompanyData, CompanyExtended, CompanyFilter, NewCompany, AddressUpdateData,
+    Address, AddressData, AddressUpdateData, Company, CompanyData, CompanyExtended, CompanyFilter,
+    NewCompany,
 };
 
 #[derive(Clone)]
@@ -35,7 +36,7 @@ impl CompanyRepository {
         data: NewCompany,
         address: AddressData,
     ) -> DbResult<CompanyExtended> {
-        let executor = self.pool.as_ref();
+        let mut tx = self.pool.begin().await?;
 
         let company = sqlx::query_as!(
             Company,
@@ -57,7 +58,7 @@ impl CompanyRepository {
             data.crn,
             data.vatin
         )
-        .fetch_one(executor)
+        .fetch_one(tx.deref_mut())
         .await?;
 
         let address = sqlx::query_as!(
@@ -72,8 +73,10 @@ impl CompanyRepository {
             address.postal_code,
             address.street_number
         )
-        .fetch_one(executor)
+        .fetch_one(tx.deref_mut())
         .await?;
+
+        tx.commit().await?;
 
         let company_extended = CompanyExtended {
             company_id: company.id,
@@ -108,14 +111,15 @@ impl CompanyRepository {
         let executor = self.pool.as_ref();
 
         let company = sqlx::query_as!(
-            Company, 
+            Company,
             "SELECT * 
              FROM company 
              WHERE id = $1
-               AND deleted_at IS NULL;", 
-            company_id)
-            .fetch_one(executor)
-            .await?;
+               AND deleted_at IS NULL;",
+            company_id
+        )
+        .fetch_one(executor)
+        .await?;
 
         Ok(company)
     }
@@ -152,10 +156,11 @@ impl CompanyRepository {
             FROM company 
                  INNER JOIN address on company.id = address.company_id 
                  WHERE company.id = $1
-                   AND deleted_at IS NULL;", 
-            company_id)
-            .fetch_one(executor)
-            .await?;
+                   AND deleted_at IS NULL;",
+            company_id
+        )
+        .fetch_one(executor)
+        .await?;
 
         Ok(company)
     }
@@ -213,22 +218,22 @@ impl CompanyRepository {
 
     fn is_company_data_empty(data: CompanyData) -> bool {
         data.name.is_none()
-        && data.description.is_none()
-        && data.phone.is_none()
-        && data.email.is_none()
-        && data.avatar_url.is_none()
-        && data.website.is_none()
-        && data.crn.is_none()
-        && data.vatin.is_none()
+            && data.description.is_none()
+            && data.phone.is_none()
+            && data.email.is_none()
+            && data.avatar_url.is_none()
+            && data.website.is_none()
+            && data.crn.is_none()
+            && data.vatin.is_none()
     }
 
     fn is_address_data_empty(data: AddressUpdateData) -> bool {
         data.country.is_none()
-        && data.region.is_none()
-        && data.city.is_none()
-        && data.postal_code.is_none()
-        && data.street.is_none()
-        && data.street_number.is_none()
+            && data.region.is_none()
+            && data.city.is_none()
+            && data.postal_code.is_none()
+            && data.street.is_none()
+            && data.street_number.is_none()
     }
 
     pub async fn update(
@@ -242,7 +247,9 @@ impl CompanyRepository {
 
         if is_company_update_empty && is_address_update_empty {
             // ToDo: Improve this.
-            return Err(sqlx::Error::TypeNotFound { type_name: "Empty data".to_string() });
+            return Err(sqlx::Error::TypeNotFound {
+                type_name: "Empty data".to_string(),
+            });
         }
 
         let mut tx = self.pool.begin().await?;
@@ -291,7 +298,7 @@ impl CompanyRepository {
             .await?;
 
             if updated.is_none() {
-                tx.commit().await;
+                tx.commit().await?;
                 return Err(sqlx::Error::RowNotFound);
             }
         }
@@ -330,7 +337,7 @@ impl CompanyRepository {
             .await?;
 
             if _address.is_none() {
-                tx.commit();
+                tx.commit().await?;
                 return Err(sqlx::Error::RowNotFound);
             }
         }
@@ -360,12 +367,13 @@ impl CompanyRepository {
             FROM company 
                  INNER JOIN address on company.id = address.company_id 
                  WHERE company.id = $1
-                   AND deleted_at IS NULL;", 
-            company_id)
-            .fetch_one(tx.deref_mut())
-            .await?;
+                   AND deleted_at IS NULL;",
+            company_id
+        )
+        .fetch_one(tx.deref_mut())
+        .await?;
 
-        tx.commit().await;
+        tx.commit().await?;
 
         Ok(company)
     }

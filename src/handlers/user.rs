@@ -240,7 +240,7 @@ pub async fn delete_user(
     HttpResponse::NoContent().body("Deleted.")
 }
 
-//TODO: Once upload is done.
+//TODO: Once file store/load is done.
 #[get("/user/{user_id}/avatar")]
 pub async fn get_user_avatar(_id: web::Path<String>) -> HttpResponse {
     todo!()
