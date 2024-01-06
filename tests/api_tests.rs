@@ -1831,7 +1831,7 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
 
         let data = json!({
-            "description": "Dirt Shoveller"
+            "level": "manager"
         });
 
         let req = test::TestRequest::patch()
@@ -1846,9 +1846,8 @@ mod api_tests {
 
         assert!(body.contains("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c"));
         assert!(body.contains("b5188eda-528d-48d4-8cee-498e0971f9f5"));
-        assert!(body.contains("hpp"));
-        assert!(body.contains("basic"));
-        assert!(body.contains("Dirt Shoveller"));
+        assert!(body.contains("HPP"));
+        assert!(body.contains("Manager"));
 
         let data = json!({});
 
