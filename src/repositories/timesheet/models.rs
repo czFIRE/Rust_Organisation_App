@@ -39,7 +39,7 @@ pub struct TimesheetCreateData {
     pub event_id: Uuid,
 }
 
-#[derive(Debug, Clone, FromRow)]
+#[derive(Debug, Clone, Deserialize, FromRow)]
 pub struct WorkdayUpdateData {
     pub timesheet_id: Uuid,
     pub date: NaiveDate,
@@ -48,7 +48,7 @@ pub struct WorkdayUpdateData {
     pub is_editable: Option<bool>,
 }
 
-#[derive(Debug, Clone, FromRow)]
+#[derive(Debug, Clone, Deserialize, FromRow)]
 pub struct TimesheetUpdateData {
     pub start_date: Option<NaiveDate>,
     pub end_date: Option<NaiveDate>,

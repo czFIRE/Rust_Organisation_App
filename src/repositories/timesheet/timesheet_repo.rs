@@ -337,7 +337,7 @@ impl TimesheetRepository {
             && data.workdays.is_none()
     }
 
-    pub async fn _update(
+    pub async fn update(
         &self,
         timesheet_id: Uuid,
         data: TimesheetUpdateData,
