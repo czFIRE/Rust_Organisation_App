@@ -346,7 +346,7 @@ pub async fn update_employment(
 
     // This isn't very pleasant, but it is what it is. Maybe fix later.
     // This is done because the repo doesn't return the necessary data from the function.
-    get_full_employment(parsed_user_id, parsed_company_id, employment_repo, false).await
+    get_full_employment(user_id, company_id, employment_repo, false).await
 }
 
 #[delete("/user/{user_id}/employment/{company_id}")]
