@@ -39,7 +39,6 @@ pub struct Employment {
 
 #[derive(Debug, Clone)]
 pub struct EmploymentExtended {
-    // User hopefully knows his own data
     pub user_id: Uuid,
     pub company: Company,
     pub manager: Option<User>,
@@ -95,7 +94,7 @@ pub struct EmploymentUserCompanyFlattened {
     pub manager_name: Option<String>,
     pub manager_email: Option<String>,
     pub manager_birth: Option<NaiveDate>,
-    pub manager_avatar_url: String,
+    pub manager_avatar_url: Option<String>,
     pub manager_gender: Option<Gender>,
     pub manager_role: Option<UserRole>,
     pub manager_status: Option<UserStatus>,
@@ -141,7 +140,7 @@ impl From<EmploymentUserCompanyFlattened> for EmploymentExtended {
                 name: value.manager_name.unwrap(),
                 email: value.manager_email.unwrap(),
                 birth: value.manager_birth.unwrap(),
-                avatar_url: value.manager_avatar_url,
+                avatar_url: value.manager_avatar_url.unwrap(),
                 gender: value.manager_gender.unwrap(),
                 role: value.manager_role.unwrap(),
                 status: value.manager_status.unwrap(),

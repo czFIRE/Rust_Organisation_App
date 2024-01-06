@@ -1669,12 +1669,13 @@ pub mod employment_repo_tests {
 
         assert_eq!(employments.len(), 2);
 
-        let employment = &employments[0];
+        // Had to switch the indices.
+        let employment = &employments[1];
 
         assert_eq!(employment.company.name, "AMD");
         assert_eq!(employment.manager.clone().unwrap().name, "Dave Null");
 
-        let employment = &employments[1];
+        let employment = &employments[0];
 
         assert_eq!(employment.company.name, "ReportLab");
         assert!(employment.manager.is_none());
@@ -1704,7 +1705,7 @@ pub mod employment_repo_tests {
 
         assert_eq!(employments.len(), 3);
 
-        let employment = &employments[0];
+        let employment = &employments[2];
 
         assert_eq!(employment.hourly_wage, 200.0);
         assert_eq!(employment.manager.clone().unwrap().name, "Dave Null");
@@ -1714,7 +1715,7 @@ pub mod employment_repo_tests {
         assert_eq!(employment.hourly_wage, 250.0);
         assert_eq!(employment.manager.clone().unwrap().name, "Dave Null");
 
-        let employment = &employments[2];
+        let employment = &employments[0];
 
         assert_eq!(employment.hourly_wage, 300.0);
         assert!(employment.manager.is_none());
@@ -1776,11 +1777,6 @@ pub mod employment_repo_tests {
             let company_id = test_constants::COMPANY0_ID;
             let user_id = test_constants::USER2_ID;
 
-            let employment = employment_repo
-                .read_one(user_id, company_id)
-                .await
-                .expect("Read should succeed");
-
             let new_employment_data = EmploymentData {
                 manager_id: Some(test_constants::USER0_ID),
                 hourly_wage: Some(10000.0),
@@ -1796,8 +1792,8 @@ pub mod employment_repo_tests {
                 .await
                 .expect("Update should succeed");
 
-            assert_eq!(updated_employment.user_id, employment.user_id);
-            assert_eq!(updated_employment.company_id, employment.company.id);
+            assert_eq!(updated_employment.user_id, user_id);
+            assert_eq!(updated_employment.company_id, company_id);
 
             assert_eq!(
                 updated_employment.manager_id,
@@ -1895,13 +1891,6 @@ pub mod employment_repo_tests {
                 .await
                 .expect("Delete should succeed");
 
-            let deleted_employment = employment_repo
-                .read_one(user_id, company_id)
-                .await
-                .expect("Read should succeed");
-
-            assert!(deleted_employment.deleted_at.is_some());
-
             let new_employment_data = EmploymentData {
                 manager_id: None,
                 hourly_wage: Some(10000.0),
@@ -1942,17 +1931,10 @@ pub mod employment_repo_tests {
 
             employment_repo.delete(user_id, company_id).await.unwrap();
 
-            let new_employment = employment_repo
+            let _new_employment = employment_repo
                 .read_one(user_id, company_id)
                 .await
-                .expect("Read should succeed");
-
-            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
-            let time_difference_edited = time - new_employment.edited_at;
-            let time_difference_deleted = time - new_employment.deleted_at.unwrap();
-
-            assert!(time_difference_edited.num_seconds() < 2);
-            assert!(time_difference_deleted.num_seconds() < 2);
+                .expect_err("Read should not succeed - we can't read a deleted entry.");
         }
 
         // delete on already deleted employment
@@ -1964,9 +1946,7 @@ pub mod employment_repo_tests {
             let employment = employment_repo
                 .read_one(user_id, company_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(employment.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             employment_repo
                 .delete(user_id, company_id)

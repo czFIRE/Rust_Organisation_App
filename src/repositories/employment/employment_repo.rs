@@ -87,7 +87,7 @@ impl EmploymentRepository {
     ) -> DbResult<EmploymentExtended> {
         let executor = self.pool.as_ref();
 
-        let employment: EmploymentUserCompanyFlattened = sqlx::query_as!(
+        let employment = sqlx::query_as!(
             EmploymentUserCompanyFlattened,
             r#"
             SELECT 
@@ -107,7 +107,7 @@ impl EmploymentRepository {
                 user_record.name AS "manager_name?", 
                 user_record.email AS "manager_email?", 
                 user_record.birth AS "manager_birth?", 
-                user_record.avatar_url AS "manager_avatar_url", 
+                user_record.avatar_url AS "manager_avatar_url?", 
                 user_record.gender AS "manager_gender?: Gender", 
                 user_record.role AS "manager_role?: UserRole", 
                 user_record.status AS "manager_status?: UserStatus", 
@@ -133,15 +133,21 @@ impl EmploymentRepository {
             WHERE 
                 employment.user_id = $1 
                 AND employment.company_id = $2  
-                AND employment.deleted_at IS NULL        
+                AND employment.deleted_at IS NULL
+                AND user_record.deleted_at IS NULL
+                AND company.deleted_at IS NULL    
             "#,
             user_uuid,
             company_uuid,
         )
-        .fetch_one(executor)
+        .fetch_optional(executor)
         .await?;
 
-        Ok(employment.into())
+        if employment.is_none() {
+            return Err(sqlx::Error::RowNotFound);
+        }
+
+        Ok(employment.unwrap().into())
     }
 
     // Retrieves all employments for a given user.
@@ -172,7 +178,7 @@ impl EmploymentRepository {
                 user_record.name AS "manager_name?", 
                 user_record.email AS "manager_email?", 
                 user_record.birth AS "manager_birth?", 
-                user_record.avatar_url AS "manager_avatar_url", 
+                user_record.avatar_url AS "manager_avatar_url?", 
                 user_record.gender AS "manager_gender?: Gender", 
                 user_record.role AS "manager_role?: UserRole", 
                 user_record.status AS "manager_status?: UserStatus", 
@@ -238,7 +244,7 @@ impl EmploymentRepository {
                 user_record.name AS "manager_name?", 
                 user_record.email AS "manager_email?", 
                 user_record.birth AS "manager_birth?", 
-                user_record.avatar_url AS "manager_avatar_url", 
+                user_record.avatar_url AS "manager_avatar_url?", 
                 user_record.gender AS "manager_gender?: Gender", 
                 user_record.role AS "manager_role?: UserRole", 
                 user_record.status AS "manager_status?: UserStatus", 
@@ -305,7 +311,7 @@ impl EmploymentRepository {
                 user_record.name AS "manager_name?", 
                 user_record.email AS "manager_email?", 
                 user_record.birth AS "manager_birth?", 
-                user_record.avatar_url AS "manager_avatar_url", 
+                user_record.avatar_url AS "manager_avatar_url?", 
                 user_record.gender AS "manager_gender?: Gender", 
                 user_record.role AS "manager_role?: UserRole", 
                 user_record.status AS "manager_status?: UserStatus", 
