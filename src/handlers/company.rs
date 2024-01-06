@@ -236,7 +236,7 @@ pub async fn create_company(
 }
 
 fn is_update_data_empty(company_data: CompanyUpdateData) -> bool {
-    company_data.name.is_none()
+    (company_data.name.is_none()
         && company_data.description.is_none()
         && company_data.website.is_none()
         && company_data.crn.is_none()
@@ -248,7 +248,20 @@ fn is_update_data_empty(company_data: CompanyUpdateData) -> bool {
         && company_data.number.is_none()
         && company_data.postal_code.is_none()
         && company_data.phone.is_none()
-        && company_data.email.is_none()
+        && company_data.email.is_none())
+        || (company_data.name.is_some() && company_data.name.unwrap().is_empty())
+        || (company_data.description.is_some() && company_data.description.unwrap().is_empty())
+        || (company_data.website.is_some() && company_data.website.unwrap().is_empty())
+        || (company_data.crn.is_some() && company_data.crn.unwrap().is_empty())
+        || (company_data.vatin.is_some() && company_data.vatin.unwrap().is_empty())
+        || (company_data.country.is_some() && company_data.country.unwrap().is_empty())
+        || (company_data.region.is_some() && company_data.region.unwrap().is_empty())
+        || (company_data.city.is_some() && company_data.city.unwrap().is_empty())
+        || (company_data.street.is_some() && company_data.street.unwrap().is_empty())
+        || (company_data.number.is_some() && company_data.number.unwrap().is_empty())
+        || (company_data.postal_code.is_some() && company_data.postal_code.unwrap().is_empty())
+        || (company_data.phone.is_some() && company_data.phone.unwrap().is_empty())
+        || (company_data.email.is_some() && company_data.email.unwrap().is_empty())
 }
 
 #[patch("/company/{company_id}")]

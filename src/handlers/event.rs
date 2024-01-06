@@ -115,6 +115,11 @@ pub async fn create_event(
     new_event: web::Form<NewEvent>,
     event_repo: web::Data<EventRepository>,
 ) -> HttpResponse {
+    if (new_event.website.is_some() && new_event.website.as_ref().unwrap().len() == 0)
+    || (new_event.description.is_some() && new_event.description.as_ref().unwrap().len() == 0) {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
     let result = event_repo.create(new_event.into_inner()).await;
 
     if let Ok(event) = result {
@@ -166,12 +171,16 @@ pub async fn create_event(
 }
 
 fn is_update_data_empty(event_data: EventData) -> bool {
-    event_data.name.is_none()
+    (event_data.name.is_none()
         && event_data.description.is_none()
         && event_data.website.is_none()
         && event_data.start_date.is_none()
         && event_data.end_date.is_none()
-        && event_data.avatar_url.is_none()
+        && event_data.avatar_url.is_none())
+        || (event_data.avatar_url.is_some() && event_data.avatar_url.unwrap().len() == 0)
+        || (event_data.website.is_some() && event_data.website.unwrap().len() == 0)
+        || (event_data.description.is_some() && event_data.description.unwrap().len() == 0)
+
 }
 
 #[patch("/event/{event_id}")]
