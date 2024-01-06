@@ -1,8 +1,9 @@
 use chrono::NaiveDate;
+use serde::Deserialize;
 use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct NewEvent {
     pub name: String,
     pub description: Option<String>,
@@ -26,7 +27,7 @@ pub struct Event {
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct EventData {
     pub name: Option<String>,
     pub description: Option<String>,
@@ -36,7 +37,7 @@ pub struct EventData {
     pub avatar_url: Option<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct EventFilter {
     pub accepts_staff: Option<bool>,
     pub limit: Option<i64>,

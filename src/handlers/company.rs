@@ -113,15 +113,6 @@ pub async fn get_company(
     let result = company_repo.read_one_extended(parsed_id).await;
 
     if let Ok(company) = result {
-        // let address = templates::company::Address {
-        //     country: company.country,
-        //     region: company.region,
-        //     city: company.city,
-        //     street: company.street,
-        //     postal_code: company.postal_code,
-        //     address_number: company.street_number,
-        // };
-
         let template = CompanyTemplate {
             id: company.company_id,
             name: company.name,
@@ -191,15 +182,6 @@ pub async fn create_company(
     let result = company_repo.create(company_data, address).await;
 
     if let Ok(company) = result {
-        // let address = templates::company::Address {
-        //     country: company.country,
-        //     region: company.region,
-        //     city: company.city,
-        //     street: company.street,
-        //     postal_code: company.postal_code,
-        //     address_number: company.street_number,
-        // };
-
         let template = CompanyTemplate {
             id: company.company_id,
             name: company.name,
@@ -313,15 +295,6 @@ pub async fn update_company(
         .await;
 
     if let Ok(company) = result {
-        // let address = templates::company::Address {
-        //     country: company.country,
-        //     region: company.region,
-        //     city: company.city,
-        //     street: company.street,
-        //     postal_code: company.postal_code,
-        //     address_number: company.street_number,
-        // };
-
         let template = CompanyTemplate {
             id: company.company_id,
             name: company.name,

@@ -67,7 +67,13 @@ impl EventRepository {
         let executor = self.pool.as_ref();
 
         let event: Event =
-            sqlx::query_as!(Event, r#" SELECT * FROM event WHERE id = $1;"#, event_id)
+            sqlx::query_as!(
+                Event, 
+                r#"SELECT * 
+                   FROM event 
+                   WHERE id = $1
+                     AND deleted_at IS NULL;"#,
+                event_id)
                 .fetch_one(executor)
                 .await?;
 
@@ -82,7 +88,12 @@ impl EventRepository {
             Some(accepts_staff) => {
                 sqlx::query_as!(
                     Event,
-                    r#" SELECT * FROM event WHERE accepts_staff = $1 LIMIT $2 OFFSET $3;"#,
+                    r#" SELECT * 
+                        FROM event 
+                        WHERE accepts_staff = $1 
+                          AND deleted_at IS NULL
+                        LIMIT $2 
+                        OFFSET $3;"#,
                     accepts_staff,
                     filter.limit,
                     filter.offset,
@@ -93,7 +104,11 @@ impl EventRepository {
             None => {
                 sqlx::query_as!(
                     Event,
-                    r#" SELECT * FROM event LIMIT $1 OFFSET $2;"#,
+                    r#" SELECT * 
+                        FROM event
+                        WHERE deleted_at IS NULL 
+                        LIMIT $1 
+                        OFFSET $2;"#,
                     filter.limit,
                     filter.offset,
                 )
@@ -118,14 +133,7 @@ impl EventRepository {
 
         let executor = self.pool.as_ref();
 
-        let event_check = self.read_one(event_id).await?;
-
-        if event_check.deleted_at.is_some() {
-            // TODO - return better error
-            return Err(sqlx::Error::RowNotFound);
-        }
-
-        let event: Event = sqlx::query_as!(
+        let event = sqlx::query_as!(
             Event,
             r#" UPDATE event SET 
                 name = COALESCE($1, name), 
@@ -135,7 +143,9 @@ impl EventRepository {
                 end_date = COALESCE($5, end_date), 
                 avatar_url = COALESCE($6, avatar_url), 
                 edited_at = NOW() 
-                WHERE id = $7 RETURNING id, 
+                WHERE id = $7
+                  AND deleted_at IS NULL 
+                RETURNING id, 
                 name, 
                 description, 
                 website, 
@@ -155,32 +165,44 @@ impl EventRepository {
             data.avatar_url,
             event_id,
         )
-        .fetch_one(executor)
+        .fetch_optional(executor)
         .await?;
 
-        Ok(event)
+        if event.is_none() {
+            return Err(sqlx::Error::RowNotFound)
+        }
+
+        Ok(event.expect("Should be valid"))
     }
 
     pub async fn delete(&self, event_id: Uuid) -> DbResult<()> {
         let executor = self.pool.as_ref();
 
-        let event_check = self.read_one(event_id).await?;
-
-        if event_check.deleted_at.is_some() {
-            // TODO - return better error
-            return Err(sqlx::Error::RowNotFound);
-        }
-
-        sqlx::query!(
+        let result = sqlx::query_as!(
+            Event,
             r#"UPDATE event
             SET deleted_at = NOW(), edited_at = NOW()
             WHERE id = $1
             AND deleted_at IS NULL
-            "#,
+            RETURNING id, 
+                name, 
+                description, 
+                website, 
+                accepts_staff, 
+                start_date, 
+                end_date, 
+                avatar_url, 
+                created_at, 
+                edited_at, 
+                deleted_at;"#,
             event_id,
         )
-        .execute(executor)
+        .fetch_optional(executor)
         .await?;
+
+        if result.is_none() {
+            return Err(sqlx::Error::RowNotFound);
+        }
 
         Ok(())
     }
