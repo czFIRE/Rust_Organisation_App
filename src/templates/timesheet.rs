@@ -6,8 +6,6 @@ use uuid::Uuid;
 
 use crate::models::ApprovalStatus;
 
-use super::event::EventLiteTemplate;
-
 #[derive(Template, Debug, Deserialize)]
 #[template(path = "employment/timesheet/workday.html")]
 pub struct WorkdayTemplate {

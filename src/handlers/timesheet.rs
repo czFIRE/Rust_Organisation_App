@@ -2,40 +2,20 @@ use std::str::FromStr;
 
 use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;
-use chrono::Utc;
-use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::{
     errors::parse_error,
-    handlers::common::{extract_user_company_ids, QueryParams},
-    models::ApprovalStatus,
+    handlers::common::extract_user_company_ids,
     repositories::timesheet::{
         models::{TimesheetCreateData, TimesheetReadAllData, TimesheetUpdateData},
         timesheet_repo::TimesheetRepository,
     },
-    templates::{
-        event::EventLiteTemplate,
-        timesheet::{
+    templates::timesheet::{
             TimesheetLiteTemplate, TimesheetTemplate, TimesheetsTemplate, WorkdayTemplate,
         },
-    },
 };
 
-#[derive(Deserialize)]
-pub struct WorkDay {
-    total_hours: Option<u8>, // If none, the default is 0.
-    comment: Option<String>,
-    is_editable: Option<bool>,
-}
-
-#[derive(Deserialize)]
-pub struct TimesheetData {
-    work_days: Option<Vec<WorkDay>>,
-    is_editable: Option<bool>,
-    status: Option<ApprovalStatus>,
-    manager_note: Option<String>,
-}
 
 #[get("/user/{user_id}/employment/{company_id}/sheet")]
 pub async fn get_all_timesheets_for_employment(
@@ -91,7 +71,7 @@ pub async fn get_all_timesheets_for_employment(
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
 
-        return HttpResponse::Ok().body(body.expect("Should be valid now."));
+        return HttpResponse::Ok().content_type("text/html").body(body.expect("Should be valid now."));
     }
 
     HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
@@ -148,7 +128,7 @@ pub async fn create_timesheet(
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
 
-        return HttpResponse::Created().body(body.expect("Should be valid now."));
+        return HttpResponse::Created().content_type("text/html").body(body.expect("Should be valid now."));
     }
 
     let error = result.err().expect("Should be error here.");
@@ -225,7 +205,7 @@ pub async fn get_timesheet(
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
 
-        return HttpResponse::Ok().body(body.expect("Should be valid now."));
+        return HttpResponse::Ok().content_type("text/html").body(body.expect("Should be valid now."));
     }
 
     let error = result.err().expect("Should be an error.");
@@ -313,7 +293,7 @@ pub async fn update_timesheet(
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
 
-        return HttpResponse::Ok().body(body.expect("Should be valid now."));
+        return HttpResponse::Ok().content_type("text/html").body(body.expect("Should be valid now."));
     }
 
     let error = result.err().expect("Should be error here.");
@@ -392,7 +372,7 @@ pub async fn reset_timesheet_data(
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
 
-        return HttpResponse::Ok().body(body.expect("Should be valid now."));
+        return HttpResponse::Ok().content_type("text/html").body(body.expect("Should be valid now."));
     }
 
     let error = result.err().expect("Should be error here.");

@@ -72,7 +72,7 @@ pub async fn get_employments_per_user(
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
 
-        return HttpResponse::Ok().body(body.expect("Should be valid now."));
+        return HttpResponse::Ok().content_type("text/html").body(body.expect("Should be valid now."));
     }
 
     HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
@@ -131,9 +131,9 @@ async fn get_full_employment(
         }
 
         return if is_created {
-            HttpResponse::Created().body(body.expect("Should be valid now."))
+            HttpResponse::Created().content_type("text/html").body(body.expect("Should be valid now."))
         } else {
-            HttpResponse::Ok().body(body.expect("Should be valid now."))
+            HttpResponse::Ok().content_type("text/html").body(body.expect("Should be valid now."))
         };
     }
 
@@ -236,7 +236,7 @@ pub async fn get_subordinates(
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
 
-        return HttpResponse::Ok().body(body.expect("Should be valid now."));
+        return HttpResponse::Ok().content_type("text/html").body(body.expect("Should be valid now."));
     }
 
     let error = result.err().expect("Should be error.");

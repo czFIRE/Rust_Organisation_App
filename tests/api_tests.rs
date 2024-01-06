@@ -2589,8 +2589,17 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_all_timesheets_for_employment_test() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = TimesheetRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(get_all_timesheets_for_employment),
+        )
+        .await;
+
         let req = test::TestRequest::get()
                     .uri("/user/ac9bf689-a713-4b66-a3d0-41faaf0f8d0c/employment/134d5286-5f55-4637-9b98-223a5820a464/sheet")
                     .to_request();
@@ -2599,14 +2608,33 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<TimesheetsTemplate>(body).unwrap();
-        assert_eq!(out.timesheets.len(), 1);
+
+        // timesheet ID, should be there since only 1 timesheet exists for user.
+        assert!(body.contains("d47e8141-a77e-4d55-a2d5-4a77de24b6d0"));
+
+        // user ID
+        assert!(body.contains("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c"));
+
+        // company ID
+        assert!(body.contains("134d5286-5f55-4637-9b98-223a5820a464"));
+
+        // event ID
+        assert!(body.contains("3f152d12-0bbd-429a-a9c5-28967d6370cc"));
     }
 
     #[actix_web::test]
     async fn get_all_timesheets_for_non_existent_employment() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = TimesheetRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(get_all_timesheets_for_employment),
+        )
+        .await;
+
         let req = test::TestRequest::get()
                     .uri("/user/3abc12e3-dad0-40b6-96d8-ce069b1ba5d4/employment/b5188eda-528d-48d4-8cee-498e0971f9f5/sheet")
                     .to_request();
@@ -2617,8 +2645,17 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_all_timesheets_for_employment_invalid_uuid_format() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = TimesheetRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(get_all_timesheets_for_employment),
+        )
+        .await;
+
         let req = test::TestRequest::get()
             .uri("/user/3aZZZBADUUIDY/employment/b5188eda-528d-48d4-8cee-498e0971f9f5/sheet")
             .to_request();
@@ -2629,8 +2666,12 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_timesheet_test() {
+        let arc_pool = get_db_pool().await;
+        let repository = TimesheetRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
+
         let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+            test::init_service(App::new().app_data(repo.clone()).service(get_timesheet)).await;
         let req = test::TestRequest::get()
             .uri("/timesheet/d47e8141-a77e-4d55-a2d5-4a77de24b6d0")
             .to_request();
@@ -2639,18 +2680,24 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<TimesheetTemplate>(body).unwrap();
-        assert_eq!(out.work_days.len(), 2);
-        assert_eq!(
-            out.id,
-            Uuid::from_str("d47e8141-a77e-4d55-a2d5-4a77de24b6d0").unwrap()
-        );
+
+        assert!(body.contains("d47e8141-a77e-4d55-a2d5-4a77de24b6d0"));
+        // user id
+        assert!(body.contains("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c"));
+        // company_id
+        assert!(body.contains("134d5286-5f55-4637-9b98-223a5820a464"));
+        // event_id
+        assert!(body.contains("3f152d12-0bbd-429a-a9c5-28967d6370cc"));
     }
 
     #[actix_web::test]
     async fn get_non_existent_timesheet() {
+        let arc_pool = get_db_pool().await;
+        let repository = TimesheetRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
+
         let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+            test::init_service(App::new().app_data(repo.clone()).service(get_timesheet)).await;
         let req = test::TestRequest::get()
             .uri("/timesheet/dabe8141-a27e-4c55-a2d5-4a77de24b6d0")
             .to_request();
@@ -2661,8 +2708,12 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_timesheet_invalid_uuid_format() {
+        let arc_pool = get_db_pool().await;
+        let repository = TimesheetRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
+
         let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+            test::init_service(App::new().app_data(repo.clone()).service(get_timesheet)).await;
         let req = test::TestRequest::get()
             .uri("/timesheet/BADFORMATZ12")
             .to_request();
@@ -2673,20 +2724,29 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_update_timesheet() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = TimesheetRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(create_timesheet)
+                .service(update_timesheet),
+        )
+        .await;
 
         let data = json!({
              "user_id": "0465041f-fe64-461f-9f71-71e3b97ca85f",
-             "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
-             "event_id": "b71fd7ce-c891-410a-9bb4-70fc5c7748f8",
+             "company_id": "134d5286-5f55-4637-9b98-223a5820a464",
+             "event_id": "3f152d12-0bbd-429a-a9c5-28967d6370cc",
              "start_date": "1969-08-15",
              "end_date": "1969-08-18"
         });
 
         let req = test::TestRequest::post()
             .uri("/timesheet")
-            .set_form(data)
+            .set_form(data.clone())
             .to_request();
         let res = test::call_service(&app, req).await;
 
@@ -2694,22 +2754,25 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::CREATED);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<TimesheetTemplate>(body).unwrap();
-        assert_eq!(out.work_days.len(), 4);
-        assert_eq!(
-            out.company_id,
-            Uuid::from_str("b5188eda-528d-48d4-8cee-498e0971f9f5").unwrap()
-        );
-        assert_eq!(
-            out.user_id,
-            Uuid::from_str("0465041f-fe64-461f-9f71-71e3b97ca85f").unwrap()
-        );
-        assert_eq!(
-            out.event.id,
-            Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap()
-        );
+        assert!(body.contains("3f152d12-0bbd-429a-a9c5-28967d6370cc"));
+        assert!(body.contains("0465041f-fe64-461f-9f71-71e3b97ca85f"));
+        assert!(body.contains("134d5286-5f55-4637-9b98-223a5820a464"));
 
-        let timesheet_id = out.id;
+        let uuid_regex = Regex::new(
+            r"[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}",
+        )
+        .unwrap();
+        let uuid_caps = uuid_regex.find(body).unwrap();
+        let timesheet_id = uuid_caps.as_str();
+
+        let req = test::TestRequest::post()
+            .uri("/timesheet")
+            .set_form(data)
+            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+
         let data = json!({
             "manager_note": "Hey, fill out your sheet.",
         });
@@ -2723,10 +2786,17 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<TimesheetTemplate>(body).unwrap();
-        assert_eq!(
-            out.manager_note,
-            Some("Hey, fill out your sheet.".to_string())
-        );
+
+        assert!(body.contains("Hey, fill out your sheet."));
+
+        let data = json!({});
+        let req = test::TestRequest::patch()
+            .uri(format!("/timesheet/{}", timesheet_id.to_string()).as_str())
+            .set_form(data)
+            .to_request();
+        let res = test::call_service(&app, req).await;
+
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 }
