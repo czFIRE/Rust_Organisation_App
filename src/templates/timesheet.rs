@@ -12,9 +12,9 @@ use super::event::EventLiteTemplate;
 #[template(path = "employment/timesheet/workday.html")]
 pub struct WorkdayTemplate {
     pub timesheet_id: Uuid,
-    pub work_date: NaiveDate,
-    pub total_hours: u8,
-    pub comment: Option<String>,
+    pub date: NaiveDate,
+    pub total_hours: f32,
+    pub comment: String,
     pub is_editable: bool,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
@@ -26,15 +26,17 @@ pub struct TimesheetTemplate {
     pub id: Uuid,
     pub user_id: Uuid,
     pub company_id: Uuid,
-    pub event: EventLiteTemplate,
+    pub event_id: Uuid,
+    pub event_avatar_url: String,
+    pub event_name: String,
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
-    pub total_hours: u16,
+    pub total_hours: f32,
     pub work_days: Vec<WorkdayTemplate>,
-    pub calculated_wage: Option<u128>, // Mind this field: It isn't in the DB and needs to be calculated. This is in CZK.
+    pub calculated_wage: u128, // Mind this field: It isn't in the DB and needs to be calculated. This is in CZK.
     pub is_editable: bool,
     pub status: ApprovalStatus,
-    pub manager_note: Option<String>,
+    pub manager_note: String,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
 }

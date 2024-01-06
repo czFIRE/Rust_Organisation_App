@@ -60,31 +60,18 @@ impl TimesheetRepository {
         Ok(workdays)
     }
 
-    pub async fn _create(&self, data: TimesheetCreateData) -> DbResult<TimesheetWithWorkdays> {
-        // let executor = self.pool.as_ref();
+    pub async fn create(&self, data: TimesheetCreateData) -> DbResult<TimesheetWithWorkdays> {
         let mut tx = self.pool.begin().await?;
-
-        if data.manager_note.is_some()
-            && data.manager_note.clone().expect("Should be some").len() == 0
-        {
-            return Err(sqlx::Error::ColumnNotFound(
-                "Manager note is some and empty.".to_string(),
-            )); // ToDo: Rewrite for a proper error.
-        }
 
         let timesheet_structure = sqlx::query_as!(
             TimesheetStructureData,
             r#"
-            INSERT INTO timesheet (start_date, end_date, total_hours, is_editable, status, manager_note, user_id, company_id, event_id) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            INSERT INTO timesheet (start_date, end_date, user_id, company_id, event_id) 
+            VALUES ($1, $2, $3, $4, $5)
             RETURNING id, start_date, end_date;
             "#,
             data.start_date,
             data.end_date,
-            data.total_hours,
-            data.is_editable,
-            data.status as ApprovalStatus,
-            data.manager_note,
             data.user_id,
             data.company_id,
             data.event_id

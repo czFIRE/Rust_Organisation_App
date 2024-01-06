@@ -8,21 +8,12 @@ use crate::{
     errors::parse_error,
     handlers::common::{extract_user_company_ids, QueryParams},
     models::ApprovalStatus,
-    repositories::timesheet::{models::TimesheetReadAllData, timesheet_repo::TimesheetRepository},
+    repositories::timesheet::{models::{TimesheetReadAllData, TimesheetCreateData}, timesheet_repo::TimesheetRepository},
     templates::{
         event::EventLiteTemplate,
-        timesheet::{TimesheetLiteTemplate, TimesheetsTemplate},
+        timesheet::{TimesheetLiteTemplate, TimesheetsTemplate, WorkdayTemplate, TimesheetTemplate},
     },
 };
-
-#[derive(Deserialize)]
-pub struct NewTimesheetData {
-    user_id: Uuid,
-    company_id: Uuid,
-    event_id: Uuid,
-    start_date: chrono::DateTime<Utc>,
-    end_date: chrono::DateTime<Utc>,
-}
 
 #[derive(Deserialize)]
 pub struct WorkDay {
@@ -101,9 +92,65 @@ pub async fn get_all_timesheets_for_employment(
 
 // Note: This is done automatically whenever event_staff is accepted to work on an event.
 #[post("/timesheet")]
-pub async fn create_timesheet(_new_timesheet: web::Form<NewTimesheetData>) -> HttpResponse {
-    // Default approval status: NotRequested
-    todo!()
+pub async fn create_timesheet(new_timesheet: web::Form<TimesheetCreateData>, timesheet_repo: web::Data<TimesheetRepository>) -> HttpResponse {
+    let result = timesheet_repo.create(new_timesheet.into_inner()).await;
+
+    if let Ok(full_timesheet) = result {
+        let workdays = full_timesheet.workdays.into_iter().map(|workday| {
+            WorkdayTemplate {
+                timesheet_id: workday.timesheet_id,
+                date: workday.date,
+                total_hours: workday.total_hours,
+                comment: workday.comment.unwrap_or("No comment.".to_string()),
+                is_editable: workday.is_editable,
+                created_at: workday.created_at,
+                edited_at: workday.edited_at
+            }
+        }).collect();
+        
+        let template = TimesheetTemplate {
+            id: full_timesheet.timesheet.id,
+            user_id: full_timesheet.timesheet.user_id,
+            company_id: full_timesheet.timesheet.company_id,
+            event_id: full_timesheet.timesheet.event_id,
+            event_avatar_url: full_timesheet.timesheet.event_avatar_url,
+            event_name: full_timesheet.timesheet.event_name,
+            start_date: full_timesheet.timesheet.start_date,
+            end_date: full_timesheet.timesheet.end_date,
+            total_hours: full_timesheet.timesheet.total_hours,
+            work_days: workdays,
+            calculated_wage: 0,
+            is_editable: full_timesheet.timesheet.is_editable,
+            status: full_timesheet.timesheet.status,
+            manager_note: full_timesheet.timesheet.manager_note.unwrap_or("No note.".to_string()),
+            created_at: full_timesheet.timesheet.created_at,
+            edited_at: full_timesheet.timesheet.edited_at,
+        };
+
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Created().body(body.expect("Should be valid now."));
+    }
+    
+    let error = result.err().expect("Should be error here.");
+    return match error {
+        sqlx::Error::Database(err) => {
+            if err.is_unique_violation()
+                || err.is_check_violation()
+                || err.is_foreign_key_violation()
+            {
+                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
+            } else {
+                HttpResponse::InternalServerError()
+                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
+            }
+        }
+        _ => HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
+    };
 }
 
 #[get("/timesheet/{timesheet_id}")]

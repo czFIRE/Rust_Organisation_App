@@ -269,9 +269,6 @@ pub async fn create_employment(
 
     if let Err(error) = result {
         return match error {
-            sqlx::Error::RowNotFound => {
-                HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-            }
             sqlx::Error::Database(err) => {
                 if err.is_unique_violation()
                     || err.is_check_violation()
