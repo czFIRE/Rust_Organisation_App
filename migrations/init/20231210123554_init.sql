@@ -245,17 +245,17 @@ CREATE TABLE event_staff
 (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     -------------------------------------------------------
+    user_id     UUID NOT NULL,
+    company_id  UUID NOT NULL,
+    event_id    UUID NOT NULL,
+    decided_by  UUID,
+    -------------------------------------------------------
     role        event_role NOT NULL DEFAULT 'staff',
     status      acceptance_status NOT NULL DEFAULT 'pending',
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at  TIMESTAMP,
-    -------------------------------------------------------
-    user_id     UUID NOT NULL,
-    company_id  UUID NOT NULL,
-    decided_by  UUID,
-    event_id    UUID NOT NULL,
     -------------------------------------------------------
     FOREIGN KEY (user_id) REFERENCES user_record (id),
     FOREIGN KEY (company_id) REFERENCES company (id),
