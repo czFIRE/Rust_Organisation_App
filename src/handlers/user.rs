@@ -137,13 +137,13 @@ pub async fn create_user(
 
 fn is_data_invalid(user_data: UserData) -> bool {
     (user_data.name.is_none()
-    && user_data.email.is_none()
-    && user_data.birth.is_none()
-    && user_data.avatar_url.is_none()
-    && user_data.role.is_none())
-    || (user_data.name.is_some() && user_data.name.unwrap().len() == 0)
-    || (user_data.email.is_some() && user_data.email.unwrap().len() == 0)
-    || (user_data.avatar_url.is_some() && user_data.avatar_url.unwrap().len() == 0)
+        && user_data.email.is_none()
+        && user_data.birth.is_none()
+        && user_data.avatar_url.is_none()
+        && user_data.role.is_none())
+        || (user_data.name.is_some() && user_data.name.unwrap().len() == 0)
+        || (user_data.email.is_some() && user_data.email.unwrap().len() == 0)
+        || (user_data.avatar_url.is_some() && user_data.avatar_url.unwrap().len() == 0)
 }
 
 #[patch("/user/{user_id}")]
@@ -152,8 +152,7 @@ pub async fn update_user(
     user_data: web::Form<UserData>,
     user_repo: web::Data<UserRepository>,
 ) -> HttpResponse {
-    if is_data_invalid(user_data.clone())
-    {
+    if is_data_invalid(user_data.clone()) {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 

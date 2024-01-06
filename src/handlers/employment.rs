@@ -129,8 +129,11 @@ async fn get_full_employment(
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
 
-        return if is_created { HttpResponse::Created().body(body.expect("Should be valid now."))}
-               else { HttpResponse::Ok().body(body.expect("Should be valid now.")) };
+        return if is_created {
+            HttpResponse::Created().body(body.expect("Should be valid now."))
+        } else {
+            HttpResponse::Ok().body(body.expect("Should be valid now."))
+        };
     }
 
     let error = result.err().expect("Should be error.");
@@ -266,7 +269,10 @@ pub async fn create_employment(
                 HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
             }
             sqlx::Error::Database(err) => {
-                if err.is_unique_violation() || err.is_check_violation() || err.is_foreign_key_violation() {
+                if err.is_unique_violation()
+                    || err.is_check_violation()
+                    || err.is_foreign_key_violation()
+                {
                     HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
                 } else {
                     HttpResponse::InternalServerError()
