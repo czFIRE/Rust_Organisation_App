@@ -208,8 +208,8 @@ CREATE TABLE timesheet
     CONSTRAINT check_timesheet_is_editable_iff_not_requested_or_rejected
         CHECK (NOT(is_editable IS TRUE AND status IN ('pending', 'accepted'))),
     CONSTRAINT check_total_hours_lte_744
+        -- max hours per month: 24.0 * 31.0 = 744.0
         CHECK (total_hours <= 744.0),
-    -- max hours per month: 24.0 * 31.0 = 744.0
     CONSTRAINT check_timesheet_start_date_lte_end_date
         CHECK (start_date <= end_date),
     CONSTRAINT check_timesheet_created_at_lte_edited_at
