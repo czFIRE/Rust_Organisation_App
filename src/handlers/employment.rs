@@ -9,13 +9,10 @@ use crate::{
 };
 use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;
-use chrono::{Duration, NaiveDate, Utc};
-use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::{
     errors::parse_error,
-    models::{EmployeeContract, EmployeeLevel},
     repositories::employment::{employment_repo::EmploymentRepository, models::EmploymentFilter},
     templates::{company::CompanyLiteTemplate, employment::EmploymentsTemplate},
 };
@@ -84,6 +81,7 @@ async fn get_full_employment(
     user_id: Uuid,
     company_id: Uuid,
     employment_repo: web::Data<EmploymentRepository>,
+    is_created: bool,
 ) -> HttpResponse {
     let result = employment_repo.read_one(user_id, company_id).await;
     if let Ok(employment) = result {
@@ -131,7 +129,8 @@ async fn get_full_employment(
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
 
-        return HttpResponse::Ok().body(body.expect("Should be valid now."));
+        return if is_created { HttpResponse::Created().body(body.expect("Should be valid now."))}
+               else { HttpResponse::Ok().body(body.expect("Should be valid now.")) };
     }
 
     let error = result.err().expect("Should be error.");
@@ -166,7 +165,7 @@ pub async fn get_employment(
 
     let parsed_company_id = company_id_parse.expect("Should be valid.");
     let parsed_user_id = user_id_parse.expect("Should be valid.");
-    get_full_employment(parsed_user_id, parsed_company_id, employment_repo).await
+    get_full_employment(parsed_user_id, parsed_company_id, employment_repo, false).await
 }
 
 #[get("/user/{user_id}/employment/{company_id}/subordinates")]
@@ -267,7 +266,7 @@ pub async fn create_employment(
                 HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
             }
             sqlx::Error::Database(err) => {
-                if err.is_check_violation() || err.is_foreign_key_violation() {
+                if err.is_unique_violation() || err.is_check_violation() || err.is_foreign_key_violation() {
                     HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
                 } else {
                     HttpResponse::InternalServerError()
@@ -281,7 +280,7 @@ pub async fn create_employment(
 
     // This isn't very pleasant, but it is what it is. Maybe fix later.
     // This is done because the repo doesn't return the necessary data from the function.
-    get_full_employment(user_id, company_id, employment_repo).await
+    get_full_employment(user_id, company_id, employment_repo, true).await
 }
 
 fn is_data_empty(data: EmploymentData) -> bool {
@@ -341,7 +340,7 @@ pub async fn update_employment(
 
     // This isn't very pleasant, but it is what it is. Maybe fix later.
     // This is done because the repo doesn't return the necessary data from the function.
-    get_full_employment(parsed_user_id, parsed_company_id, employment_repo).await
+    get_full_employment(parsed_user_id, parsed_company_id, employment_repo, false).await
 }
 
 #[delete("/user/{user_id}/employment/{company_id}")]

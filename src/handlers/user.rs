@@ -7,7 +7,7 @@ use crate::{
 };
 use actix_web::{delete, get, http, patch, post, put, web, HttpResponse};
 use askama::Template;
-use chrono::{NaiveDate, NaiveDateTime, Utc};
+use chrono::NaiveDate;
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -76,18 +76,13 @@ pub async fn get_user(
 
 #[post("/user")]
 pub async fn create_user(
-    new_user: web::Form<NewUserData>,
+    new_user: web::Form<NewUser>,
     user_repo: web::Data<UserRepository>,
 ) -> HttpResponse {
-    let user_data = NewUser {
-        name: new_user.name.clone(),
-        email: new_user.email.clone(),
-        birth: new_user.birth.clone(),
-        gender: new_user.gender.clone(),
-        role: new_user.role.clone(),
-    };
-
-    let created_user = user_repo.create(user_data).await;
+    if new_user.name.len() == 0 || new_user.email.len() == 0 {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+    let created_user = user_repo.create(new_user.into_inner()).await;
 
     if let Ok(user) = created_user {
         let template = UserTemplate {
@@ -140,17 +135,24 @@ pub async fn create_user(
     }
 }
 
+fn is_data_invalid(user_data: UserData) -> bool {
+    (user_data.name.is_none()
+    && user_data.email.is_none()
+    && user_data.birth.is_none()
+    && user_data.avatar_url.is_none()
+    && user_data.role.is_none())
+    || (user_data.name.is_some() && user_data.name.unwrap().len() == 0)
+    || (user_data.email.is_some() && user_data.email.unwrap().len() == 0)
+    || (user_data.avatar_url.is_some() && user_data.avatar_url.unwrap().len() == 0)
+}
+
 #[patch("/user/{user_id}")]
 pub async fn update_user(
     user_id: web::Path<String>,
     user_data: web::Form<UserData>,
     user_repo: web::Data<UserRepository>,
 ) -> HttpResponse {
-    if user_data.name.is_none()
-        && user_data.email.is_none()
-        && user_data.birth.is_none()
-        && user_data.avatar_url.is_none()
-        && user_data.role.is_none()
+    if is_data_invalid(user_data.clone())
     {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }

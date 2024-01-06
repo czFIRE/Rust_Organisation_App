@@ -1796,10 +1796,11 @@ mod api_tests {
             "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
             "manager_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
             "employment_type": "hpp",
-            "hourly_rate": "200.0",
-            "employee_level": "basic",
+            "hourly_wage": "200.0",
+            "level": "basic",
             "start_date": "2022-12-23",
             "end_date": "2022-12-26",
+            "description": "A person.",
         });
 
         let req = test::TestRequest::post()
@@ -1811,19 +1812,12 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::CREATED);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-
-        let uuid_regex = Regex::new(
-            r"[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}",
-        )
-        .unwrap();
-        let uuid_caps = uuid_regex.captures(body).unwrap();
-        let user_uuid = &uuid_caps[1];
-        let company_uuid = &uuid_caps[2];
-
+        println!("{}", body);
         assert!(body.contains("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c"));
         assert!(body.contains("b5188eda-528d-48d4-8cee-498e0971f9f5"));
-        assert!(body.contains("hpp"));
-        assert!(body.contains("basic"));
+        assert!(body.contains("HPP"));
+        assert!(body.contains("Basic"));
+        assert!(body.contains("200"));
         //ToDo: check for manager ID
 
         let req = test::TestRequest::post()
