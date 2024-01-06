@@ -338,6 +338,77 @@ pub async fn update_timesheet(
 * Reset every work_day for a corresponding timesheet, as well as worked_hours and comments in the timesheet record.
 */
 #[delete("/timesheet/{timesheet_id}/workdays")]
-pub async fn reset_timesheet_data(_timesheet_id: web::Path<String>) -> HttpResponse {
-    todo!()
+pub async fn reset_timesheet_data(
+    timesheet_id: web::Path<String>,
+    timesheet_repo: web::Data<TimesheetRepository>,
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(timesheet_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let parsed_id = id_parse.expect("Should be valid.");
+    let result = timesheet_repo.reset_timesheet(parsed_id).await;
+    if let Ok(full_timesheet) = result {
+        let workdays = full_timesheet
+            .workdays
+            .into_iter()
+            .map(|workday| WorkdayTemplate {
+                timesheet_id: workday.timesheet_id,
+                date: workday.date,
+                total_hours: workday.total_hours,
+                comment: workday.comment.unwrap_or("No comment.".to_string()),
+                is_editable: workday.is_editable,
+                created_at: workday.created_at,
+                edited_at: workday.edited_at,
+            })
+            .collect();
+
+        let template = TimesheetTemplate {
+            id: full_timesheet.timesheet.id,
+            user_id: full_timesheet.timesheet.user_id,
+            company_id: full_timesheet.timesheet.company_id,
+            event_id: full_timesheet.timesheet.event_id,
+            event_avatar_url: full_timesheet.timesheet.event_avatar_url,
+            event_name: full_timesheet.timesheet.event_name,
+            start_date: full_timesheet.timesheet.start_date,
+            end_date: full_timesheet.timesheet.end_date,
+            total_hours: full_timesheet.timesheet.total_hours,
+            work_days: workdays,
+            calculated_wage: 0,
+            is_editable: full_timesheet.timesheet.is_editable,
+            status: full_timesheet.timesheet.status,
+            manager_note: full_timesheet
+                .timesheet
+                .manager_note
+                .unwrap_or("No note.".to_string()),
+            created_at: full_timesheet.timesheet.created_at,
+            edited_at: full_timesheet.timesheet.edited_at,
+        };
+
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Ok().body(body.expect("Should be valid now."));
+    }
+
+    let error = result.err().expect("Should be error here.");
+    return match error {
+        sqlx::Error::Database(err) => {
+            if err.is_unique_violation()
+                || err.is_check_violation()
+                || err.is_foreign_key_violation()
+            {
+                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
+            } else {
+                HttpResponse::InternalServerError()
+                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
+            }
+        }
+        _ => HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
+    };
 }

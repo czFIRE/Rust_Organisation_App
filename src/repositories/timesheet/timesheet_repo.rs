@@ -470,7 +470,7 @@ impl TimesheetRepository {
         Ok(())
     }
 
-    pub async fn _reset_timesheet(&self, timesheet_id: Uuid) -> DbResult<TimesheetWithWorkdays> {
+    pub async fn reset_timesheet(&self, timesheet_id: Uuid) -> DbResult<TimesheetWithWorkdays> {
         let mut tx = self.pool.begin().await?;
 
         let timesheet = sqlx::query_as!(
