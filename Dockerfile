@@ -11,6 +11,9 @@ WORKDIR /app
 COPY Cargo.lock .
 COPY Cargo.toml .
 
+# tmp
+COPY src/lib.rs src/lib.rs
+
 # download dependencies
 RUN cargo fetch
 
