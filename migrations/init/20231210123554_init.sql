@@ -207,7 +207,7 @@ CREATE TABLE timesheet
     --------------------------------------------------------
     CONSTRAINT check_timesheet_is_editable_iff_not_requested_or_rejected
         CHECK (NOT(is_editable IS TRUE AND status IN ('pending', 'accepted'))),
-    CONSTRAINT check_total_hours_lte_744
+    CONSTRAINT check_timesheet_total_hours_lte_744
         -- max hours per month: 24.0 * 31.0 = 744.0
         CHECK (total_hours <= 744.0),
     CONSTRAINT check_timesheet_start_date_lte_end_date
@@ -232,7 +232,7 @@ CREATE TABLE workday
     PRIMARY KEY  (timesheet_id, date),
     FOREIGN KEY  (timesheet_id) REFERENCES timesheet (id),
     --------------------------------------------------------
-    CONSTRAINT check_total_hours_lte_24
+    CONSTRAINT check_work_day_total_hours_lte_24
         CHECK (total_hours <= 24.0),
     CONSTRAINT check_work_day_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
