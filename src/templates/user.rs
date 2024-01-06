@@ -27,7 +27,7 @@ pub struct UserLiteTemplate {
     pub id: Uuid,
     pub name: String,
     pub status: UserStatus,
-    pub age: u8,
+    pub age: u32,
     pub gender: Gender,
     pub avatar_url: String,
 }

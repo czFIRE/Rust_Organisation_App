@@ -132,7 +132,8 @@ impl EmploymentRepository {
                 LEFT OUTER JOIN user_record ON employment.manager_id = user_record.id 
             WHERE 
                 employment.user_id = $1 
-                AND employment.company_id = $2          
+                AND employment.company_id = $2  
+                AND employment.deleted_at IS NULL        
             "#,
             user_uuid,
             company_uuid,
@@ -196,6 +197,7 @@ impl EmploymentRepository {
                 LEFT OUTER JOIN user_record ON employment.manager_id = user_record.id 
             WHERE 
                 employment.user_id = $1 
+                AND employment.deleted_at IS NULL
             LIMIT $2 OFFSET $3          
             "#,
             user_uuid,
@@ -261,6 +263,7 @@ impl EmploymentRepository {
                 LEFT OUTER JOIN user_record ON employment.manager_id = user_record.id 
             WHERE 
                 employment.company_id = $1 
+                AND employment.deleted_at IS NULL
             LIMIT $2 OFFSET $3          
             "#,
             company_uuid,
@@ -277,6 +280,7 @@ impl EmploymentRepository {
     pub async fn read_subordinates(
         &self,
         manager_uuid: Uuid,
+        company_uuid: Uuid,
         filter: EmploymentFilter,
     ) -> DbResult<Vec<EmploymentExtended>> {
         let executor = self.pool.as_ref();
@@ -325,10 +329,13 @@ impl EmploymentRepository {
                 INNER JOIN company ON employment.company_id = company.id 
                 LEFT OUTER JOIN user_record ON employment.manager_id = user_record.id 
             WHERE 
-                employment.manager_id = $1 
-            LIMIT $2 OFFSET $3          
+                employment.manager_id = $1
+                AND employment.company_id = $2
+                AND employment.deleted_at IS NULL
+            LIMIT $3 OFFSET $4          
             "#,
             manager_uuid,
+            company_uuid,
             filter.limit,
             filter.offset,
         )
@@ -357,14 +364,7 @@ impl EmploymentRepository {
 
         let executor = self.pool.as_ref();
 
-        let employment_check = self.read_one(user_uuid, company_uuid).await?;
-
-        if employment_check.deleted_at.is_some() {
-            // TODO - return better error
-            return Err(sqlx::Error::RowNotFound);
-        }
-
-        let updated_employment: Employment = sqlx::query_as!(
+        let updated_employment = sqlx::query_as!(
             Employment,
             r#" UPDATE employment SET 
                 manager_id = COALESCE($3, manager_id), 
@@ -375,7 +375,9 @@ impl EmploymentRepository {
                 type = COALESCE($8, type), 
                 level = COALESCE($9, level),
                 edited_at = now() 
-                WHERE user_id=$1 AND company_id=$2 
+                WHERE user_id=$1 
+                  AND company_id=$2
+                  AND deleted_at IS NULL 
                 RETURNING 
                 user_id, 
                 company_id, 
@@ -399,32 +401,47 @@ impl EmploymentRepository {
             data.employment_type as Option<EmployeeContract>,
             data.level as Option<EmployeeLevel>,
         )
-        .fetch_one(executor)
+        .fetch_optional(executor)
         .await?;
 
-        Ok(updated_employment)
+        if updated_employment.is_none() {
+            return Err(sqlx::Error::RowNotFound);
+        }
+
+        Ok(updated_employment.expect("Should be some."))
     }
 
     pub async fn delete(&self, user_uuid: Uuid, company_uuid: Uuid) -> DbResult<()> {
         let executor = self.pool.as_ref();
 
-        let employment_check = self.read_one(user_uuid, company_uuid).await?;
-
-        if employment_check.deleted_at.is_some() {
-            // TODO - return better error
-            return Err(sqlx::Error::RowNotFound);
-        }
-
-        sqlx::query!(
+        let result = sqlx::query_as!(
+            Employment,
             r#"UPDATE employment
             SET deleted_at = NOW(), edited_at = NOW()
             WHERE user_id = $1 AND company_id = $2
-            AND deleted_at IS NULL"#,
+            AND deleted_at IS NULL
+            RETURNING 
+                user_id, 
+                company_id, 
+                manager_id, 
+                hourly_wage, 
+                start_date, 
+                end_date, 
+                description, 
+                type AS "employment_type!: EmployeeContract", 
+                level AS "level!: EmployeeLevel", 
+                created_at, 
+                edited_at, 
+                deleted_at;"#,
             user_uuid,
             company_uuid,
         )
-        .execute(executor)
+        .fetch_optional(executor)
         .await?;
+
+        if result.is_none() {
+            return Err(sqlx::Error::RowNotFound);
+        }
 
         Ok(())
     }

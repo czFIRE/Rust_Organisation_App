@@ -237,7 +237,7 @@ pub async fn delete_user(
         };
     }
 
-    HttpResponse::NoContent().body("Deleted.")
+    HttpResponse::NoContent().finish()
 }
 
 //TODO: Once file store/load is done.

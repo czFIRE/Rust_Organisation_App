@@ -141,8 +141,8 @@ pub async fn get_company(
         }
 
         return HttpResponse::Ok()
-                .content_type("text/html")
-                .body(body.expect("Should be valid."));
+            .content_type("text/html")
+            .body(body.expect("Should be valid."));
     }
 
     let error = result.err().expect("Should be an error");
@@ -210,8 +210,8 @@ pub async fn create_company(
         }
 
         return HttpResponse::Created()
-                    .content_type("text/html")
-                    .body(body.expect("Should be valid."));
+            .content_type("text/html")
+            .body(body.expect("Should be valid."));
     }
 
     let error = result.err().expect("Should be error.");
@@ -323,8 +323,8 @@ pub async fn update_company(
         }
 
         return HttpResponse::Ok()
-                    .content_type("text/html")
-                    .body(body.expect("Should be valid."));
+            .content_type("text/html")
+            .body(body.expect("Should be valid."));
     }
 
     let error = result.err().expect("Should be error.");
@@ -371,7 +371,7 @@ pub async fn delete_company(
         };
     }
 
-    HttpResponse::NoContent().body("Deleted.")
+    HttpResponse::NoContent().finish()
 }
 
 //TODO: Once file store/load is done.

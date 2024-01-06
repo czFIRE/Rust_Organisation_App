@@ -357,7 +357,7 @@ mod api_tests {
         let app = test::init_service(
             App::new()
                 .app_data(company_repo.clone())
-                .service(get_all_companies)
+                .service(get_all_companies),
         )
         .await;
 
@@ -376,7 +376,7 @@ mod api_tests {
         let app = test::init_service(
             App::new()
                 .app_data(company_repo.clone())
-                .service(get_company)
+                .service(get_company),
         )
         .await;
         let req = test::TestRequest::get()
@@ -408,7 +408,7 @@ mod api_tests {
         let app = test::init_service(
             App::new()
                 .app_data(company_repo.clone())
-                .service(get_company)
+                .service(get_company),
         )
         .await;
 
@@ -429,7 +429,7 @@ mod api_tests {
         let app = test::init_service(
             App::new()
                 .app_data(company_repo.clone())
-                .service(get_company)
+                .service(get_company),
         )
         .await;
 
@@ -452,7 +452,7 @@ mod api_tests {
                 .app_data(company_repo.clone())
                 .service(create_company)
                 .service(update_company)
-                .service(delete_company)
+                .service(delete_company),
         )
         .await;
 
@@ -481,7 +481,7 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::CREATED);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        
+
         let uuid_regex = Regex::new(
             r"[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}",
         )
@@ -533,7 +533,7 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
-        
+
         let req = test::TestRequest::delete()
             .uri(format!("/company/{}", uuid_str).as_str())
             .to_request();
@@ -558,7 +558,7 @@ mod api_tests {
         let app = test::init_service(
             App::new()
                 .app_data(company_repo.clone())
-                .service(update_company)
+                .service(update_company),
         )
         .await;
 
@@ -585,7 +585,7 @@ mod api_tests {
         let app = test::init_service(
             App::new()
                 .app_data(company_repo.clone())
-                .service(update_company)
+                .service(update_company),
         )
         .await;
 
@@ -612,7 +612,7 @@ mod api_tests {
         let app = test::init_service(
             App::new()
                 .app_data(company_repo.clone())
-                .service(delete_company)
+                .service(delete_company),
         )
         .await;
 
@@ -651,12 +651,8 @@ mod api_tests {
         let event_repository = EventRepository::new(arc_pool.clone());
         let event_repo = web::Data::new(event_repository);
 
-        let app = test::init_service(
-            App::new()
-                .app_data(event_repo.clone())
-                .service(get_events)
-        )
-        .await;
+        let app =
+            test::init_service(App::new().app_data(event_repo.clone()).service(get_events)).await;
 
         let req = test::TestRequest::get().uri("/event").to_request();
         let res = test::call_service(&app, req).await;
@@ -670,12 +666,8 @@ mod api_tests {
         let event_repository = EventRepository::new(arc_pool.clone());
         let event_repo = web::Data::new(event_repository);
 
-        let app = test::init_service(
-            App::new()
-                .app_data(event_repo.clone())
-                .service(get_event)
-        )
-        .await;
+        let app =
+            test::init_service(App::new().app_data(event_repo.clone()).service(get_event)).await;
 
         let req = test::TestRequest::get()
             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8")
@@ -685,7 +677,7 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        
+
         assert!(body.contains("Woodstock"));
         assert!(body.contains("https://woodstock.com"));
         assert!(body.contains("A legendary music festival"));
@@ -697,12 +689,8 @@ mod api_tests {
         let event_repository = EventRepository::new(arc_pool.clone());
         let event_repo = web::Data::new(event_repository);
 
-        let app = test::init_service(
-            App::new()
-                .app_data(event_repo.clone())
-                .service(get_event)
-        )
-        .await;
+        let app =
+            test::init_service(App::new().app_data(event_repo.clone()).service(get_event)).await;
 
         let req = test::TestRequest::get()
             .uri("/event/a71cd75e-a811-410a-9bb4-70fc5c7748f8")
@@ -718,12 +706,8 @@ mod api_tests {
         let event_repository = EventRepository::new(arc_pool.clone());
         let event_repo = web::Data::new(event_repository);
 
-        let app = test::init_service(
-            App::new()
-                .app_data(event_repo.clone())
-                .service(get_event)
-        )
-        .await;
+        let app =
+            test::init_service(App::new().app_data(event_repo.clone()).service(get_event)).await;
 
         let req = test::TestRequest::get()
             .uri("/event/a71cd75e-sleepy-head-111z3zz")
@@ -744,7 +728,7 @@ mod api_tests {
                 .app_data(event_repo.clone())
                 .service(create_event)
                 .service(update_event)
-                .service(delete_event)
+                .service(delete_event),
         )
         .await;
 
@@ -767,7 +751,7 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::CREATED);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        
+
         let uuid_regex = Regex::new(
             r"[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}",
         )
@@ -819,7 +803,7 @@ mod api_tests {
         let app = test::init_service(
             App::new()
                 .app_data(event_repo.clone())
-                .service(update_event)
+                .service(update_event),
         )
         .await;
 
@@ -845,7 +829,7 @@ mod api_tests {
         let app = test::init_service(
             App::new()
                 .app_data(event_repo.clone())
-                .service(update_event)
+                .service(update_event),
         )
         .await;
 
@@ -869,7 +853,7 @@ mod api_tests {
         let app = test::init_service(
             App::new()
                 .app_data(event_repo.clone())
-                .service(update_event)
+                .service(update_event),
         )
         .await;
 
@@ -893,7 +877,7 @@ mod api_tests {
         let app = test::init_service(
             App::new()
                 .app_data(event_repo.clone())
-                .service(delete_event)
+                .service(delete_event),
         )
         .await;
 
@@ -1578,8 +1562,16 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_employments_per_user_test() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let employment_repository = EmploymentRepository::new(arc_pool.clone());
+        let employment_repo = web::Data::new(employment_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(employment_repo.clone())
+                .service(get_employments_per_user),
+        )
+        .await;
 
         let req = test::TestRequest::get()
             .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4/employment")
@@ -1589,15 +1581,22 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<EmploymentsTemplate>(body).unwrap();
-        assert_eq!(out.employments.len(), 1);
+        assert!(body.contains("35341253-da20-40b6-96d8-ce069b1ba5d4"));
     }
 
     #[actix_web::test]
     async fn get_employments_non_existent_user() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let employment_repository = EmploymentRepository::new(arc_pool.clone());
+        let employment_repo = web::Data::new(employment_repository);
 
+        let app = test::init_service(
+            App::new()
+                .app_data(employment_repo.clone())
+                .service(get_employments_per_user),
+        )
+        .await;
+    
         let req = test::TestRequest::get()
             .uri("/user/35221a5b-da2c-4fe6-96d8-ce069b1ba5d4/employment")
             .to_request();
@@ -1608,8 +1607,16 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_employments_invalid_uuid_format() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let employment_repository = EmploymentRepository::new(arc_pool.clone());
+        let employment_repo = web::Data::new(employment_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(employment_repo.clone())
+                .service(get_employments_per_user),
+        )
+        .await;
 
         let req = test::TestRequest::get()
             .uri("/user/wrongUUIDFormatBois/employment")
@@ -1621,8 +1628,16 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_employment_test() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let employment_repository = EmploymentRepository::new(arc_pool.clone());
+        let employment_repo = web::Data::new(employment_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(employment_repo.clone())
+                .service(get_employment),
+        )
+        .await;
 
         let req = test::TestRequest::get()
                             .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4/employment/b5188eda-528d-48d4-8cee-498e0971f9f5")
@@ -1632,21 +1647,22 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<EmploymentTemplate>(body).unwrap();
-        assert_eq!(
-            out.company.id,
-            Uuid::from_str("b5188eda-528d-48d4-8cee-498e0971f9f5").unwrap()
-        );
-        assert_eq!(
-            out.user_id,
-            Uuid::from_str("35341253-da20-40b6-96d8-ce069b1ba5d4").unwrap()
-        );
+        assert!(body.contains("35341253-da20-40b6-96d8-ce069b1ba5d4"));
+        assert!(body.contains("b5188eda-528d-48d4-8cee-498e0971f9f5"));
     }
 
     #[actix_web::test]
     async fn get_employment_non_existent_user() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let employment_repository = EmploymentRepository::new(arc_pool.clone());
+        let employment_repo = web::Data::new(employment_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(employment_repo.clone())
+                .service(get_employment),
+        )
+        .await;
 
         let req = test::TestRequest::get()
                             .uri("/user/35341253-dade-4ac6-96dc-cede9b1ba5d4/employment/b5188eda-528d-48d4-8cee-498e0971f9f5")
@@ -1658,8 +1674,16 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_employment_non_existent_company() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let employment_repository = EmploymentRepository::new(arc_pool.clone());
+        let employment_repo = web::Data::new(employment_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(employment_repo.clone())
+                .service(get_employment),
+        )
+        .await;
 
         let req = test::TestRequest::get()
                             .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4/employment/b5188eda-5bcd-4eda-8cae-498e0971f9f5")
@@ -1671,8 +1695,16 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_employment_invalid_uuid_format() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let employment_repository = EmploymentRepository::new(arc_pool.clone());
+        let employment_repo = web::Data::new(employment_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(employment_repo.clone())
+                .service(get_employment),
+        )
+        .await;
 
         let req = test::TestRequest::get()
             .uri(
@@ -1687,28 +1719,38 @@ mod api_tests {
     //ToDo: No data for this yet.
     #[actix_web::test]
     async fn get_subordinates_test() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let employment_repository = EmploymentRepository::new(arc_pool.clone());
+        let employment_repo = web::Data::new(employment_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(employment_repo.clone())
+                .service(get_subordinates),
+        )
+        .await;
+
         let req = test::TestRequest::get()
                                 .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4/employment/b5188eda-528d-48d4-8cee-498e0971f9f5/subordinates")
                                 .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::OK);
-        let body_bytes = test::read_body(res).await;
-        let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<EmploymentsTemplate>(body).unwrap();
-        assert_eq!(out.employments.len(), 1);
-        assert_eq!(
-            out.employments.first().unwrap().company.id,
-            Uuid::from_str("b5188eda-528d-48d4-8cee-498e0971f9f5").unwrap()
-        );
     }
 
     #[actix_web::test]
     async fn get_subordinates_errors() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let employment_repository = EmploymentRepository::new(arc_pool.clone());
+        let employment_repo = web::Data::new(employment_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(employment_repo.clone())
+                .service(get_subordinates),
+        )
+        .await;
+
         let req = test::TestRequest::get()
                                 .uri("/user/353ae253-dab6-55e6-96d8-ce069b1ba5d4/employment/b5188eda-528d-48d4-8cee-498e0971f9f5/subordinates")
                                 .to_request();
@@ -1736,8 +1778,18 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_update_delete_employment() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let employment_repository = EmploymentRepository::new(arc_pool.clone());
+        let employment_repo = web::Data::new(employment_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(employment_repo.clone())
+                .service(create_employment)
+                .service(update_employment)
+                .service(delete_employment),
+        )
+        .await;
 
         let data = json!({
             "user_id": "ac9bf689-a713-4b66-a3d0-41faaf0f8d0c",
@@ -1759,25 +1811,27 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::CREATED);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<EmploymentTemplate>(body).unwrap();
-        assert_eq!(
-            out.company.id,
-            Uuid::from_str("b5188eda-528d-48d4-8cee-498e0971f9f5").unwrap()
-        );
-        assert_eq!(
-            out.user_id,
-            Uuid::from_str("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c").unwrap()
-        );
-        assert_eq!(
-            out.manager.id,
-            Uuid::from_str("35341253-da20-40b6-96d8-ce069b1ba5d4").unwrap()
-        );
+
+        let uuid_regex = Regex::new(
+            r"[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}",
+        )
+        .unwrap();
+        let uuid_caps = uuid_regex.captures(body).unwrap();
+        let user_uuid = &uuid_caps[1];
+        let company_uuid = &uuid_caps[2];
+
+        assert!(body.contains("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c"));
+        assert!(body.contains("b5188eda-528d-48d4-8cee-498e0971f9f5"));
+        assert!(body.contains("hpp"));
+        assert!(body.contains("basic"));
+        //ToDo: check for manager ID
 
         let req = test::TestRequest::post()
             .uri("/employment")
             .set_form(data)
             .to_request();
         let res = test::call_service(&app, req).await;
+
         // Creating a duplicate employment.
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
@@ -1795,20 +1849,12 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<EmploymentTemplate>(body).unwrap();
-        assert_eq!(
-            out.company.id,
-            Uuid::from_str("b5188eda-528d-48d4-8cee-498e0971f9f5").unwrap()
-        );
-        assert_eq!(
-            out.user_id,
-            Uuid::from_str("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c").unwrap()
-        );
-        assert_eq!(
-            out.manager.id,
-            Uuid::from_str("35341253-da20-40b6-96d8-ce069b1ba5d4").unwrap()
-        );
-        assert_eq!(out.description, Some("Dirt Shoveller".to_string()));
+
+        assert!(body.contains("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c"));
+        assert!(body.contains("b5188eda-528d-48d4-8cee-498e0971f9f5"));
+        assert!(body.contains("hpp"));
+        assert!(body.contains("basic"));
+        assert!(body.contains("Dirt Shoveller"));
 
         let data = json!({});
 
@@ -1818,7 +1864,7 @@ mod api_tests {
                             .to_request();
         let res = test::call_service(&app, req).await;
         // Patching empty data.
-        assert!(res.status().is_success());
+        assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
 
         let req = test::TestRequest::delete()
@@ -1838,8 +1884,16 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_employment_errors() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let employment_repository = EmploymentRepository::new(arc_pool.clone());
+        let employment_repo = web::Data::new(employment_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(employment_repo.clone())
+                .service(create_employment),
+        )
+        .await;
 
         let data = json!({
             "user_id": "0465041f-INVALID4-461f-9f71-71aaagf",

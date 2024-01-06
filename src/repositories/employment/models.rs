@@ -1,4 +1,5 @@
 use chrono::NaiveDate;
+use serde::Deserialize;
 use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
 
@@ -7,7 +8,7 @@ use crate::{
     repositories::{company::models::Company, user::models::User},
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct NewEmployment {
     pub user_id: Uuid,
     pub company_id: Uuid,
@@ -53,7 +54,7 @@ pub struct EmploymentExtended {
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct EmploymentData {
     pub manager_id: Option<Uuid>,
     pub hourly_wage: Option<f64>,
@@ -64,7 +65,7 @@ pub struct EmploymentData {
     pub level: Option<EmployeeLevel>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct EmploymentFilter {
     pub limit: Option<i64>,
     pub offset: Option<i64>,

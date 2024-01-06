@@ -66,16 +66,16 @@ impl EventRepository {
     async fn read_one_db(&self, event_id: Uuid) -> DbResult<Event> {
         let executor = self.pool.as_ref();
 
-        let event: Event =
-            sqlx::query_as!(
-                Event, 
-                r#"SELECT * 
+        let event: Event = sqlx::query_as!(
+            Event,
+            r#"SELECT * 
                    FROM event 
                    WHERE id = $1
                      AND deleted_at IS NULL;"#,
-                event_id)
-                .fetch_one(executor)
-                .await?;
+            event_id
+        )
+        .fetch_one(executor)
+        .await?;
 
         Ok(event)
     }
@@ -169,7 +169,7 @@ impl EventRepository {
         .await?;
 
         if event.is_none() {
-            return Err(sqlx::Error::RowNotFound)
+            return Err(sqlx::Error::RowNotFound);
         }
 
         Ok(event.expect("Should be valid"))
