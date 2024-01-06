@@ -311,8 +311,7 @@ CREATE TABLE assigned_staff
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at  TIMESTAMP,
     -------------------------------------------------------
-    PRIMARY KEY (staff_id, task_id),
-    FOREIGN KEY (decided_by) REFERENCES event_staff (id),
+    PRIMARY KEY (task_id, staff_id),
     FOREIGN KEY (task_id) REFERENCES task (id),
     FOREIGN KEY (staff_id) REFERENCES event_staff (id),
     FOREIGN KEY (decided_by) REFERENCES event_staff (id),
