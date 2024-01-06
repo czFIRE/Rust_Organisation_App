@@ -88,7 +88,7 @@ pub mod user_repo_tests {
         assert!(new_user.deleted_at.is_none());
 
         assert_eq!(
-            new_user.avatar_url,
+            new_user.avatar_path,
             Some("img/default/user.jpg".to_string())
         );
 
@@ -116,7 +116,7 @@ pub mod user_repo_tests {
         assert_eq!(user.birth, NaiveDate::from_ymd_opt(1996, 6, 23).unwrap());
         assert_eq!(user.gender, Gender::Male);
         assert_eq!(user.role, UserRole::Admin);
-        assert_eq!(user.avatar_url, Some("dave.jpg".to_string()));
+        assert_eq!(user.avatar_path, Some("dave.jpg".to_string()));
         assert_eq!(user.status, UserStatus::Available);
 
         user_repo.disconnect().await;
@@ -175,7 +175,7 @@ pub mod user_repo_tests {
                 birth: Some(NaiveDate::from_ymd_opt(1997, 9, 15).unwrap()),
                 gender: Some(Gender::Other),
                 role: Some(UserRole::Admin),
-                avatar_url: Some("hehe.jpg".to_string()),
+                avatar_path: Some("hehe.jpg".to_string()),
             };
 
             let updated_user = user_repo
@@ -187,7 +187,7 @@ pub mod user_repo_tests {
             assert_eq!(updated_user.name, new_user_data.name.unwrap());
             assert_eq!(updated_user.email, new_user_data.email.unwrap());
             assert_eq!(updated_user.birth, new_user_data.birth.unwrap());
-            assert_eq!(updated_user.avatar_url, new_user_data.avatar_url);
+            assert_eq!(updated_user.avatar_path, new_user_data.avatar_path);
             assert_eq!(updated_user.gender, new_user_data.gender.unwrap());
             assert_eq!(updated_user.role, new_user_data.role.unwrap());
 
@@ -207,7 +207,7 @@ pub mod user_repo_tests {
                 birth: None,
                 gender: None,
                 role: None,
-                avatar_url: None,
+                avatar_path: None,
             };
 
             let _updated_user = user_repo
@@ -227,7 +227,7 @@ pub mod user_repo_tests {
                 birth: None,
                 gender: None,
                 role: None,
-                avatar_url: None,
+                avatar_path: None,
             };
 
             let _updated_user = user_repo
@@ -264,7 +264,7 @@ pub mod user_repo_tests {
                 birth: None,
                 gender: None,
                 role: None,
-                avatar_url: None,
+                avatar_path: None,
             };
 
             let _updated_user = user_repo
@@ -389,7 +389,7 @@ pub mod company_repo_tests {
         assert_eq!(new_company.phone, company_data.phone);
         assert_eq!(new_company.email, company_data.email);
         assert_eq!(
-            new_company.avatar_url,
+            new_company.avatar_path,
             Some("img/default/company.jpg".to_string()),
         );
         assert_eq!(new_company.website, company_data.website);
@@ -536,7 +536,7 @@ pub mod company_repo_tests {
                 website: Some("test.com".to_string()),
                 crn: Some("CRN_123".to_string()),
                 vatin: Some("VATIN_123".to_string()),
-                avatar_url: Some("test.jpg".to_string()),
+                avatar_path: Some("test.jpg".to_string()),
             };
 
             let updated_company = company_repo
@@ -549,7 +549,7 @@ pub mod company_repo_tests {
             assert_eq!(updated_company.description, company_data.description);
             assert_eq!(updated_company.phone, company_data.phone.unwrap());
             assert_eq!(updated_company.email, company_data.email.unwrap());
-            assert_eq!(updated_company.avatar_url, company_data.avatar_url);
+            assert_eq!(updated_company.avatar_path, company_data.avatar_path);
             assert_eq!(updated_company.website, company_data.website);
             assert_eq!(updated_company.crn, company_data.crn.unwrap());
             assert_eq!(updated_company.vatin, company_data.vatin.unwrap());
@@ -581,7 +581,7 @@ pub mod company_repo_tests {
                 website: None,
                 crn: None,
                 vatin: None,
-                avatar_url: None,
+                avatar_path: None,
             };
 
             let address_data = AddressData {
@@ -603,7 +603,7 @@ pub mod company_repo_tests {
             assert_eq!(updated_company.description, company.description);
             assert_eq!(updated_company.phone, company.phone);
             assert_eq!(updated_company.email, company.email);
-            assert_eq!(updated_company.avatar_url, company.avatar_url);
+            assert_eq!(updated_company.avatar_path, company.avatar_path);
             assert_eq!(updated_company.website, company.website);
             assert_eq!(updated_company.crn, company.crn);
             assert_eq!(updated_company.vatin, company.vatin);
@@ -640,7 +640,7 @@ pub mod company_repo_tests {
                 website: None,
                 crn: None,
                 vatin: None,
-                avatar_url: None,
+                avatar_path: None,
             };
 
             let updated_company = company_repo
@@ -662,7 +662,7 @@ pub mod company_repo_tests {
                 website: None,
                 crn: None,
                 vatin: None,
-                avatar_url: None,
+                avatar_path: None,
             };
 
             let updated_company = company_repo
@@ -703,7 +703,7 @@ pub mod company_repo_tests {
                 website: None,
                 crn: None,
                 vatin: None,
-                avatar_url: None,
+                avatar_path: None,
             };
 
             let updated_company = company_repo
@@ -828,7 +828,7 @@ pub mod event_repo_tests {
         assert_eq!(new_event.end_date, new_event_data.end_date);
 
         assert_eq!(
-            new_event.avatar_url,
+            new_event.avatar_path,
             Some("img/default/event.jpg".to_string())
         );
 
@@ -875,7 +875,7 @@ pub mod event_repo_tests {
             event.end_date,
             NaiveDate::from_ymd_opt(1969, 8, 18).unwrap()
         );
-        assert_eq!(event.avatar_url, Some("woodstock.png".to_string()));
+        assert_eq!(event.avatar_path, Some("woodstock.png".to_string()));
         assert!(event.accepts_staff);
 
         event_repo.disconnect().await;
@@ -958,7 +958,7 @@ pub mod event_repo_tests {
                 website: Some("test.com".to_string()),
                 start_date: Some(NaiveDate::from_ymd_opt(2025, 9, 15).unwrap()),
                 end_date: Some(NaiveDate::from_ymd_opt(2025, 9, 16).unwrap()),
-                avatar_url: Some("test.jpg".to_string()),
+                avatar_path: Some("test.jpg".to_string()),
             };
 
             let updated_event = event_repo
@@ -972,7 +972,7 @@ pub mod event_repo_tests {
             assert_eq!(updated_event.website, new_event_data.website);
             assert_eq!(updated_event.start_date, new_event_data.start_date.unwrap());
             assert_eq!(updated_event.end_date, new_event_data.end_date.unwrap());
-            assert_eq!(updated_event.avatar_url, new_event_data.avatar_url);
+            assert_eq!(updated_event.avatar_path, new_event_data.avatar_path);
 
             let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
             let time_difference_edited = time - updated_event.edited_at;
@@ -990,7 +990,7 @@ pub mod event_repo_tests {
                 website: None,
                 start_date: None,
                 end_date: None,
-                avatar_url: None,
+                avatar_path: None,
             };
 
             let _updated_event = event_repo
@@ -1010,7 +1010,7 @@ pub mod event_repo_tests {
                 website: None,
                 start_date: None,
                 end_date: None,
-                avatar_url: None,
+                avatar_path: None,
             };
 
             let _updated_event = event_repo
@@ -1047,7 +1047,7 @@ pub mod event_repo_tests {
                 website: None,
                 start_date: None,
                 end_date: None,
-                avatar_url: None,
+                avatar_path: None,
             };
 
             let _updated_event = event_repo

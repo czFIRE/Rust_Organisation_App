@@ -81,7 +81,7 @@ impl CompanyRepository {
             description: company.description,
             phone: company.phone,
             email: company.email,
-            avatar_url: company.avatar_url,
+            avatar_path: company.avatar_path,
             website: company.website,
             crn: company.crn,
             vatin: company.vatin,
@@ -130,7 +130,7 @@ impl CompanyRepository {
                 description,
                 phone,
                 email,
-                avatar_url,
+                avatar_path,
                 website,
                 crn,
                 vatin,
@@ -177,7 +177,7 @@ impl CompanyRepository {
                 description,
                 phone,
                 email,
-                avatar_url,
+                avatar_path,
                 website,
                 crn,
                 vatin,
@@ -222,7 +222,7 @@ impl CompanyRepository {
             && data.description.is_none()
             && data.phone.is_none()
             && data.email.is_none()
-            && data.avatar_url.is_none()
+            && data.avatar_path.is_none()
             && data.website.is_none()
             && data.crn.is_none()
             && data.vatin.is_none())
@@ -243,7 +243,7 @@ impl CompanyRepository {
                     description = COALESCE($2, description),
                     phone = COALESCE($3, phone),
                     email = COALESCE($4, email),
-                    avatar_url = COALESCE($5, avatar_url),
+                    avatar_path = COALESCE($5, avatar_path),
                     website = COALESCE($6, website),
                     crn = COALESCE($7, crn),
                     vatin = COALESCE($8, vatin),
@@ -255,7 +255,7 @@ impl CompanyRepository {
                 data.description,
                 data.phone,
                 data.email,
-                data.avatar_url,
+                data.avatar_path,
                 data.website,
                 data.crn,
                 data.vatin,

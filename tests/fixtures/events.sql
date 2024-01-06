@@ -33,7 +33,7 @@ BEGIN
     INSERT INTO event
         (id, name, description,
         website, accepts_staff,
-        start_date, end_date, avatar_url,
+        start_date, end_date, avatar_path,
         created_at, edited_at)
         VALUES
         (event0_id, 'Woodstock', 'A legendary music festival.',
@@ -44,7 +44,7 @@ BEGIN
     INSERT INTO event
         (id, name, description,
         website, accepts_staff,
-        start_date, end_date, avatar_url,
+        start_date, end_date, avatar_path,
         created_at, edited_at)
         VALUES
         (event1_id, 'PyCon', 'The largest annual gathering for the community using and developing the open-source Python programming language.',

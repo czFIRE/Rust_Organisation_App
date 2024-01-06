@@ -105,7 +105,7 @@ mod api_tests {
         let user_template = serde_json::from_str::<UserTemplate>(body).unwrap();
         assert_eq!(user_template.name, "Dave Null");
         assert_eq!(user_template.email, "dave@null.com");
-        assert_eq!(user_template.avatar_url, "dave.jpg");
+        assert_eq!(user_template.avatar_path, "dave.jpg");
     }
 
     #[actix_web::test]
@@ -155,7 +155,7 @@ mod api_tests {
         let user_template = serde_json::from_str::<UserTemplate>(body).unwrap();
         assert_eq!(user_template.name, "Dave Nill");
         assert_eq!(user_template.email, "dave@null.com");
-        assert_eq!(user_template.avatar_url, "dave.jpg");
+        assert_eq!(user_template.avatar_path, "dave.jpg");
     }
 
     #[actix_web::test]

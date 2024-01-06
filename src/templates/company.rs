@@ -25,7 +25,7 @@ pub struct CompanyTemplate {
     pub address: Address,
     pub phone: String,
     pub email: String,
-    pub avatar_url: String,
+    pub avatar_path: String,
     pub website: Option<String>,
     pub crn: String,
     pub vatin: String,
@@ -39,7 +39,7 @@ pub struct CompanyTemplate {
 pub struct CompanyLiteTemplate {
     pub id: Uuid,
     pub name: String,
-    pub avatar_url: String,
+    pub avatar_path: String,
 }
 
 #[derive(Template, Debug, Deserialize)]

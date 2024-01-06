@@ -13,7 +13,7 @@ pub struct UserTemplate {
     pub name: String,
     pub email: String,
     pub birth: NaiveDate,
-    pub avatar_url: String,
+    pub avatar_path: String,
     pub role: UserRole,
     pub status: UserStatus,
     pub gender: Gender,
@@ -28,5 +28,5 @@ pub struct UserLiteTemplate {
     pub status: UserStatus,
     pub age: u8,
     pub gender: Gender,
-    pub avatar_url: String,
+    pub avatar_path: String,
 }

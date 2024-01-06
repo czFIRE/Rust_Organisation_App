@@ -3,5 +3,5 @@ use askama::Template;
 #[derive(Template)]
 #[template(path = "avatar/avatar.html")]
 pub struct AvatarTemplate {
-    pub avatar_url: String,
+    pub avatar_path: String,
 }

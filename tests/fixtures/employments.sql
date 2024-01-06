@@ -31,7 +31,7 @@ DECLARE
 
 BEGIN
     INSERT INTO user_record
-        (id, name, email, birth, avatar_url,
+        (id, name, email, birth, avatar_path,
         gender, role, status,
         created_at, edited_at)
         VALUES
@@ -40,7 +40,7 @@ BEGIN
         '2023-12-22 08:38:20.288688', '2023-12-22 08:38:20.288688');
 
     INSERT INTO user_record
-        (id, name, email, birth, avatar_url,
+        (id, name, email, birth, avatar_path,
         gender, role, status,
         created_at, edited_at)
         VALUES
@@ -49,7 +49,7 @@ BEGIN
         '2023-12-26 07:33:20.288688', '2023-12-26 07:33:20.288688');
 
     INSERT INTO user_record
-        (id, name, email, birth, avatar_url,
+        (id, name, email, birth, avatar_path,
         gender, role, status,
         created_at, edited_at)
         VALUES
@@ -60,7 +60,7 @@ BEGIN
     INSERT INTO company
         (id, name, description,
         website, crn, vatin,
-        phone, email, avatar_url,
+        phone, email, avatar_path,
         created_at, edited_at)
         VALUES
         (company0_id, 'AMD', 'Advanced Micro Devices, Inc.',
@@ -71,7 +71,7 @@ BEGIN
     INSERT INTO company
         (id, name, description,
         website, crn, vatin,
-        phone, email, avatar_url,
+        phone, email, avatar_path,
         created_at, edited_at)
         VALUES
         (company1_id, 'ReportLab', 'ReportLab Europe Ltd.',
@@ -82,7 +82,7 @@ BEGIN
     INSERT INTO company
         (id, name, description,
         website, crn, vatin,
-        phone, email, avatar_url,
+        phone, email, avatar_path,
         created_at, edited_at)
         VALUES
         (company2_id, 'Prusa Research', 'Prusa Research a.s.',

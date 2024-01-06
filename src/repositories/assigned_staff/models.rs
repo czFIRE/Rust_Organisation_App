@@ -82,7 +82,7 @@ pub struct AssignedStaffStaffUserCompanyFlattened {
     pub user_name: String,
     pub user_email: String,
     pub user_birth: NaiveDate,
-    pub user_avatar_url: Option<String>, // TODO: Now is the same as in INIT.SQL but do we want this?
+    pub user_avatar_path: Option<String>, // TODO: Now is the same as in INIT.SQL but do we want this?
     pub user_gender: Gender,
     pub user_role: UserRole,
     pub user_status: UserStatus,
@@ -95,7 +95,7 @@ pub struct AssignedStaffStaffUserCompanyFlattened {
     pub company_description: Option<String>,
     pub company_phone: String,
     pub company_email: String,
-    pub company_avatar_url: Option<String>,
+    pub company_avatar_path: Option<String>,
     pub company_website: Option<String>,
     pub company_crn: String,
     pub company_vatin: String,
@@ -107,7 +107,7 @@ pub struct AssignedStaffStaffUserCompanyFlattened {
     pub decided_by_user_name: Option<String>,
     pub decided_by_user_email: Option<String>,
     pub decided_by_user_birth: Option<NaiveDate>,
-    pub decided_by_user_avatar_url: Option<String>, // TODO: Now is the same as in INIT.SQL but do we want this?
+    pub decided_by_user_avatar_path: Option<String>, // TODO: Now is the same as in INIT.SQL but do we want this?
     pub decided_by_user_gender: Option<Gender>,
     pub decided_by_user_role: Option<UserRole>,
     pub decided_by_user_status: Option<UserStatus>,
@@ -123,7 +123,7 @@ impl From<AssignedStaffStaffUserCompanyFlattened> for AssignedStaffExtended {
             name: value.user_name,
             email: value.user_email,
             birth: value.user_birth,
-            avatar_url: value.user_avatar_url,
+            avatar_path: value.user_avatar_path,
             gender: value.user_gender,
             role: value.user_role,
             status: value.user_status,
@@ -138,7 +138,7 @@ impl From<AssignedStaffStaffUserCompanyFlattened> for AssignedStaffExtended {
             description: value.company_description,
             phone: value.company_phone,
             email: value.company_email,
-            avatar_url: value.company_avatar_url,
+            avatar_path: value.company_avatar_path,
             website: value.company_website,
             crn: value.company_crn,
             vatin: value.company_vatin,
@@ -166,7 +166,7 @@ impl From<AssignedStaffStaffUserCompanyFlattened> for AssignedStaffExtended {
                 name: value.decided_by_user_name.unwrap(),
                 email: value.decided_by_user_email.unwrap(),
                 birth: value.decided_by_user_birth.unwrap(),
-                avatar_url: value.decided_by_user_avatar_url,
+                avatar_path: value.decided_by_user_avatar_path,
                 gender: value.decided_by_user_gender.unwrap(),
                 role: value.decided_by_user_role.unwrap(),
                 status: value.decided_by_user_status.unwrap(),

@@ -22,7 +22,7 @@ pub struct Event {
     pub accepts_staff: bool,
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
-    pub avatar_url: Option<String>,
+    pub avatar_path: Option<String>,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
     pub deleted_at: Option<NaiveDateTime>,
@@ -35,7 +35,7 @@ pub struct EventData {
     pub website: Option<String>,
     pub start_date: Option<NaiveDate>,
     pub end_date: Option<NaiveDate>,
-    pub avatar_url: Option<String>,
+    pub avatar_path: Option<String>,
 }
 
 #[derive(Debug, Clone)]
