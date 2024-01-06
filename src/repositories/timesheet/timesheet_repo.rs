@@ -1,8 +1,8 @@
 use crate::common::DbResult;
 use crate::models::ApprovalStatus;
 use crate::repositories::timesheet::models::{
-    TimesheetCreateData, TimesheetDb, TimesheetReadAllData, TimesheetUpdateData,
-    TimesheetWithWorkdays, Workday,
+    TimesheetCreateData, TimesheetWithEvent, TimesheetReadAllData, TimesheetUpdateData,
+    TimesheetWithWorkdays, Workday, TimesheetStructureData,
 };
 use chrono::{Duration, NaiveDate};
 use sqlx::postgres::PgPool;
@@ -56,6 +56,7 @@ impl TimesheetRepository {
             workdays.push(workday);
             workdate += Duration::days(1);
         }
+        tx.commit().await?;
         Ok(workdays)
     }
 
@@ -71,12 +72,12 @@ impl TimesheetRepository {
             )); // ToDo: Rewrite for a proper error.
         }
 
-        let timesheet = sqlx::query_as!(
-            TimesheetDb,
+        let timesheet_structure = sqlx::query_as!(
+            TimesheetStructureData,
             r#"
             INSERT INTO timesheet (start_date, end_date, total_hours, is_editable, status, manager_note, user_id, company_id, event_id) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
-            RETURNING id, start_date, end_date, total_hours, is_editable, status AS "status!:ApprovalStatus", manager_note, user_id, company_id, event_id, created_at, edited_at, deleted_at;
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            RETURNING id, start_date, end_date;
             "#,
             data.start_date,
             data.end_date,
@@ -91,14 +92,44 @@ impl TimesheetRepository {
         .fetch_one(tx.deref_mut())
         .await?;
 
-        let workdays = Self::create_workdays(
-            &self,
+        // ToDo: This can probably be done better, but we need the event there as well.
+        let timesheet = sqlx::query_as!(
+            TimesheetWithEvent,
+            r#"
+            SELECT timesheet.id, 
+                   timesheet.start_date, 
+                   timesheet.end_date, 
+                   total_hours, 
+                   is_editable, 
+                   status AS "status!:ApprovalStatus", 
+                   manager_note, 
+                   user_id, 
+                   company_id,
+                   event_id,
+                   event.avatar_url AS event_avatar_url,
+                   event.name AS event_name,
+                   timesheet.created_at, 
+                   timesheet.edited_at, 
+                   timesheet.deleted_at 
+            FROM timesheet 
+            JOIN event ON timesheet.event_id = event.id
+            WHERE timesheet.id = $1 
+              AND timesheet.deleted_at IS NULL;
+            "#,
+            timesheet_structure.id
+        )
+        .fetch_one(tx.deref_mut())
+        .await?;
+
+        let workdays = self.create_workdays(
             tx,
-            timesheet.id,
-            timesheet.start_date,
-            timesheet.end_date,
+            timesheet_structure.id,
+            timesheet_structure.start_date,
+            timesheet_structure.end_date,
         )
         .await?;
+
+        // Tx commit in create_workdays
 
         let result = TimesheetWithWorkdays {
             timesheet,
@@ -112,29 +143,34 @@ impl TimesheetRepository {
         let mut tx = self.pool.begin().await?;
 
         let timesheet = sqlx::query_as!(
-            TimesheetDb,
+            TimesheetWithEvent,
             r#"
-            SELECT id, 
-                   start_date, 
-                   end_date, 
+            SELECT timesheet.id, 
+                   timesheet.start_date, 
+                   timesheet.end_date, 
                    total_hours, 
                    is_editable, 
                    status AS "status!:ApprovalStatus", 
                    manager_note, 
                    user_id, 
-                   company_id, 
-                   event_id, 
-                   created_at, 
-                   edited_at, 
-                   deleted_at 
-            FROM timesheet WHERE id = $1 AND deleted_at IS NULL;
+                   company_id,
+                   event_id,
+                   event.avatar_url AS event_avatar_url,
+                   event.name AS event_name,
+                   timesheet.created_at, 
+                   timesheet.edited_at, 
+                   timesheet.deleted_at 
+            FROM timesheet 
+            JOIN event ON timesheet.event_id = event.id
+            WHERE timesheet.id = $1 
+              AND timesheet.deleted_at IS NULL;
             "#,
             timesheet_id
         )
-        .fetch_one(tx.deref_mut())
+        .fetch_optional(tx.deref_mut())
         .await?;
 
-        if timesheet.deleted_at.is_some() {
+        if timesheet.is_none() {
             return Err(sqlx::Error::RowNotFound);
         }
 
@@ -154,7 +190,7 @@ impl TimesheetRepository {
         .await?;
 
         let result = TimesheetWithWorkdays {
-            timesheet,
+            timesheet: timesheet.expect("Should be valid here."),
             workdays,
         };
 
@@ -163,21 +199,75 @@ impl TimesheetRepository {
         Ok(result)
     }
 
-    pub async fn _read_all(&self, data: TimesheetReadAllData) -> DbResult<Vec<TimesheetDb>> {
+    // Warning!! The tx will be commited, use this as the last call in a transaction.
+    async fn _read_one_tx(&self, timesheet_id: Uuid, mut tx: Transaction<'_, Postgres>) -> DbResult<TimesheetWithEvent> {
+        let timesheet = sqlx::query_as!(
+            TimesheetWithEvent,
+            r#"
+            SELECT timesheet.id, 
+                   timesheet.start_date, 
+                   timesheet.end_date, 
+                   total_hours, 
+                   is_editable, 
+                   status AS "status!:ApprovalStatus", 
+                   manager_note, 
+                   user_id, 
+                   company_id,
+                   event_id,
+                   event.avatar_url AS event_avatar_url,
+                   event.name AS event_name,
+                   timesheet.created_at, 
+                   timesheet.edited_at, 
+                   timesheet.deleted_at 
+            FROM timesheet 
+            JOIN event ON timesheet.event_id = event.id
+            WHERE timesheet.id = $1 
+              AND timesheet.deleted_at IS NULL;
+            "#,
+            timesheet_id
+        )
+        .fetch_optional(tx.deref_mut())
+        .await?;
+
+        if timesheet.is_none() {
+            return Err(sqlx::Error::RowNotFound);
+        }
+
+        tx.commit().await?;
+
+        return Ok(timesheet.expect("Should be valid here."))
+    }
+
+    pub async fn _read_all(&self, data: TimesheetReadAllData) -> DbResult<Vec<TimesheetWithEvent>> {
         // This is for redis.
 
         self._read_all_db(data).await
     }
 
-    async fn _read_all_db(&self, data: TimesheetReadAllData) -> DbResult<Vec<TimesheetDb>> {
+    async fn _read_all_db(&self, data: TimesheetReadAllData) -> DbResult<Vec<TimesheetWithEvent>> {
         let executor = self.pool.as_ref();
 
         let timesheets = sqlx::query_as!(
-            TimesheetDb,
+            TimesheetWithEvent,
             r#"
-            SELECT id, start_date, end_date, total_hours, is_editable, status AS "status!:ApprovalStatus", manager_note, user_id, company_id, event_id, created_at, edited_at, deleted_at 
+            SELECT timesheet.id, 
+                   timesheet.start_date, 
+                   timesheet.end_date, 
+                   total_hours, 
+                   is_editable, 
+                   status AS "status!:ApprovalStatus", 
+                   manager_note, 
+                   user_id, 
+                   company_id,
+                   event_id,
+                   event.avatar_url AS event_avatar_url,
+                   event.name AS event_name,
+                   timesheet.created_at, 
+                   timesheet.edited_at, 
+                   timesheet.deleted_at 
             FROM timesheet 
-            WHERE deleted_at IS NULL
+             JOIN event ON timesheet.event_id = event.id
+            WHERE timesheet.deleted_at IS NULL
             LIMIT $1 OFFSET $2;
             "#,
             data.limit,
@@ -194,7 +284,7 @@ impl TimesheetRepository {
         user_id: Uuid,
         company_id: Uuid,
         data: TimesheetReadAllData,
-    ) -> DbResult<Vec<TimesheetDb>> {
+    ) -> DbResult<Vec<TimesheetWithEvent>> {
         // For Redis
 
         self.read_all_per_employment_db(user_id, company_id, data)
@@ -206,29 +296,32 @@ impl TimesheetRepository {
         user_id: Uuid,
         company_id: Uuid,
         data: TimesheetReadAllData,
-    ) -> DbResult<Vec<TimesheetDb>> {
+    ) -> DbResult<Vec<TimesheetWithEvent>> {
         let executor = self.pool.as_ref();
 
         let timesheets = sqlx::query_as!(
-            TimesheetDb,
+            TimesheetWithEvent,
             r#"
-            SELECT id, 
-                   start_date, 
-                   end_date, 
+            SELECT timesheet.id, 
+                   timesheet.start_date, 
+                   timesheet.end_date, 
                    total_hours, 
                    is_editable, 
                    status AS "status!:ApprovalStatus", 
                    manager_note, 
                    user_id, 
                    company_id,
-                   event_id, 
-                   created_at, 
-                   edited_at, 
-                   deleted_at 
+                   event_id,
+                   event.avatar_url AS event_avatar_url,
+                   event.name AS event_name,
+                   timesheet.created_at, 
+                   timesheet.edited_at, 
+                   timesheet.deleted_at 
             FROM timesheet 
+             JOIN event ON timesheet.event_id = event.id
             WHERE user_id = $1
               AND company_id = $2
-              AND deleted_at IS NULL
+              AND timesheet.deleted_at IS NULL
             LIMIT $3 OFFSET $4;
             "#,
             user_id,
@@ -265,8 +358,7 @@ impl TimesheetRepository {
             });
         }
 
-        let timesheet = sqlx::query_as!(
-            TimesheetDb,
+        sqlx::query!(
             r#"
             UPDATE timesheet
             SET start_date = COALESCE($1, start_date),
@@ -278,19 +370,6 @@ impl TimesheetRepository {
                 edited_at = NOW()
             WHERE id = $7
               AND deleted_at IS NULL
-            RETURNING id,
-                      start_date,
-                      end_date,
-                      total_hours,
-                      is_editable,
-                      status AS "status!:ApprovalStatus",
-                      manager_note,
-                      user_id,
-                      company_id,
-                      event_id,
-                      created_at,
-                      edited_at,
-                      deleted_at;
             "#,
             data.start_date,
             data.end_date,
@@ -300,12 +379,8 @@ impl TimesheetRepository {
             data.manager_note,
             timesheet_id
         )
-        .fetch_one(tx.deref_mut())
+        .execute(tx.deref_mut())
         .await?;
-
-        if timesheet.deleted_at.is_some() {
-            return Err(sqlx::Error::RowNotFound);
-        }
 
         // This should likely be in a separate function.
         if data.workdays.is_some() {
@@ -334,7 +409,10 @@ impl TimesheetRepository {
         /* You may think this is redundant, BUT
          *  since not all workdays may be edited,
          *  it's better to just retrieve all of them after the change.
+         * Also we don't get event data from the update.
+         * But if we get the time, we should think about improving this.
          */
+
         let workdays = sqlx::query_as!(
             Workday,
             r#"
@@ -347,10 +425,12 @@ impl TimesheetRepository {
                     edited_at 
             FROM workday 
             WHERE timesheet_id = $1;"#,
-            timesheet.id
+            timesheet_id
         )
         .fetch_all(tx.deref_mut())
         .await?;
+
+        let timesheet = self._read_one_tx(timesheet_id, tx).await?;
 
         let result = TimesheetWithWorkdays {
             timesheet,
@@ -364,7 +444,7 @@ impl TimesheetRepository {
         let executor = self.pool.as_ref();
 
         let timesheet = sqlx::query_as!(
-            TimesheetDb,
+            TimesheetStructureData,
             r#"UPDATE timesheet 
             SET edited_at = NOW(), 
             deleted_at = NOW() 
@@ -372,23 +452,13 @@ impl TimesheetRepository {
               AND deleted_at IS NULL
             RETURNING id,
                       start_date,
-                      end_date,
-                      total_hours,
-                      is_editable,
-                      status AS "status!:ApprovalStatus",
-                      manager_note,
-                      user_id,
-                      company_id,
-                      event_id,
-                      created_at,
-                      edited_at,
-                      deleted_at;"#,
+                      end_date;"#,
             timesheet_id
         )
-        .fetch_all(executor)
+        .fetch_optional(executor)
         .await?;
 
-        if timesheet.len() == 0 {
+        if timesheet.is_none() {
             return Err(sqlx::Error::RowNotFound);
         }
 
@@ -409,31 +479,26 @@ impl TimesheetRepository {
     }
 
     pub async fn _reset_timesheet(&self, timesheet_id: Uuid) -> DbResult<TimesheetWithWorkdays> {
-        let executor = self.pool.as_ref();
+        let mut tx = self.pool.begin().await?;
 
         let timesheet = sqlx::query_as!(
-            TimesheetDb,
+            TimesheetStructureData,
             r#"UPDATE timesheet 
             SET total_hours = 0,
                 edited_at = NOW()
             WHERE id = $1
+                  AND deleted_at IS NULL
             RETURNING id,
                       start_date,
-                      end_date,
-                      total_hours,
-                      is_editable,
-                      status AS "status!:ApprovalStatus",
-                      manager_note,
-                      user_id,
-                      company_id,
-                      event_id,
-                      created_at,
-                      edited_at,
-                      deleted_at;"#,
+                      end_date;"#,
             timesheet_id
         )
-        .fetch_one(executor)
+        .fetch_optional(tx.deref_mut())
         .await?;
+
+        if timesheet.is_none() {
+            return Err(sqlx::Error::RowNotFound);
+        }
 
         let workdays = sqlx::query_as!(
             Workday,
@@ -452,8 +517,10 @@ impl TimesheetRepository {
                       edited_at;"#,
             timesheet_id
         )
-        .fetch_all(executor)
+        .fetch_all(tx.deref_mut())
         .await?;
+
+        let timesheet = self._read_one_tx(timesheet_id, tx).await?;
 
         let edited_data = TimesheetWithWorkdays {
             timesheet,

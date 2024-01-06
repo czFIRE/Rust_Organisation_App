@@ -5,7 +5,14 @@ use sqlx::prelude::FromRow;
 use uuid::Uuid;
 
 #[derive(Debug, FromRow)]
-pub struct TimesheetDb {
+pub struct TimesheetStructureData {
+    pub id: Uuid,
+    pub start_date: NaiveDate,
+    pub end_date: NaiveDate
+}
+
+#[derive(Debug, FromRow)]
+pub struct TimesheetWithEvent {
     pub id: Uuid,
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
@@ -13,11 +20,11 @@ pub struct TimesheetDb {
     pub is_editable: bool,
     pub status: ApprovalStatus,
     pub manager_note: Option<String>,
-    // foreign keys
     pub user_id: Uuid,
     pub company_id: Uuid,
     pub event_id: Uuid,
-    // timestamps
+    pub event_avatar_url: String,
+    pub event_name: String,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
     pub deleted_at: Option<NaiveDateTime>,
@@ -76,6 +83,6 @@ pub struct Workday {
 
 #[allow(dead_code)]
 pub struct TimesheetWithWorkdays {
-    pub timesheet: TimesheetDb,
+    pub timesheet: TimesheetWithEvent,
     pub workdays: Vec<Workday>,
 }
