@@ -193,7 +193,7 @@ CREATE TABLE timesheet
     start_date   DATE NOT NULL,
     end_date     DATE NOT NULL,
     total_hours  REAL NOT NULL DEFAULT 0.0,
-    is_editable  BOOLEAN NOT NULL,
+    is_editable  BOOLEAN NOT NULL DEFAULT true,
     status       approval_status NOT NULL DEFAULT 'not_requested',
     manager_note TEXT,
     -------------------------------------------------------
