@@ -1,6 +1,6 @@
 // This is here for testing purposes!!!
-mod common;
-mod errors;
+pub mod common;
+pub mod errors;
 pub mod handlers;
 pub mod initialize;
 pub mod models;
