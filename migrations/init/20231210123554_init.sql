@@ -257,12 +257,10 @@ CREATE TABLE event_staff
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at  TIMESTAMP,
     -------------------------------------------------------
-    FOREIGN KEY (user_id) REFERENCES user_record (id),
-    FOREIGN KEY (company_id) REFERENCES company (id),
     FOREIGN KEY (user_id, company_id)
         REFERENCES employment (user_id, company_id),
-    FOREIGN KEY (decided_by) REFERENCES event_staff (id),
     FOREIGN KEY (event_id) REFERENCES event (id),
+    FOREIGN KEY (decided_by) REFERENCES event_staff (id),
     -------------------------------------------------------
     CONSTRAINT check_event_staff_decided_by_null_iff_pending
         CHECK (NOT(decided_by IS NULL AND status != 'pending')),
