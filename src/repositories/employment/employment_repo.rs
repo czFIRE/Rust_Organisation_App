@@ -9,7 +9,7 @@ use super::models::{
     EmploymentUserCompanyFlattened, NewEmployment,
 };
 
-use crate::models::{EmployeeContract, EmployeeLevel, Gender, UserRole, UserStatus};
+use crate::models::{EmploymentContract, EmployeeLevel, Gender, UserRole, UserStatus};
 
 #[derive(Clone)]
 pub struct EmploymentRepository {
@@ -49,7 +49,7 @@ impl EmploymentRepository {
                     start_date, 
                     end_date, 
                     description, 
-                    type AS "employment_type!: EmployeeContract", 
+                    type AS "employment_type!: EmploymentContract", 
                     level AS "level!: EmployeeLevel", 
                     created_at, 
                     edited_at, 
@@ -61,7 +61,7 @@ impl EmploymentRepository {
             data.start_date,
             data.end_date,
             data.description,
-            data.employment_type as EmployeeContract,
+            data.employment_type as EmploymentContract,
             data.level as EmployeeLevel,
         )
         .fetch_one(executor)
@@ -98,7 +98,7 @@ impl EmploymentRepository {
                 employment.start_date AS employment_start_date, 
                 employment.end_date AS employment_end_date, 
                 employment.description AS employment_description, 
-                employment.type AS "employment_type!: EmployeeContract", 
+                employment.type AS "employment_type!: EmploymentContract", 
                 employment.level AS "employment_level!: EmployeeLevel", 
                 employment.created_at AS employment_created_at, 
                 employment.edited_at AS employment_edited_at, 
@@ -162,7 +162,7 @@ impl EmploymentRepository {
                 employment.start_date AS employment_start_date, 
                 employment.end_date AS employment_end_date, 
                 employment.description AS employment_description, 
-                employment.type AS "employment_type!: EmployeeContract", 
+                employment.type AS "employment_type!: EmploymentContract", 
                 employment.level AS "employment_level!: EmployeeLevel", 
                 employment.created_at AS employment_created_at, 
                 employment.edited_at AS employment_edited_at, 
@@ -227,7 +227,7 @@ impl EmploymentRepository {
                 employment.start_date AS employment_start_date, 
                 employment.end_date AS employment_end_date, 
                 employment.description AS employment_description, 
-                employment.type AS "employment_type!: EmployeeContract", 
+                employment.type AS "employment_type!: EmploymentContract", 
                 employment.level AS "employment_level!: EmployeeLevel", 
                 employment.created_at AS employment_created_at, 
                 employment.edited_at AS employment_edited_at, 
@@ -292,7 +292,7 @@ impl EmploymentRepository {
                 employment.start_date AS employment_start_date, 
                 employment.end_date AS employment_end_date, 
                 employment.description AS employment_description, 
-                employment.type AS "employment_type!: EmployeeContract", 
+                employment.type AS "employment_type!: EmploymentContract", 
                 employment.level AS "employment_level!: EmployeeLevel", 
                 employment.created_at AS employment_created_at, 
                 employment.edited_at AS employment_edited_at, 
@@ -384,7 +384,7 @@ impl EmploymentRepository {
                 start_date, 
                 end_date, 
                 description, 
-                type AS "employment_type!: EmployeeContract", 
+                type AS "employment_type!: EmploymentContract", 
                 level AS "level!: EmployeeLevel", 
                 created_at, 
                 edited_at, 
@@ -396,7 +396,7 @@ impl EmploymentRepository {
             data.start_date,
             data.end_date,
             data.description,
-            data.employment_type as Option<EmployeeContract>,
+            data.employment_type as Option<EmploymentContract>,
             data.level as Option<EmployeeLevel>,
         )
         .fetch_one(executor)

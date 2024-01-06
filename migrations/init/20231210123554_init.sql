@@ -8,7 +8,6 @@ CREATE TYPE approval_status         AS ENUM ('not_requested', 'pending',
 CREATE TYPE association             AS ENUM ('sponsor', 'organizer', 'media', 'other');
 CREATE TYPE employment_contract     AS ENUM ('dpp', 'dpc', 'hpp');
 CREATE TYPE employee_level          AS ENUM ('basic', 'manager', 'company_administrator');
-CREATE TYPE employee_contract       AS ENUM ('dpp', 'dpc', 'hpp');
 CREATE TYPE event_role              AS ENUM ('staff', 'organizer');
 CREATE TYPE gender                  AS ENUM ('male', 'female', 'other');
 CREATE TYPE task_priority           AS ENUM ('low', 'medium', 'high');
@@ -114,7 +113,7 @@ CREATE TABLE employment
     start_date  DATE NOT NULL,
     end_date    DATE NOT NULL,
     description TEXT,
-    type        employee_contract NOT NULL,
+    type        employment_contract NOT NULL,
     level       employee_level NOT NULL DEFAULT 'basic',
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),

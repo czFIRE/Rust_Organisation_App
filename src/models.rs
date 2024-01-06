@@ -73,8 +73,8 @@ pub enum EmployeeLevel {
 
 #[derive(Serialize, Deserialize, Debug, sqlx::Type, Clone, PartialEq)]
 #[serde(rename_all = "snake_case")]
-#[sqlx(type_name = "employee_contract", rename_all = "lowercase")]
-pub enum EmployeeContract {
+#[sqlx(type_name = "employment_contract", rename_all = "lowercase")]
+pub enum EmploymentContract {
     Dpp,
     Dpc,
     Hpp,
