@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;
 use chrono::Utc;
@@ -8,10 +10,15 @@ use crate::{
     errors::parse_error,
     handlers::common::{extract_user_company_ids, QueryParams},
     models::ApprovalStatus,
-    repositories::timesheet::{models::{TimesheetReadAllData, TimesheetCreateData}, timesheet_repo::TimesheetRepository},
+    repositories::timesheet::{
+        models::{TimesheetCreateData, TimesheetReadAllData},
+        timesheet_repo::TimesheetRepository,
+    },
     templates::{
         event::EventLiteTemplate,
-        timesheet::{TimesheetLiteTemplate, TimesheetsTemplate, WorkdayTemplate, TimesheetTemplate},
+        timesheet::{
+            TimesheetLiteTemplate, TimesheetTemplate, TimesheetsTemplate, WorkdayTemplate,
+        },
     },
 };
 
@@ -92,22 +99,27 @@ pub async fn get_all_timesheets_for_employment(
 
 // Note: This is done automatically whenever event_staff is accepted to work on an event.
 #[post("/timesheet")]
-pub async fn create_timesheet(new_timesheet: web::Form<TimesheetCreateData>, timesheet_repo: web::Data<TimesheetRepository>) -> HttpResponse {
+pub async fn create_timesheet(
+    new_timesheet: web::Form<TimesheetCreateData>,
+    timesheet_repo: web::Data<TimesheetRepository>,
+) -> HttpResponse {
     let result = timesheet_repo.create(new_timesheet.into_inner()).await;
 
     if let Ok(full_timesheet) = result {
-        let workdays = full_timesheet.workdays.into_iter().map(|workday| {
-            WorkdayTemplate {
+        let workdays = full_timesheet
+            .workdays
+            .into_iter()
+            .map(|workday| WorkdayTemplate {
                 timesheet_id: workday.timesheet_id,
                 date: workday.date,
                 total_hours: workday.total_hours,
                 comment: workday.comment.unwrap_or("No comment.".to_string()),
                 is_editable: workday.is_editable,
                 created_at: workday.created_at,
-                edited_at: workday.edited_at
-            }
-        }).collect();
-        
+                edited_at: workday.edited_at,
+            })
+            .collect();
+
         let template = TimesheetTemplate {
             id: full_timesheet.timesheet.id,
             user_id: full_timesheet.timesheet.user_id,
@@ -122,19 +134,23 @@ pub async fn create_timesheet(new_timesheet: web::Form<TimesheetCreateData>, tim
             calculated_wage: 0,
             is_editable: full_timesheet.timesheet.is_editable,
             status: full_timesheet.timesheet.status,
-            manager_note: full_timesheet.timesheet.manager_note.unwrap_or("No note.".to_string()),
+            manager_note: full_timesheet
+                .timesheet
+                .manager_note
+                .unwrap_or("No note.".to_string()),
             created_at: full_timesheet.timesheet.created_at,
             edited_at: full_timesheet.timesheet.edited_at,
         };
 
         let body = template.render();
         if body.is_err() {
-            return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
 
         return HttpResponse::Created().body(body.expect("Should be valid now."));
     }
-    
+
     let error = result.err().expect("Should be error here.");
     return match error {
         sqlx::Error::Database(err) => {
@@ -154,8 +170,72 @@ pub async fn create_timesheet(new_timesheet: web::Form<TimesheetCreateData>, tim
 }
 
 #[get("/timesheet/{timesheet_id}")]
-pub async fn get_timesheet(_id: web::Path<String>) -> HttpResponse {
-    todo!()
+pub async fn get_timesheet(
+    timesheet_id: web::Path<String>,
+    timesheet_repo: web::Data<TimesheetRepository>,
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(timesheet_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let parsed_id = id_parse.expect("Should be valid.");
+    let result = timesheet_repo._read_one(parsed_id).await;
+
+    if let Ok(full_timesheet) = result {
+        let workdays = full_timesheet
+            .workdays
+            .into_iter()
+            .map(|workday| WorkdayTemplate {
+                timesheet_id: workday.timesheet_id,
+                date: workday.date,
+                total_hours: workday.total_hours,
+                comment: workday.comment.unwrap_or("No comment.".to_string()),
+                is_editable: workday.is_editable,
+                created_at: workday.created_at,
+                edited_at: workday.edited_at,
+            })
+            .collect();
+
+        let template = TimesheetTemplate {
+            id: full_timesheet.timesheet.id,
+            user_id: full_timesheet.timesheet.user_id,
+            company_id: full_timesheet.timesheet.company_id,
+            event_id: full_timesheet.timesheet.event_id,
+            event_avatar_url: full_timesheet.timesheet.event_avatar_url,
+            event_name: full_timesheet.timesheet.event_name,
+            start_date: full_timesheet.timesheet.start_date,
+            end_date: full_timesheet.timesheet.end_date,
+            total_hours: full_timesheet.timesheet.total_hours,
+            work_days: workdays,
+            calculated_wage: 0,
+            is_editable: full_timesheet.timesheet.is_editable,
+            status: full_timesheet.timesheet.status,
+            manager_note: full_timesheet
+                .timesheet
+                .manager_note
+                .unwrap_or("No note.".to_string()),
+            created_at: full_timesheet.timesheet.created_at,
+            edited_at: full_timesheet.timesheet.edited_at,
+        };
+
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Ok().body(body.expect("Should be valid now."));
+    }
+
+    let error = result.err().expect("Should be an error.");
+    match error {
+        sqlx::Error::RowNotFound => {
+            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
+        }
+        _ => HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
+    }
 }
 
 #[patch("/timesheet/{timesheet_id}")]

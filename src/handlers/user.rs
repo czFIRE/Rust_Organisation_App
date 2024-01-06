@@ -16,15 +16,6 @@ use crate::{
     repositories::user::user_repo::UserRepository,
 };
 
-#[derive(Deserialize)]
-pub struct NewUserData {
-    name: String,
-    email: String,
-    birth: NaiveDate,
-    gender: Gender,
-    role: UserRole,
-}
-
 #[get("/user/{user_id}")]
 pub async fn get_user(
     user_id: web::Path<String>,
