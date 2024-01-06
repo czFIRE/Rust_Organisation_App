@@ -2512,7 +2512,7 @@ mod api_tests {
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         let out = serde_json::from_str::<TimesheetTemplate>(body).unwrap();
-        assert_eq!(out.work_days.len(), 2);
+        assert_eq!(out.workdays.len(), 2);
         assert_eq!(
             out.id,
             Uuid::from_str("d47e8141-a77e-4d55-a2d5-4a77de24b6d0").unwrap()
@@ -2567,7 +2567,7 @@ mod api_tests {
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         let out = serde_json::from_str::<TimesheetTemplate>(body).unwrap();
-        assert_eq!(out.work_days.len(), 4);
+        assert_eq!(out.workdays.len(), 4);
         assert_eq!(
             out.company_id,
             Uuid::from_str("b5188eda-528d-48d4-8cee-498e0971f9f5").unwrap()

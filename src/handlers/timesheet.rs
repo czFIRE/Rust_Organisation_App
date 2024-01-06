@@ -23,7 +23,7 @@ pub struct WorkDay {
 
 #[derive(Deserialize)]
 pub struct TimesheetData {
-    work_days: Option<Vec<WorkDay>>,
+    workdays: Option<Vec<WorkDay>>,
     is_editable: Option<bool>,
     status: Option<ApprovalStatus>,
     manager_note: Option<String>,
@@ -59,7 +59,7 @@ pub async fn update_timesheet(
 }
 
 /*
-* Reset every work_day for a corresponding timesheet, as well as worked_hours and comments in the timesheet record.
+* Reset every workday for a corresponding timesheet, as well as worked_hours and comments in the timesheet record.
 */
 #[delete("/timesheet/{timesheet_id}/workdays")]
 pub async fn reset_timesheet_data(_timesheet_id: web::Path<String>) -> HttpResponse {

@@ -233,9 +233,9 @@ CREATE TABLE workday
     PRIMARY KEY  (timesheet_id, date),
     FOREIGN KEY  (timesheet_id) REFERENCES timesheet (id),
     --------------------------------------------------------
-    CONSTRAINT check_work_day_total_hours_between_0_and_24
+    CONSTRAINT check_workday_total_hours_between_0_and_24
         CHECK (total_hours BETWEEN 0.0 AND 24.0),
-    CONSTRAINT check_work_day_created_at_lte_edited_at
+    CONSTRAINT check_workday_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
 

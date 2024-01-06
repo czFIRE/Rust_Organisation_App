@@ -316,49 +316,49 @@ BEGIN
 
 --------------------------------------------------------------------------------
 
-    INSERT INTO work_day
+    INSERT INTO workday
         (timesheet_id, date, total_hours, comment, is_editable,
         created_at, edited_at)
         VALUES
         (timesheet0_id, '1969-08-15', 12, '', true,
         '1969-08-16 18:28', '1969-08-17 08:22');
 
-    INSERT INTO work_day
+    INSERT INTO workday
         (timesheet_id, date, total_hours, comment, is_editable,
         created_at, edited_at)
         VALUES
         (timesheet0_id, '1969-08-16', 10, '', true,
         '1969-08-17 20:00', '1969-08-17 20:00');
 
-    INSERT INTO work_day
+    INSERT INTO workday
         (timesheet_id, date, total_hours, comment, is_editable,
         created_at, edited_at)
         VALUES
         (timesheet1_id, '1969-08-14', 10, '', false,
         '1969-08-17 19:58', '1969-08-17 19:59');
 
-    INSERT INTO work_day
+    INSERT INTO workday
         (timesheet_id, date, total_hours, comment, is_editable,
         created_at, edited_at)
         VALUES
         (timesheet1_id, '1969-08-15', 4.5, 'I was overworked as a mule!', false,
         '1969-08-17 20:00', '1969-08-17 20:00');
 
-    INSERT INTO work_day
+    INSERT INTO workday
         (timesheet_id, date, total_hours, comment, is_editable,
         created_at, edited_at)
         VALUES
         (timesheet1_id, '1969-08-16', 9.5, '', false,
         '1969-08-17 20:40', '1969-08-17 21:00');
 
-    INSERT INTO work_day
+    INSERT INTO workday
         (timesheet_id, date, total_hours, comment, is_editable,
         created_at, edited_at)
         VALUES
         (timesheet2_id, '2024-01-01', 8, '', false,
         '2024-01-01 22:33', '2024-01-01 22:33');
 
-    INSERT INTO work_day
+    INSERT INTO workday
         (timesheet_id, date, total_hours, comment, is_editable,
         created_at, edited_at)
         VALUES

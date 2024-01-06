@@ -150,14 +150,14 @@ BEGIN
 		true, 'not_requested', NULL,
 		'1969-08-16 18:26:0.0', '1969-08-17 20:00:0.0');
 	
-	INSERT INTO work_day
+	INSERT INTO workday
 		(timesheet_id, date, total_hours, comment, is_editable,
 		created_at, edited_at)
 		VALUES
 		(timesheet0_id, '1969-08-15', 12, '', true,
 		'1969-08-16 18:28:5.4', '1969-08-17 08:22:32.4');
 	
-	INSERT INTO work_day
+	INSERT INTO workday
 		(timesheet_id, date, total_hours, comment, is_editable,
 		created_at, edited_at)
 		VALUES

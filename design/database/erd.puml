@@ -135,7 +135,7 @@ entity timesheet {
     deleted_at: timestamp
 }
 
-entity work_day {
+entity workday {
     *<u>timesheet_id</u>: <<uuid>>
     *<u>work_date</u>: date
     ---
@@ -309,7 +309,7 @@ entity comment {
 '/
 user||..|{employment
 timesheet}o..||employment
-timesheet||.l.o{work_day : can\nhave\n <
+timesheet||.l.o{workday : can\nhave\n <
 timesheet}o.r.||event
 employment||..o{event_staff
 employment}o..||company

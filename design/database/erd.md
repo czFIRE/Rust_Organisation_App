@@ -65,11 +65,11 @@ In our system, timesheets are related to events, not whole months.
 - event_id - The event this timesheet is bound to.
 - start_date - The start date of the timesheet. Corresponds to the start date of the work on an event.
 - end_date - The end date of the timesheets. Has same correspondence as start_date.
-- worked_hours - A float value representing the aggregated sum of worked_hours for all workdays (work_day table)
+- worked_hours - A float value representing the aggregated sum of worked_hours for all workdays (workday table)
 - is_editable - This attribute represents two things. A timesheet is editable when a user can enter data into it. It can become non-editable when the timesheet is turned in. So we model both the editability and the status of the timesheet. The sheet becomes editable if any issue is detected by the responsible party and a correction is needed.
 - manager_note - a note from a responsible person
   
-### Work_day
+### Workday
 This table contains information about workdays that belong to timesheets.
 
 #### Attributes
