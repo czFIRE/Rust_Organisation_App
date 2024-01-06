@@ -1596,7 +1596,7 @@ mod api_tests {
                 .service(get_employments_per_user),
         )
         .await;
-    
+
         let req = test::TestRequest::get()
             .uri("/user/35221a5b-da2c-4fe6-96d8-ce069b1ba5d4/employment")
             .to_request();
