@@ -1,8 +1,8 @@
 use crate::common::DbResult;
 use crate::models::ApprovalStatus;
 use crate::repositories::timesheet::models::{
-    TimesheetCreateData, TimesheetWithEvent, TimesheetReadAllData, TimesheetUpdateData,
-    TimesheetWithWorkdays, Workday, TimesheetStructureData,
+    TimesheetCreateData, TimesheetReadAllData, TimesheetStructureData, TimesheetUpdateData,
+    TimesheetWithEvent, TimesheetWithWorkdays, Workday,
 };
 use chrono::{Duration, NaiveDate};
 use sqlx::postgres::PgPool;
@@ -121,13 +121,14 @@ impl TimesheetRepository {
         .fetch_one(tx.deref_mut())
         .await?;
 
-        let workdays = self.create_workdays(
-            tx,
-            timesheet_structure.id,
-            timesheet_structure.start_date,
-            timesheet_structure.end_date,
-        )
-        .await?;
+        let workdays = self
+            .create_workdays(
+                tx,
+                timesheet_structure.id,
+                timesheet_structure.start_date,
+                timesheet_structure.end_date,
+            )
+            .await?;
 
         // Tx commit in create_workdays
 
@@ -200,7 +201,11 @@ impl TimesheetRepository {
     }
 
     // Warning!! The tx will be commited, use this as the last call in a transaction.
-    async fn _read_one_tx(&self, timesheet_id: Uuid, mut tx: Transaction<'_, Postgres>) -> DbResult<TimesheetWithEvent> {
+    async fn _read_one_tx(
+        &self,
+        timesheet_id: Uuid,
+        mut tx: Transaction<'_, Postgres>,
+    ) -> DbResult<TimesheetWithEvent> {
         let timesheet = sqlx::query_as!(
             TimesheetWithEvent,
             r#"
@@ -235,7 +240,7 @@ impl TimesheetRepository {
 
         tx.commit().await?;
 
-        return Ok(timesheet.expect("Should be valid here."))
+        return Ok(timesheet.expect("Should be valid here."));
     }
 
     pub async fn _read_all(&self, data: TimesheetReadAllData) -> DbResult<Vec<TimesheetWithEvent>> {

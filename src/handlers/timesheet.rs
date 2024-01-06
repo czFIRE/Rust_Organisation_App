@@ -1,4 +1,5 @@
 use actix_web::{delete, get, http, patch, post, web, HttpResponse};
+use askama::Template;
 use chrono::Utc;
 use serde::Deserialize;
 use uuid::Uuid;
@@ -8,6 +9,10 @@ use crate::{
     handlers::common::{extract_user_company_ids, QueryParams},
     models::ApprovalStatus,
     repositories::timesheet::{models::TimesheetReadAllData, timesheet_repo::TimesheetRepository},
+    templates::{
+        event::EventLiteTemplate,
+        timesheet::{TimesheetLiteTemplate, TimesheetsTemplate},
+    },
 };
 
 #[derive(Deserialize)]
@@ -54,7 +59,44 @@ pub async fn get_all_timesheets_for_employment(
     }
 
     let (company_id, user_id) = parsed_ids.unwrap();
-    todo!()
+    let result = timesheet_repo
+        .read_all_timesheets_per_employment(user_id, company_id, query_params)
+        .await;
+
+    if let Ok(timesheets) = result {
+        let timesheet_vec = timesheets
+            .into_iter()
+            .map(|timesheet| TimesheetLiteTemplate {
+                id: timesheet.id,
+                user_id: timesheet.user_id,
+                company_id: timesheet.company_id,
+                event_id: timesheet.event_id,
+                event_avatar_url: timesheet.event_avatar_url,
+                event_name: timesheet.event_name,
+                start_date: timesheet.start_date,
+                end_date: timesheet.end_date,
+                is_editable: timesheet.is_editable,
+                status: timesheet.status,
+                has_note: timesheet.manager_note.is_some(),
+                created_at: timesheet.created_at,
+                edited_at: timesheet.edited_at,
+            })
+            .collect();
+
+        let template = TimesheetsTemplate {
+            timesheets: timesheet_vec,
+        };
+
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Ok().body(body.expect("Should be valid now."));
+    }
+
+    HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
 }
 
 // Note: This is done automatically whenever event_staff is accepted to work on an event.

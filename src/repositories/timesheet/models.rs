@@ -8,7 +8,7 @@ use uuid::Uuid;
 pub struct TimesheetStructureData {
     pub id: Uuid,
     pub start_date: NaiveDate,
-    pub end_date: NaiveDate
+    pub end_date: NaiveDate,
 }
 
 #[derive(Debug, FromRow)]
