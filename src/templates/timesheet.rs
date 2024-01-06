@@ -15,7 +15,6 @@ pub struct WorkdayTemplate {
     pub work_date: NaiveDate,
     pub total_hours: u8,
     pub comment: Option<String>,
-    pub is_editable: bool,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
 }

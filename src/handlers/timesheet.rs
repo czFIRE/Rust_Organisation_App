@@ -18,7 +18,6 @@ pub struct NewTimesheetData {
 pub struct WorkDay {
     total_hours: Option<u8>, // If none, the default is 0.
     comment: Option<String>,
-    is_editable: Option<bool>,
 }
 
 #[derive(Deserialize)]

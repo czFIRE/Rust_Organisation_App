@@ -3543,9 +3543,6 @@ components:
         commentary:
           type: string
           example: 'Backstage: Catering for The Mutes accapella band.'
-        is_editable:
-          type: boolean
-          example: false
         created_at:
           type: string
           example: '2020-06-01 00:00:00+01'
@@ -3562,9 +3559,6 @@ components:
         commentary:
           type: string
           example: 'Backstage: Catering for The Mutes accapella band.'
-        is_editable:
-          type: boolean
-          example: false
 
     TimeSheetLite:
       type: object
