@@ -188,6 +188,17 @@ BEGIN
         type, level,
         created_at, edited_at)
         VALUES
+        (user0_id, company1_id, NULL, 300,
+        '2023-01-01', '2025-01-01', '-',
+        'hpp', 'company_administrator',
+        '2022-12-29 12:38', '2023-12-10 14:52');
+
+    INSERT INTO employment
+        (user_id, company_id, manager_id, hourly_wage,
+        start_date, end_date, description,
+        type, level,
+        created_at, edited_at)
+        VALUES
         (user1_id, company1_id, user0_id, 200,
         '2023-02-01', '2025-01-01', '-',
         'dpc', 'manager',

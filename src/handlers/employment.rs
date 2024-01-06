@@ -154,12 +154,12 @@ async fn get_full_employment(
 
 #[get("/user/{user_id}/employment/{company_id}")]
 pub async fn get_employment(
-    user_id: web::Path<String>,
-    company_id: web::Path<String>,
+    path: web::Path<(String, String)>,
     employment_repo: web::Data<EmploymentRepository>,
 ) -> HttpResponse {
-    let user_id_parse = Uuid::from_str(user_id.into_inner().as_str());
-    let company_id_parse = Uuid::from_str(company_id.into_inner().as_str());
+    let ids = path.into_inner();
+    let user_id_parse = Uuid::from_str(ids.0.as_str());
+    let company_id_parse = Uuid::from_str(ids.1.as_str());
     if user_id_parse.is_err() || company_id_parse.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
@@ -171,8 +171,7 @@ pub async fn get_employment(
 
 #[get("/user/{user_id}/employment/{company_id}/subordinates")]
 pub async fn get_subordinates(
-    user_id: web::Path<String>,
-    company_id: web::Path<String>,
+    path: web::Path<(String, String)>,
     params: web::Query<EmploymentFilter>,
     employment_repo: web::Data<EmploymentRepository>,
 ) -> HttpResponse {
@@ -184,8 +183,9 @@ pub async fn get_subordinates(
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
-    let user_id_parse = Uuid::from_str(user_id.into_inner().as_str());
-    let company_id_parse = Uuid::from_str(company_id.into_inner().as_str());
+    let ids = path.into_inner();
+    let user_id_parse = Uuid::from_str(ids.0.as_str());
+    let company_id_parse = Uuid::from_str(ids.1.as_str());
     if user_id_parse.is_err() || company_id_parse.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
@@ -296,8 +296,7 @@ fn is_data_empty(data: EmploymentData) -> bool {
 
 #[patch("/user/{user_id}/employment/{company_id}")]
 pub async fn update_employment(
-    user_id: web::Path<String>,
-    company_id: web::Path<String>,
+    path: web::Path<(String, String)>,
     employment_data: web::Form<EmploymentData>,
     employment_repo: web::Data<EmploymentRepository>,
 ) -> HttpResponse {
@@ -305,8 +304,9 @@ pub async fn update_employment(
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
-    let user_id_parse = Uuid::from_str(user_id.into_inner().as_str());
-    let company_id_parse = Uuid::from_str(company_id.into_inner().as_str());
+    let ids = path.into_inner();
+    let user_id_parse = Uuid::from_str(ids.0.as_str());
+    let company_id_parse = Uuid::from_str(ids.1.as_str());
     if user_id_parse.is_err() || company_id_parse.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
@@ -346,12 +346,12 @@ pub async fn update_employment(
 
 #[delete("/user/{user_id}/employment/{company_id}")]
 pub async fn delete_employment(
-    user_id: web::Path<String>,
-    company_id: web::Path<String>,
+    path: web::Path<(String, String)>,
     employment_repo: web::Data<EmploymentRepository>,
 ) -> HttpResponse {
-    let user_id_parse = Uuid::from_str(user_id.into_inner().as_str());
-    let company_id_parse = Uuid::from_str(company_id.into_inner().as_str());
+    let ids = path.into_inner();
+    let user_id_parse = Uuid::from_str(ids.0.as_str());
+    let company_id_parse = Uuid::from_str(ids.1.as_str());
     if user_id_parse.is_err() || company_id_parse.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }

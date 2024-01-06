@@ -98,6 +98,7 @@ async fn main() -> Result<()> {
     let timesheet_repo = web::Data::new(timesheet_repository);
     let comment_repo = web::Data::new(comment_repository);
 
+    println!("Starting server on {}", HOST);
     HttpServer::new(move || {
         App::new()
             .app_data(user_repo.clone())

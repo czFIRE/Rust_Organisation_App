@@ -1574,14 +1574,14 @@ mod api_tests {
         .await;
 
         let req = test::TestRequest::get()
-            .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4/employment")
+            .uri("/user/0465041f-fe64-461f-9f71-71e3b97ca85f/employment")
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        assert!(body.contains("35341253-da20-40b6-96d8-ce069b1ba5d4"));
+        assert!(body.contains("0465041f-fe64-461f-9f71-71e3b97ca85f"));
     }
 
     #[actix_web::test]
