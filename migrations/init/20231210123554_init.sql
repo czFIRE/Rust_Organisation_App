@@ -221,6 +221,7 @@ CREATE TABLE workday
 (   
     timesheet_id UUID NOT NULL,
     date         DATE NOT NULL,
+    --------------------------------------------------------
     total_hours  REAL NOT NULL DEFAULT 0.0,
     comment      TEXT,
     is_editable  BOOLEAN NOT NULL DEFAULT true,
