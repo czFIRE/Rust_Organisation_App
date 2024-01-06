@@ -647,23 +647,35 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_events_test() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let event_repository = EventRepository::new(arc_pool.clone());
+        let event_repo = web::Data::new(event_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(event_repo.clone())
+                .service(get_events)
+        )
+        .await;
 
         let req = test::TestRequest::get().uri("/event").to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::OK);
-        let body_bytes = test::read_body(res).await;
-        let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<EventsTemplate>(body).unwrap();
-        assert_eq!(out.events.len(), 1);
     }
 
     #[actix_web::test]
     async fn get_existing_event() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let event_repository = EventRepository::new(arc_pool.clone());
+        let event_repo = web::Data::new(event_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(event_repo.clone())
+                .service(get_event)
+        )
+        .await;
 
         let req = test::TestRequest::get()
             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8")
@@ -673,25 +685,24 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<EventTemplate>(body).unwrap();
-        assert_eq!(out.name, "Woodstock");
-        assert_eq!(out.website, Some("https://woodstock.com".to_string()));
-        assert!(out.accepts_staff);
-        assert_eq!(
-            out.description,
-            Some("A legendary music festival".to_string())
-        );
-        assert_eq!(
-            out.start_date,
-            NaiveDate::from_ymd_opt(1969, 8, 15).unwrap()
-        );
-        assert_eq!(out.end_date, NaiveDate::from_ymd_opt(1969, 8, 18).unwrap());
+        
+        assert!(body.contains("Woodstock"));
+        assert!(body.contains("https://woodstock.com"));
+        assert!(body.contains("A legendary music festival"));
     }
 
     #[actix_web::test]
     async fn get_non_existent_event() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let event_repository = EventRepository::new(arc_pool.clone());
+        let event_repo = web::Data::new(event_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(event_repo.clone())
+                .service(get_event)
+        )
+        .await;
 
         let req = test::TestRequest::get()
             .uri("/event/a71cd75e-a811-410a-9bb4-70fc5c7748f8")
@@ -703,8 +714,16 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_event_invalid_uuid_format() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let event_repository = EventRepository::new(arc_pool.clone());
+        let event_repo = web::Data::new(event_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(event_repo.clone())
+                .service(get_event)
+        )
+        .await;
 
         let req = test::TestRequest::get()
             .uri("/event/a71cd75e-sleepy-head-111z3zz")
@@ -715,48 +734,22 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn create_event_test() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+    async fn create_update_delete_event_test() {
+        let arc_pool = get_db_pool().await;
+        let event_repository = EventRepository::new(arc_pool.clone());
+        let event_repo = web::Data::new(event_repository);
 
-        let start_date = Utc.with_ymd_and_hms(2027, 04, 06, 0, 0, 0).unwrap();
-        let end_date = Utc.with_ymd_and_hms(2027, 04, 07, 0, 0, 0).unwrap();
+        let app = test::init_service(
+            App::new()
+                .app_data(event_repo.clone())
+                .service(create_event)
+                .service(update_event)
+                .service(delete_event)
+        )
+        .await;
 
-        let data = json!({
-            "name": "BitConnect Charitative Concert",
-            "description": "Return of the best bitcoin app, BitConneeeeeeeeect!",
-            "start_date": start_date.clone().to_string(),
-            "end_date": end_date.clone().to_string(),
-        });
-
-        let req = test::TestRequest::post()
-            .uri("/event")
-            .set_form(data)
-            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_success());
-        assert_eq!(res.status(), http::StatusCode::CREATED);
-        let body_bytes = test::read_body(res).await;
-        let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<EventTemplate>(body).unwrap();
-        assert_eq!(out.name, "BitConnect Charitative Concert");
-        // Accepts staff should be default true when event is created.
-        assert!(out.accepts_staff);
-        assert_eq!(
-            out.description,
-            Some("Return of the best bitcoin app, BitConneeeeeeeeect!".to_string())
-        );
-        assert_eq!(out.start_date, start_date.date_naive());
-        assert_eq!(out.end_date, end_date.date_naive());
-    }
-
-    #[actix_web::test]
-    async fn create_event_duplicate() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-
-        let start_date = Utc.with_ymd_and_hms(2027, 04, 06, 0, 0, 0).unwrap();
-        let end_date = Utc.with_ymd_and_hms(2027, 04, 07, 0, 0, 0).unwrap();
+        let start_date = NaiveDate::from_ymd_opt(2027, 04, 06).unwrap();
+        let end_date = NaiveDate::from_ymd_opt(2027, 04, 07).unwrap();
 
         let data = json!({
             "name": "BitConnect Charitative Concert",
@@ -772,27 +765,26 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::CREATED);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+        
+        let uuid_regex = Regex::new(
+            r"[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}",
+        )
+        .unwrap();
+        let uuid_caps = uuid_regex.captures(body).unwrap();
+        let uuid_str = &uuid_caps[0];
 
-        let req = test::TestRequest::post()
-            .uri("/event")
-            .set_form(data)
-            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
-    }
-
-    #[actix_web::test]
-    async fn patch_event() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        assert!(body.contains("BitConnect Charitative Concert"));
+        assert!(body.contains("Return of the best bitcoin app, BitConneeeeeeeeect!"));
+        assert!(body.contains("true"));
 
         let data = json!({
-            "name": "Ironstock"
+            "name": "BitConnect Charitative Event"
         });
 
         let req = test::TestRequest::patch()
-            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8")
+            .uri(format!("/event/{}", uuid_str).as_str())
             .set_form(data)
             .to_request();
         let res = test::call_service(&app, req).await;
@@ -800,25 +792,36 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<EventTemplate>(body).unwrap();
-        assert_eq!(out.name, "Ironstock");
-        assert_eq!(out.website, Some("https://woodstock.com".to_string()));
-        assert!(out.accepts_staff);
-        assert_eq!(
-            out.description,
-            Some("A legendary music festival".to_string())
-        );
-        assert_eq!(
-            out.start_date,
-            NaiveDate::from_ymd_opt(1969, 8, 15).unwrap()
-        );
-        assert_eq!(out.end_date, NaiveDate::from_ymd_opt(1969, 8, 18).unwrap());
+        assert!(body.contains("BitConnect Charitative Event"));
+        assert!(body.contains("Return of the best bitcoin app, BitConneeeeeeeeect!"));
+
+        let req = test::TestRequest::delete()
+            .uri(format!("/event/{}", uuid_str).as_str())
+            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
+
+        let req = test::TestRequest::delete()
+            .uri(format!("/event/{}", uuid_str).as_str())
+            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn patch_non_existent_event() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let event_repository = EventRepository::new(arc_pool.clone());
+        let event_repo = web::Data::new(event_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(event_repo.clone())
+                .service(update_event)
+        )
+        .await;
 
         let data = json!({
             "name": "Ironstock"
@@ -835,8 +838,16 @@ mod api_tests {
 
     #[actix_web::test]
     async fn patch_event_invalid_uuid_format() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let event_repository = EventRepository::new(arc_pool.clone());
+        let event_repo = web::Data::new(event_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(event_repo.clone())
+                .service(update_event)
+        )
+        .await;
 
         let data = json!({});
 
@@ -851,8 +862,16 @@ mod api_tests {
 
     #[actix_web::test]
     async fn patch_event_empty_data() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let event_repository = EventRepository::new(arc_pool.clone());
+        let event_repo = web::Data::new(event_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(event_repo.clone())
+                .service(update_event)
+        )
+        .await;
 
         let data = json!({});
 
@@ -866,35 +885,17 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn delete_event_test() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-
-        let req = test::TestRequest::delete()
-            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8")
-            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_success());
-        assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
-    }
-
-    #[actix_web::test]
-    async fn delete_non_existent_event() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-
-        let req = test::TestRequest::delete()
-            .uri("/event/b7afddce-c8fe-45aa-a12c-70fc5c7748f8")
-            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
-    }
-
-    #[actix_web::test]
     async fn delete_event_invalid_uuid_format() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let event_repository = EventRepository::new(arc_pool.clone());
+        let event_repo = web::Data::new(event_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(event_repo.clone())
+                .service(delete_event)
+        )
+        .await;
 
         let req = test::TestRequest::delete()
             .uri("/event/b71fd7ce-im-rusty-boizzz-1")

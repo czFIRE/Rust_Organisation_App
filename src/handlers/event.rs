@@ -133,7 +133,14 @@ pub async fn create_event(new_event: web::Form<NewEvent>, event_repo: web::Data<
     }
 }
 
-// fn is_update_data_empty(event_data: EventD)
+fn is_update_data_empty(event_data: EventData) -> bool {
+    event_data.name.is_none() 
+    && event_data.description.is_none()
+    && event_data.website.is_none()
+    && event_data.start_date.is_none()
+    && event_data.end_date.is_none()
+    && event_data.avatar_url.is_none()
+}
 
 #[patch("/event/{event_id}")]
 pub async fn update_event(
@@ -141,6 +148,10 @@ pub async fn update_event(
     event_data: web::Form<EventData>,
     event_repo: web::Data<EventRepository>
 ) -> HttpResponse {
+    if is_update_data_empty(event_data.clone()) {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
     let id_parse = Uuid::from_str(event_id.into_inner().as_str());
     if id_parse.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
