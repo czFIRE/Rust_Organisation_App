@@ -189,13 +189,24 @@ impl TimesheetRepository {
         Ok(timesheets)
     }
 
-    pub async fn read_all_timesheets_per_employment(&self, user_id: Uuid, company_id: Uuid, data: TimesheetReadAllData) -> DbResult<Vec<TimesheetDb>> {
+    pub async fn read_all_timesheets_per_employment(
+        &self,
+        user_id: Uuid,
+        company_id: Uuid,
+        data: TimesheetReadAllData,
+    ) -> DbResult<Vec<TimesheetDb>> {
         // For Redis
 
-        self.read_all_per_employment_db(user_id, company_id, data).await
+        self.read_all_per_employment_db(user_id, company_id, data)
+            .await
     }
 
-    async fn read_all_per_employment_db(&self, user_id: Uuid, company_id: Uuid, data: TimesheetReadAllData) -> DbResult<Vec<TimesheetDb>> {
+    async fn read_all_per_employment_db(
+        &self,
+        user_id: Uuid,
+        company_id: Uuid,
+        data: TimesheetReadAllData,
+    ) -> DbResult<Vec<TimesheetDb>> {
         let executor = self.pool.as_ref();
 
         let timesheets = sqlx::query_as!(

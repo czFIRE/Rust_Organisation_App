@@ -1,9 +1,14 @@
-use actix_web::{delete, get, patch, post, web, HttpResponse, http};
+use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use chrono::Utc;
 use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::{handlers::common::{QueryParams, extract_user_company_ids}, models::ApprovalStatus, repositories::timesheet::{timesheet_repo::TimesheetRepository, models::TimesheetReadAllData}, errors::parse_error};
+use crate::{
+    errors::parse_error,
+    handlers::common::{extract_user_company_ids, QueryParams},
+    models::ApprovalStatus,
+    repositories::timesheet::{models::TimesheetReadAllData, timesheet_repo::TimesheetRepository},
+};
 
 #[derive(Deserialize)]
 pub struct NewTimesheetData {
@@ -33,7 +38,7 @@ pub struct TimesheetData {
 pub async fn get_all_timesheets_for_employment(
     path: web::Path<(String, String)>,
     query: web::Query<TimesheetReadAllData>,
-    timesheet_repo: web::Data<TimesheetRepository>
+    timesheet_repo: web::Data<TimesheetRepository>,
 ) -> HttpResponse {
     let query_params = query.into_inner();
 

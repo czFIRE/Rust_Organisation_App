@@ -1,8 +1,8 @@
 use crate::models::ApprovalStatus;
 use chrono::{NaiveDate, NaiveDateTime};
+use serde::Deserialize;
 use sqlx::prelude::FromRow;
 use uuid::Uuid;
-use serde::Deserialize;
 
 #[derive(Debug, FromRow)]
 pub struct TimesheetDb {

@@ -1,11 +1,12 @@
 use std::str::FromStr;
 
 use crate::{
+    handlers::common::extract_user_company_ids,
     repositories::employment::models::{EmploymentData, NewEmployment},
     templates::{
         employment::{EmploymentLiteTemplate, EmploymentTemplate},
         user::UserLiteTemplate,
-    }, handlers::common::extract_user_company_ids,
+    },
 };
 use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;
@@ -319,11 +320,7 @@ pub async fn update_employment(
 
     let (user_id, company_id) = parsed_ids.unwrap();
     let result = employment_repo
-        .update(
-            user_id,
-            company_id,
-            employment_data.into_inner(),
-        )
+        .update(user_id, company_id, employment_data.into_inner())
         .await;
 
     if let Err(error) = result {
@@ -361,9 +358,7 @@ pub async fn delete_employment(
 
     let (user_id, company_id) = parsed_ids.unwrap();
 
-    let result = employment_repo
-        .delete(user_id, company_id)
-        .await;
+    let result = employment_repo.delete(user_id, company_id).await;
     if let Err(error) = result {
         return match error {
             sqlx::Error::RowNotFound => {
