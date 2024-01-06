@@ -178,7 +178,7 @@ BEGIN
         VALUES
         (user0_id, company0_id, NULL, 300,
         '2023-01-01', '2025-01-01', '-',
-        'HPP', 'company_administrator',
+        'hpp', 'company_administrator',
         '2022-12-29 12:38', '2023-12-10 14:52');
 
     INSERT INTO employment
@@ -189,7 +189,7 @@ BEGIN
         VALUES
         (user1_id, company1_id, user0_id, 200,
         '2023-02-01', '2025-01-01', '-',
-        'DPC', 'manager',
+        'dpc', 'manager',
         '2023-12-30 15:00', '2023-12-30 15:00');
 
     INSERT INTO employment
@@ -200,7 +200,7 @@ BEGIN
         VALUES
         (user2_id, company1_id, NULL, 280,
         '2023-12-31', '2026-01-01', '-',
-        'DPP', 'manager',
+        'dpp', 'manager',
         '2023-12-28 14:30', '2023-12-28 14:30');
 
     INSERT INTO employment
@@ -211,7 +211,7 @@ BEGIN
         VALUES
         (user3_id, company2_id, NULL, 150,
         '2023-01-01', '2025-01-01', '-',
-        'DPP', 'basic',
+        'dpp', 'basic',
         '2022-12-29 12:38', '2023-12-10 14:52');
 
     INSERT INTO employment
@@ -222,7 +222,7 @@ BEGIN
         VALUES
         (user5_id, company1_id, NULL, 135,
         '2024-01-01', '2025-01-01', '-',
-        'DPC', 'basic',
+        'dpc', 'basic',
         '2023-12-30 11:38', '2023-12-31 14:52');
 
 --------------------------------------------------------------------------------
