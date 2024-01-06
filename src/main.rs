@@ -10,6 +10,7 @@ use dotenv::dotenv;
 use sqlx::{Pool, Postgres};
 use std::io::Result;
 
+use actix_web_middleware_keycloak_auth::{DecodingKey, KeycloakAuth};
 use std::sync::Arc;
 
 use crate::repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository;
@@ -67,6 +68,11 @@ use crate::handlers::{
 };
 
 const HOST: &str = "0.0.0.0:8000";
+const KEYCLOAK_PK: &str = r#"
+-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1KB3+wI4RUfsQzyyhL3aWlx5UIhId/csY31rgYUr6RYTjXN1glu9eFSNTzQOejjWo4uxmpYvnEvy9HVXpSSko9oORkw75PRvYLtoi6cU4Eodno7XPO8AkesLKoxVMlxzE8hoIjWrg4qbJzdCAeKpecXN6WRMtx4zKaUGjdOmWu0QKSRndohg4dPnmoQRDTOWbnaFj5wBofJ8BJDrXFuZAiYKtxHZg88QmB3EMWXlnQI5creCsWP0I3Om0w9vpZwM5jHi3I3R1jKw2y6Ppvkb3qr7Br1HOS9I3P4yofeBcY14VyvHPuAZOCWKE7gq2A1FMZxSmxqmZaLAhFOnDawNCQIDAQAB
+-----END PUBLIC KEY-----
+"#;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -98,7 +104,10 @@ async fn main() -> Result<()> {
     let timesheet_repo = web::Data::new(timesheet_repository);
     let comment_repo = web::Data::new(comment_repository);
 
-    println!("Starting server on {}", HOST);
+    let keycloak_auth =
+        KeycloakAuth::default_with_pk(DecodingKey::from_rsa_pem(KEYCLOAK_PK.as_bytes()).unwrap());
+
+    println!("Starting server on http://{}", HOST);
     HttpServer::new(move || {
         App::new()
             .app_data(user_repo.clone())
@@ -111,6 +120,7 @@ async fn main() -> Result<()> {
             .app_data(associated_company_repo.clone())
             .app_data(timesheet_repo.clone())
             .app_data(comment_repo.clone())
+            .wrap(keycloak_auth.clone())
             .service(index)
             .service(get_user)
             .service(create_user)
