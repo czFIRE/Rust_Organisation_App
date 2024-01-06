@@ -2,6 +2,7 @@ use crate::models::ApprovalStatus;
 use chrono::{NaiveDate, NaiveDateTime};
 use sqlx::prelude::FromRow;
 use uuid::Uuid;
+use serde::Deserialize;
 
 #[derive(Debug, FromRow)]
 pub struct TimesheetDb {
@@ -56,7 +57,7 @@ pub struct TimesheetUpdateData {
     pub workdays: Option<Vec<WorkdayUpdateData>>,
 }
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, Deserialize, FromRow)]
 pub struct TimesheetReadAllData {
     pub limit: Option<i64>,
     pub offset: Option<i64>,

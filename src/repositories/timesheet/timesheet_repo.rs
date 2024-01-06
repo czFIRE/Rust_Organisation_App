@@ -164,14 +164,64 @@ impl TimesheetRepository {
     }
 
     pub async fn _read_all(&self, data: TimesheetReadAllData) -> DbResult<Vec<TimesheetDb>> {
+        // This is for redis.
+
+        self._read_all_db(data).await
+    }
+
+    async fn _read_all_db(&self, data: TimesheetReadAllData) -> DbResult<Vec<TimesheetDb>> {
         let executor = self.pool.as_ref();
 
         let timesheets = sqlx::query_as!(
             TimesheetDb,
             r#"
             SELECT id, start_date, end_date, total_hours, is_editable, status AS "status!:ApprovalStatus", manager_note, user_id, company_id, event_id, created_at, edited_at, deleted_at 
-            FROM timesheet LIMIT $1 OFFSET $2;
+            FROM timesheet 
+            WHERE deleted_at IS NULL
+            LIMIT $1 OFFSET $2;
             "#,
+            data.limit,
+            data.offset
+        )
+        .fetch_all(executor)
+        .await?;
+
+        Ok(timesheets)
+    }
+
+    pub async fn read_all_timesheets_per_employment(&self, user_id: Uuid, company_id: Uuid, data: TimesheetReadAllData) -> DbResult<Vec<TimesheetDb>> {
+        // For Redis
+
+        self.read_all_per_employment_db(user_id, company_id, data).await
+    }
+
+    async fn read_all_per_employment_db(&self, user_id: Uuid, company_id: Uuid, data: TimesheetReadAllData) -> DbResult<Vec<TimesheetDb>> {
+        let executor = self.pool.as_ref();
+
+        let timesheets = sqlx::query_as!(
+            TimesheetDb,
+            r#"
+            SELECT id, 
+                   start_date, 
+                   end_date, 
+                   total_hours, 
+                   is_editable, 
+                   status AS "status!:ApprovalStatus", 
+                   manager_note, 
+                   user_id, 
+                   company_id,
+                   event_id, 
+                   created_at, 
+                   edited_at, 
+                   deleted_at 
+            FROM timesheet 
+            WHERE user_id = $1
+              AND company_id = $2
+              AND deleted_at IS NULL
+            LIMIT $3 OFFSET $4;
+            "#,
+            user_id,
+            company_id,
             data.limit,
             data.offset
         )
@@ -216,6 +266,7 @@ impl TimesheetRepository {
                 manager_note = COALESCE($6, manager_note),
                 edited_at = NOW()
             WHERE id = $7
+              AND deleted_at IS NULL
             RETURNING id,
                       start_date,
                       end_date,

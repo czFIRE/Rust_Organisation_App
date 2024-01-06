@@ -5,7 +5,7 @@ use crate::{
     templates::{
         employment::{EmploymentLiteTemplate, EmploymentTemplate},
         user::UserLiteTemplate,
-    },
+    }, handlers::common::extract_user_company_ids,
 };
 use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;
@@ -159,16 +159,22 @@ pub async fn get_employment(
     path: web::Path<(String, String)>,
     employment_repo: web::Data<EmploymentRepository>,
 ) -> HttpResponse {
-    let ids = path.into_inner();
-    let user_id_parse = Uuid::from_str(ids.0.as_str());
-    let company_id_parse = Uuid::from_str(ids.1.as_str());
-    if user_id_parse.is_err() || company_id_parse.is_err() {
+    // let ids = path.into_inner();
+    // let user_id_parse = Uuid::from_str(ids.0.as_str());
+    // let company_id_parse = Uuid::from_str(ids.1.as_str());
+    // if user_id_parse.is_err() || company_id_parse.is_err() {
+    //     return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    // }
+
+    let parsed_ids = extract_user_company_ids(path.into_inner());
+    if parsed_ids.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
-    let parsed_company_id = company_id_parse.expect("Should be valid.");
-    let parsed_user_id = user_id_parse.expect("Should be valid.");
-    get_full_employment(parsed_user_id, parsed_company_id, employment_repo, false).await
+    let (user_id, company_id) = parsed_ids.unwrap();
+    // let parsed_company_id = company_id_parse.expect("Should be valid.");
+    // let parsed_user_id = user_id_parse.expect("Should be valid.");
+    get_full_employment(user_id, company_id, employment_repo, false).await
 }
 
 #[get("/user/{user_id}/employment/{company_id}/subordinates")]
@@ -185,17 +191,14 @@ pub async fn get_subordinates(
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
-    let ids = path.into_inner();
-    let user_id_parse = Uuid::from_str(ids.0.as_str());
-    let company_id_parse = Uuid::from_str(ids.1.as_str());
-    if user_id_parse.is_err() || company_id_parse.is_err() {
+    let parsed_ids = extract_user_company_ids(path.into_inner());
+    if parsed_ids.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
-    let parsed_company_id = company_id_parse.expect("Should be valid.");
-    let parsed_user_id = user_id_parse.expect("Should be valid.");
+    let (user_id, company_id) = parsed_ids.unwrap();
     let result = employment_repo
-        .read_subordinates(parsed_user_id, parsed_company_id, query_params)
+        .read_subordinates(user_id, company_id, query_params)
         .await;
 
     if let Ok(employments) = result {
@@ -309,19 +312,16 @@ pub async fn update_employment(
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
-    let ids = path.into_inner();
-    let user_id_parse = Uuid::from_str(ids.0.as_str());
-    let company_id_parse = Uuid::from_str(ids.1.as_str());
-    if user_id_parse.is_err() || company_id_parse.is_err() {
+    let parsed_ids = extract_user_company_ids(path.into_inner());
+    if parsed_ids.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
-    let parsed_company_id = company_id_parse.expect("Should be valid.");
-    let parsed_user_id = user_id_parse.expect("Should be valid.");
+    let (user_id, company_id) = parsed_ids.unwrap();
     let result = employment_repo
         .update(
-            parsed_user_id,
-            parsed_company_id,
+            user_id,
+            company_id,
             employment_data.into_inner(),
         )
         .await;
@@ -354,18 +354,15 @@ pub async fn delete_employment(
     path: web::Path<(String, String)>,
     employment_repo: web::Data<EmploymentRepository>,
 ) -> HttpResponse {
-    let ids = path.into_inner();
-    let user_id_parse = Uuid::from_str(ids.0.as_str());
-    let company_id_parse = Uuid::from_str(ids.1.as_str());
-    if user_id_parse.is_err() || company_id_parse.is_err() {
+    let parsed_ids = extract_user_company_ids(path.into_inner());
+    if parsed_ids.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
-    let parsed_company_id = company_id_parse.expect("Should be valid.");
-    let parsed_user_id = user_id_parse.expect("Should be valid.");
+    let (user_id, company_id) = parsed_ids.unwrap();
 
     let result = employment_repo
-        .delete(parsed_user_id, parsed_company_id)
+        .delete(user_id, company_id)
         .await;
     if let Err(error) = result {
         return match error {

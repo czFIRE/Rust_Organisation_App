@@ -1,9 +1,9 @@
-use actix_web::{delete, get, patch, post, web, HttpResponse};
+use actix_web::{delete, get, patch, post, web, HttpResponse, http};
 use chrono::Utc;
 use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::{handlers::common::QueryParams, models::ApprovalStatus};
+use crate::{handlers::common::{QueryParams, extract_user_company_ids}, models::ApprovalStatus, repositories::timesheet::{timesheet_repo::TimesheetRepository, models::TimesheetReadAllData}, errors::parse_error};
 
 #[derive(Deserialize)]
 pub struct NewTimesheetData {
@@ -31,10 +31,24 @@ pub struct TimesheetData {
 
 #[get("/user/{user_id}/employment/{company_id}/sheet")]
 pub async fn get_all_timesheets_for_employment(
-    _user_id: web::Path<Uuid>,
-    _company_id: web::Path<Uuid>,
-    _query: web::Query<QueryParams>,
+    path: web::Path<(String, String)>,
+    query: web::Query<TimesheetReadAllData>,
+    timesheet_repo: web::Data<TimesheetRepository>
 ) -> HttpResponse {
+    let query_params = query.into_inner();
+
+    if (query_params.limit.is_some() && query_params.limit.clone().unwrap() < 0)
+        || (query_params.offset.is_some() && query_params.offset.clone().unwrap() < 0)
+    {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let parsed_ids = extract_user_company_ids(path.into_inner());
+    if parsed_ids.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let (company_id, user_id) = parsed_ids.unwrap();
     todo!()
 }
 
