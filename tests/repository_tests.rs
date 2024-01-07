@@ -128,7 +128,7 @@ pub mod user_repo_tests {
         let mut user_repo = UserRepository::new(arc_pool);
 
         {
-            let users = user_repo.read_all().await.expect("Read all should succeed");
+            let users = user_repo._read_all().await.expect("Read all should succeed");
 
             assert_eq!(users.len(), 3);
 
@@ -2004,19 +2004,18 @@ pub mod event_staff_repo_tests {
 
         let event_staff_data = NewStaff {
             user_id: test_constants::USER2_ID,
-            event_id: test_constants::EVENT0_ID,
             company_id: test_constants::COMPANY2_ID,
             role: EventRole::Organizer,
         };
 
         let new_event_staff = event_staff_repo
-            .create(event_staff_data.clone())
+            .create(test_constants::EVENT0_ID, event_staff_data.clone())
             .await
             .expect("Create should succeed");
 
-        assert_eq!(new_event_staff.user_id, event_staff_data.user_id);
-        assert_eq!(new_event_staff.event_id, event_staff_data.event_id);
-        assert_eq!(new_event_staff.company_id, event_staff_data.company_id);
+        assert_eq!(new_event_staff.user.id, event_staff_data.user_id);
+        assert_eq!(new_event_staff.event_id, test_constants::EVENT0_ID);
+        assert_eq!(new_event_staff.company.id, event_staff_data.company_id);
         assert_eq!(new_event_staff.role, event_staff_data.role);
 
         assert_eq!(new_event_staff.status, AcceptanceStatus::Pending);
@@ -2115,7 +2114,7 @@ pub mod event_staff_repo_tests {
             let new_event_staff_data = StaffData {
                 role: Some(EventRole::Staff),
                 status: Some(AcceptanceStatus::Rejected),
-                decided_by: decider_staff_id,
+                decided_by: Some(decider_staff_id),
             };
 
             let updated_event_staff = event_staff_repo
@@ -2123,16 +2122,16 @@ pub mod event_staff_repo_tests {
                 .await
                 .expect("Update should succeed");
 
-            assert_eq!(updated_event_staff.user_id, event_staff.user.id);
-            assert_eq!(updated_event_staff.company_id, event_staff.company.id);
+            assert_eq!(updated_event_staff.user.id, event_staff.user.id);
+            assert_eq!(updated_event_staff.company.id, event_staff.company.id);
             assert_eq!(updated_event_staff.role, new_event_staff_data.role.unwrap());
             assert_eq!(
                 updated_event_staff.status,
                 new_event_staff_data.status.unwrap()
             );
             assert_eq!(
-                updated_event_staff.decided_by,
-                Some(new_event_staff_data.decided_by)
+                updated_event_staff.decided_by.unwrap().id,
+                new_event_staff_data.decided_by.unwrap()
             );
 
             let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
@@ -2153,7 +2152,7 @@ pub mod event_staff_repo_tests {
             let new_event_staff_data = StaffData {
                 role: None,
                 status: None,
-                decided_by: decider_staff_id,
+                decided_by: Some(decider_staff_id),
             };
 
             let _updated_event_staff = event_staff_repo
@@ -2172,7 +2171,7 @@ pub mod event_staff_repo_tests {
             let new_event_staff_data = StaffData {
                 role: None,
                 status: Some(AcceptanceStatus::Rejected),
-                decided_by: decider_staff_id,
+                decided_by: Some(decider_staff_id),
             };
 
             let _updated_event_staff = event_staff_repo
@@ -2210,7 +2209,7 @@ pub mod event_staff_repo_tests {
             let new_event_staff_data = StaffData {
                 role: None,
                 status: Some(AcceptanceStatus::Rejected),
-                decided_by: decider_staff_id,
+                decided_by: Some(decider_staff_id),
             };
 
             let _updated_event_staff = event_staff_repo
