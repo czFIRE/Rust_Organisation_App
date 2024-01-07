@@ -22,13 +22,6 @@ pub struct NewAssociatedCompanyData {
     association_type: Association,
 }
 
-#[derive(Deserialize)]
-pub struct AssociatedCompanyQueryParams {
-    association_type: Option<Association>,
-    limit: Option<i64>,
-    offset: Option<i64>,
-}
-
 #[get("/event/{event_id}/company")]
 pub async fn get_all_associated_companies(
     event_id: web::Path<String>,
@@ -184,8 +177,7 @@ pub async fn update_associated_company(
 
 #[delete("/event/{event_id}/company/{company_id}")]
 pub async fn delete_associated_company(
-    event_id: web::Path<String>,
-    company_id: web::Path<String>,
+    path: web::Path<(String, String)>,
     associated_repo: web::Data<AssociatedCompanyRepository>,
 ) -> HttpResponse {
     let parsed_ids = extract_path_tuple_ids(path.into_inner());
