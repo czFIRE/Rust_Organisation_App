@@ -4,7 +4,7 @@ use serde::Deserialize;
 use sqlx::types::uuid;
 use uuid::Uuid;
 
-use crate::models::Association;
+use crate::{models::Association, repositories::associated_company::models::AssociatedCompanyExtented};
 
 #[derive(Deserialize)]
 pub struct Address {
@@ -60,6 +60,24 @@ pub struct AssociatedCompanyTemplate {
     pub association_type: Association,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
+}
+
+impl From<AssociatedCompanyExtented> for AssociatedCompanyTemplate {
+    fn from(associated: AssociatedCompanyExtented) -> Self {
+        let company_lite = CompanyLiteTemplate {
+            id: associated.company.id,
+            name: associated.company.name,
+            avatar_url: associated.company.avatar_url,
+        };
+
+        AssociatedCompanyTemplate {
+            event_id: associated.event.id,
+            company: company_lite,
+            association_type: associated.association_type,
+            created_at: associated.created_at,
+            edited_at: associated.edited_at,
+        }
+    }
 }
 
 #[derive(Template, Debug, Deserialize)]

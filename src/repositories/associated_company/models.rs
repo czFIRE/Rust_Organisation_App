@@ -1,6 +1,7 @@
 use chrono::NaiveDate;
 use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
+use serde::Deserialize;
 
 use crate::{
     models::Association,
@@ -75,7 +76,7 @@ pub struct AssociatedCompanyFlattened {
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct AssociatedCompanyFilter {
     pub limit: Option<i64>,
     pub offset: Option<i64>,
