@@ -181,6 +181,7 @@ impl TaskRepository {
             INNER JOIN event_staff ON task.creator_id=event_staff.id
             INNER JOIN user_record ON event_staff.user_id=user_record.id 
             WHERE task.event_id=$1
+              AND task.deleted_at IS NULL
             LIMIT $2 OFFSET $3"#,
             event_id,
             filter.limit,

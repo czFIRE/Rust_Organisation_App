@@ -43,6 +43,19 @@ pub struct UserLite {
     pub avatar_url: String,
 }
 
+impl From<User> for UserLite {
+    fn from(value: User) -> Self {
+        UserLite {
+            id: value.id,
+            name: value.name,
+            status: value.status,
+            birth: value.birth,
+            gender: value.gender,
+            avatar_url: value.avatar_url,
+        }
+    }
+}
+
 #[derive(Debug, FromRow, Deserialize, Clone)]
 pub struct UserData {
     pub name: Option<String>,

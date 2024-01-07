@@ -1,6 +1,7 @@
 use chrono::NaiveDate;
 use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
+use serde::Deserialize;
 
 use crate::{
     models::{Gender, TaskPriority, UserRole, UserStatus},
@@ -56,7 +57,7 @@ pub struct TaskData {
     pub accepts_staff: Option<bool>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct TaskFilter {
     pub limit: Option<i64>,
     pub offset: Option<i64>,
