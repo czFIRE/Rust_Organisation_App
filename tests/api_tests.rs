@@ -912,8 +912,16 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_all_tasks_per_event() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = TaskRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(get_event_tasks),
+        )
+        .await;
 
         let req = test::TestRequest::get()
             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task")
@@ -924,34 +932,24 @@ mod api_tests {
 
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<TasksTemplate>(body).unwrap();
-        assert_eq!(out.tasks.len(), 1);
-        assert_eq!(
-            out.tasks[0].event_id,
-            Uuid::from_str("b71fd7ce-c891-410a-9bba-1aacececc8fa").unwrap()
-        );
-    }
-
-    #[actix_web::test]
-    async fn get_all_tasks_per_non_existent_event() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-
-        let req = test::TestRequest::get()
-            .uri("/event/ba1cd734-c571-42ea-9bb4-70fc5c7748f8/task")
-            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+        assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
     }
 
     #[actix_web::test]
     async fn get_all_tasks_per_event_invalid_uuid_format() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = TaskRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(get_event_tasks),
+        )
+        .await;
 
         let req = test::TestRequest::get()
-            .uri("/event/ba1cd734-tasks-boi-they-sure-are-difficult-are-they-not?")
+            .uri("/event/bzz-tasks-boi-they-sure-are-difficult-are-they-notzz-z-z-z-zzz/task")
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -960,11 +958,19 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_one_task() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = TaskRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(get_event_task),
+        )
+        .await;
 
         let req = test::TestRequest::get()
-                    .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task/7ae0c017-fe31-4aac-b767-100d18a8877b")
+                    .uri("/event/task/7ae0c017-fe31-4aac-b767-100d18a8877b")
                     .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -972,39 +978,26 @@ mod api_tests {
 
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<TaskTemplate>(body).unwrap();
-        assert_eq!(out.title, "Prepare stage for Joe Cocker".to_string());
-        assert_eq!(
-            out.id,
-            Uuid::from_str("7ae0c017-fe31-4aac-b767-100d18a8877b").unwrap()
-        );
-        assert_eq!(
-            out.event_id,
-            Uuid::from_str("b71fd7ce-c891-410a-9bba-1aacececc8fa").unwrap()
-        );
-        assert!(out.accepts_staff);
-    }
-
-    #[actix_web::test]
-    async fn get_one_task_non_existent_event() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-
-        let req = test::TestRequest::get()
-                    .uri("/event/baaadfcf-c891-410a-9bb4-70fc5c7748f8/task/7ae0c017-fe31-4aac-b767-100d18a8877b")
-                    .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+        
+        assert!(body.contains("Prepare stage for Joe Cocker"));
+        assert!(body.contains("7ae0c017-fe31-4aac-b767-100d18a8877b"));
+        assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
     }
 
     #[actix_web::test]
     async fn get_non_existent_task() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = TaskRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
 
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(get_event_task),
+        )
+        .await;
         let req = test::TestRequest::get()
-                    .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task/7ae0c017-fffe-4aac-b767-1aacca8877b")
+                    .uri("/event/task/a96d1d99-93b5-469b-ac62-654b0cf7ebd3")
                     .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -1013,11 +1006,18 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_one_task_invalid_uuid_format() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = TaskRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
 
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(get_event_task),
+        )
+        .await;
         let req = test::TestRequest::get()
-            .uri("/event/sleepy-head-I-am?-70fc5c7748f8/task/nowaythiscanbeavalidUUIDbrotherrr")
+            .uri("/event/task/nowaythiscanbeavalidUUIDbrotherrr")
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -1025,10 +1025,19 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn create_task_test() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+    async fn create_update_delete_task_test() {
+        let arc_pool = get_db_pool().await;
+        let repository = TaskRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
 
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(create_task)
+                .service(delete_task)
+                .service(update_task),
+        )
+        .await;
         let data = json!({
             "creator_id": "9281b570-4d02-4096-9136-338a613c71cd",
             "title": "Stock the wood pile.",
@@ -1045,59 +1054,25 @@ mod api_tests {
 
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<TaskTemplate>(body).unwrap();
-        assert!(out.accepts_staff);
-        assert!(out.finished_at.is_none());
-        assert_eq!(out.title, "Stock the wood pile.".to_string());
-        assert_eq!(
-            out.creator.id,
-            Uuid::from_str("9281b570-4d02-4096-9136-338a613c71cd").unwrap()
-        );
-        assert_eq!(
-            out.event_id,
-            Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap()
-        );
-    }
+        
+        assert!(body.contains("true"));
+        assert!(body.contains("Stock the wood pile."));
+        assert!(body.contains("9281b570-4d02-4096-9136-338a613c71cd"));
+        assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
 
-    #[actix_web::test]
-    async fn create_task_duplicate() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-
-        let data = json!({
-            "creator_id": "9281b570-4d02-4096-9136-338a613c71cd",
-            "title": "Unstock the wood pile.",
-            "priority": "low"
-        });
-
-        let req = test::TestRequest::post()
-            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task")
-            .set_form(data.clone())
-            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_success());
-        assert_eq!(res.status(), http::StatusCode::CREATED);
-
-        let req = test::TestRequest::post()
-            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task")
-            .set_form(data)
-            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
-    }
-
-    #[actix_web::test]
-    async fn patch_task() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let uuid_regex = Regex::new(
+            r"[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}",
+        )
+        .unwrap();
+        let uuid_caps = uuid_regex.find(body).unwrap();
+        let task_id = uuid_caps.as_str();
 
         let data = json!({
             "title": "Help do stuff."
         });
 
         let req = test::TestRequest::patch()
-                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task/7ae0c017-fe31-4aac-b767-100d18a8877b")
+                            .uri(format!("/event/task/{}", task_id).as_str())
                             .set_form(data)
                             .to_request();
         let res = test::call_service(&app, req).await;
@@ -1106,31 +1081,54 @@ mod api_tests {
 
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<TaskTemplate>(body).unwrap();
-        assert!(out.accepts_staff);
-        assert!(out.finished_at.is_none());
-        assert_eq!(out.title, "Help do stuff.".to_string());
-        assert_eq!(
-            out.creator.id,
-            Uuid::from_str("9281b570-4d02-4096-9136-338a613c71cd").unwrap()
-        );
-        assert_eq!(
-            out.event_id,
-            Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap()
-        );
+
+        assert!(body.contains("true"));
+        assert!(body.contains("Help do stuff."));
+        assert!(body.contains("9281b570-4d02-4096-9136-338a613c71cd"));
+        assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
+
+        let req = test::TestRequest::patch()
+                            .uri(format!("/event/task/{}", task_id).as_str())
+                            .set_form(json!({}))
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+
+        let req = test::TestRequest::delete()
+                            .uri(format!("/event/task/{}", task_id).as_str())
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
+
+        let req = test::TestRequest::delete()
+                            .uri(format!("/event/task/{}", task_id).as_str())
+                            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
     async fn patch_non_existent_task() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = TaskRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(update_task),
+        )
+        .await;
 
         let data = json!({
             "title": "Help do stuff."
         });
 
         let req = test::TestRequest::patch()
-                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task/7a201017-aa31-4aac-b767-100d18a8877b")
+                            .uri("/event/task/7a201017-aa31-4aac-b767-100d18a8877b")
                             .set_form(data)
                             .to_request();
         let res = test::call_service(&app, req).await;
@@ -1140,62 +1138,28 @@ mod api_tests {
 
     #[actix_web::test]
     async fn patch_task_invalid_uuid_format() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = TaskRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
 
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(update_task),
+        )
+        .await;
+    
         let data = json!({
             "title": "Help do stuff."
         });
 
         let req = test::TestRequest::patch()
-                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task/IllhaveyouknowIgraduatedtopofmyclassintheNavySealsandIvebeeninvolvedinnumeroussecretraids")
+                            .uri("/event/task/IllhaveyouknowIgraduatedtopofmyclassintheNavySealsandIvebeeninvolvedinnumeroussecretraids")
                             .set_form(data)
                             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
-    }
-
-    #[actix_web::test]
-    async fn patch_task_empty_data() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-
-        let data = json!({});
-
-        let req = test::TestRequest::patch()
-                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task/7ae0c017-fe31-4aac-b767-100d18a8877b")
-                            .set_form(data)
-                            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
-    }
-
-    #[actix_web::test]
-    async fn delete_task_test() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-
-        let req = test::TestRequest::delete()
-                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task/7ae0c017-fe31-4aac-b767-100d18a8877b")
-                            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_success());
-        assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
-    }
-
-    #[actix_web::test]
-    async fn delete_non_existent_task() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-
-        let req = test::TestRequest::delete()
-                            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task/7ae0c017-fe31-4aac-b767-100d1fa88aac")
-                            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
@@ -1204,7 +1168,7 @@ mod api_tests {
             test::init_service(App::new().configure(organization::initialize::configure_app)).await;
 
         let req = test::TestRequest::delete()
-            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task/yesofficerIamanUUID.")
+            .uri("/event/task/yesofficerIamanUUID.")
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());

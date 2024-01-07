@@ -16,6 +16,7 @@ use super::user::UserLiteTemplate;
 pub struct TaskTemplate {
     pub id: Uuid,
     pub event_id: Uuid,
+    pub creator_id: Uuid, // staff table ID
     pub creator: UserLiteTemplate,
     pub title: String,
     pub description: String,
@@ -34,6 +35,7 @@ impl From<TaskExtended> for TaskTemplate {
         TaskTemplate {
             id: task.task_id,
             event_id: task.event_id,
+            creator_id: task.creator_id,
             creator,
             title: task.title,
             description: if task.description.is_some() {

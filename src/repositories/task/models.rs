@@ -37,6 +37,7 @@ pub struct Task {
 pub struct TaskExtended {
     pub task_id: Uuid,
     pub event_id: Uuid,
+    pub creator_id: Uuid,
     pub creator: User,
     pub title: String,
     pub description: Option<String>,
@@ -113,6 +114,7 @@ impl From<TaskUserFlattened> for TaskExtended {
         Self {
             task_id: value.task_id,
             event_id: value.task_event_id,
+            creator_id: value.task_creator_id,
             creator: tmp_user,
             title: value.task_title,
             description: value.task_description,
