@@ -26,8 +26,6 @@ DECLARE
   timesheet0_id UUID := 'd47e8141-a77e-4d55-a2d5-4a77de24b6d0';
   timesheet1_id UUID := '0f0f0ff5-0073-47cc-bd1f-540a04fee9ea';
   timesheet2_id UUID := 'c51e77aa-bd80-42c7-8b8a-003f018328f6';
-  timesheet3_id UUID := '8446b2ba-8223-4388-be5f-9efdfc4ea265';
-  timesheet4_id UUID := 'a19a0ac6-3bd2-4ebd-bc8d-ec111ec9f705';
 
   event_staff0_id UUID := '9281b570-4d02-4096-9136-338a613c71cd';
   event_staff1_id UUID := 'a96d1d99-93b5-469b-ac62-654b0cf7ebd3';
