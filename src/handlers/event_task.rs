@@ -16,15 +16,6 @@ pub struct NewEventTaskData {
     priority: TaskPriority,
 }
 
-#[derive(Deserialize)]
-pub struct EventTaskData {
-    title: Option<String>,
-    description: Option<String>,
-    finished_at: Option<chrono::DateTime<Utc>>,
-    priority: Option<TaskPriority>,
-    accepts_staff: Option<bool>,
-}
-
 #[get("/event/{event_id}/task")]
 pub async fn get_event_tasks(event_id: web::Path<String>, query: web::Query<TaskFilter>, task_repo: web::Data<TaskRepository>) -> HttpResponse {
     if (query.limit.is_some() && query.limit.clone().unwrap() <= 0)
@@ -191,10 +182,26 @@ pub async fn update_task(
     }
 }
 
-#[delete("/event/{event_id}/task/{task_id}")]
+#[delete("/event/task/{task_id}")]
 pub async fn delete_task(
-    _event_id: web::Path<String>,
-    _task_id: web::Path<String>,
+    task_id: web::Path<String>,
+    task_repo: web::Data<TaskRepository>,
 ) -> HttpResponse {
-    todo!()
+    let id_parse = Uuid::from_str(task_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+    let parsed_id = id_parse.expect("Should be valid.");
+    let result = task_repo.delete(parsed_id).await;
+    if let Err(error) = result {
+        return match error {
+            sqlx::Error::RowNotFound => {
+                HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
+            }
+            _ => HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
+        };
+    }
+
+    HttpResponse::NoContent().finish()
 }

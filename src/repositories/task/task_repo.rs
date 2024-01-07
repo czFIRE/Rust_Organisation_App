@@ -272,7 +272,7 @@ impl TaskRepository {
                 accepts_staff, 
                 created_at, 
                 deleted_at, 
-                edited_at
+                edited_at;
             "#,
             data.title,
             data.description,
@@ -296,24 +296,33 @@ impl TaskRepository {
     pub async fn delete(&self, task_id: Uuid) -> DbResult<()> {
         let executor = self.pool.as_ref();
 
-        // Should return error if we can't find the task
-        let task_check = self.read_one_db(task_id).await?;
-
-        if task_check.deleted_at.is_some() {
-            // TODO - better error
-            return Err(sqlx::Error::RowNotFound);
-        }
-
-        sqlx::query!(
+        let result = sqlx::query_as!(
+            Task,
             r#"UPDATE task
-            SET deleted_at = NOW(), edited_at = NOW()
+            SET deleted_at = NOW(), 
+                edited_at = NOW()
             WHERE id = $1
             AND deleted_at IS NULL
+            RETURNING id, 
+                event_id, 
+                creator_id, 
+                title, 
+                description, 
+                finished_at, 
+                priority as "priority!: TaskPriority", 
+                accepts_staff, 
+                created_at, 
+                deleted_at, 
+                edited_at;
             "#,
             task_id,
         )
-        .execute(executor)
+        .fetch_optional(executor)
         .await?;
+
+        if result.is_none() {
+            return Err(sqlx::Error::RowNotFound);
+        }
 
         Ok(())
     }
