@@ -5,10 +5,7 @@ use uuid::Uuid;
 
 use crate::{
     models::Association,
-    repositories::{
-        company::{self, models::Company},
-        event::models::Event,
-    },
+    repositories::{company::models::Company, event::models::Event},
 };
 
 #[derive(Debug, FromRow, Clone)]

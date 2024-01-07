@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 use crate::{
     models::{Gender, TaskPriority, UserRole, UserStatus},
-    repositories::{event_staff::models::Staff, user::models::User},
+    repositories::user::models::User,
 };
 
 #[derive(Debug, Clone)]

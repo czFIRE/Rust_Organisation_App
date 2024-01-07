@@ -431,7 +431,16 @@ impl AssociatedCompanyRepository {
             r#" UPDATE associated_company SET 
                 deleted_at = NOW(),
                 edited_at = NOW()
-            WHERE company_id = $1 AND event_id = $2
+            WHERE company_id = $1 
+              AND event_id = $2
+              AND deleted_at IS NULL
+            RETURNING 
+              company_id, 
+              event_id, 
+              type as "association_type!: Association", 
+              created_at, 
+              edited_at, 
+              deleted_at;
             "#,
             company_id,
             event_id,

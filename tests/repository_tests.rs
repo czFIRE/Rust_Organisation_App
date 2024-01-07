@@ -1205,11 +1205,11 @@ pub mod associated_company_repo_tests {
             .expect("Create should succeed");
 
         assert_eq!(
-            new_associated_company.event_id,
+            new_associated_company.event.id,
             associated_company_data.event_id
         );
         assert_eq!(
-            new_associated_company.company_id,
+            new_associated_company.company.id,
             associated_company_data.company_id
         );
         assert_eq!(
@@ -1377,11 +1377,11 @@ pub mod associated_company_repo_tests {
                 .expect("Update should succeed");
 
             assert_eq!(
-                updated_associated_company.event_id,
+                updated_associated_company.event.id,
                 associated_company.event.id
             );
             assert_eq!(
-                updated_associated_company.company_id,
+                updated_associated_company.company.id,
                 associated_company.company.id
             );
             assert_eq!(
@@ -1439,12 +1439,10 @@ pub mod associated_company_repo_tests {
                 .await
                 .expect("Delete should succeed");
 
-            let deleted_associated_company = associated_company_repo
+            let _deleted_associated_company = associated_company_repo
                 .read_one(company_id, event_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(deleted_associated_company.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             let new_associated_company_data = AssociatedCompanyData {
                 association_type: Some(Association::Media),
@@ -1483,17 +1481,10 @@ pub mod associated_company_repo_tests {
                 .await
                 .unwrap();
 
-            let new_associated_company = associated_company_repo
+            let _deleted_associated_company = associated_company_repo
                 .read_one(company_id, event_id)
                 .await
-                .expect("Read should succeed");
-
-            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
-            let time_difference_edited = time - new_associated_company.edited_at;
-            let time_difference_deleted = time - new_associated_company.deleted_at.unwrap();
-
-            assert!(time_difference_edited.num_seconds() < 2);
-            assert!(time_difference_deleted.num_seconds() < 2);
+                .expect_err("Read should not succeed");
         }
 
         // delete on already deleted associated company
@@ -1505,9 +1496,7 @@ pub mod associated_company_repo_tests {
             let associated_company = associated_company_repo
                 .read_one(company_id, event_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(associated_company.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             associated_company_repo
                 .delete(company_id, event_id)
