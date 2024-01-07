@@ -1,5 +1,8 @@
 -- Enums
 
+--
+-- Keep these enum types ordered alphabetically.
+--
 CREATE TYPE acceptance_status       AS ENUM ('pending', 'accepted', 'rejected');
 CREATE TYPE approval_status         AS ENUM ('not_requested', 'pending',
                                              'accepted', 'rejected');
