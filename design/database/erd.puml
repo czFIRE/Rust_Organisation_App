@@ -136,7 +136,7 @@ entity timesheet {
 }
 
 entity workday {
-    *<u>timesheet_id</u>: <<uuid>>
+    *<u>timesheet_id</u>: <<uuid>> (also FK timesheet)
     *<u>work_date</u>: date
     ---
     *total_hours: float
