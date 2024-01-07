@@ -111,8 +111,9 @@ impl StaffRepository {
                 event_staff 
                 INNER JOIN user_record ON event_staff.user_id = user_record.id 
                 INNER JOIN company ON event_staff.company_id = company.id
-                LEFT OUTER JOIN event_staff AS decider_staff ON event_staff.decided_by = decider_staff.id
-                INNER JOIN user_record AS decider ON decider_staff.user_id = decider.id 
+                LEFT OUTER JOIN (event_staff AS decider_staff
+                INNER JOIN user_record AS decider ON decider_staff.user_id = decider.id)
+                ON event_staff.decided_by = decider_staff.id
             WHERE 
                 event_staff.id = $1
                 AND event_staff.deleted_at IS NULL;
@@ -173,8 +174,9 @@ impl StaffRepository {
                 event_staff 
                 INNER JOIN user_record ON event_staff.user_id = user_record.id 
                 INNER JOIN company ON event_staff.company_id = company.id
-                LEFT OUTER JOIN event_staff AS decider_staff ON event_staff.decided_by = decider_staff.id
-                INNER JOIN user_record AS decider ON decider_staff.user_id = decider.id 
+                LEFT OUTER JOIN (event_staff AS decider_staff
+                INNER JOIN user_record AS decider ON decider_staff.user_id = decider.id)
+                ON event_staff.decided_by = decider_staff.id
             WHERE 
                 event_staff.id = $1
                 AND event_staff.deleted_at IS NULL;
@@ -243,8 +245,9 @@ impl StaffRepository {
                 event_staff 
                 INNER JOIN user_record ON event_staff.user_id = user_record.id 
                 INNER JOIN company ON event_staff.company_id = company.id
-                LEFT OUTER JOIN event_staff AS decider_staff ON event_staff.decided_by = decider_staff.id
-                INNER JOIN user_record AS decider ON decider_staff.user_id = decider.id
+                LEFT OUTER JOIN (event_staff AS decider_staff
+                INNER JOIN user_record AS decider ON decider_staff.user_id = decider.id)
+                ON event_staff.decided_by = decider_staff.id
             WHERE 
                 event_staff.event_id = $1
                 AND event_staff.deleted_at IS NULL

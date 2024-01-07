@@ -17,7 +17,8 @@ pub struct StaffTemplate {
     pub event_id: Uuid,
     pub role: EventRole,
     pub status: AcceptanceStatus,
-    pub decided_by: Option<UserLiteTemplate>,
+    pub decided_by: Option<Uuid>,
+    pub decided_by_user: Option<UserLiteTemplate>,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
 }
@@ -41,7 +42,7 @@ impl From<StaffExtended> for StaffTemplate {
 
         let decided_by: Option<UserLiteTemplate>;
         if staff.decided_by.is_some() {
-            let decider = staff.decided_by.unwrap();
+            let decider = staff.decided_by_user.unwrap();
             decided_by = Some(UserLiteTemplate {
                 id: decider.id,
                 name: decider.name,
@@ -61,7 +62,8 @@ impl From<StaffExtended> for StaffTemplate {
             event_id: staff.event_id,
             role: staff.role,
             status: staff.status,
-            decided_by,
+            decided_by: staff.decided_by,
+            decided_by_user: decided_by,
             created_at: staff.created_at,
             edited_at: staff.edited_at
         }

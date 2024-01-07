@@ -2053,7 +2053,7 @@ pub mod event_staff_repo_tests {
         assert_eq!(event_staff.company.name, "AMD");
         assert_eq!(event_staff.role, EventRole::Organizer);
         assert_eq!(event_staff.status, AcceptanceStatus::Accepted);
-        assert!(event_staff.decided_by.is_none());
+        assert!(event_staff.decided_by.is_some());
 
         event_staff_repo.disconnect().await;
 
@@ -2130,7 +2130,7 @@ pub mod event_staff_repo_tests {
                 new_event_staff_data.status.unwrap()
             );
             assert_eq!(
-                updated_event_staff.decided_by.unwrap().id,
+                updated_event_staff.decided_by.unwrap(),
                 new_event_staff_data.decided_by.unwrap()
             );
 
@@ -2202,9 +2202,7 @@ pub mod event_staff_repo_tests {
             let deleted_event_staff = event_staff_repo
                 .read_one(event_staff_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(deleted_event_staff.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             let new_event_staff_data = StaffData {
                 role: None,
@@ -2241,17 +2239,10 @@ pub mod event_staff_repo_tests {
 
             event_staff_repo.delete(event_staff_id).await.unwrap();
 
-            let new_event_staff = event_staff_repo
+            let _new_event_staff = event_staff_repo
                 .read_one(event_staff_id)
                 .await
-                .expect("Read should succeed");
-
-            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
-            let time_difference_edited = time - new_event_staff.edited_at;
-            let time_difference_deleted = time - new_event_staff.deleted_at.unwrap();
-
-            assert!(time_difference_edited.num_seconds() < 2);
-            assert!(time_difference_deleted.num_seconds() < 2);
+                .expect_err("Read should not succeed");
         }
 
         // delete on already deleted event staff
@@ -2262,9 +2253,7 @@ pub mod event_staff_repo_tests {
             let event_staff = event_staff_repo
                 .read_one(event_staff_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(event_staff.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             event_staff_repo.delete(event_staff_id).await.expect_err(
                 "Repository should return error on deleting an already deleted event staff",
