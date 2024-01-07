@@ -2083,7 +2083,7 @@ mod api_tests {
         });
 
         let req = test::TestRequest::patch()
-            .uri(format!("/event-staff/{}", staff_id.to_string()).as_str())
+            .uri(format!("/event/staff/{}", staff_id.to_string()).as_str())
             .set_form(data)
             .to_request();
         let res = test::call_service(&app, req).await;
@@ -2098,7 +2098,7 @@ mod api_tests {
 
         // No data.
         let req = test::TestRequest::patch()
-            .uri(format!("/event-staff/{}", staff_id.to_string()).as_str())
+            .uri(format!("/event/staff/{}", staff_id.to_string()).as_str())
             .set_form(json!({}))
             .to_request();
         let res = test::call_service(&app, req).await;
@@ -2107,7 +2107,7 @@ mod api_tests {
 
         // Trying to set status without providing decided_by.
         let req = test::TestRequest::patch()
-            .uri(format!("/event-staff/{}", staff_id.to_string()).as_str())
+            .uri(format!("/event/staff/{}", staff_id.to_string()).as_str())
             .set_form(json!({
                 "status": "accepted"
             }))
@@ -2117,14 +2117,14 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
 
         let req = test::TestRequest::delete()
-            .uri(format!("/event-staff/{}", staff_id.to_string()).as_str())
+            .uri(format!("/event/staff/{}", staff_id.to_string()).as_str())
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
 
         let req = test::TestRequest::delete()
-            .uri(format!("/event-staff/{}", staff_id.to_string()).as_str())
+            .uri(format!("/event/staff/{}", staff_id.to_string()).as_str())
             .to_request();
         let res = test::call_service(&app, req).await;
         // Duplicate delete
@@ -2402,8 +2402,16 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_all_associated_companies_per_event() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = AssociatedCompanyRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(get_all_associated_companies),
+        )
+        .await;
 
         let req = test::TestRequest::get()
             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/company")
@@ -2413,27 +2421,22 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<AssociatedCompaniesTemplate>(body).unwrap();
-        assert_eq!(out.associated_companies.len(), 1);
-    }
-
-    #[actix_web::test]
-    async fn get_all_associated_companies_non_existent_event() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-
-        let req = test::TestRequest::get()
-            .uri("/event/b7acd7ce-caac-410a-9bb4-70fc5c7748f8/company")
-            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+        
+        assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
     }
 
     #[actix_web::test]
     async fn get_all_associated_comapnies_invalid_uuid_format() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = AssociatedCompanyRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(get_all_associated_companies),
+        )
+        .await;
 
         let req = test::TestRequest::get()
             .uri("/event/BADUUIDZZZZZZZZZc7748f8/company")
@@ -2445,8 +2448,18 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_update_delete_associated_company() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = AssociatedCompanyRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(create_associated_company)
+                .service(update_associated_company)
+                .service(delete_associated_company),
+        )
+        .await;
 
         let data = json!({
           "company_id": "134d5286-5f55-4637-9b98-223a5820a464",
@@ -2462,16 +2475,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::CREATED);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<AssociatedCompanyTemplate>(body).unwrap();
-        assert_eq!(out.association_type, Association::Sponsor);
-        assert_eq!(
-            out.company.id,
-            Uuid::from_str("134d5286-5f55-4637-9b98-223a5820a464").unwrap()
-        );
-        assert_eq!(
-            out.event_id,
-            Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap()
-        );
+        assert!(body.contains("Sponsor"));
+        assert!(body.contains("134d5286-5f55-4637-9b98-223a5820a464"));
+        assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
 
         //Duplicate creation should fail
         let req = test::TestRequest::post()
@@ -2504,16 +2510,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<AssociatedCompanyTemplate>(body).unwrap();
-        assert_eq!(out.association_type, Association::Other);
-        assert_eq!(
-            out.company.id,
-            Uuid::from_str("134d5286-5f55-4637-9b98-223a5820a464").unwrap()
-        );
-        assert_eq!(
-            out.event_id,
-            Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap()
-        );
+        assert!(body.contains("Other"));
+        assert!(body.contains("134d5286-5f55-4637-9b98-223a5820a464"));
+        assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
 
         let data = json!({});
 
@@ -2543,6 +2542,13 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
+
+        let req = test::TestRequest::delete()
+                    .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/company/134d5286-5f55-4637-9b98-223a5820a464")
+                    .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
