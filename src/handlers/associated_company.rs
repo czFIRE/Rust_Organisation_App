@@ -7,10 +7,11 @@ use uuid::Uuid;
 
 use crate::{
     errors::parse_error,
+    handlers::common::extract_path_tuple_ids,
     models::Association,
     repositories::associated_company::{
         associated_company_repo::AssociatedCompanyRepository,
-        models::{AssociatedCompanyFilter, NewAssociatedCompany},
+        models::{AssociatedCompanyData, AssociatedCompanyFilter, NewAssociatedCompany},
     },
     templates::company::{AssociatedCompaniesTemplate, AssociatedCompanyTemplate},
 };
@@ -19,11 +20,6 @@ use crate::{
 pub struct NewAssociatedCompanyData {
     company_id: Uuid,
     association_type: Association,
-}
-
-#[derive(Deserialize)]
-pub struct AssociatedCompanyData {
-    association_type: Option<Association>,
 }
 
 #[derive(Deserialize)]
@@ -136,11 +132,54 @@ pub async fn create_associated_company(
 
 #[patch("/event/{event_id}/company/{company_id}")]
 pub async fn update_associated_company(
-    _event_id: web::Path<String>,
-    _company_id: web::Path<String>,
-    _associated_company_data: web::Form<AssociatedCompanyData>,
+    path: web::Path<(String, String)>,
+    associated_company_data: web::Form<AssociatedCompanyData>,
+    associated_repo: web::Data<AssociatedCompanyRepository>,
 ) -> HttpResponse {
-    todo!()
+    if associated_company_data.association_type.is_none() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let parsed_ids = extract_path_tuple_ids(path.into_inner());
+    if parsed_ids.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let (event_id, company_id) = parsed_ids.unwrap();
+    let result = associated_repo
+        .update(company_id, event_id, associated_company_data.into_inner())
+        .await;
+    if let Ok(company) = result {
+        let template: AssociatedCompanyTemplate = company.into();
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+        return HttpResponse::Ok()
+            .content_type("text/html")
+            .body(body.expect("Should be valid now."));
+    }
+
+    let error = result.err().expect("Should be error.");
+    match error {
+        sqlx::Error::RowNotFound => {
+            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
+        }
+        sqlx::Error::Database(err) => {
+            if err.is_check_violation()
+                || err.is_foreign_key_violation()
+                || err.is_unique_violation()
+            {
+                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
+            } else {
+                HttpResponse::InternalServerError()
+                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
+            }
+        }
+        _ => HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
+    }
 }
 
 #[delete("/event/{event_id}/company/{company_id}")]

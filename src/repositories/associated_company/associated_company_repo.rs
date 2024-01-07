@@ -116,7 +116,9 @@ impl AssociatedCompanyRepository {
             FROM associated_company 
             INNER JOIN company ON associated_company.company_id = company.id 
             INNER JOIN event ON associated_company.event_id = event.id 
-            WHERE associated_company.company_id = $1 AND associated_company.event_id = $2;
+            WHERE associated_company.company_id = $1
+              AND associated_company.event_id = $2
+              AND associated_company.deleted_at IS NULL;
             "#,
             company_id,
             event_id,
@@ -127,7 +129,7 @@ impl AssociatedCompanyRepository {
         Ok(associated_company.into())
     }
 
-    pub async fn read_one_tx(
+    async fn read_one_tx(
         &self,
         company_id: Uuid,
         event_id: Uuid,
@@ -166,7 +168,9 @@ impl AssociatedCompanyRepository {
             FROM associated_company 
             INNER JOIN company ON associated_company.company_id = company.id 
             INNER JOIN event ON associated_company.event_id = event.id 
-            WHERE associated_company.company_id = $1 AND associated_company.event_id = $2;
+            WHERE associated_company.company_id = $1 
+              AND associated_company.event_id = $2
+              AND associated_company.deleted_at IS NULL;
             "#,
             company_id,
             event_id,
@@ -223,9 +227,10 @@ impl AssociatedCompanyRepository {
                 associated_company.created_at as "created_at!", 
                 associated_company.edited_at as "edited_at!", 
                 associated_company.deleted_at as "deleted_at" 
-            FROM associated_company 
+            FROM associated_company
             INNER JOIN company ON associated_company.company_id = company.id 
             INNER JOIN event ON associated_company.event_id = event.id
+            WHERE associated_company.deleted_at IS NULL
             LIMIT $1 OFFSET $2;
             "#,
             filter.limit,
@@ -289,7 +294,8 @@ impl AssociatedCompanyRepository {
             FROM associated_company 
             INNER JOIN company ON associated_company.company_id = company.id 
             INNER JOIN event ON associated_company.event_id = event.id 
-            WHERE associated_company.event_id = $1
+            WHERE associated_company.event_id = $1 
+              AND associated_company.deleted_at IS NULL
             LIMIT $2 OFFSET $3;
             "#,
             event_id,
@@ -356,6 +362,7 @@ impl AssociatedCompanyRepository {
             INNER JOIN company ON associated_company.company_id = company.id 
             INNER JOIN event ON associated_company.event_id = event.id 
             WHERE associated_company.company_id = $1
+              AND associated_company.deleted_at IS NULL
             LIMIT $2 OFFSET $3;
             "#,
             company_id,
@@ -376,26 +383,22 @@ impl AssociatedCompanyRepository {
         company_id: Uuid,
         event_id: Uuid,
         data: AssociatedCompanyData,
-    ) -> DbResult<AssociatedCompany> {
-        let executor = self.pool.as_ref();
+    ) -> DbResult<AssociatedCompanyExtended> {
+        let mut tx = self.pool.begin().await?;
 
         if data.association_type.is_none() {
-            // TODO: Return better error
-            return Err(sqlx::Error::RowNotFound);
+            return Err(sqlx::Error::TypeNotFound {
+                type_name: "User Error".to_string(),
+            });
         }
 
-        let associated_company_check = self.read_one_db(company_id, event_id).await?;
-
-        if associated_company_check.deleted_at.is_some() {
-            // TODO - return better error
-            return Err(sqlx::Error::RowNotFound);
-        }
-
-        let updated_associated_company: AssociatedCompany = sqlx::query_as!(
+        let associated_company: Option<AssociatedCompany> = sqlx::query_as!(
             AssociatedCompany,
             r#" UPDATE associated_company SET 
                 type = $1, edited_at = NOW()
-            WHERE company_id = $2 AND event_id = $3
+            WHERE company_id = $2
+              AND event_id = $3
+              AND deleted_at IS NULL
             RETURNING 
                 company_id, 
                 event_id, 
@@ -408,8 +411,14 @@ impl AssociatedCompanyRepository {
             company_id,
             event_id,
         )
-        .fetch_one(executor)
+        .fetch_optional(tx.deref_mut())
         .await?;
+
+        if associated_company.is_none() {
+            return Err(sqlx::Error::RowNotFound);
+        }
+
+        let updated_associated_company = self.read_one_tx(company_id, event_id, tx).await?;
 
         Ok(updated_associated_company)
     }
@@ -417,14 +426,7 @@ impl AssociatedCompanyRepository {
     pub async fn delete(&self, company_id: Uuid, event_id: Uuid) -> DbResult<()> {
         let executor = self.pool.as_ref();
 
-        let associated_company_check = self.read_one_db(company_id, event_id).await?;
-
-        if associated_company_check.deleted_at.is_some() {
-            // TODO - return better error
-            return Err(sqlx::Error::RowNotFound);
-        }
-
-        sqlx::query_as!(
+        let result = sqlx::query_as!(
             AssociatedCompany,
             r#" UPDATE associated_company SET 
                 deleted_at = NOW(),
@@ -434,8 +436,12 @@ impl AssociatedCompanyRepository {
             company_id,
             event_id,
         )
-        .execute(executor)
+        .fetch_optional(executor)
         .await?;
+
+        if result.is_none() {
+            return Err(sqlx::Error::RowNotFound);
+        }
 
         Ok(())
     }
