@@ -50,18 +50,7 @@ impl From<StaffExtended> for StaffTemplate {
         let decided_by: Option<UserLiteTemplate>;
         if staff.decided_by.is_some() {
             let decider = staff.decided_by_user.unwrap();
-            decided_by = Some(UserLiteTemplate {
-                id: decider.id,
-                name: decider.name,
-                status: decider.status,
-                age: chrono::offset::Local::now()
-                    .naive_local()
-                    .date()
-                    .years_since(decider.birth)
-                    .expect("Should be valid"),
-                gender: decider.gender,
-                avatar_url: decider.avatar_url,
-            });
+            decided_by = Some(decider.into());
         } else {
             decided_by = None;
         }
