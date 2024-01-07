@@ -2,7 +2,6 @@ use std::str::FromStr;
 
 use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;
-use chrono::Utc;
 use serde::Deserialize;
 use uuid::Uuid;
 
