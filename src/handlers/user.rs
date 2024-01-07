@@ -25,18 +25,7 @@ pub async fn get_user(
     let query_result = user_repo.read_one(parsed_id).await;
 
     if let Ok(user) = query_result {
-        let template = UserTemplate {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            birth: user.birth,
-            avatar_url: user.avatar_url,
-            role: user.role,
-            status: user.status,
-            gender: user.gender,
-            created_at: user.created_at,
-            edited_at: user.edited_at,
-        };
+        let template: UserTemplate = user.into();
 
         let body = template.render();
 
@@ -71,19 +60,7 @@ pub async fn create_user(
     let created_user = user_repo.create(new_user.into_inner()).await;
 
     if let Ok(user) = created_user {
-        let template = UserTemplate {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            birth: user.birth,
-            avatar_url: user.avatar_url,
-            role: user.role,
-            status: user.status,
-            gender: user.gender,
-            created_at: user.created_at,
-            edited_at: user.edited_at,
-        };
-
+        let template: UserTemplate = user.into();
         let body = template.render();
 
         if body.is_err() {
@@ -154,18 +131,7 @@ pub async fn update_user(
         .await;
 
     if let Ok(user) = updated_user {
-        let template = UserTemplate {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            birth: user.birth,
-            avatar_url: user.avatar_url,
-            role: user.role,
-            status: user.status,
-            gender: user.gender,
-            created_at: user.created_at,
-            edited_at: user.edited_at,
-        };
+        let template: UserTemplate = user.into();
 
         let body = template.render();
 

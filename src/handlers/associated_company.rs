@@ -186,7 +186,7 @@ pub async fn delete_associated_company(
     }
 
     let (event_id, company_id) = parsed_ids.unwrap();
-    let result = associated_repo.delete(event_id, company_id).await;
+    let result = associated_repo.delete(company_id, event_id).await;
     if let Err(error) = result {
         return match error {
             sqlx::Error::RowNotFound => {

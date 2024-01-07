@@ -149,7 +149,7 @@ fn is_data_invalid(data: StaffData) -> bool {
         || (data.status.is_some() && data.decided_by.is_none())
 }
 
-#[patch("/event-staff/{staff_id}")]
+#[patch("/event/staff/{staff_id}")]
 pub async fn update_event_staff(
     staff_id: web::Path<String>,
     event_staff_data: web::Form<StaffData>,
@@ -228,7 +228,7 @@ pub async fn delete_all_rejected_event_staff(
     HttpResponse::NoContent().finish()
 }
 
-#[delete("/event-staff/{staff_id}")]
+#[delete("/event/staff/{staff_id}")]
 pub async fn delete_event_staff(
     staff_id: web::Path<String>,
     event_staff_repo: web::Data<StaffRepository>,
