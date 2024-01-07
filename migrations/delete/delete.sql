@@ -27,8 +27,3 @@ DROP TYPE IF EXISTS gender;
 DROP TYPE IF EXISTS task_priority;
 DROP TYPE IF EXISTS user_role;
 DROP TYPE IF EXISTS user_status;
-
--- Domains
-DROP TYPE IF EXISTS "hours_per_day_float" CASCADE;
-DROP TYPE IF EXISTS "hours_per_month_float" CASCADE;
-DROP TYPE IF EXISTS "ufloat" CASCADE;
