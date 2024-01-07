@@ -114,7 +114,7 @@ CREATE TABLE employment
     -------------------------------------------------------
     hourly_wage FLOAT NOT NULL,
     start_date  DATE NOT NULL,
-    end_date    DATE NOT NULL,
+    end_date    DATE,
     description TEXT,
     type        employment_contract NOT NULL,
     level       employee_level NOT NULL DEFAULT 'basic',
