@@ -25,7 +25,7 @@ pub struct Task {
     pub creator_id: Uuid, // references event_staff
     pub title: String,
     pub description: Option<String>,
-    pub finished_at: Option<NaiveDateTime>, // TODO: In the db it was a Date
+    pub finished_at: Option<NaiveDateTime>,
     pub priority: TaskPriority,
     pub accepts_staff: bool,
     pub created_at: NaiveDateTime,
@@ -48,7 +48,7 @@ pub struct TaskExtended {
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct TaskData {
     pub title: Option<String>,
     pub description: Option<String>,
