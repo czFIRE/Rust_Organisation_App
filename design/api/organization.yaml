@@ -181,7 +181,7 @@ paths:
     get:
       tags:
         - userContent
-      summary: 'Retrieve path to a user avatar.'
+      summary: 'Retireve path to a user avatar.'
       parameters:
         - in: path
           name: user_id
@@ -2887,7 +2887,7 @@ components:
           type: string
           format: uuid
           example: b50c9874-c743-48e2-9295-0625f5d5a068
-        avatar_path:
+        avatar_url:
           type: string
           example: /bambino/default.jpg
         name:
@@ -2924,7 +2924,7 @@ components:
           type: string
           format: uuid
           example: b50c9874-c743-48e2-9295-0625f5d5a068
-        avatar_path:
+        avatar_url:
           type: string
           example: /bambino/default.jpg
         name:
@@ -3115,7 +3115,7 @@ components:
           type: string
           format: uuid
           example: a40c9874-c743-48e2-9295-0625f5d5a068
-        avatar_path:
+        avatar_url:
           type: string
           example: /img/pepebusiness.png
         name:
@@ -3157,7 +3157,7 @@ components:
           type: string
           format: uuid
           example: a40c9874-c743-48e2-9295-0625f5d5a068
-        avatar_path:
+        avatar_url:
           type: string
           example: /img/pepebusiness.png
         name:
@@ -3200,7 +3200,7 @@ components:
           type: string
           format: uuid
           example: e40c9874-c743-48e2-9295-0625f5d5a068
-        avatar_path:
+        avatar_url:
           type: string
           example: /img/pepejam.png
         name:
@@ -3235,7 +3235,7 @@ components:
           type: string
           format: uuid
           example: e40c9874-c743-48e2-9295-0625f5d5a068
-        avatar_path:
+        avatar_url:
           type: string
           example: /img/pepejam.png
         name:

@@ -41,7 +41,7 @@ impl EventRepository {
                 accepts_staff, 
                 start_date, 
                 end_date, 
-                avatar_path, 
+                avatar_url, 
                 created_at, 
                 edited_at, 
                 deleted_at;
@@ -111,7 +111,7 @@ impl EventRepository {
             && data.website.is_none()
             && data.start_date.is_none()
             && data.end_date.is_none()
-            && data.avatar_path.is_none()
+            && data.avatar_url.is_none()
         {
             return Err(sqlx::Error::RowNotFound);
         }
@@ -133,7 +133,7 @@ impl EventRepository {
                 website = COALESCE($3, website), 
                 start_date = COALESCE($4, start_date), 
                 end_date = COALESCE($5, end_date), 
-                avatar_path = COALESCE($6, avatar_path), 
+                avatar_url = COALESCE($6, avatar_url), 
                 edited_at = NOW() 
                 WHERE id = $7 RETURNING id, 
                 name, 
@@ -142,7 +142,7 @@ impl EventRepository {
                 accepts_staff, 
                 start_date, 
                 end_date, 
-                avatar_path, 
+                avatar_url, 
                 created_at, 
                 edited_at, 
                 deleted_at;
@@ -152,7 +152,7 @@ impl EventRepository {
             data.website,
             data.start_date,
             data.end_date,
-            data.avatar_path,
+            data.avatar_url,
             event_id,
         )
         .fetch_one(executor)

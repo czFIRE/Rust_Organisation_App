@@ -41,7 +41,7 @@ BEGIN
 	INSERT INTO company
 		(id, name, description,
 		website, crn, vatin,
-		phone, email, avatar_path,
+		phone, email, avatar_url,
 		created_at, edited_at)
 		VALUES
 		(company0_id, 'AMD', 'Advanced Micro Devices, Inc.',
@@ -52,7 +52,7 @@ BEGIN
 	INSERT INTO company
 		(id, name, description,
 		website, crn, vatin,
-		phone, email, avatar_path,
+		phone, email, avatar_url,
 		created_at, edited_at)
 		VALUES
 		(company1_id, 'ReportLab', 'ReportLab Europe Ltd.',
@@ -63,7 +63,7 @@ BEGIN
 	INSERT INTO company
 		(id, name, description,
 		website, crn, vatin,
-		phone, email, avatar_path,
+		phone, email, avatar_url,
 		created_at, edited_at)
 		VALUES
 		(company2_id, 'Prusa Research', 'Prusa Research a.s.',
@@ -93,7 +93,7 @@ BEGIN
 		'Partyzanska', '188/7A', '170 00');
 
 	INSERT INTO user_record
-		(id, name, email, birth, avatar_path,
+		(id, name, email, birth, avatar_url,
 		gender, role, status,
 		created_at, edited_at)
 		VALUES
@@ -102,7 +102,7 @@ BEGIN
 		'2023-12-22 08:38:20.288688', '2023-12-22 08:38:20.288688');
 	
 	INSERT INTO user_record
-		(id, name, email, birth, avatar_path,
+		(id, name, email, birth, avatar_url,
 		gender, role, status,
 		created_at, edited_at)
 		VALUES
@@ -124,7 +124,7 @@ BEGIN
 	INSERT INTO event
 		(id, name, description,
 		website, accepts_staff,
-		start_date, end_date, avatar_path,
+		start_date, end_date, avatar_url,
 		created_at, edited_at)
 		VALUES
 		(event0_id, 'Woodstock', 'A legendary music festival.',

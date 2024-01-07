@@ -69,7 +69,7 @@ pub struct CommentUserFlattened {
     pub user_name: String,
     pub user_email: String,
     pub user_birth: NaiveDate,
-    pub user_avatar_path: Option<String>, // TODO: Now is the same as in INIT.SQL but do we want this?
+    pub user_avatar_url: Option<String>, // TODO: Now is the same as in INIT.SQL but do we want this?
     pub user_gender: Gender,
     pub user_role: UserRole,
     pub user_status: UserStatus,
@@ -85,7 +85,7 @@ impl From<CommentUserFlattened> for CommentExtended {
             name: value.user_name,
             email: value.user_email,
             birth: value.user_birth,
-            avatar_path: value.user_avatar_path,
+            avatar_url: value.user_avatar_url,
             gender: value.user_gender,
             role: value.user_role,
             status: value.user_status,
