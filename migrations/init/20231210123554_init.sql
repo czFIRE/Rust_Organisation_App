@@ -1,6 +1,5 @@
 -- Enums
 
-CREATE TYPE role                    AS ENUM ('user', 'admin');
 CREATE TYPE acceptance_status       AS ENUM ('pending', 'accepted', 'rejected');
 CREATE TYPE approval_status         AS ENUM ('not_requested', 'pending',
                                              'accepted', 'rejected');
@@ -10,6 +9,7 @@ CREATE TYPE employee_level          AS ENUM ('basic', 'manager', 'company_admini
 CREATE TYPE event_role              AS ENUM ('staff', 'organizer');
 CREATE TYPE gender                  AS ENUM ('male', 'female', 'other');
 CREATE TYPE task_priority           AS ENUM ('low', 'medium', 'high');
+CREATE TYPE user_role               AS ENUM ('user', 'admin');
 CREATE TYPE user_status             AS ENUM ('available', 'unavailable');
 
 -- Tables
@@ -25,7 +25,7 @@ CREATE TABLE user_record
     birth       DATE NOT NULL,
     avatar_path VARCHAR(255) DEFAULT 'img/default/user.jpg',
     gender      gender NOT NULL,
-    role        role NOT NULL DEFAULT 'user',
+    role        user_role NOT NULL DEFAULT 'user',
     status      user_status NOT NULL DEFAULT 'available',
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
