@@ -12,7 +12,7 @@ use crate::{
         timesheet_repo::TimesheetRepository,
     },
     templates::timesheet::{
-            TimesheetLiteTemplate, TimesheetTemplate, TimesheetsTemplate, WorkdayTemplate,
+            TimesheetLiteTemplate, TimesheetTemplate, TimesheetsTemplate
         },
 };
 
@@ -86,42 +86,7 @@ pub async fn create_timesheet(
     let result = timesheet_repo.create(new_timesheet.into_inner()).await;
 
     if let Ok(full_timesheet) = result {
-        let workdays = full_timesheet
-            .workdays
-            .into_iter()
-            .map(|workday| WorkdayTemplate {
-                timesheet_id: workday.timesheet_id,
-                date: workday.date,
-                total_hours: workday.total_hours,
-                comment: workday.comment.unwrap_or("No comment.".to_string()),
-                is_editable: workday.is_editable,
-                created_at: workday.created_at,
-                edited_at: workday.edited_at,
-            })
-            .collect();
-
-        let template = TimesheetTemplate {
-            id: full_timesheet.timesheet.id,
-            user_id: full_timesheet.timesheet.user_id,
-            company_id: full_timesheet.timesheet.company_id,
-            event_id: full_timesheet.timesheet.event_id,
-            event_avatar_url: full_timesheet.timesheet.event_avatar_url,
-            event_name: full_timesheet.timesheet.event_name,
-            start_date: full_timesheet.timesheet.start_date,
-            end_date: full_timesheet.timesheet.end_date,
-            total_hours: full_timesheet.timesheet.total_hours,
-            work_days: workdays,
-            calculated_wage: 0,
-            is_editable: full_timesheet.timesheet.is_editable,
-            status: full_timesheet.timesheet.status,
-            manager_note: full_timesheet
-                .timesheet
-                .manager_note
-                .unwrap_or("No note.".to_string()),
-            created_at: full_timesheet.timesheet.created_at,
-            edited_at: full_timesheet.timesheet.edited_at,
-        };
-
+        let template: TimesheetTemplate = full_timesheet.into();
         let body = template.render();
         if body.is_err() {
             return HttpResponse::InternalServerError()
@@ -163,42 +128,7 @@ pub async fn get_timesheet(
     let result = timesheet_repo._read_one(parsed_id).await;
 
     if let Ok(full_timesheet) = result {
-        let workdays = full_timesheet
-            .workdays
-            .into_iter()
-            .map(|workday| WorkdayTemplate {
-                timesheet_id: workday.timesheet_id,
-                date: workday.date,
-                total_hours: workday.total_hours,
-                comment: workday.comment.unwrap_or("No comment.".to_string()),
-                is_editable: workday.is_editable,
-                created_at: workday.created_at,
-                edited_at: workday.edited_at,
-            })
-            .collect();
-
-        let template = TimesheetTemplate {
-            id: full_timesheet.timesheet.id,
-            user_id: full_timesheet.timesheet.user_id,
-            company_id: full_timesheet.timesheet.company_id,
-            event_id: full_timesheet.timesheet.event_id,
-            event_avatar_url: full_timesheet.timesheet.event_avatar_url,
-            event_name: full_timesheet.timesheet.event_name,
-            start_date: full_timesheet.timesheet.start_date,
-            end_date: full_timesheet.timesheet.end_date,
-            total_hours: full_timesheet.timesheet.total_hours,
-            work_days: workdays,
-            calculated_wage: 0,
-            is_editable: full_timesheet.timesheet.is_editable,
-            status: full_timesheet.timesheet.status,
-            manager_note: full_timesheet
-                .timesheet
-                .manager_note
-                .unwrap_or("No note.".to_string()),
-            created_at: full_timesheet.timesheet.created_at,
-            edited_at: full_timesheet.timesheet.edited_at,
-        };
-
+        let template: TimesheetTemplate = full_timesheet.into();
         let body = template.render();
         if body.is_err() {
             return HttpResponse::InternalServerError()
@@ -251,41 +181,7 @@ pub async fn update_timesheet(
         .await;
 
     if let Ok(full_timesheet) = result {
-        let workdays = full_timesheet
-            .workdays
-            .into_iter()
-            .map(|workday| WorkdayTemplate {
-                timesheet_id: workday.timesheet_id,
-                date: workday.date,
-                total_hours: workday.total_hours,
-                comment: workday.comment.unwrap_or("No comment.".to_string()),
-                is_editable: workday.is_editable,
-                created_at: workday.created_at,
-                edited_at: workday.edited_at,
-            })
-            .collect();
-
-        let template = TimesheetTemplate {
-            id: full_timesheet.timesheet.id,
-            user_id: full_timesheet.timesheet.user_id,
-            company_id: full_timesheet.timesheet.company_id,
-            event_id: full_timesheet.timesheet.event_id,
-            event_avatar_url: full_timesheet.timesheet.event_avatar_url,
-            event_name: full_timesheet.timesheet.event_name,
-            start_date: full_timesheet.timesheet.start_date,
-            end_date: full_timesheet.timesheet.end_date,
-            total_hours: full_timesheet.timesheet.total_hours,
-            work_days: workdays,
-            calculated_wage: 0,
-            is_editable: full_timesheet.timesheet.is_editable,
-            status: full_timesheet.timesheet.status,
-            manager_note: full_timesheet
-                .timesheet
-                .manager_note
-                .unwrap_or("No note.".to_string()),
-            created_at: full_timesheet.timesheet.created_at,
-            edited_at: full_timesheet.timesheet.edited_at,
-        };
+        let template: TimesheetTemplate = full_timesheet.into();
 
         let body = template.render();
         if body.is_err() {
@@ -330,41 +226,7 @@ pub async fn reset_timesheet_data(
     let parsed_id = id_parse.expect("Should be valid.");
     let result = timesheet_repo.reset_timesheet(parsed_id).await;
     if let Ok(full_timesheet) = result {
-        let workdays = full_timesheet
-            .workdays
-            .into_iter()
-            .map(|workday| WorkdayTemplate {
-                timesheet_id: workday.timesheet_id,
-                date: workday.date,
-                total_hours: workday.total_hours,
-                comment: workday.comment.unwrap_or("No comment.".to_string()),
-                is_editable: workday.is_editable,
-                created_at: workday.created_at,
-                edited_at: workday.edited_at,
-            })
-            .collect();
-
-        let template = TimesheetTemplate {
-            id: full_timesheet.timesheet.id,
-            user_id: full_timesheet.timesheet.user_id,
-            company_id: full_timesheet.timesheet.company_id,
-            event_id: full_timesheet.timesheet.event_id,
-            event_avatar_url: full_timesheet.timesheet.event_avatar_url,
-            event_name: full_timesheet.timesheet.event_name,
-            start_date: full_timesheet.timesheet.start_date,
-            end_date: full_timesheet.timesheet.end_date,
-            total_hours: full_timesheet.timesheet.total_hours,
-            work_days: workdays,
-            calculated_wage: 0,
-            is_editable: full_timesheet.timesheet.is_editable,
-            status: full_timesheet.timesheet.status,
-            manager_note: full_timesheet
-                .timesheet
-                .manager_note
-                .unwrap_or("No note.".to_string()),
-            created_at: full_timesheet.timesheet.created_at,
-            edited_at: full_timesheet.timesheet.edited_at,
-        };
+        let template: TimesheetTemplate = full_timesheet.into();
 
         let body = template.render();
         if body.is_err() {
