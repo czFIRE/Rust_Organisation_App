@@ -5,7 +5,7 @@ use uuid::Uuid;
 use crate::{
     models::{AcceptanceStatus, EventRole, Gender, UserRole, UserStatus},
     repositories::{
-        company::models::Company, event_staff::models::StaffExtended, user::models::User,
+        company::models::Company, event_staff::models::StaffLite, user::models::User,
     },
 };
 
@@ -29,7 +29,7 @@ pub struct AssignedStaff {
 #[derive(Debug)]
 pub struct AssignedStaffExtended {
     pub task_id: Uuid,
-    pub staff: StaffExtended,
+    pub staff: StaffLite,
     pub status: AcceptanceStatus,
     pub decided_by: Option<User>,
     pub created_at: NaiveDateTime,
@@ -147,16 +147,11 @@ impl From<AssignedStaffStaffUserCompanyFlattened> for AssignedStaffExtended {
             deleted_at: value.company_deleted_at,
         };
 
-        let tmp_event_staff = StaffExtended {
+        let tmp_event_staff = StaffLite {
             user: tmp_user,
             company: tmp_company,
             event_id: value.staff_event_id,
             role: value.staff_role,
-            status: value.staff_status,
-            decided_by: value.staff_decided_by,
-            created_at: value.staff_created_at,
-            edited_at: value.staff_edited_at,
-            deleted_at: value.staff_deleted_at,
         };
 
         let decided_by_user: Option<User> = match value.decided_by_user_id {

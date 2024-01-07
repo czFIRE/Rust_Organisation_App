@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use crate::{
-    handlers::common::extract_user_company_ids,
+    handlers::common::extract_path_tuple_ids,
     repositories::employment::models::{EmploymentData, NewEmployment},
     templates::{
         employment::{EmploymentLiteTemplate, EmploymentTemplate},
@@ -160,21 +160,12 @@ pub async fn get_employment(
     path: web::Path<(String, String)>,
     employment_repo: web::Data<EmploymentRepository>,
 ) -> HttpResponse {
-    // let ids = path.into_inner();
-    // let user_id_parse = Uuid::from_str(ids.0.as_str());
-    // let company_id_parse = Uuid::from_str(ids.1.as_str());
-    // if user_id_parse.is_err() || company_id_parse.is_err() {
-    //     return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
-    // }
-
-    let parsed_ids = extract_user_company_ids(path.into_inner());
+    let parsed_ids = extract_path_tuple_ids(path.into_inner());
     if parsed_ids.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
     let (user_id, company_id) = parsed_ids.unwrap();
-    // let parsed_company_id = company_id_parse.expect("Should be valid.");
-    // let parsed_user_id = user_id_parse.expect("Should be valid.");
     get_full_employment(user_id, company_id, employment_repo, false).await
 }
 
@@ -192,7 +183,7 @@ pub async fn get_subordinates(
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
-    let parsed_ids = extract_user_company_ids(path.into_inner());
+    let parsed_ids = extract_path_tuple_ids(path.into_inner());
     if parsed_ids.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
@@ -310,7 +301,7 @@ pub async fn update_employment(
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
-    let parsed_ids = extract_user_company_ids(path.into_inner());
+    let parsed_ids = extract_path_tuple_ids(path.into_inner());
     if parsed_ids.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
@@ -348,7 +339,7 @@ pub async fn delete_employment(
     path: web::Path<(String, String)>,
     employment_repo: web::Data<EmploymentRepository>,
 ) -> HttpResponse {
-    let parsed_ids = extract_user_company_ids(path.into_inner());
+    let parsed_ids = extract_path_tuple_ids(path.into_inner());
     if parsed_ids.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }

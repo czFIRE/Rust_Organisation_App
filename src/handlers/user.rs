@@ -7,14 +7,9 @@ use crate::{
 };
 use actix_web::{delete, get, http, patch, post, put, web, HttpResponse};
 use askama::Template;
-use chrono::NaiveDate;
-use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::{
-    models::{Gender, UserRole},
-    repositories::user::user_repo::UserRepository,
-};
+use crate::repositories::user::user_repo::UserRepository;
 
 #[get("/user/{user_id}")]
 pub async fn get_user(

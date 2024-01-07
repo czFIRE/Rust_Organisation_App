@@ -9,7 +9,7 @@ pub struct QueryParams {
     pub offset: Option<i64>,
 }
 
-pub fn extract_user_company_ids(ids: (String, String)) -> Result<(Uuid, Uuid), Error> {
+pub fn extract_path_tuple_ids(ids: (String, String)) -> Result<(Uuid, Uuid), Error> {
     Ok((
         Uuid::from_str(ids.0.as_str())?,
         Uuid::from_str(ids.1.as_str())?,

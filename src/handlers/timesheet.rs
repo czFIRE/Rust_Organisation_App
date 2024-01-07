@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 use crate::{
     errors::parse_error,
-    handlers::common::extract_user_company_ids,
+    handlers::common::extract_path_tuple_ids,
     repositories::timesheet::{
         models::{TimesheetCreateData, TimesheetReadAllData, TimesheetUpdateData},
         timesheet_repo::TimesheetRepository,
@@ -31,7 +31,7 @@ pub async fn get_all_timesheets_for_employment(
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
-    let parsed_ids = extract_user_company_ids(path.into_inner());
+    let parsed_ids = extract_path_tuple_ids(path.into_inner());
     if parsed_ids.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }

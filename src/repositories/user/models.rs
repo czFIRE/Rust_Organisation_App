@@ -33,6 +33,16 @@ pub struct User {
     pub deleted_at: Option<NaiveDateTime>,
 }
 
+#[derive(Debug, FromRow, Clone)]
+pub struct UserLite {
+    pub id: Uuid,
+    pub name: String,
+    pub status: UserStatus,
+    pub birth: NaiveDate,
+    pub gender: Gender,
+    pub avatar_url: String
+}
+
 #[derive(Debug, FromRow, Deserialize, Clone)]
 pub struct UserData {
     pub name: Option<String>,

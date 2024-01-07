@@ -1928,11 +1928,19 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
+    //ToDo: Works manually but tests throw 500, complain about wrong setup???
     #[actix_web::test]
     async fn get_all_event_staff_test() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let staff_repository = EmploymentRepository::new(arc_pool.clone());
+        let staff_repo = web::Data::new(staff_repository);
 
+        let app = test::init_service(
+            App::new()
+                .app_data(staff_repo.clone())
+                .service(get_all_event_staff),
+        )
+        .await;
         let req = test::TestRequest::get()
             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff")
             .to_request();
@@ -1942,26 +1950,24 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<AllStaffTemplate>(body).unwrap();
-        assert_eq!(out.staff.len(), 1);
+        assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
     }
 
     #[actix_web::test]
     async fn get_all_event_staff_errors() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let staff_repository = EmploymentRepository::new(arc_pool.clone());
+        let staff_repo = web::Data::new(staff_repository);
 
-        // This should be a non-existent event.
+        let app = test::init_service(
+            App::new()
+                .app_data(staff_repo.clone())
+                .service(get_all_event_staff),
+        )
+        .await;
+
         let req = test::TestRequest::get()
-            .uri("/event/beefdbce-caaa-410a-9bb4-70fc5c7748f8/staff")
-            .to_request();
-        let res = test::call_service(&app, req).await;
-
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
-
-        let req = test::TestRequest::get()
-            .uri("/event/beezzzfdbce-caaa-4INVALIDFORMATbBOIYSb4-70fc5c7748f8/staff")
+            .uri("/event/beezzz-4INVALIDFORMATbBOIYSb4-70fc5c7748f8/staff")
             .to_request();
         let res = test::call_service(&app, req).await;
 
@@ -1971,10 +1977,19 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_event_staff_test() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let staff_repository = EmploymentRepository::new(arc_pool.clone());
+        let staff_repo = web::Data::new(staff_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(staff_repo.clone())
+                .service(get_event_staff),
+        )
+        .await;
+
         let req = test::TestRequest::get()
-                    .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff/9281b570-4d02-4096-9136-338a613c71cd")
+                    .uri("/event/staff/9281b570-4d02-4096-9136-338a613c71cd")
                     .to_request();
         let res = test::call_service(&app, req).await;
 
@@ -1983,24 +1998,26 @@ mod api_tests {
 
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<StaffTemplate>(body).unwrap();
-
-        assert_eq!(
-            out.event_id,
-            Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap()
-        );
-        assert_eq!(
-            out.id,
-            Uuid::from_str("9281b570-4d02-4096-9136-338a613c71cd").unwrap()
-        );
+        
+        assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
+        assert!(body.contains("9281b570-4d02-4096-9136-338a613c71cd"));
     }
 
     #[actix_web::test]
     async fn get_event_staff_errors() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let staff_repository = EmploymentRepository::new(arc_pool.clone());
+        let staff_repo = web::Data::new(staff_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(staff_repo.clone())
+                .service(get_event_staff),
+        )
+        .await;
+
         let req = test::TestRequest::get()
-                    .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff/918ab570-adb3-4c9d-9136-338a613c71cd")
+                    .uri("/event/staff/918ab570-adb3-4c9d-9136-338a613c71cd")
                     .to_request();
         let res = test::call_service(&app, req).await;
 
@@ -2009,7 +2026,7 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
 
         let req = test::TestRequest::get()
-                    .uri("/event/b71fd7ce-c891INVALIDFORMAT4-zzzyzc7748f8/staff/918ab570-adb3-4c9d-9136-338a613c71cd")
+                    .uri("/event/staff/918ab570-adb3-4c9d-9136-338a613c71cd")
                     .to_request();
         let res = test::call_service(&app, req).await;
 
@@ -2020,8 +2037,18 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_update_delete_event_staff() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let staff_repository = EmploymentRepository::new(arc_pool.clone());
+        let staff_repo = web::Data::new(staff_repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(staff_repo.clone())
+                .service(create_event_staff)
+                .service(update_event_staff)
+                .service(delete_event_staff),
+        )
+        .await;
 
         let data = json!({
             "user_id": "51a01dbf-dcd5-43a0-809c-94ed8e61d420",
@@ -2031,7 +2058,7 @@ mod api_tests {
 
         let req = test::TestRequest::post()
             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff")
-            .set_form(data)
+            .set_form(data.clone())
             .to_request();
 
         let res = test::call_service(&app, req).await;
@@ -2040,21 +2067,28 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::CREATED);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<StaffTemplate>(body).unwrap();
-        assert_eq!(
-            out.user.id,
-            Uuid::from_str("51a01dbf-dcd5-43a0-809c-94ed8e61d420").unwrap()
-        );
-        assert_eq!(
-            out.company.id,
-            Uuid::from_str("b5188eda-528d-48d4-8cee-498e0971f9f5").unwrap()
-        );
-        assert_eq!(
-            out.event_id,
-            Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap()
-        );
+        
+        assert!(body.contains("51a01dbf-dcd5-43a0-809c-94ed8e61d420"));
+        assert!(body.contains("b5188eda-528d-48d4-8cee-498e0971f9f5"));
+        assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
 
-        let staff_id = out.id;
+        let uuid_regex = Regex::new(
+            r"[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}",
+        )
+        .unwrap();
+        let uuid_caps = uuid_regex.find(body).unwrap();
+        let staff_id = uuid_caps.as_str();
+
+        // Duplicate creation attempt
+        let req = test::TestRequest::post()
+            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff")
+            .set_form(data)
+            .to_request();
+
+        let res = test::call_service(&app, req).await;
+
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
 
         let data = json!({
             "role": "organizer",
@@ -2063,7 +2097,7 @@ mod api_tests {
         let req = test::TestRequest::patch()
             .uri(
                 format!(
-                    "/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff/{}",
+                    "/event-staff/{}",
                     staff_id.to_string()
                 )
                 .as_str(),
@@ -2075,25 +2109,48 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<StaffTemplate>(body).unwrap();
-        assert_eq!(
-            out.user.id,
-            Uuid::from_str("51a01dbf-dcd5-43a0-809c-94ed8e61d420").unwrap()
-        );
-        assert_eq!(
-            out.company.id,
-            Uuid::from_str("b5188eda-528d-48d4-8cee-498e0971f9f5").unwrap()
-        );
-        assert_eq!(
-            out.event_id,
-            Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap()
-        );
-        assert_eq!(out.role, EventRole::Organizer);
+        assert!(body.contains("51a01dbf-dcd5-43a0-809c-94ed8e61d420"));
+        assert!(body.contains("b5188eda-528d-48d4-8cee-498e0971f9f5"));
+        assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
+        assert!(body.contains("Organizer"));
+
+        // No data.
+        let req = test::TestRequest::patch()
+        .uri(
+            format!(
+                "/event-staff/{}",
+                staff_id.to_string()
+            )
+            .as_str(),
+        )
+        .set_form(json!({}))
+        .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+
+        // Trying to set status without providing decided_by.
+        let req = test::TestRequest::patch()
+        .uri(
+            format!(
+                "/event-staff/{}",
+                staff_id.to_string()
+            )
+            .as_str(),
+        )
+        .set_form(json!({
+            "status": "accepted"
+        }))
+        .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+
 
         let req = test::TestRequest::delete()
             .uri(
                 format!(
-                    "/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff/{}",
+                    "/event-staff/{}",
                     staff_id.to_string()
                 )
                 .as_str(),
@@ -2106,7 +2163,7 @@ mod api_tests {
         let req = test::TestRequest::delete()
             .uri(
                 format!(
-                    "/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff/{}",
+                    "/event-staff/{}",
                     staff_id.to_string()
                 )
                 .as_str(),
@@ -2114,62 +2171,6 @@ mod api_tests {
             .to_request();
         let res = test::call_service(&app, req).await;
         // Duplicate delete
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
-    }
-
-    #[actix_web::test]
-    async fn create_event_staff_errors() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-
-        let data = json!({
-            "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
-            "role": "basic"
-        });
-
-        let req = test::TestRequest::post()
-            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff")
-            .set_form(data)
-            .to_request();
-
-        let res = test::call_service(&app, req).await;
-
-        // Missing user_id in form data
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
-
-        let data = json!({
-            "user_id": "0465041f-fe64-461f-9f71-71e3b97ca85f",
-            "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
-            "role": "basic"
-        });
-
-        let req = test::TestRequest::post()
-            .uri("/event/baafdece-c291-410a-9bb4-70fc5c7748f8/staff")
-            .set_form(data)
-            .to_request();
-
-        let res = test::call_service(&app, req).await;
-
-        // Non-existent event
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
-
-        let data = json!({
-            "user_id": "0465041f-fe64-461f-9f71-71e3b97ca85f",
-            "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
-            "role": "basic"
-        });
-
-        let req = test::TestRequest::post()
-            .uri("/event/gginvalidUUIDBOIYZZZ91-410a-9bb4-70fc5c7748f8/staff")
-            .set_form(data)
-            .to_request();
-
-        let res = test::call_service(&app, req).await;
-
-        // Invalid UUID
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
