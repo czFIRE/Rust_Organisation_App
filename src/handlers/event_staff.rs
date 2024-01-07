@@ -36,7 +36,7 @@ pub async fn get_all_event_staff(event_id: web::Path<String>, query: web::Query<
             return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
 
-        return HttpResponse::Ok().body(body.expect("Should be valid now."));
+        return HttpResponse::Ok().content_type("text/html").body(body.expect("Should be valid now."));
     }
     
     let error = result.err().expect("Should be an error");
@@ -64,7 +64,7 @@ pub async fn get_event_staff(staff_id: web::Path<String>, event_staff_repo: web:
         if body.is_err() {
             return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
-        return HttpResponse::Ok().body(body.expect("Should be valid now."));
+        return HttpResponse::Ok().content_type("text/html").body(body.expect("Should be valid now."));
     }
     
     let error = result.err().expect("Should be an error");
@@ -97,7 +97,7 @@ pub async fn create_event_staff(
         if body.is_err() {
             return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
-        return HttpResponse::Ok().body(body.expect("Should be valid now."));
+        return HttpResponse::Created().content_type("text/html").body(body.expect("Should be valid now."));
     }
     
     let error = result.err().expect("Should be error.");
@@ -106,12 +106,18 @@ pub async fn create_event_staff(
             HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
         }
         sqlx::Error::Database(err) => {
-            if err.is_check_violation()
-                || err.is_foreign_key_violation()
-                || err.is_unique_violation()
+            if err.is_check_violation() {
+                return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+            }
+            if
+                err.is_foreign_key_violation()
             {
+                return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
+            } 
+            if err.is_unique_violation() {
                 HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
-            } else {
+            }
+            else {
                 HttpResponse::InternalServerError()
                     .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
             }
@@ -152,7 +158,7 @@ pub async fn update_event_staff(
         if body.is_err() {
             return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
-        return HttpResponse::Ok().body(body.expect("Should be valid now."));
+        return HttpResponse::Ok().content_type("text/html").body(body.expect("Should be valid now."));
     }
     
     let error = result.err().expect("Should be error.");

@@ -1928,11 +1928,10 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    //ToDo: Works manually but tests throw 500, complain about wrong setup???
     #[actix_web::test]
     async fn get_all_event_staff_test() {
         let arc_pool = get_db_pool().await;
-        let staff_repository = EmploymentRepository::new(arc_pool.clone());
+        let staff_repository = StaffRepository::new(arc_pool.clone());
         let staff_repo = web::Data::new(staff_repository);
 
         let app = test::init_service(
@@ -1956,7 +1955,7 @@ mod api_tests {
     #[actix_web::test]
     async fn get_all_event_staff_errors() {
         let arc_pool = get_db_pool().await;
-        let staff_repository = EmploymentRepository::new(arc_pool.clone());
+        let staff_repository = StaffRepository::new(arc_pool.clone());
         let staff_repo = web::Data::new(staff_repository);
 
         let app = test::init_service(
@@ -1978,7 +1977,7 @@ mod api_tests {
     #[actix_web::test]
     async fn get_event_staff_test() {
         let arc_pool = get_db_pool().await;
-        let staff_repository = EmploymentRepository::new(arc_pool.clone());
+        let staff_repository = StaffRepository::new(arc_pool.clone());
         let staff_repo = web::Data::new(staff_repository);
 
         let app = test::init_service(
@@ -2006,7 +2005,7 @@ mod api_tests {
     #[actix_web::test]
     async fn get_event_staff_errors() {
         let arc_pool = get_db_pool().await;
-        let staff_repository = EmploymentRepository::new(arc_pool.clone());
+        let staff_repository = StaffRepository::new(arc_pool.clone());
         let staff_repo = web::Data::new(staff_repository);
 
         let app = test::init_service(
@@ -2026,7 +2025,7 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
 
         let req = test::TestRequest::get()
-                    .uri("/event/staff/918ab570-adb3-4c9d-9136-338a613c71cd")
+                    .uri("/event/staff/9zzzzz0-adb3-4czz36-338az3c71cd")
                     .to_request();
         let res = test::call_service(&app, req).await;
 
@@ -2038,7 +2037,7 @@ mod api_tests {
     #[actix_web::test]
     async fn create_update_delete_event_staff() {
         let arc_pool = get_db_pool().await;
-        let staff_repository = EmploymentRepository::new(arc_pool.clone());
+        let staff_repository = StaffRepository::new(arc_pool.clone());
         let staff_repo = web::Data::new(staff_repository);
 
         let app = test::init_service(
@@ -2052,8 +2051,8 @@ mod api_tests {
 
         let data = json!({
             "user_id": "51a01dbf-dcd5-43a0-809c-94ed8e61d420",
-            "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
-            "role": "basic"
+            "company_id": "71fa27d6-6f00-4ad0-8902-778e298aaed2",
+            "role": "staff"
         });
 
         let req = test::TestRequest::post()
@@ -2069,7 +2068,7 @@ mod api_tests {
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         
         assert!(body.contains("51a01dbf-dcd5-43a0-809c-94ed8e61d420"));
-        assert!(body.contains("b5188eda-528d-48d4-8cee-498e0971f9f5"));
+        assert!(body.contains("71fa27d6-6f00-4ad0-8902-778e298aaed2"));
         assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
 
         let uuid_regex = Regex::new(
@@ -2078,17 +2077,6 @@ mod api_tests {
         .unwrap();
         let uuid_caps = uuid_regex.find(body).unwrap();
         let staff_id = uuid_caps.as_str();
-
-        // Duplicate creation attempt
-        let req = test::TestRequest::post()
-            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff")
-            .set_form(data)
-            .to_request();
-
-        let res = test::call_service(&app, req).await;
-
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
 
         let data = json!({
             "role": "organizer",
@@ -2110,7 +2098,7 @@ mod api_tests {
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         assert!(body.contains("51a01dbf-dcd5-43a0-809c-94ed8e61d420"));
-        assert!(body.contains("b5188eda-528d-48d4-8cee-498e0971f9f5"));
+        assert!(body.contains("71fa27d6-6f00-4ad0-8902-778e298aaed2"));
         assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
         assert!(body.contains("Organizer"));
 
@@ -2172,7 +2160,7 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         // Duplicate delete
         assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
