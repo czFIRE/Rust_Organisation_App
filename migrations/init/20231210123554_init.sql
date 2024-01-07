@@ -1,17 +1,19 @@
 -- Enums
 
-CREATE TYPE role                    AS ENUM ('user', 'admin');
-CREATE TYPE status                  AS ENUM ('available', 'unavailable');
+--
+-- Keep these enum types ordered alphabetically.
+--
 CREATE TYPE acceptance_status       AS ENUM ('pending', 'accepted', 'rejected');
 CREATE TYPE approval_status         AS ENUM ('not_requested', 'pending',
                                              'accepted', 'rejected');
 CREATE TYPE association             AS ENUM ('sponsor', 'organizer', 'media', 'other');
-CREATE TYPE employment_contract     AS ENUM ('DPP', 'DPC', 'HPP');
+CREATE TYPE employment_contract     AS ENUM ('dpp', 'dpc', 'hpp');
 CREATE TYPE employee_level          AS ENUM ('basic', 'manager', 'company_administrator');
-CREATE TYPE employee_contract       AS ENUM ('dpp', 'dpc', 'hpp');
 CREATE TYPE event_role              AS ENUM ('staff', 'organizer');
 CREATE TYPE gender                  AS ENUM ('male', 'female', 'other');
 CREATE TYPE task_priority           AS ENUM ('low', 'medium', 'high');
+CREATE TYPE user_role               AS ENUM ('user', 'admin');
+CREATE TYPE user_status             AS ENUM ('available', 'unavailable');
 
 -- Tables
 
@@ -26,8 +28,8 @@ CREATE TABLE user_record
     birth       DATE NOT NULL,
     avatar_url  VARCHAR(255) DEFAULT 'img/default/user.jpg',
     gender      gender NOT NULL,
-    role        role NOT NULL DEFAULT 'user',
-    status      status NOT NULL DEFAULT 'available',
+    role        user_role NOT NULL DEFAULT 'user',
+    status      user_status NOT NULL DEFAULT 'available',
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
@@ -112,9 +114,9 @@ CREATE TABLE employment
     -------------------------------------------------------
     hourly_wage FLOAT NOT NULL,
     start_date  DATE NOT NULL,
-    end_date    DATE NOT NULL,
+    end_date    DATE,
     description TEXT,
-    type        employee_contract NOT NULL,
+    type        employment_contract NOT NULL,
     level       employee_level NOT NULL DEFAULT 'basic',
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
@@ -193,7 +195,7 @@ CREATE TABLE timesheet
     start_date   DATE NOT NULL,
     end_date     DATE NOT NULL,
     total_hours  REAL NOT NULL DEFAULT 0.0,
-    is_editable  BOOLEAN NOT NULL,
+    is_editable  BOOLEAN NOT NULL DEFAULT true,
     status       approval_status NOT NULL DEFAULT 'not_requested',
     manager_note TEXT,
     -------------------------------------------------------
@@ -201,15 +203,15 @@ CREATE TABLE timesheet
     edited_at    TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at   TIMESTAMP,
     --------------------------------------------------------
-	FOREIGN KEY (user_id, company_id)
-	    REFERENCES employment (user_id, company_id),
+    FOREIGN KEY (user_id, company_id)
+        REFERENCES employment (user_id, company_id),
     FOREIGN KEY  (event_id) REFERENCES event (id),
     --------------------------------------------------------
     CONSTRAINT check_timesheet_is_editable_iff_not_requested_or_rejected
         CHECK (NOT(is_editable IS TRUE AND status IN ('pending', 'accepted'))),
-    CONSTRAINT check_total_hours_lte_744
-        CHECK (total_hours <= 744.0),
-    -- max hours per month: 24.0 * 31.0 = 744.0
+    CONSTRAINT check_timesheet_total_hours_between_0_and_744
+        -- max hours per month: 24.0 * 31.0 = 744.0
+        CHECK (total_hours BETWEEN 0.0 AND 744.0),
     CONSTRAINT check_timesheet_start_date_lte_end_date
         CHECK (start_date <= end_date),
     CONSTRAINT check_timesheet_created_at_lte_edited_at
@@ -221,6 +223,7 @@ CREATE TABLE workday
 (   
     timesheet_id UUID NOT NULL,
     date         DATE NOT NULL,
+    --------------------------------------------------------
     total_hours  REAL NOT NULL DEFAULT 0.0,
     comment      TEXT,
     is_editable  BOOLEAN NOT NULL DEFAULT true,
@@ -232,9 +235,9 @@ CREATE TABLE workday
     PRIMARY KEY  (timesheet_id, date),
     FOREIGN KEY  (timesheet_id) REFERENCES timesheet (id),
     --------------------------------------------------------
-    CONSTRAINT check_total_hours_lte_24
-        CHECK (total_hours <= 24.0),
-    CONSTRAINT check_work_day_created_at_lte_edited_at
+    CONSTRAINT check_workday_total_hours_between_0_and_24
+        CHECK (total_hours BETWEEN 0.0 AND 24.0),
+    CONSTRAINT check_workday_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
 
@@ -245,6 +248,11 @@ CREATE TABLE event_staff
 (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     -------------------------------------------------------
+    user_id     UUID NOT NULL,
+    company_id  UUID NOT NULL,
+    event_id    UUID NOT NULL,
+    decided_by  UUID,
+    -------------------------------------------------------
     role        event_role NOT NULL DEFAULT 'staff',
     status      acceptance_status NOT NULL DEFAULT 'pending',
     -------------------------------------------------------
@@ -252,17 +260,10 @@ CREATE TABLE event_staff
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at  TIMESTAMP,
     -------------------------------------------------------
-    user_id     UUID NOT NULL,
-    company_id  UUID NOT NULL,
-    decided_by  UUID,
-    event_id    UUID NOT NULL,
-    -------------------------------------------------------
-    FOREIGN KEY (user_id) REFERENCES user_record (id),
-    FOREIGN KEY (company_id) REFERENCES company (id),
-	FOREIGN KEY (user_id, company_id)
-	    REFERENCES employment (user_id, company_id),
-    FOREIGN KEY (decided_by) REFERENCES event_staff (id),
+    FOREIGN KEY (user_id, company_id)
+        REFERENCES employment (user_id, company_id),
     FOREIGN KEY (event_id) REFERENCES event (id),
+    FOREIGN KEY (decided_by) REFERENCES event_staff (id),
     -------------------------------------------------------
     CONSTRAINT check_event_staff_decided_by_null_iff_pending
         CHECK (NOT(decided_by IS NULL AND status != 'pending')),
@@ -311,8 +312,7 @@ CREATE TABLE assigned_staff
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at  TIMESTAMP,
     -------------------------------------------------------
-    PRIMARY KEY (staff_id, task_id),
-    FOREIGN KEY (decided_by) REFERENCES event_staff (id),
+    PRIMARY KEY (task_id, staff_id),
     FOREIGN KEY (task_id) REFERENCES task (id),
     FOREIGN KEY (staff_id) REFERENCES event_staff (id),
     FOREIGN KEY (decided_by) REFERENCES event_staff (id),

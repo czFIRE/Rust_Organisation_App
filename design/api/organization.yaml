@@ -3623,7 +3623,7 @@ components:
         worked_hours:
           type: number
           example: 20
-        work_days:
+        workdays:
           type: array
           items:
             $ref: '#/components/schemas/WorkDay'
@@ -3661,7 +3661,7 @@ components:
     TimeSheetData:
       type: object
       properties:
-        work_days:
+        workdays:
           type: array
           items:
             $ref: '#/components/schemas/WorkDayData'

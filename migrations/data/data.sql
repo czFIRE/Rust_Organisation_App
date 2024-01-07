@@ -49,7 +49,7 @@ BEGIN
     INSERT INTO company
         (id, name, description,
         website, crn, vatin,
-        phone, email, avatar_path,
+        phone, email, avatar_url,
         created_at, edited_at)
         VALUES
         (company0_id, 'AMD', 'Advanced Micro Devices, Inc.',
@@ -60,7 +60,7 @@ BEGIN
     INSERT INTO company
         (id, name, description,
         website, crn, vatin,
-        phone, email, avatar_path,
+        phone, email, avatar_url,
         created_at, edited_at)
         VALUES
         (company1_id, 'ReportLab', 'ReportLab Europe Ltd.',
@@ -71,7 +71,7 @@ BEGIN
     INSERT INTO company
         (id, name, description,
         website, crn, vatin,
-        phone, email, avatar_path,
+        phone, email, avatar_url,
         created_at, edited_at)
         VALUES
         (company2_id, 'Prusa Research', 'Prusa Research a.s.',
@@ -106,7 +106,7 @@ BEGIN
 
     INSERT INTO user_record
         (id, name, email,
-        birth, avatar_path,
+        birth, avatar_url,
         gender, role, status,
         created_at, edited_at)
         VALUES
@@ -117,7 +117,7 @@ BEGIN
 
     INSERT INTO user_record
         (id, name, email,
-        birth, avatar_path,
+        birth, avatar_url,
         gender, role, status,
         created_at, edited_at)
         VALUES
@@ -128,7 +128,7 @@ BEGIN
 
     INSERT INTO user_record
         (id, name, email,
-        birth, avatar_path,
+        birth, avatar_url,
         gender, role, status,
         created_at, edited_at)
         VALUES
@@ -139,7 +139,7 @@ BEGIN
 
     INSERT INTO user_record
         (id, name, email,
-        birth, avatar_path,
+        birth, avatar_url,
         gender, role, status,
         created_at, edited_at)
         VALUES
@@ -150,7 +150,7 @@ BEGIN
 
     INSERT INTO user_record
         (id, name, email,
-        birth, avatar_path,
+        birth, avatar_url,
         gender, role, status,
         created_at, edited_at)
         VALUES
@@ -160,7 +160,7 @@ BEGIN
         '2023-12-31 09:33', '2024-01-01 12:33');
 
     INSERT INTO user_record
-        (id, name, email, birth, avatar_path,
+        (id, name, email, birth, avatar_url,
         gender, role, status,
         created_at, edited_at)
         VALUES
@@ -178,7 +178,7 @@ BEGIN
         VALUES
         (user0_id, company0_id, NULL, 300,
         '2023-01-01', '2025-01-01', '-',
-        'HPP', 'company_administrator',
+        'hpp', 'company_administrator',
         '2022-12-29 12:38', '2023-12-10 14:52');
 
     INSERT INTO employment
@@ -189,7 +189,7 @@ BEGIN
         VALUES
         (user1_id, company1_id, user0_id, 200,
         '2023-02-01', '2025-01-01', '-',
-        'DPC', 'manager',
+        'dpc', 'manager',
         '2023-12-30 15:00', '2023-12-30 15:00');
 
     INSERT INTO employment
@@ -200,7 +200,7 @@ BEGIN
         VALUES
         (user2_id, company1_id, NULL, 280,
         '2023-12-31', '2026-01-01', '-',
-        'DPP', 'manager',
+        'dpp', 'manager',
         '2023-12-28 14:30', '2023-12-28 14:30');
 
     INSERT INTO employment
@@ -211,7 +211,7 @@ BEGIN
         VALUES
         (user3_id, company2_id, NULL, 150,
         '2023-01-01', '2025-01-01', '-',
-        'DPP', 'basic',
+        'dpp', 'basic',
         '2022-12-29 12:38', '2023-12-10 14:52');
 
     INSERT INTO employment
@@ -222,7 +222,7 @@ BEGIN
         VALUES
         (user5_id, company1_id, NULL, 135,
         '2024-01-01', '2025-01-01', '-',
-        'DPC', 'basic',
+        'dpc', 'basic',
         '2023-12-30 11:38', '2023-12-31 14:52');
 
 --------------------------------------------------------------------------------
@@ -230,7 +230,7 @@ BEGIN
     INSERT INTO event
         (id, name, description,
         website, accepts_staff,
-        start_date, end_date, avatar_path,
+        start_date, end_date, avatar_url,
         created_at, edited_at)
         VALUES
         (event0_id, 'Woodstock', 'A legendary music festival.',
@@ -241,7 +241,7 @@ BEGIN
     INSERT INTO event
         (id, name, description,
         website, accepts_staff,
-        start_date, end_date, avatar_path,
+        start_date, end_date, avatar_url,
         created_at, edited_at)
         VALUES
         (event1_id, 'Darkness 2024', 'Norwegian festival for happy people.',
@@ -316,49 +316,49 @@ BEGIN
 
 --------------------------------------------------------------------------------
 
-    INSERT INTO work_day
+    INSERT INTO workday
         (timesheet_id, date, total_hours, comment, is_editable,
         created_at, edited_at)
         VALUES
         (timesheet0_id, '1969-08-15', 12, '', true,
         '1969-08-16 18:28', '1969-08-17 08:22');
 
-    INSERT INTO work_day
+    INSERT INTO workday
         (timesheet_id, date, total_hours, comment, is_editable,
         created_at, edited_at)
         VALUES
         (timesheet0_id, '1969-08-16', 10, '', true,
         '1969-08-17 20:00', '1969-08-17 20:00');
 
-    INSERT INTO work_day
+    INSERT INTO workday
         (timesheet_id, date, total_hours, comment, is_editable,
         created_at, edited_at)
         VALUES
         (timesheet1_id, '1969-08-14', 10, '', false,
         '1969-08-17 19:58', '1969-08-17 19:59');
 
-    INSERT INTO work_day
+    INSERT INTO workday
         (timesheet_id, date, total_hours, comment, is_editable,
         created_at, edited_at)
         VALUES
         (timesheet1_id, '1969-08-15', 4.5, 'I was overworked as a mule!', false,
         '1969-08-17 20:00', '1969-08-17 20:00');
 
-    INSERT INTO work_day
+    INSERT INTO workday
         (timesheet_id, date, total_hours, comment, is_editable,
         created_at, edited_at)
         VALUES
         (timesheet1_id, '1969-08-16', 9.5, '', false,
         '1969-08-17 20:40', '1969-08-17 21:00');
 
-    INSERT INTO work_day
+    INSERT INTO workday
         (timesheet_id, date, total_hours, comment, is_editable,
         created_at, edited_at)
         VALUES
         (timesheet2_id, '2024-01-01', 8, '', false,
         '2024-01-01 22:33', '2024-01-01 22:33');
 
-    INSERT INTO work_day
+    INSERT INTO workday
         (timesheet_id, date, total_hours, comment, is_editable,
         created_at, edited_at)
         VALUES

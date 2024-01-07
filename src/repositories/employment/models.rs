@@ -3,7 +3,7 @@ use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
 
 use crate::{
-    models::{EmployeeContract, EmployeeLevel, Gender, UserRole, UserStatus},
+    models::{EmploymentContract, EmployeeLevel, Gender, UserRole, UserStatus},
     repositories::{company::models::Company, user::models::User},
 };
 
@@ -16,7 +16,7 @@ pub struct NewEmployment {
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
     pub description: Option<String>,
-    pub employment_type: EmployeeContract,
+    pub employment_type: EmploymentContract,
     pub level: EmployeeLevel,
 }
 
@@ -29,7 +29,7 @@ pub struct Employment {
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
     pub description: Option<String>,
-    pub employment_type: EmployeeContract,
+    pub employment_type: EmploymentContract,
     pub level: EmployeeLevel,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
@@ -46,7 +46,7 @@ pub struct EmploymentExtended {
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
     pub description: Option<String>,
-    pub employment_type: EmployeeContract,
+    pub employment_type: EmploymentContract,
     pub level: EmployeeLevel,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
@@ -60,7 +60,7 @@ pub struct EmploymentData {
     pub start_date: Option<NaiveDate>,
     pub end_date: Option<NaiveDate>,
     pub description: Option<String>,
-    pub employment_type: Option<EmployeeContract>,
+    pub employment_type: Option<EmploymentContract>,
     pub level: Option<EmployeeLevel>,
 }
 
@@ -84,7 +84,7 @@ pub struct EmploymentUserCompanyFlattened {
     pub employment_start_date: NaiveDate,
     pub employment_end_date: NaiveDate,
     pub employment_description: Option<String>,
-    pub employment_type: EmployeeContract,
+    pub employment_type: EmploymentContract,
     pub employment_level: EmployeeLevel,
     pub employment_created_at: NaiveDateTime,
     pub employment_edited_at: NaiveDateTime,

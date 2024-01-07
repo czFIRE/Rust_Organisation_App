@@ -30,7 +30,7 @@ pub struct TimesheetTemplate {
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
     pub total_hours: u16,
-    pub work_days: Vec<WorkdayTemplate>,
+    pub workdays: Vec<WorkdayTemplate>,
     pub calculated_wage: Option<u128>, // Mind this field: It isn't in the DB and needs to be calculated. This is in CZK.
     pub is_editable: bool,
     pub status: ApprovalStatus,

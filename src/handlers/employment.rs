@@ -3,14 +3,14 @@ use chrono::Utc;
 use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::models::{EmployeeContract, EmployeeLevel};
+use crate::models::{EmploymentContract, EmployeeLevel};
 
 #[derive(Deserialize)]
 pub struct NewEmploymentData {
     user_id: Uuid,
     company_id: Uuid,
     manager_id: Uuid,
-    employment_type: EmployeeContract,
+    employment_type: EmploymentContract,
     hourly_rate: f64,
     employee_level: EmployeeLevel,
     description: Option<String>,
@@ -21,7 +21,7 @@ pub struct NewEmploymentData {
 #[derive(Deserialize)]
 pub struct EmploymentData {
     manager_id: Option<Uuid>,
-    employment_type: Option<EmployeeContract>,
+    employment_type: Option<EmploymentContract>,
     hourly_rate: Option<f64>,
     employee_level: Option<EmployeeLevel>,
     description: Option<String>,

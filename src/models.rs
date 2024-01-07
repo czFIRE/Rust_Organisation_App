@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, sqlx::Type, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
-#[sqlx(type_name = "role", rename_all = "lowercase")]
+#[sqlx(type_name = "user_role", rename_all = "lowercase")]
 pub enum UserRole {
     User,
     Admin,
@@ -73,8 +73,8 @@ pub enum EmployeeLevel {
 
 #[derive(Serialize, Deserialize, Debug, sqlx::Type, Clone, PartialEq)]
 #[serde(rename_all = "snake_case")]
-#[sqlx(type_name = "employee_contract", rename_all = "lowercase")]
-pub enum EmployeeContract {
+#[sqlx(type_name = "employment_contract", rename_all = "lowercase")]
+pub enum EmploymentContract {
     Dpp,
     Dpc,
     Hpp,
