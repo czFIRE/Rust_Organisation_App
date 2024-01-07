@@ -184,8 +184,26 @@ pub async fn update_associated_company(
 
 #[delete("/event/{event_id}/company/{company_id}")]
 pub async fn delete_associated_company(
-    _event_id: web::Path<String>,
-    _company_id: web::Path<String>,
+    event_id: web::Path<String>,
+    company_id: web::Path<String>,
+    associated_repo: web::Data<AssociatedCompanyRepository>,
 ) -> HttpResponse {
-    todo!()
+    let parsed_ids = extract_path_tuple_ids(path.into_inner());
+    if parsed_ids.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let (event_id, company_id) = parsed_ids.unwrap();
+    let result = associated_repo.delete(event_id, company_id).await;
+    if let Err(error) = result {
+        return match error {
+            sqlx::Error::RowNotFound => {
+                HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
+            }
+            _ => HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
+        };
+    }
+
+    HttpResponse::NoContent().finish()
 }
