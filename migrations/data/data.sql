@@ -286,7 +286,7 @@ BEGIN
         created_at, edited_at)
         VALUES
         (timesheet0_id, user2_id, company1_id, event1_id,
-        '1969-08-16', '1969-08-17', 22,
+        '1969-08-16', '1969-08-17', DEFAULT,
         true, 'not_requested', NULL,
         '1969-08-16 18:26', '1969-08-17 20:00');
 
@@ -297,7 +297,7 @@ BEGIN
         created_at, edited_at)
         VALUES
         (timesheet1_id, user1_id, company1_id, event0_id,
-        '1969-08-14', '1969-08-17', 24,
+        '1969-08-14', '1969-08-17', DEFAULT,
         false, 'accepted', 'Everything seems all righty. Good job.',
         '2023-05-05 10:39', '2023-05-09 13:39');
 
@@ -308,7 +308,7 @@ BEGIN
         created_at, edited_at)
         VALUES
         (timesheet2_id, user3_id, company2_id, event1_id,
-        '2024-01-01', '2024-01-02', 15,
+        '2024-01-01', '2024-01-02', DEFAULT,
         false, 'pending', NULL,
         '2024-01-03 18:26', '2024-01-03 18:29');
 
