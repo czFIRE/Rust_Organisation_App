@@ -2421,7 +2421,7 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        
+
         assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
     }
 

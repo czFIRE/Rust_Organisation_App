@@ -4,7 +4,10 @@ use serde::Deserialize;
 use sqlx::types::uuid;
 use uuid::Uuid;
 
-use crate::{models::TaskPriority, repositories::{task::models::TaskExtended, user::models::UserLite}};
+use crate::{
+    models::TaskPriority,
+    repositories::{task::models::TaskExtended, user::models::UserLite},
+};
 
 use super::user::UserLiteTemplate;
 
@@ -26,14 +29,18 @@ pub struct TaskTemplate {
 impl From<TaskExtended> for TaskTemplate {
     fn from(task: TaskExtended) -> Self {
         let creator_lite: UserLite = task.creator.into();
-        let creator = creator_lite.into() ;
+        let creator = creator_lite.into();
 
         TaskTemplate {
             id: task.task_id,
             event_id: task.event_id,
             creator,
             title: task.title,
-            description: if task.description.is_some() { task.description.unwrap() } else { "No description.".to_string() },
+            description: if task.description.is_some() {
+                task.description.unwrap()
+            } else {
+                "No description.".to_string()
+            },
             finished_at: task.finished_at,
             priority: task.priority,
             accepts_staff: task.accepts_staff,

@@ -4,7 +4,10 @@ use serde::Deserialize;
 use sqlx::types::uuid;
 use uuid::Uuid;
 
-use crate::{models::{Gender, UserRole, UserStatus}, repositories::user::models::{User, UserLite}};
+use crate::{
+    models::{Gender, UserRole, UserStatus},
+    repositories::user::models::{User, UserLite},
+};
 
 #[derive(Template, Deserialize)]
 #[template(path = "user/user.html")]
@@ -56,12 +59,12 @@ impl From<UserLite> for UserLiteTemplate {
             name: value.name,
             status: value.status,
             age: chrono::offset::Local::now()
-                 .naive_local()
-                 .date()
-                 .years_since(value.birth)
-                 .expect("Should be valid"),
+                .naive_local()
+                .date()
+                .years_since(value.birth)
+                .expect("Should be valid"),
             gender: value.gender,
-            avatar_url: value.avatar_url
+            avatar_url: value.avatar_url,
         }
     }
 }

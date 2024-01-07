@@ -1,7 +1,7 @@
 use crate::{common::DbResult, repositories::task::models::TaskUserFlattened};
 use async_trait::async_trait;
-use sqlx::{postgres::PgPool, Transaction, Postgres};
-use std::{sync::Arc, ops::DerefMut};
+use sqlx::{postgres::PgPool, Postgres, Transaction};
+use std::{ops::DerefMut, sync::Arc};
 use uuid::Uuid;
 
 use super::models::{NewTask, Task, TaskData, TaskExtended, TaskFilter};
@@ -106,7 +106,11 @@ impl TaskRepository {
         Ok(task_user_flattened.into())
     }
 
-    async fn read_one_tx(&self, task_id: Uuid, mut tx: Transaction<'_, Postgres>) -> DbResult<TaskExtended> {
+    async fn read_one_tx(
+        &self,
+        task_id: Uuid,
+        mut tx: Transaction<'_, Postgres>,
+    ) -> DbResult<TaskExtended> {
         let task_user_flattened: TaskUserFlattened = sqlx::query_as!(
             TaskUserFlattened,
             r#"SELECT 
@@ -242,10 +246,11 @@ impl TaskRepository {
             && data.title.is_none()
         {
             // TODO - add better error
-            return Err(sqlx::Error::TypeNotFound { type_name: "User Error".to_string() });
+            return Err(sqlx::Error::TypeNotFound {
+                type_name: "User Error".to_string(),
+            });
         }
 
-        
         let mut tx = self.pool.begin().await?;
 
         let task_res: Option<Task> = sqlx::query_as!(
@@ -288,7 +293,9 @@ impl TaskRepository {
             return Err(sqlx::Error::RowNotFound);
         }
 
-        let task = self.read_one_tx(task_res.expect("Should be some.").id, tx).await?;
+        let task = self
+            .read_one_tx(task_res.expect("Should be some.").id, tx)
+            .await?;
 
         Ok(task)
     }
