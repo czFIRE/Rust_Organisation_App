@@ -4,9 +4,7 @@ use uuid::Uuid;
 
 use crate::{
     models::{AcceptanceStatus, EventRole, Gender, UserRole, UserStatus},
-    repositories::{
-        company::models::Company, event_staff::models::StaffLite, user::models::User,
-    },
+    repositories::{company::models::Company, event_staff::models::StaffLite, user::models::User},
 };
 
 #[derive(Debug, Clone)]

@@ -1,7 +1,7 @@
 use chrono::NaiveDate;
+use serde::Deserialize;
 use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
-use serde::Deserialize;
 
 use crate::{
     models::Association,
@@ -34,7 +34,7 @@ pub struct AssociatedCompanyData {
 }
 
 #[derive(Debug, Clone)]
-pub struct AssociatedCompanyExtented {
+pub struct AssociatedCompanyExtended {
     pub company: Company,
     pub event: Event,
     pub association_type: Association,
@@ -82,7 +82,7 @@ pub struct AssociatedCompanyFilter {
     pub offset: Option<i64>,
 }
 
-impl From<AssociatedCompanyFlattened> for AssociatedCompanyExtented {
+impl From<AssociatedCompanyFlattened> for AssociatedCompanyExtended {
     fn from(value: AssociatedCompanyFlattened) -> Self {
         let company = Company {
             id: value.company_id,

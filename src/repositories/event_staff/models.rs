@@ -1,11 +1,14 @@
 use chrono::{NaiveDate, NaiveDateTime};
+use serde::Deserialize;
 use sqlx::FromRow;
 use uuid::Uuid;
-use serde::Deserialize;
 
 use crate::{
     models::{AcceptanceStatus, EventRole, Gender, UserRole, UserStatus},
-    repositories::{company::models::Company, user::models::{User, UserLite}},
+    repositories::{
+        company::models::Company,
+        user::models::{User, UserLite},
+    },
 };
 
 #[derive(Debug, Deserialize, Clone)]
@@ -64,7 +67,6 @@ pub struct StaffFilter {
     pub limit: Option<i64>,
     pub offset: Option<i64>,
 }
-
 
 #[derive(Debug, FromRow, Clone)]
 pub struct StaffInfo {

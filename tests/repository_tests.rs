@@ -128,7 +128,10 @@ pub mod user_repo_tests {
         let mut user_repo = UserRepository::new(arc_pool);
 
         {
-            let users = user_repo._read_all().await.expect("Read all should succeed");
+            let users = user_repo
+                ._read_all()
+                .await
+                .expect("Read all should succeed");
 
             assert_eq!(users.len(), 3);
 

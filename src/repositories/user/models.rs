@@ -40,7 +40,7 @@ pub struct UserLite {
     pub status: UserStatus,
     pub birth: NaiveDate,
     pub gender: Gender,
-    pub avatar_url: String
+    pub avatar_url: String,
 }
 
 #[derive(Debug, FromRow, Deserialize, Clone)]

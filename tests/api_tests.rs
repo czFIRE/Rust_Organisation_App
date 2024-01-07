@@ -1988,8 +1988,8 @@ mod api_tests {
         .await;
 
         let req = test::TestRequest::get()
-                    .uri("/event/staff/9281b570-4d02-4096-9136-338a613c71cd")
-                    .to_request();
+            .uri("/event/staff/9281b570-4d02-4096-9136-338a613c71cd")
+            .to_request();
         let res = test::call_service(&app, req).await;
 
         assert!(res.status().is_success());
@@ -1997,7 +1997,7 @@ mod api_tests {
 
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        
+
         assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
         assert!(body.contains("9281b570-4d02-4096-9136-338a613c71cd"));
     }
@@ -2016,8 +2016,8 @@ mod api_tests {
         .await;
 
         let req = test::TestRequest::get()
-                    .uri("/event/staff/918ab570-adb3-4c9d-9136-338a613c71cd")
-                    .to_request();
+            .uri("/event/staff/918ab570-adb3-4c9d-9136-338a613c71cd")
+            .to_request();
         let res = test::call_service(&app, req).await;
 
         // Staff does not exist
@@ -2025,8 +2025,8 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
 
         let req = test::TestRequest::get()
-                    .uri("/event/staff/9zzzzz0-adb3-4czz36-338az3c71cd")
-                    .to_request();
+            .uri("/event/staff/9zzzzz0-adb3-4czz36-338az3c71cd")
+            .to_request();
         let res = test::call_service(&app, req).await;
 
         // Invalid UUID format.
@@ -2066,7 +2066,7 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::CREATED);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        
+
         assert!(body.contains("51a01dbf-dcd5-43a0-809c-94ed8e61d420"));
         assert!(body.contains("71fa27d6-6f00-4ad0-8902-778e298aaed2"));
         assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
@@ -2083,13 +2083,7 @@ mod api_tests {
         });
 
         let req = test::TestRequest::patch()
-            .uri(
-                format!(
-                    "/event-staff/{}",
-                    staff_id.to_string()
-                )
-                .as_str(),
-            )
+            .uri(format!("/event-staff/{}", staff_id.to_string()).as_str())
             .set_form(data)
             .to_request();
         let res = test::call_service(&app, req).await;
@@ -2104,58 +2098,33 @@ mod api_tests {
 
         // No data.
         let req = test::TestRequest::patch()
-        .uri(
-            format!(
-                "/event-staff/{}",
-                staff_id.to_string()
-            )
-            .as_str(),
-        )
-        .set_form(json!({}))
-        .to_request();
+            .uri(format!("/event-staff/{}", staff_id.to_string()).as_str())
+            .set_form(json!({}))
+            .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
 
         // Trying to set status without providing decided_by.
         let req = test::TestRequest::patch()
-        .uri(
-            format!(
-                "/event-staff/{}",
-                staff_id.to_string()
-            )
-            .as_str(),
-        )
-        .set_form(json!({
-            "status": "accepted"
-        }))
-        .to_request();
+            .uri(format!("/event-staff/{}", staff_id.to_string()).as_str())
+            .set_form(json!({
+                "status": "accepted"
+            }))
+            .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
 
-
         let req = test::TestRequest::delete()
-            .uri(
-                format!(
-                    "/event-staff/{}",
-                    staff_id.to_string()
-                )
-                .as_str(),
-            )
+            .uri(format!("/event-staff/{}", staff_id.to_string()).as_str())
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
 
         let req = test::TestRequest::delete()
-            .uri(
-                format!(
-                    "/event-staff/{}",
-                    staff_id.to_string()
-                )
-                .as_str(),
-            )
+            .uri(format!("/event-staff/{}", staff_id.to_string()).as_str())
             .to_request();
         let res = test::call_service(&app, req).await;
         // Duplicate delete

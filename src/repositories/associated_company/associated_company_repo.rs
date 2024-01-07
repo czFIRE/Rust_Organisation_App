@@ -1,11 +1,11 @@
 use crate::common::DbResult;
 use async_trait::async_trait;
-use sqlx::postgres::PgPool;
-use std::sync::Arc;
+use sqlx::{postgres::PgPool, Postgres, Transaction};
+use std::{ops::DerefMut, sync::Arc};
 use uuid::Uuid;
 
 use super::models::{
-    AssociatedCompany, AssociatedCompanyData, AssociatedCompanyExtented, AssociatedCompanyFilter,
+    AssociatedCompany, AssociatedCompanyData, AssociatedCompanyExtended, AssociatedCompanyFilter,
     AssociatedCompanyFlattened, NewAssociatedCompany,
 };
 
@@ -31,10 +31,11 @@ impl crate::repositories::repository::DbRepository for AssociatedCompanyReposito
 }
 
 impl AssociatedCompanyRepository {
-    pub async fn create(&self, data: NewAssociatedCompany) -> DbResult<AssociatedCompany> {
-        let executor = self.pool.as_ref();
+    pub async fn create(&self, data: NewAssociatedCompany) -> DbResult<AssociatedCompanyExtended> {
+        // let executor = self.pool.as_ref();
+        let mut tx = self.pool.begin().await?;
 
-        let new_associated_company: AssociatedCompany = sqlx::query_as!(
+        let associated_company: AssociatedCompany = sqlx::query_as!(
             AssociatedCompany,
             r#" INSERT INTO associated_company (
                 company_id, event_id, type
@@ -52,8 +53,16 @@ impl AssociatedCompanyRepository {
             data.event_id,
             data.association_type as Association,
         )
-        .fetch_one(executor)
+        .fetch_one(tx.deref_mut())
         .await?;
+
+        let new_associated_company = self
+            .read_one_tx(
+                associated_company.company_id,
+                associated_company.event_id,
+                tx,
+            )
+            .await?;
 
         Ok(new_associated_company)
     }
@@ -62,7 +71,7 @@ impl AssociatedCompanyRepository {
         &self,
         company_id: Uuid,
         event_id: Uuid,
-    ) -> DbResult<AssociatedCompanyExtented> {
+    ) -> DbResult<AssociatedCompanyExtended> {
         // TODO REDIS here
         self.read_one_db(company_id, event_id).await
     }
@@ -71,7 +80,7 @@ impl AssociatedCompanyRepository {
         &self,
         company_id: Uuid,
         event_id: Uuid,
-    ) -> DbResult<AssociatedCompanyExtented> {
+    ) -> DbResult<AssociatedCompanyExtended> {
         let executor = self.pool.as_ref();
 
         let associated_company: AssociatedCompanyFlattened = sqlx::query_as!(
@@ -118,10 +127,62 @@ impl AssociatedCompanyRepository {
         Ok(associated_company.into())
     }
 
+    pub async fn read_one_tx(
+        &self,
+        company_id: Uuid,
+        event_id: Uuid,
+        mut tx: Transaction<'_, Postgres>,
+    ) -> DbResult<AssociatedCompanyExtended> {
+        let associated_company: AssociatedCompanyFlattened = sqlx::query_as!(
+            AssociatedCompanyFlattened,
+            r#" SELECT 
+                company.id as "company_id!", 
+                company.name as "company_name!", 
+                company.description as "company_description", 
+                company.phone as "company_phone!", 
+                company.email as "company_email!", 
+                company.avatar_url as "company_avatar_url", 
+                company.website as "company_website", 
+                company.crn as "company_crn!", 
+                company.vatin as "company_vatin!", 
+                company.created_at as "company_created_at!", 
+                company.edited_at as "company_edited_at!", 
+                company.deleted_at as "company_deleted_at", 
+                event.id as "event_id!", 
+                event.name as "event_name!", 
+                event.description as "event_description", 
+                event.website as "event_website", 
+                event.accepts_staff as "event_accepts_staff!", 
+                event.start_date as "event_start_date!", 
+                event.end_date as "event_end_date!", 
+                event.avatar_url as "event_avatar_url", 
+                event.created_at as "event_created_at!", 
+                event.edited_at as "event_edited_at!", 
+                event.deleted_at as "event_deleted_at", 
+                associated_company.type as "association_type!: Association", 
+                associated_company.created_at as "created_at!", 
+                associated_company.edited_at as "edited_at!", 
+                associated_company.deleted_at as "deleted_at" 
+            FROM associated_company 
+            INNER JOIN company ON associated_company.company_id = company.id 
+            INNER JOIN event ON associated_company.event_id = event.id 
+            WHERE associated_company.company_id = $1 AND associated_company.event_id = $2;
+            "#,
+            company_id,
+            event_id,
+        )
+        .fetch_one(tx.deref_mut())
+        .await?;
+
+        tx.commit().await?;
+
+        Ok(associated_company.into())
+    }
+
     pub async fn read_all(
         &self,
         filter: AssociatedCompanyFilter,
-    ) -> DbResult<Vec<AssociatedCompanyExtented>> {
+    ) -> DbResult<Vec<AssociatedCompanyExtended>> {
         // TODO REDIS here
         self.read_all_db(filter).await
     }
@@ -129,7 +190,7 @@ impl AssociatedCompanyRepository {
     pub async fn read_all_db(
         &self,
         filter: AssociatedCompanyFilter,
-    ) -> DbResult<Vec<AssociatedCompanyExtented>> {
+    ) -> DbResult<Vec<AssociatedCompanyExtended>> {
         let executor = self.pool.as_ref();
 
         let associated_companies: Vec<AssociatedCompanyFlattened> = sqlx::query_as!(
@@ -183,7 +244,7 @@ impl AssociatedCompanyRepository {
         &self,
         event_id: Uuid,
         filter: AssociatedCompanyFilter,
-    ) -> DbResult<Vec<AssociatedCompanyExtented>> {
+    ) -> DbResult<Vec<AssociatedCompanyExtended>> {
         // TODO REDIS here
         self.read_all_companies_for_event_db(event_id, filter).await
     }
@@ -192,7 +253,7 @@ impl AssociatedCompanyRepository {
         &self,
         event_id: Uuid,
         filter: AssociatedCompanyFilter,
-    ) -> DbResult<Vec<AssociatedCompanyExtented>> {
+    ) -> DbResult<Vec<AssociatedCompanyExtended>> {
         let executor = self.pool.as_ref();
 
         let associated_companies: Vec<AssociatedCompanyFlattened> = sqlx::query_as!(
@@ -248,7 +309,7 @@ impl AssociatedCompanyRepository {
         &self,
         company_id: Uuid,
         filter: AssociatedCompanyFilter,
-    ) -> DbResult<Vec<AssociatedCompanyExtented>> {
+    ) -> DbResult<Vec<AssociatedCompanyExtended>> {
         // TODO REDIS here
         self.read_all_events_for_company_db(company_id, filter)
             .await
@@ -258,7 +319,7 @@ impl AssociatedCompanyRepository {
         &self,
         company_id: Uuid,
         filter: AssociatedCompanyFilter,
-    ) -> DbResult<Vec<AssociatedCompanyExtented>> {
+    ) -> DbResult<Vec<AssociatedCompanyExtended>> {
         let executor = self.pool.as_ref();
 
         let associated_companies: Vec<AssociatedCompanyFlattened> = sqlx::query_as!(

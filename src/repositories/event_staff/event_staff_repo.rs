@@ -1,14 +1,12 @@
 use crate::common::DbResult;
 use async_trait::async_trait;
 use sqlx::{postgres::PgPool, Postgres, Transaction};
-use std::{sync::Arc, ops::DerefMut};
+use std::{ops::DerefMut, sync::Arc};
 use uuid::Uuid;
 
 use crate::repositories::event_staff::models::StaffInfo;
 
-use super::models::{
-    NewStaff, StaffData, StaffExtended, StaffFilter, StaffUserCompanyFlattened,
-};
+use super::models::{NewStaff, StaffData, StaffExtended, StaffFilter, StaffUserCompanyFlattened};
 
 use crate::models::{AcceptanceStatus, EventRole, Gender, UserRole, UserStatus};
 
@@ -126,7 +124,11 @@ impl StaffRepository {
         Ok(staff.into())
     }
 
-    async fn read_one_tx(&self, event_staff_id: Uuid, mut tx: Transaction<'_, Postgres>) -> DbResult<StaffExtended> {
+    async fn read_one_tx(
+        &self,
+        event_staff_id: Uuid,
+        mut tx: Transaction<'_, Postgres>,
+    ) -> DbResult<StaffExtended> {
         let staff: StaffUserCompanyFlattened = sqlx::query_as!(
             StaffUserCompanyFlattened,
             r#"
@@ -266,7 +268,9 @@ impl StaffRepository {
     pub async fn update(&self, event_staff_id: Uuid, data: StaffData) -> DbResult<StaffExtended> {
         if data.role.is_none() && data.status.is_none() {
             // TODO - better error
-            return Err(sqlx::Error::TypeNotFound { type_name: "User Error".to_string() });
+            return Err(sqlx::Error::TypeNotFound {
+                type_name: "User Error".to_string(),
+            });
         }
 
         let mut tx = self.pool.begin().await?;
