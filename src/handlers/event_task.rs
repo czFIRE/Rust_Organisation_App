@@ -54,12 +54,43 @@ pub async fn get_event_tasks(event_id: web::Path<String>, query: web::Query<Task
     HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
 }
 
-#[get("/event/{event_id}/task/{task_id}")]
+#[get("/event/task/{task_id}")]
 pub async fn get_event_task(
-    _event_id: web::Path<String>,
-    _task_id: web::Path<String>,
+    task_id: web::Path<String>,
+    task_repo: web::Data<TaskRepository>,
 ) -> HttpResponse {
-    todo!()
+    let id_parse = Uuid::from_str(task_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+    let parsed_id = id_parse.expect("Should be valid.");
+
+    let result = task_repo.read_one(parsed_id).await;
+    if let Ok(task) = result {
+        let template: TaskTemplate = task.into();
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+        return HttpResponse::Ok().content_type("text/html").body(body.expect("Should be valid now."));
+    }
+    
+    let error = result.err().expect("Should be error.");
+    match error {
+        sqlx::Error::RowNotFound => {
+            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
+        }
+        sqlx::Error::Database(err) => {
+            if err.is_check_violation() || err.is_foreign_key_violation() {
+                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
+            } else {
+                HttpResponse::InternalServerError()
+                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
+            }
+        }
+        _ => HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
+    }
 }
 
 #[post("/event/{event_id}/task")]
