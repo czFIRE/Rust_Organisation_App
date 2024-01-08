@@ -1735,7 +1735,6 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::CREATED);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        println!("{}", body);
         assert!(body.contains("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c"));
         assert!(body.contains("b5188eda-528d-48d4-8cee-498e0971f9f5"));
         assert!(body.contains("HPP"));
@@ -1963,9 +1962,14 @@ mod api_tests {
         let staff_repository = StaffRepository::new(arc_pool.clone());
         let staff_repo = web::Data::new(staff_repository);
 
+        let timesheet_repo = web::Data::new(TimesheetRepository::new(arc_pool.clone()));
+        let event_repo = web::Data::new(EventRepository::new(arc_pool.clone()));
+
         let app = test::init_service(
             App::new()
                 .app_data(staff_repo.clone())
+                .app_data(timesheet_repo.clone())
+                .app_data(event_repo.clone())
                 .service(create_event_staff)
                 .service(update_event_staff)
                 .service(delete_event_staff),
@@ -2001,12 +2005,104 @@ mod api_tests {
         let uuid_caps = uuid_regex.find(body).unwrap();
         let staff_id = uuid_caps.as_str();
 
+        // No data.
+        let req = test::TestRequest::patch()
+            .uri(
+                format!(
+                    "/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff/{}",
+                    staff_id.to_string()
+                )
+                .as_str(),
+            )
+            .set_form(json!({}))
+            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+
+        // Trying to set status without providing decided_by.
+        let req = test::TestRequest::patch()
+            .uri(
+                format!(
+                    "/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff/{}",
+                    staff_id.to_string()
+                )
+                .as_str(),
+            )
+            .set_form(json!({
+                "status": "accepted"
+            }))
+            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+
+        // Decider is not an organizer of the event.
+        let req = test::TestRequest::patch()
+            .uri(
+                format!(
+                    "/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff/{}",
+                    staff_id.to_string()
+                )
+                .as_str(),
+            )
+            .set_form(json!({
+                "status": "accepted",
+                "decided_by": staff_id.to_string(),
+            }))
+            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+
+        // Decider is an organizer, but not for this event.
+        let req = test::TestRequest::patch()
+            .uri(
+                format!(
+                    "/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff/{}",
+                    staff_id.to_string()
+                )
+                .as_str(),
+            )
+            .set_form(json!({
+                "status": "accepted",
+                "decided_by": "aa7f3d0e-ab48-473b-ac69-b84cb74f34f7",
+            }))
+            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+
+        // Setting status to accepted with valid decider.
+        let req = test::TestRequest::patch()
+            .uri(
+                format!(
+                    "/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff/{}",
+                    staff_id.to_string()
+                )
+                .as_str(),
+            )
+            .set_form(json!({
+                "status": "accepted",
+                "decided_by": "9281b570-4d02-4096-9136-338a613c71cd"
+            }))
+            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+
         let data = json!({
             "role": "organizer",
         });
 
         let req = test::TestRequest::patch()
-            .uri(format!("/event/staff/{}", staff_id.to_string()).as_str())
+            .uri(
+                format!(
+                    "/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff/{}",
+                    staff_id.to_string()
+                )
+                .as_str(),
+            )
             .set_form(data)
             .to_request();
         let res = test::call_service(&app, req).await;
@@ -2018,26 +2114,6 @@ mod api_tests {
         assert!(body.contains("71fa27d6-6f00-4ad0-8902-778e298aaed2"));
         assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
         assert!(body.contains("Organizer"));
-
-        // No data.
-        let req = test::TestRequest::patch()
-            .uri(format!("/event/staff/{}", staff_id.to_string()).as_str())
-            .set_form(json!({}))
-            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
-
-        // Trying to set status without providing decided_by.
-        let req = test::TestRequest::patch()
-            .uri(format!("/event/staff/{}", staff_id.to_string()).as_str())
-            .set_form(json!({
-                "status": "accepted"
-            }))
-            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
 
         let req = test::TestRequest::delete()
             .uri(format!("/event/staff/{}", staff_id.to_string()).as_str())

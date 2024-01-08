@@ -70,8 +70,6 @@ pub async fn create_user(
 
         let unwrapped_body = body.unwrap();
 
-        println!("{}", unwrapped_body);
-
         return HttpResponse::Created()
             .content_type("text/html")
             .body(unwrapped_body);
