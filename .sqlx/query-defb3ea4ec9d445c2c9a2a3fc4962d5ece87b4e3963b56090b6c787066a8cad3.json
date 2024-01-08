@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": " INSERT INTO employment (\n                    user_id, company_id, manager_id, hourly_wage, \n                    start_date, end_date, description, \n                    type, level\n                ) \n                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) \n                RETURNING user_id, \n                    company_id, \n                    manager_id, \n                    hourly_wage, \n                    start_date, \n                    end_date, \n                    description, \n                    type AS \"employment_type!: EmployeeContract\", \n                    level AS \"level!: EmployeeLevel\", \n                    created_at, \n                    edited_at, \n                    deleted_at;",
+  "query": " INSERT INTO employment (\n                    user_id, company_id, manager_id, hourly_wage, \n                    start_date, end_date, description, \n                    type, level\n                ) \n                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) \n                RETURNING user_id, \n                    company_id, \n                    manager_id, \n                    hourly_wage, \n                    start_date, \n                    end_date, \n                    description, \n                    type AS \"employment_type!: EmploymentContract\", \n                    level AS \"level!: EmployeeLevel\", \n                    created_at, \n                    edited_at, \n                    deleted_at;",
   "describe": {
     "columns": [
       {
@@ -40,7 +40,7 @@
       },
       {
         "ordinal": 7,
-        "name": "employment_type!: EmployeeContract",
+        "name": "employment_type!: EmploymentContract",
         "type_info": {
           "Custom": {
             "name": "employee_contract",
@@ -136,5 +136,5 @@
       true
     ]
   },
-  "hash": "5dea543140a1bf95313b93ddac8667d460ac626258326e7b4b6b6541fa12557a"
+  "hash": "defb3ea4ec9d445c2c9a2a3fc4962d5ece87b4e3963b56090b6c787066a8cad3"
 }

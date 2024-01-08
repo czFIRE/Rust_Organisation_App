@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            SELECT \n                employment.user_id AS employment_user_id, \n                employment.company_id AS employment_company_id, \n                employment.manager_id AS employment_manager_id, \n                employment.hourly_wage AS employment_hourly_wage, \n                employment.start_date AS employment_start_date, \n                employment.end_date AS employment_end_date, \n                employment.description AS employment_description, \n                employment.type AS \"employment_type!: EmployeeContract\", \n                employment.level AS \"employment_level!: EmployeeLevel\", \n                employment.created_at AS employment_created_at, \n                employment.edited_at AS employment_edited_at, \n                employment.deleted_at AS employment_deleted_at, \n                user_record.id AS \"manager_id?\", \n                user_record.name AS \"manager_name?\", \n                user_record.email AS \"manager_email?\", \n                user_record.birth AS \"manager_birth?\", \n                user_record.avatar_url AS \"manager_avatar_url?\", \n                user_record.gender AS \"manager_gender?: Gender\", \n                user_record.role AS \"manager_role?: UserRole\", \n                user_record.status AS \"manager_status?: UserStatus\", \n                user_record.created_at AS \"manager_created_at?\", \n                user_record.edited_at AS \"manager_edited_at?\", \n                user_record.deleted_at AS \"manager_deleted_at?\", \n                company.id AS company_id, \n                company.name AS company_name, \n                company.description AS company_description, \n                company.phone AS company_phone, \n                company.email AS company_email, \n                company.avatar_url AS company_avatar_url, \n                company.website AS company_website, \n                company.crn AS company_crn, \n                company.vatin AS company_vatin, \n                company.created_at AS company_created_at, \n                company.edited_at AS company_edited_at, \n                company.deleted_at AS company_deleted_at \n            FROM \n                employment \n                INNER JOIN company ON employment.company_id = company.id \n                LEFT OUTER JOIN user_record ON employment.manager_id = user_record.id \n            WHERE \n                employment.user_id = $1 \n                AND employment.company_id = $2          \n            ",
+  "query": "\n            SELECT \n                employment.user_id AS employment_user_id, \n                employment.company_id AS employment_company_id, \n                employment.manager_id AS employment_manager_id, \n                employment.hourly_wage AS employment_hourly_wage, \n                employment.start_date AS employment_start_date, \n                employment.end_date AS employment_end_date, \n                employment.description AS employment_description, \n                employment.type AS \"employment_type!: EmploymentContract\", \n                employment.level AS \"employment_level!: EmployeeLevel\", \n                employment.created_at AS employment_created_at, \n                employment.edited_at AS employment_edited_at, \n                employment.deleted_at AS employment_deleted_at, \n                user_record.id AS \"manager_id?\", \n                user_record.name AS \"manager_name?\", \n                user_record.email AS \"manager_email?\", \n                user_record.birth AS \"manager_birth?\", \n                user_record.avatar_url AS \"manager_avatar_url?\", \n                user_record.gender AS \"manager_gender?: Gender\", \n                user_record.role AS \"manager_role?: UserRole\", \n                user_record.status AS \"manager_status?: UserStatus\", \n                user_record.created_at AS \"manager_created_at?\", \n                user_record.edited_at AS \"manager_edited_at?\", \n                user_record.deleted_at AS \"manager_deleted_at?\",\n                company.id AS company_id, \n                company.name AS company_name, \n                company.description AS company_description, \n                company.phone AS company_phone, \n                company.email AS company_email, \n                company.avatar_url AS company_avatar_url, \n                company.website AS company_website, \n                company.crn AS company_crn, \n                company.vatin AS company_vatin, \n                company.created_at AS company_created_at, \n                company.edited_at AS company_edited_at, \n                company.deleted_at AS company_deleted_at \n            FROM \n                employment \n                INNER JOIN company ON employment.company_id = company.id \n                LEFT OUTER JOIN user_record ON employment.manager_id = user_record.id \n            WHERE \n                employment.manager_id = $1 \n            LIMIT $2 OFFSET $3          \n            ",
   "describe": {
     "columns": [
       {
@@ -40,7 +40,7 @@
       },
       {
         "ordinal": 7,
-        "name": "employment_type!: EmployeeContract",
+        "name": "employment_type!: EmploymentContract",
         "type_info": {
           "Custom": {
             "name": "employee_contract",
@@ -235,7 +235,8 @@
     "parameters": {
       "Left": [
         "Uuid",
-        "Uuid"
+        "Int8",
+        "Int8"
       ]
     },
     "nullable": [
@@ -255,19 +256,19 @@
       false,
       false,
       false,
-      true,
       false,
-      false,
-      false,
-      false,
-      false,
-      true,
       false,
       false,
       false,
       false,
       false,
       true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
       true,
       false,
       false,
@@ -276,5 +277,5 @@
       true
     ]
   },
-  "hash": "6f328c7c1d657c9c3ed5e05cd5e8b2ef11d0c0eddb281223b2bce75f8d0a8fb0"
+  "hash": "91acb88862797853c37e5e3d9c1f209ab8e107945d668e1c413d1ed7933e8b5f"
 }
