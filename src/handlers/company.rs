@@ -93,7 +93,14 @@ pub async fn get_all_companies(
         return HttpResponse::Ok().body(body.expect("Should be okay now."));
     }
 
-    HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
+    let error = result.err().expect("Should be an error");
+    match error {
+        sqlx::Error::RowNotFound => {
+            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
+        }
+        _ => HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
+    }
 }
 
 #[get("/company/{company_id}")]

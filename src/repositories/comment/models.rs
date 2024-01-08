@@ -1,6 +1,7 @@
 use chrono::NaiveDate;
 use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
+use serde::Deserialize;
 
 use crate::{
     models::{Gender, UserRole, UserStatus},
@@ -44,7 +45,7 @@ pub struct CommentData {
     pub content: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct CommentFilter {
     pub limit: Option<i64>,
     pub offset: Option<i64>,
