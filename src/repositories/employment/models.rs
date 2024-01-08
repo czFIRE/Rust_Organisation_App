@@ -3,7 +3,7 @@ use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
 
 use crate::{
-    models::{EmploymentContract, EmployeeLevel, Gender, UserRole, UserStatus},
+    models::{EmployeeLevel, EmploymentContract, Gender, UserRole, UserStatus},
     repositories::{company::models::Company, user::models::User},
 };
 

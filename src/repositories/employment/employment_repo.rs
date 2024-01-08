@@ -9,7 +9,7 @@ use super::models::{
     EmploymentUserCompanyFlattened, NewEmployment,
 };
 
-use crate::models::{EmploymentContract, EmployeeLevel, Gender, UserRole, UserStatus};
+use crate::models::{EmployeeLevel, EmploymentContract, Gender, UserRole, UserStatus};
 
 #[derive(Clone)]
 pub struct EmploymentRepository {
