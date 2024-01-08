@@ -88,7 +88,7 @@ impl TimesheetRepository {
                    timesheet.end_date, 
                    total_hours, 
                    is_editable, 
-                   status AS "status!:ApprovalStatus", 
+                   status AS "approval_status!:ApprovalStatus", 
                    manager_note AS "manager_note?", 
                    user_id, 
                    company_id,
@@ -96,8 +96,7 @@ impl TimesheetRepository {
                    event.avatar_url AS event_avatar_url,
                    event.name AS event_name,
                    timesheet.created_at, 
-                   timesheet.edited_at, 
-                   timesheet.deleted_at 
+                   timesheet.edited_at
             FROM timesheet 
             JOIN event ON timesheet.event_id = event.id
             WHERE timesheet.id = $1 
@@ -138,7 +137,7 @@ impl TimesheetRepository {
                    timesheet.end_date, 
                    total_hours, 
                    is_editable, 
-                   status AS "status!: ApprovalStatus", 
+                   status AS "approval_status!: ApprovalStatus", 
                    manager_note AS "manager_note?", 
                    user_id, 
                    company_id,
@@ -146,8 +145,7 @@ impl TimesheetRepository {
                    event.avatar_url AS event_avatar_url,
                    event.name AS event_name,
                    timesheet.created_at, 
-                   timesheet.edited_at, 
-                   timesheet.deleted_at 
+                   timesheet.edited_at
             FROM timesheet 
             JOIN event ON timesheet.event_id = event.id
             WHERE timesheet.id = $1 
@@ -201,16 +199,15 @@ impl TimesheetRepository {
                    timesheet.end_date, 
                    total_hours, 
                    is_editable, 
-                   status AS "status!: ApprovalStatus", 
+                   status AS "approval_status!: ApprovalStatus", 
                    manager_note AS "manager_note?", 
                    user_id, 
                    company_id,
                    event_id,
                    event.avatar_url AS event_avatar_url,
                    event.name AS event_name,
-                   timesheet.created_at, 
-                   timesheet.edited_at, 
-                   timesheet.deleted_at 
+                   timesheet.created_at,
+                   timesheet.edited_at
             FROM timesheet 
             JOIN event ON timesheet.event_id = event.id
             WHERE timesheet.id = $1 
@@ -247,7 +244,7 @@ impl TimesheetRepository {
                    timesheet.end_date, 
                    total_hours, 
                    is_editable, 
-                   status AS "status!: ApprovalStatus", 
+                   status AS "approval_status!: ApprovalStatus", 
                    manager_note AS "manager_note?", 
                    user_id, 
                    company_id,
@@ -255,8 +252,7 @@ impl TimesheetRepository {
                    event.avatar_url AS event_avatar_url,
                    event.name AS event_name,
                    timesheet.created_at, 
-                   timesheet.edited_at, 
-                   timesheet.deleted_at 
+                   timesheet.edited_at
             FROM timesheet 
              JOIN event ON timesheet.event_id = event.id
             WHERE timesheet.deleted_at IS NULL
@@ -299,7 +295,7 @@ impl TimesheetRepository {
                    timesheet.end_date, 
                    total_hours, 
                    is_editable, 
-                   status AS "status!: ApprovalStatus", 
+                   status AS "approval_status!: ApprovalStatus", 
                    manager_note AS "manager_note?", 
                    user_id, 
                    company_id,
@@ -307,8 +303,7 @@ impl TimesheetRepository {
                    event.avatar_url AS event_avatar_url,
                    event.name AS event_name,
                    timesheet.created_at, 
-                   timesheet.edited_at, 
-                   timesheet.deleted_at 
+                   timesheet.edited_at 
             FROM timesheet 
              JOIN event ON timesheet.event_id = event.id
             WHERE user_id = $1

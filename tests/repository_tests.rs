@@ -3191,3 +3191,268 @@ pub mod comment_repo_tests {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod timesheet_repo_tests {
+    use std::sync::Arc;
+
+    use chrono::NaiveDate;
+    use organization::{
+        repositories::timesheet::{timesheet_repo::TimesheetRepository, models::{TimesheetCreateData, TimesheetReadAllData, TimesheetUpdateData}}, models::ApprovalStatus,
+    };
+    use sqlx::PgPool;
+
+    use crate::test_constants::{USER1_ID, COMPANY1_ID, EVENT1_ID, TIMESHEET0_ID, USER2_ID, TIMESHEET4_ID, COMPANY2_ID, TIMESHEET1_ID, EVENT0_ID};
+    #[sqlx::test(fixtures("all_inclusive"))]
+    async fn create(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
+
+        let timesheet_repo = TimesheetRepository::new(arc_pool);
+
+        {
+            let user_id = USER1_ID;
+            let company_id = COMPANY1_ID;
+            let event_id = EVENT1_ID;
+            let start_date = NaiveDate::from_ymd_opt(1969,8,15).unwrap();
+            let end_date = NaiveDate::from_ymd_opt(1969,08,18).unwrap();
+            let data = TimesheetCreateData {
+                start_date,
+                end_date,
+                user_id,
+                company_id,
+                event_id,
+            };
+
+            let result = timesheet_repo.create(data).await.expect("Should succed");
+            assert_eq!(result.workdays.len(), 4);
+            for day in result.workdays.into_iter() {
+                assert!(day.date >= start_date);
+                assert!(day.date <= end_date);
+            }
+            assert_eq!(result.timesheet.approval_status, ApprovalStatus::NotRequested);
+            assert!(result.timesheet.is_editable);
+        }
+    }
+    
+    #[sqlx::test(fixtures("all_inclusive"))]
+    async fn read_one(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
+
+        let timesheet_repo = TimesheetRepository::new(arc_pool);
+
+        {
+            let sheet_id = TIMESHEET0_ID;
+            let user_id = USER2_ID;
+            let company_id = COMPANY1_ID;
+            let event_id = EVENT1_ID;
+
+            let result = timesheet_repo._read_one(sheet_id).await.expect("Should succed");
+            assert_eq!(result.workdays.len(), 2);
+            assert_eq!(result.timesheet.approval_status, ApprovalStatus::NotRequested);
+            assert!(result.timesheet.is_editable);
+            assert_eq!(result.timesheet.company_id, company_id);
+            assert_eq!(result.timesheet.event_id, event_id);
+            assert_eq!(result.timesheet.user_id, user_id);
+        }
+
+        {
+            let sheet_id = TIMESHEET1_ID;
+            let user_id = USER1_ID;
+            let company_id = COMPANY1_ID;
+            let event_id = EVENT0_ID;
+
+            let result = timesheet_repo._read_one(sheet_id).await.expect("Should succed");
+            assert_eq!(result.workdays.len(), 3);
+            assert_eq!(result.timesheet.approval_status, ApprovalStatus::Accepted);
+        }
+
+
+        // Non-existent sheet
+        {
+            let sheet_id = TIMESHEET4_ID;
+
+            let _ = timesheet_repo._read_one(sheet_id).await.expect_err("Should not succed");
+        }
+    }
+
+    #[sqlx::test(fixtures("all_inclusive"))]
+    async fn read_all_per_employment(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
+
+        let timesheet_repo = TimesheetRepository::new(arc_pool);
+
+        {
+            let user_id = USER2_ID;
+            let company_id = COMPANY1_ID;
+
+            let data = TimesheetReadAllData {
+                limit: None,
+                offset: None,
+            };
+            let result = timesheet_repo.read_all_timesheets_per_employment(user_id, company_id, data).await.expect("Should succed");
+            assert_eq!(result.len(), 1);
+        }
+
+        // Non-existent employment
+        {
+            let user_id = USER2_ID;
+            let company_id = COMPANY2_ID;
+
+            let data = TimesheetReadAllData {
+                limit: None,
+                offset: None,
+            };
+            let result = timesheet_repo.read_all_timesheets_per_employment(user_id, company_id, data).await.expect("Should succed");
+            assert_eq!(result.len(), 0);
+        }
+    }
+
+    #[sqlx::test(fixtures("all_inclusive"))]
+    async fn update(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
+
+        let timesheet_repo = TimesheetRepository::new(arc_pool);
+
+        {
+            let sheet_id = TIMESHEET0_ID;
+            let user_id = USER2_ID;
+            let company_id = COMPANY1_ID;
+            let event_id = EVENT1_ID;
+
+            let result = timesheet_repo._read_one(sheet_id).await.expect("Should succeed.");
+            assert_eq!(result.workdays.len(), 2);
+            assert_eq!(result.timesheet.approval_status, ApprovalStatus::NotRequested);
+            assert!(result.timesheet.is_editable);
+            assert_eq!(result.timesheet.company_id, company_id);
+            assert_eq!(result.timesheet.event_id, event_id);
+            assert_eq!(result.timesheet.user_id, user_id);
+
+            let data = TimesheetUpdateData {
+                start_date: None,
+                end_date: None,
+                total_hours: None,
+                is_editable: None,
+                status: None,
+                manager_note: Some("Change X and Y.".to_string()),
+                workdays: None,
+            };
+
+            let result = timesheet_repo.update(sheet_id, data).await.expect("Should succeed.");
+            assert_eq!(result.workdays.len(), 2);
+            assert_eq!(result.timesheet.approval_status, ApprovalStatus::NotRequested);
+            assert!(result.timesheet.is_editable);
+            assert_eq!(result.timesheet.company_id, company_id);
+            assert_eq!(result.timesheet.event_id, event_id);
+            assert_eq!(result.timesheet.user_id, user_id);
+            assert!(result.timesheet.manager_note.is_some());
+            assert_eq!(result.timesheet.manager_note.expect("Should be some"), "Change X and Y.".to_string());
+        }
+
+        // Empty data
+        {
+            let sheet_id = TIMESHEET0_ID;
+            let user_id = USER2_ID;
+            let company_id = COMPANY1_ID;
+            let event_id = EVENT1_ID;
+
+            let result = timesheet_repo._read_one(sheet_id).await.expect("Should succeed.");
+            assert_eq!(result.workdays.len(), 2);
+            assert_eq!(result.timesheet.approval_status, ApprovalStatus::NotRequested);
+            assert!(result.timesheet.is_editable);
+            assert_eq!(result.timesheet.company_id, company_id);
+            assert_eq!(result.timesheet.event_id, event_id);
+            assert_eq!(result.timesheet.user_id, user_id);
+
+            let data = TimesheetUpdateData {
+                start_date: None,
+                end_date: None,
+                total_hours: None,
+                is_editable: None,
+                status: None,
+                manager_note: None,
+                workdays: None,
+            };
+
+            let _ = timesheet_repo.update(sheet_id, data).await.expect_err("Should not succeed.");
+        }
+
+        // Non-existent sheet
+        {
+            let sheet_id = TIMESHEET4_ID;
+
+            let _ = timesheet_repo._read_one(sheet_id).await.expect_err("Should not succeed.");
+
+            let data = TimesheetUpdateData {
+                start_date: None,
+                end_date: None,
+                total_hours: None,
+                is_editable: None,
+                status: None,
+                manager_note: Some("Change X and Y.".to_string()),
+                workdays: None,
+            };
+
+            let _ = timesheet_repo.update(sheet_id, data).await.expect_err("Should succeed.");
+        }
+
+        // Deleted sheet
+        {
+            let sheet_id = TIMESHEET0_ID;
+            let user_id = USER2_ID;
+            let company_id = COMPANY1_ID;
+            let event_id = EVENT1_ID;
+
+            let result = timesheet_repo._read_one(sheet_id).await.expect("Should succeed.");
+            assert_eq!(result.workdays.len(), 2);
+            assert_eq!(result.timesheet.approval_status, ApprovalStatus::NotRequested);
+            assert!(result.timesheet.is_editable);
+            assert_eq!(result.timesheet.company_id, company_id);
+            assert_eq!(result.timesheet.event_id, event_id);
+            assert_eq!(result.timesheet.user_id, user_id);
+            
+            let _ = timesheet_repo._delete(sheet_id).await.expect("Should succeed");
+
+            let data = TimesheetUpdateData {
+                start_date: None,
+                end_date: None,
+                total_hours: None,
+                is_editable: None,
+                status: None,
+                manager_note: Some("Change X and Y.".to_string()),
+                workdays: None,
+            };
+
+            let _ = timesheet_repo.update(sheet_id, data).await.expect_err("Should fail because we can't edit a deleted timesheet.");
+        }
+    }
+
+    #[sqlx::test(fixtures("all_inclusive"))]
+    async fn delete(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
+
+        let timesheet_repo = TimesheetRepository::new(arc_pool);
+
+        {
+            let sheet_id = TIMESHEET0_ID;
+            
+            let _ = timesheet_repo._read_one(sheet_id).await.expect("Should succeed.");
+
+            let _ = timesheet_repo._delete(sheet_id).await.expect("Should succeed.");
+            
+            let _ = timesheet_repo._read_one(sheet_id).await.expect_err("Should fail.");
+
+            // Deleting an already deleted sheet.
+            let _ = timesheet_repo._delete(sheet_id).await.expect_err("Should fail.");
+        }
+
+
+        // Non-existent sheet
+        {
+            let sheet_id = TIMESHEET4_ID;
+
+            let _ = timesheet_repo._read_one(sheet_id).await.expect_err("Should not succeed.");
+
+            let _ = timesheet_repo._delete(sheet_id).await.expect_err("Should not succeed.");
+        }
+    }
+}

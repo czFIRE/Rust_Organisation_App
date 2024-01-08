@@ -172,10 +172,10 @@ impl fmt::Display for EmployeeContract {
 
 #[derive(Serialize, Deserialize, Debug, sqlx::Type, Clone, PartialEq)]
 #[serde(rename_all = "snake_case")]
-#[sqlx(type_name = "approval_status", rename_all = "lowercase")]
+#[sqlx(type_name = "approval_status", rename_all = "snake_case")]
 pub enum ApprovalStatus {
     Pending,
-    Approved,
+    Accepted,
     Rejected,
     NotRequested,
 }
@@ -183,7 +183,7 @@ pub enum ApprovalStatus {
 impl fmt::Display for ApprovalStatus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ApprovalStatus::Approved => write!(f, "Approved"),
+            ApprovalStatus::Accepted => write!(f, "Accepted"),
             ApprovalStatus::Rejected => write!(f, "Rejected"),
             ApprovalStatus::Pending => write!(f, "Pending"),
             ApprovalStatus::NotRequested => write!(f, "Not Requested"),

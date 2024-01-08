@@ -18,7 +18,7 @@ pub struct TimesheetWithEvent {
     pub end_date: NaiveDate,
     pub total_hours: f32,
     pub is_editable: bool,
-    pub status: ApprovalStatus,
+    pub approval_status: ApprovalStatus,
     pub manager_note: Option<String>,
     pub user_id: Uuid,
     pub company_id: Uuid,
@@ -27,7 +27,6 @@ pub struct TimesheetWithEvent {
     pub event_name: String,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
-    pub deleted_at: Option<NaiveDateTime>,
 }
 
 #[derive(Debug, Deserialize, FromRow)]
@@ -76,7 +75,7 @@ pub struct Workday {
     pub edited_at: NaiveDateTime,
 }
 
-#[allow(dead_code)]
+#[derive(Debug, FromRow)]
 pub struct TimesheetWithWorkdays {
     pub timesheet: TimesheetWithEvent,
     pub workdays: Vec<Workday>,

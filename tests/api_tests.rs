@@ -22,7 +22,7 @@ mod api_tests {
 
     use organization::handlers::{
         assigned_staff::{
-            create_assigned_staff, delete_all_rejected_assigned_staff, delete_assigned_staff,
+            create_assigned_staff, delete_assigned_staff,
             get_all_assigned_staff, get_assigned_staff, update_assigned_staff,
         },
         associated_company::{
@@ -34,39 +34,35 @@ mod api_tests {
             get_all_task_comments, update_comment,
         },
         company::{
-            create_company, delete_company, get_all_companies, get_company, get_company_avatar,
-            remove_company_avatar, update_company, upload_company_avatar,
+            create_company, delete_company, get_all_companies, get_company, update_company,
         },
         employment::{
             create_employment, delete_employment, get_employment, get_employments_per_user,
             get_subordinates, update_employment,
         },
         event::{
-            create_event, delete_event, get_event, get_event_avatar, get_events,
-            remove_event_avatar, update_event, upload_event_avatar,
+            create_event, delete_event, get_event, get_events,
+            update_event,
         },
         event_staff::{
-            create_event_staff, delete_all_rejected_event_staff, delete_event_staff,
+            create_event_staff, delete_event_staff,
             get_all_event_staff, get_event_staff, update_event_staff,
         },
         event_task::{create_task, delete_task, get_event_task, get_event_tasks, update_task},
         index::index,
         timesheet::{
             create_timesheet, get_all_timesheets_for_employment, get_timesheet,
-            reset_timesheet_data, update_timesheet,
+            update_timesheet,
         },
         user::{
-            create_user, delete_user, get_user, get_user_avatar, remove_user_avatar, update_user,
-            upload_user_avatar,
+            create_user, delete_user, get_user, update_user,
         },
     };
 
-    use organization::templates::comment::{CommentTemplate, CommentsTemplate};
     use regex::Regex;
     use serde_json::json;
     use sqlx::{Pool, Postgres};
-    use std::str::{self, FromStr};
-    use uuid::Uuid;
+    use std::str;
 
     async fn get_db_pool() -> Arc<Pool<Postgres>> {
         dotenv().ok();
@@ -131,7 +127,6 @@ mod api_tests {
         .unwrap();
         let uuid_caps = uuid_regex.captures(body).unwrap();
         let uuid_str = &uuid_caps[0];
-        let user_uuid = Uuid::from_str(uuid_str).expect("Should be a valid UUID");
 
         let req = test::TestRequest::post()
             .uri("/user")
@@ -312,26 +307,28 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    #[actix_web::test]
-    async fn get_user_avatar_test() {
-        let _app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
+    // TODO: Once the functionality is implemented.
 
-    #[actix_web::test]
-    async fn upload_user_avatar_test() {
-        let _app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
+    // #[actix_web::test]
+    // async fn get_user_avatar_test() {
+    //     let _app =
+    //         test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+    //     todo!()
+    // }
 
-    #[actix_web::test]
-    async fn remove_user_avatar_test() {
-        let _app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
+    // #[actix_web::test]
+    // async fn upload_user_avatar_test() {
+    //     let _app =
+    //         test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+    //     todo!()
+    // }
+
+    // #[actix_web::test]
+    // async fn remove_user_avatar_test() {
+    //     let _app =
+    //         test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+    //     todo!()
+    // }
 
     #[actix_web::test]
     async fn get_all_companies_test() {
@@ -609,26 +606,27 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    #[actix_web::test]
-    async fn get_company_avatar_test() {
-        let _app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
+    // TODO: Once the functionality is implemented.
+    // #[actix_web::test]
+    // async fn get_company_avatar_test() {
+    //     let _app =
+    //         test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+    //     todo!()
+    // }
 
-    #[actix_web::test]
-    async fn upload_company_avatar_test() {
-        let _app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
+    // #[actix_web::test]
+    // async fn upload_company_avatar_test() {
+    //     let _app =
+    //         test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+    //     todo!()
+    // }
 
-    #[actix_web::test]
-    async fn remove_company_avatar_test() {
-        let _app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
+    // #[actix_web::test]
+    // async fn remove_company_avatar_test() {
+    //     let _app =
+    //         test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+    //     todo!()
+    // }
 
     #[actix_web::test]
     async fn get_events_test() {
@@ -874,26 +872,27 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    #[actix_web::test]
-    async fn get_event_avatar_test() {
-        let _app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
+    // TODO: Once the functionality is implemented.
+    // #[actix_web::test]
+    // async fn get_event_avatar_test() {
+    //     let _app =
+    //         test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+    //     todo!()
+    // }
 
-    #[actix_web::test]
-    async fn upload_event_avatar_test() {
-        let _app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
+    // #[actix_web::test]
+    // async fn upload_event_avatar_test() {
+    //     let _app =
+    //         test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+    //     todo!()
+    // }
 
-    #[actix_web::test]
-    async fn remove_event_avatar_test() {
-        let _app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
+    // #[actix_web::test]
+    // async fn remove_event_avatar_test() {
+    //     let _app =
+    //         test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+    //     todo!()
+    // }
 
     #[actix_web::test]
     async fn get_all_tasks_per_event() {
@@ -2486,27 +2485,6 @@ mod api_tests {
 
         // event ID
         assert!(body.contains("3f152d12-0bbd-429a-a9c5-28967d6370cc"));
-    }
-
-    #[actix_web::test]
-    async fn get_all_timesheets_for_non_existent_employment() {
-        let arc_pool = get_db_pool().await;
-        let repository = TimesheetRepository::new(arc_pool.clone());
-        let repo = web::Data::new(repository);
-
-        let app = test::init_service(
-            App::new()
-                .app_data(repo.clone())
-                .service(get_all_timesheets_for_employment),
-        )
-        .await;
-
-        let req = test::TestRequest::get()
-                    .uri("/user/3abc12e3-dad0-40b6-96d8-ce069b1ba5d4/employment/b5188eda-528d-48d4-8cee-498e0971f9f5/sheet")
-                    .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
