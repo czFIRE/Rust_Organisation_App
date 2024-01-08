@@ -337,7 +337,7 @@ impl StaffRepository {
                 edited_at = now() 
             WHERE event_id = $1 
               AND deleted_at IS NULL
-              AND status = 'pending'
+              AND status = 'rejected'
             RETURNING id;
             "#,
             event_id,

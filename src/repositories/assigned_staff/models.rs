@@ -1,6 +1,7 @@
 use chrono::NaiveDate;
 use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
+use serde::Deserialize;
 
 use crate::{
     models::{AcceptanceStatus, EventRole, Gender, UserRole, UserStatus},
@@ -29,20 +30,21 @@ pub struct AssignedStaffExtended {
     pub task_id: Uuid,
     pub staff: StaffLite,
     pub status: AcceptanceStatus,
-    pub decided_by: Option<User>,
+    pub decided_by: Option<Uuid>, // ID to staff
+    pub decided_by_user: Option<User>,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-// TODO - remove this option if not needed
-#[derive(Debug, Clone)]
+// These two changes are dependent on each other.
+#[derive(Debug, Deserialize, Clone)]
 pub struct AssignedStaffData {
-    pub status: Option<AcceptanceStatus>,
-    pub decided_by: Option<Uuid>,
+    pub status: AcceptanceStatus,
+    pub decided_by: Uuid,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
 pub struct AssignedStaffFilter {
     pub limit: Option<i64>,
     pub offset: Option<i64>,
@@ -173,7 +175,8 @@ impl From<AssignedStaffStaffUserCompanyFlattened> for AssignedStaffExtended {
             task_id: value.assigned_staff_task_id,
             staff: tmp_event_staff,
             status: value.assigned_staff_status,
-            decided_by: decided_by_user,
+            decided_by: value.staff_decided_by,
+            decided_by_user: decided_by_user,
             created_at: value.assigned_staff_created_at,
             edited_at: value.assigned_staff_edited_at,
             deleted_at: value.assigned_staff_deleted_at,

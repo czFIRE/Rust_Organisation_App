@@ -110,25 +110,7 @@ pub async fn get_company(
     let result = company_repo.read_one_extended(parsed_id).await;
 
     if let Ok(company) = result {
-        let template = CompanyTemplate {
-            id: company.company_id,
-            name: company.name,
-            description: company.description,
-            phone: company.phone,
-            email: company.email,
-            avatar_url: company.avatar_url,
-            website: company.website,
-            crn: company.crn,
-            vatin: company.vatin,
-            country: company.country,
-            region: company.region,
-            city: company.city,
-            street: company.street,
-            postal_code: company.postal_code,
-            address_number: company.street_number,
-            created_at: company.created_at,
-            edited_at: company.edited_at,
-        };
+        let template: CompanyTemplate = company.into();
 
         let body = template.render();
 
@@ -179,25 +161,7 @@ pub async fn create_company(
     let result = company_repo.create(company_data, address).await;
 
     if let Ok(company) = result {
-        let template = CompanyTemplate {
-            id: company.company_id,
-            name: company.name,
-            description: company.description,
-            phone: company.phone,
-            email: company.email,
-            avatar_url: company.avatar_url,
-            website: company.website,
-            crn: company.crn,
-            vatin: company.vatin,
-            country: company.country,
-            region: company.region,
-            city: company.city,
-            street: company.street,
-            postal_code: company.postal_code,
-            address_number: company.street_number,
-            created_at: company.created_at,
-            edited_at: company.edited_at,
-        };
+        let template: CompanyTemplate = company.into();
 
         let body = template.render();
 
@@ -305,25 +269,7 @@ pub async fn update_company(
         .await;
 
     if let Ok(company) = result {
-        let template = CompanyTemplate {
-            id: company.company_id,
-            name: company.name,
-            description: company.description,
-            phone: company.phone,
-            email: company.email,
-            avatar_url: company.avatar_url,
-            website: company.website,
-            crn: company.crn,
-            vatin: company.vatin,
-            country: company.country,
-            region: company.region,
-            city: company.city,
-            street: company.street,
-            postal_code: company.postal_code,
-            address_number: company.street_number,
-            created_at: company.created_at,
-            edited_at: company.edited_at,
-        };
+        let template: CompanyTemplate = company.into();
 
         let body = template.render();
 

@@ -213,7 +213,7 @@ pub async fn delete_all_rejected_event_staff(
     }
 
     let parsed_id = id_parse.expect("Should be valid.");
-    let result = event_staff_repo.delete(parsed_id).await;
+    let result = event_staff_repo.delete_rejected(parsed_id).await;
 
     if let Err(error) = result {
         return match error {

@@ -47,7 +47,7 @@ pub struct StaffExtended {
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug, FromRow, Clone)]
+#[derive(Debug, FromRow, Deserialize, Clone)]
 pub struct StaffLite {
     pub user: User,
     pub company: Company,

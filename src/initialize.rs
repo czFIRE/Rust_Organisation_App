@@ -18,7 +18,7 @@ use crate::repositories::user::user_repo::UserRepository;
 
 use crate::handlers::{
     assigned_staff::{
-        create_assigned_staff, delete_assigned_staff, delete_not_accepted_assigned_staff,
+        create_assigned_staff, delete_assigned_staff, delete_all_rejected_assigned_staff,
         get_all_assigned_staff, get_assigned_staff, update_assigned_staff,
     },
     associated_company::{
@@ -142,7 +142,7 @@ pub fn configure_app(config: &mut ServiceConfig) {
         .service(get_assigned_staff)
         .service(create_assigned_staff)
         .service(update_assigned_staff)
-        .service(delete_not_accepted_assigned_staff)
+        .service(delete_all_rejected_assigned_staff)
         .service(delete_assigned_staff)
         .service(get_event_tasks)
         .service(get_event_task)

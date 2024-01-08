@@ -1,12 +1,13 @@
 use askama::Template;
 use chrono::NaiveDateTime;
+use crate::repositories::{event_staff::models::StaffLite, user::models::User};
 use serde::Deserialize;
 use sqlx::types::uuid;
 use uuid::Uuid;
 
 use crate::{
     models::{AcceptanceStatus, EventRole},
-    repositories::event_staff::models::StaffExtended,
+    repositories::{event_staff::models::StaffExtended, assigned_staff::models::AssignedStaffExtended},
 };
 
 use super::{company::CompanyLiteTemplate, user::UserLiteTemplate};
@@ -78,15 +79,32 @@ pub struct AllStaffTemplate {
 
 #[derive(Template, Debug, Deserialize)]
 #[template(path = "event/staff/task-staff.html")]
-pub struct TaskStaffTemplate {
-    pub id: Uuid,
-    pub user: StaffTemplate,
+pub struct AssignedStaffTemplate {
+    pub task_id: Uuid,
+    pub staff: StaffLite,
     pub status: AcceptanceStatus,
-    pub decided_by: UserLiteTemplate,
+    pub decided_by: Option<Uuid>,
+    pub decided_by_user: Option<User>,
+    pub created_at: NaiveDateTime,
+    pub edited_at: NaiveDateTime,
+}
+
+impl From<AssignedStaffExtended> for AssignedStaffTemplate {
+    fn from(value: AssignedStaffExtended) -> Self {
+        AssignedStaffTemplate {
+            task_id: value.task_id,
+            staff: value.staff,
+            status: value.status,
+            decided_by: value.decided_by,
+            decided_by_user: value.decided_by_user,
+            created_at: value.created_at,
+            edited_at: value.edited_at,
+        }
+    }
 }
 
 #[derive(Template, Deserialize)]
 #[template(path = "event/staff/all-task-staff.html")]
-pub struct AllStaffTaskTemplate {
-    pub staff: Vec<TaskStaffTemplate>,
+pub struct AllAssignedStaffTemplate {
+    pub staff: Vec<AssignedStaffTemplate>,
 }

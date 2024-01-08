@@ -6,8 +6,7 @@ mod api_tests {
     use actix_web::http::header::ContentType;
     use actix_web::{http, web};
     use actix_web::{test, App};
-    use askama::Template;
-    use chrono::{NaiveDate, TimeZone, Utc};
+    use chrono::{NaiveDate, Utc};
     use dotenv::dotenv;
     use organization::repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository;
     use organization::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
@@ -1148,7 +1147,7 @@ mod api_tests {
                 .service(update_task),
         )
         .await;
-    
+
         let data = json!({
             "title": "Help do stuff."
         });
