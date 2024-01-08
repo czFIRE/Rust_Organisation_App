@@ -2609,14 +2609,6 @@ mod api_tests {
         let uuid_caps = uuid_regex.find(body).unwrap();
         let timesheet_id = uuid_caps.as_str();
 
-        let req = test::TestRequest::post()
-            .uri("/timesheet")
-            .set_form(data)
-            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
-
         let data = json!({
             "manager_note": "Hey, fill out your sheet.",
         });

@@ -3202,7 +3202,7 @@ mod timesheet_repo_tests {
     };
     use sqlx::PgPool;
 
-    use crate::test_constants::{USER1_ID, COMPANY1_ID, EVENT1_ID, TIMESHEET0_ID, USER2_ID, TIMESHEET4_ID, COMPANY2_ID, TIMESHEET1_ID, EVENT0_ID};
+    use crate::test_constants::{USER1_ID, COMPANY1_ID, EVENT1_ID, TIMESHEET0_ID, USER2_ID, TIMESHEET4_ID, COMPANY2_ID, TIMESHEET1_ID};
     #[sqlx::test(fixtures("all_inclusive"))]
     async fn create(pool: PgPool) {
         let arc_pool = Arc::new(pool);
@@ -3257,9 +3257,6 @@ mod timesheet_repo_tests {
 
         {
             let sheet_id = TIMESHEET1_ID;
-            let user_id = USER1_ID;
-            let company_id = COMPANY1_ID;
-            let event_id = EVENT0_ID;
 
             let result = timesheet_repo._read_one(sheet_id).await.expect("Should succed");
             assert_eq!(result.workdays.len(), 3);
