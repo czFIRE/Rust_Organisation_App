@@ -36,14 +36,18 @@ impl CommentRepository {
     pub async fn create(&self, data: NewComment) -> DbResult<CommentExtended> {
         if data.content.chars().count() < 1 {
             // TODO - better error
-            return Err(sqlx::Error::TypeNotFound { type_name: "User error.".to_string() });
+            return Err(sqlx::Error::TypeNotFound {
+                type_name: "User error.".to_string(),
+            });
         }
 
         if (data.event_id.is_none() && data.task_id.is_none())
             || (data.event_id.is_some() && data.task_id.is_some())
         {
             // TODO - better error
-            return Err(sqlx::Error::TypeNotFound { type_name: "Both keys are some.".to_string() });
+            return Err(sqlx::Error::TypeNotFound {
+                type_name: "Both keys are some.".to_string(),
+            });
         }
 
         let mut tx = self.pool.begin().await?;
@@ -117,7 +121,11 @@ impl CommentRepository {
     // ToDo: Can probably be written with less duplication
     /* WARNING! The tx will be commited at the end of this function.
      */
-    async fn read_one_tx(&self, comment_id: Uuid, mut tx: Transaction<'_, Postgres>) -> DbResult<CommentExtended> {
+    async fn read_one_tx(
+        &self,
+        comment_id: Uuid,
+        mut tx: Transaction<'_, Postgres>,
+    ) -> DbResult<CommentExtended> {
         let comment: CommentUserFlattened = sqlx::query_as!(
             CommentUserFlattened,
             r#"
@@ -257,7 +265,9 @@ impl CommentRepository {
     pub async fn update(&self, comment_id: Uuid, data: CommentData) -> DbResult<CommentExtended> {
         if data.content.chars().count() < 1 {
             // TODO - better error
-            return Err(sqlx::Error::TypeNotFound { type_name: "User error.".to_string() });
+            return Err(sqlx::Error::TypeNotFound {
+                type_name: "User error.".to_string(),
+            });
         }
 
         let mut tx = self.pool.begin().await?;

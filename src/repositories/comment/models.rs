@@ -1,7 +1,7 @@
 use chrono::NaiveDate;
+use serde::Deserialize;
 use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
-use serde::Deserialize;
 
 use crate::{
     models::{Gender, UserRole, UserStatus},

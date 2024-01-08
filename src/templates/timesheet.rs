@@ -1,6 +1,6 @@
+use crate::repositories::timesheet::models::TimesheetWithEvent;
 use askama::Template;
 use chrono::{NaiveDate, NaiveDateTime};
-use crate::repositories::timesheet::models::TimesheetWithEvent;
 use serde::Deserialize;
 use sqlx::types::uuid;
 use uuid::Uuid;

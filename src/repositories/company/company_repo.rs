@@ -182,7 +182,10 @@ impl CompanyRepository {
         Ok(companies)
     }
 
-    pub async fn _read_all_extended(&self, filter: CompanyFilter) -> DbResult<Vec<CompanyExtended>> {
+    pub async fn _read_all_extended(
+        &self,
+        filter: CompanyFilter,
+    ) -> DbResult<Vec<CompanyExtended>> {
         let executor = self.pool.as_ref();
 
         let companies = sqlx::query_as!(

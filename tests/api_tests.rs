@@ -22,8 +22,8 @@ mod api_tests {
 
     use organization::handlers::{
         assigned_staff::{
-            create_assigned_staff, delete_assigned_staff,
-            get_all_assigned_staff, get_assigned_staff, update_assigned_staff,
+            create_assigned_staff, delete_assigned_staff, get_all_assigned_staff,
+            get_assigned_staff, update_assigned_staff,
         },
         associated_company::{
             create_associated_company, delete_associated_company, get_all_associated_companies,
@@ -33,30 +33,22 @@ mod api_tests {
             create_event_comment, create_task_comment, delete_comment, get_all_event_comments,
             get_all_task_comments, update_comment,
         },
-        company::{
-            create_company, delete_company, get_all_companies, get_company, update_company,
-        },
+        company::{create_company, delete_company, get_all_companies, get_company, update_company},
         employment::{
             create_employment, delete_employment, get_employment, get_employments_per_user,
             get_subordinates, update_employment,
         },
-        event::{
-            create_event, delete_event, get_event, get_events,
-            update_event,
-        },
+        event::{create_event, delete_event, get_event, get_events, update_event},
         event_staff::{
-            create_event_staff, delete_event_staff,
-            get_all_event_staff, get_event_staff, update_event_staff,
+            create_event_staff, delete_event_staff, get_all_event_staff, get_event_staff,
+            update_event_staff,
         },
         event_task::{create_task, delete_task, get_event_task, get_event_tasks, update_task},
         index::index,
         timesheet::{
-            create_timesheet, get_all_timesheets_for_employment, get_timesheet,
-            update_timesheet,
+            create_timesheet, get_all_timesheets_for_employment, get_timesheet, update_timesheet,
         },
-        user::{
-            create_user, delete_user, get_user, update_user,
-        },
+        user::{create_user, delete_user, get_user, update_user},
     };
 
     use regex::Regex;
@@ -1204,7 +1196,7 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::CREATED);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        
+
         assert!(body.contains("35341253-da20-40b6-96d8-ce069b1ba5d4"));
         assert!(body.contains("Cool event, maaaaan!"));
 
@@ -1215,7 +1207,7 @@ mod api_tests {
 
         let uuid_caps = uuid_regex.find(body).unwrap();
         let comment_id = uuid_caps.as_str();
-        
+
         let data = json!({
             "content": "Chill event, maaaaan!",
         });
@@ -1229,7 +1221,7 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        
+
         assert!(body.contains(comment_id));
         assert!(body.contains("Chill event, maaaaan!"));
 
@@ -1322,12 +1314,8 @@ mod api_tests {
         let repository = CommentRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
-        let app = test::init_service(
-            App::new()
-                .app_data(repo.clone())
-                .service(update_comment),
-        )
-        .await;
+        let app =
+            test::init_service(App::new().app_data(repo.clone()).service(update_comment)).await;
         let data = json!({
             "author_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
             "content": "One of the events of all time, maaaaan!",
@@ -1363,7 +1351,7 @@ mod api_tests {
 
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        
+
         assert!(body.contains("7ae0c017-fe31-4aac-b767-100d18a8877b"));
     }
 
@@ -1415,10 +1403,10 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::CREATED);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        
+
         assert!(body.contains("35341253-da20-40b6-96d8-ce069b1ba5d4"));
         assert!(body.contains("Cool task, maaaaan!"));
-        
+
         let uuid_regex = Regex::new(
             r"[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}",
         )
@@ -1440,7 +1428,7 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        
+
         assert!(body.contains("35341253-da20-40b6-96d8-ce069b1ba5d4"));
         assert!(body.contains("Chill task, maaaaan!"));
 
@@ -1509,7 +1497,7 @@ mod api_tests {
                 .service(create_task_comment),
         )
         .await;
-    
+
         let data = json!({
             "author_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
             "content": "Cool event, maaaaan!",

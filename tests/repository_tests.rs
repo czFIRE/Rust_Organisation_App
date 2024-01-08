@@ -3198,11 +3198,18 @@ mod timesheet_repo_tests {
 
     use chrono::NaiveDate;
     use organization::{
-        repositories::timesheet::{timesheet_repo::TimesheetRepository, models::{TimesheetCreateData, TimesheetReadAllData, TimesheetUpdateData}}, models::ApprovalStatus,
+        models::ApprovalStatus,
+        repositories::timesheet::{
+            models::{TimesheetCreateData, TimesheetReadAllData, TimesheetUpdateData},
+            timesheet_repo::TimesheetRepository,
+        },
     };
     use sqlx::PgPool;
 
-    use crate::test_constants::{USER1_ID, COMPANY1_ID, EVENT1_ID, TIMESHEET0_ID, USER2_ID, TIMESHEET4_ID, COMPANY2_ID, TIMESHEET1_ID};
+    use crate::test_constants::{
+        COMPANY1_ID, COMPANY2_ID, EVENT1_ID, TIMESHEET0_ID, TIMESHEET1_ID, TIMESHEET4_ID, USER1_ID,
+        USER2_ID,
+    };
     #[sqlx::test(fixtures("all_inclusive"))]
     async fn create(pool: PgPool) {
         let arc_pool = Arc::new(pool);
@@ -3213,8 +3220,8 @@ mod timesheet_repo_tests {
             let user_id = USER1_ID;
             let company_id = COMPANY1_ID;
             let event_id = EVENT1_ID;
-            let start_date = NaiveDate::from_ymd_opt(1969,8,15).unwrap();
-            let end_date = NaiveDate::from_ymd_opt(1969,08,18).unwrap();
+            let start_date = NaiveDate::from_ymd_opt(1969, 8, 15).unwrap();
+            let end_date = NaiveDate::from_ymd_opt(1969, 08, 18).unwrap();
             let data = TimesheetCreateData {
                 start_date,
                 end_date,
@@ -3229,11 +3236,14 @@ mod timesheet_repo_tests {
                 assert!(day.date >= start_date);
                 assert!(day.date <= end_date);
             }
-            assert_eq!(result.timesheet.approval_status, ApprovalStatus::NotRequested);
+            assert_eq!(
+                result.timesheet.approval_status,
+                ApprovalStatus::NotRequested
+            );
             assert!(result.timesheet.is_editable);
         }
     }
-    
+
     #[sqlx::test(fixtures("all_inclusive"))]
     async fn read_one(pool: PgPool) {
         let arc_pool = Arc::new(pool);
@@ -3246,9 +3256,15 @@ mod timesheet_repo_tests {
             let company_id = COMPANY1_ID;
             let event_id = EVENT1_ID;
 
-            let result = timesheet_repo._read_one(sheet_id).await.expect("Should succed");
+            let result = timesheet_repo
+                ._read_one(sheet_id)
+                .await
+                .expect("Should succed");
             assert_eq!(result.workdays.len(), 2);
-            assert_eq!(result.timesheet.approval_status, ApprovalStatus::NotRequested);
+            assert_eq!(
+                result.timesheet.approval_status,
+                ApprovalStatus::NotRequested
+            );
             assert!(result.timesheet.is_editable);
             assert_eq!(result.timesheet.company_id, company_id);
             assert_eq!(result.timesheet.event_id, event_id);
@@ -3258,17 +3274,22 @@ mod timesheet_repo_tests {
         {
             let sheet_id = TIMESHEET1_ID;
 
-            let result = timesheet_repo._read_one(sheet_id).await.expect("Should succed");
+            let result = timesheet_repo
+                ._read_one(sheet_id)
+                .await
+                .expect("Should succed");
             assert_eq!(result.workdays.len(), 3);
             assert_eq!(result.timesheet.approval_status, ApprovalStatus::Accepted);
         }
-
 
         // Non-existent sheet
         {
             let sheet_id = TIMESHEET4_ID;
 
-            let _ = timesheet_repo._read_one(sheet_id).await.expect_err("Should not succed");
+            let _ = timesheet_repo
+                ._read_one(sheet_id)
+                .await
+                .expect_err("Should not succed");
         }
     }
 
@@ -3286,7 +3307,10 @@ mod timesheet_repo_tests {
                 limit: None,
                 offset: None,
             };
-            let result = timesheet_repo.read_all_timesheets_per_employment(user_id, company_id, data).await.expect("Should succed");
+            let result = timesheet_repo
+                .read_all_timesheets_per_employment(user_id, company_id, data)
+                .await
+                .expect("Should succed");
             assert_eq!(result.len(), 1);
         }
 
@@ -3299,7 +3323,10 @@ mod timesheet_repo_tests {
                 limit: None,
                 offset: None,
             };
-            let result = timesheet_repo.read_all_timesheets_per_employment(user_id, company_id, data).await.expect("Should succed");
+            let result = timesheet_repo
+                .read_all_timesheets_per_employment(user_id, company_id, data)
+                .await
+                .expect("Should succed");
             assert_eq!(result.len(), 0);
         }
     }
@@ -3316,9 +3343,15 @@ mod timesheet_repo_tests {
             let company_id = COMPANY1_ID;
             let event_id = EVENT1_ID;
 
-            let result = timesheet_repo._read_one(sheet_id).await.expect("Should succeed.");
+            let result = timesheet_repo
+                ._read_one(sheet_id)
+                .await
+                .expect("Should succeed.");
             assert_eq!(result.workdays.len(), 2);
-            assert_eq!(result.timesheet.approval_status, ApprovalStatus::NotRequested);
+            assert_eq!(
+                result.timesheet.approval_status,
+                ApprovalStatus::NotRequested
+            );
             assert!(result.timesheet.is_editable);
             assert_eq!(result.timesheet.company_id, company_id);
             assert_eq!(result.timesheet.event_id, event_id);
@@ -3334,15 +3367,24 @@ mod timesheet_repo_tests {
                 workdays: None,
             };
 
-            let result = timesheet_repo.update(sheet_id, data).await.expect("Should succeed.");
+            let result = timesheet_repo
+                .update(sheet_id, data)
+                .await
+                .expect("Should succeed.");
             assert_eq!(result.workdays.len(), 2);
-            assert_eq!(result.timesheet.approval_status, ApprovalStatus::NotRequested);
+            assert_eq!(
+                result.timesheet.approval_status,
+                ApprovalStatus::NotRequested
+            );
             assert!(result.timesheet.is_editable);
             assert_eq!(result.timesheet.company_id, company_id);
             assert_eq!(result.timesheet.event_id, event_id);
             assert_eq!(result.timesheet.user_id, user_id);
             assert!(result.timesheet.manager_note.is_some());
-            assert_eq!(result.timesheet.manager_note.expect("Should be some"), "Change X and Y.".to_string());
+            assert_eq!(
+                result.timesheet.manager_note.expect("Should be some"),
+                "Change X and Y.".to_string()
+            );
         }
 
         // Empty data
@@ -3352,9 +3394,15 @@ mod timesheet_repo_tests {
             let company_id = COMPANY1_ID;
             let event_id = EVENT1_ID;
 
-            let result = timesheet_repo._read_one(sheet_id).await.expect("Should succeed.");
+            let result = timesheet_repo
+                ._read_one(sheet_id)
+                .await
+                .expect("Should succeed.");
             assert_eq!(result.workdays.len(), 2);
-            assert_eq!(result.timesheet.approval_status, ApprovalStatus::NotRequested);
+            assert_eq!(
+                result.timesheet.approval_status,
+                ApprovalStatus::NotRequested
+            );
             assert!(result.timesheet.is_editable);
             assert_eq!(result.timesheet.company_id, company_id);
             assert_eq!(result.timesheet.event_id, event_id);
@@ -3370,14 +3418,20 @@ mod timesheet_repo_tests {
                 workdays: None,
             };
 
-            let _ = timesheet_repo.update(sheet_id, data).await.expect_err("Should not succeed.");
+            let _ = timesheet_repo
+                .update(sheet_id, data)
+                .await
+                .expect_err("Should not succeed.");
         }
 
         // Non-existent sheet
         {
             let sheet_id = TIMESHEET4_ID;
 
-            let _ = timesheet_repo._read_one(sheet_id).await.expect_err("Should not succeed.");
+            let _ = timesheet_repo
+                ._read_one(sheet_id)
+                .await
+                .expect_err("Should not succeed.");
 
             let data = TimesheetUpdateData {
                 start_date: None,
@@ -3389,7 +3443,10 @@ mod timesheet_repo_tests {
                 workdays: None,
             };
 
-            let _ = timesheet_repo.update(sheet_id, data).await.expect_err("Should succeed.");
+            let _ = timesheet_repo
+                .update(sheet_id, data)
+                .await
+                .expect_err("Should succeed.");
         }
 
         // Deleted sheet
@@ -3399,15 +3456,24 @@ mod timesheet_repo_tests {
             let company_id = COMPANY1_ID;
             let event_id = EVENT1_ID;
 
-            let result = timesheet_repo._read_one(sheet_id).await.expect("Should succeed.");
+            let result = timesheet_repo
+                ._read_one(sheet_id)
+                .await
+                .expect("Should succeed.");
             assert_eq!(result.workdays.len(), 2);
-            assert_eq!(result.timesheet.approval_status, ApprovalStatus::NotRequested);
+            assert_eq!(
+                result.timesheet.approval_status,
+                ApprovalStatus::NotRequested
+            );
             assert!(result.timesheet.is_editable);
             assert_eq!(result.timesheet.company_id, company_id);
             assert_eq!(result.timesheet.event_id, event_id);
             assert_eq!(result.timesheet.user_id, user_id);
-            
-            let _ = timesheet_repo._delete(sheet_id).await.expect("Should succeed");
+
+            let _ = timesheet_repo
+                ._delete(sheet_id)
+                .await
+                .expect("Should succeed");
 
             let data = TimesheetUpdateData {
                 start_date: None,
@@ -3419,7 +3485,10 @@ mod timesheet_repo_tests {
                 workdays: None,
             };
 
-            let _ = timesheet_repo.update(sheet_id, data).await.expect_err("Should fail because we can't edit a deleted timesheet.");
+            let _ = timesheet_repo
+                .update(sheet_id, data)
+                .await
+                .expect_err("Should fail because we can't edit a deleted timesheet.");
         }
     }
 
@@ -3431,25 +3500,42 @@ mod timesheet_repo_tests {
 
         {
             let sheet_id = TIMESHEET0_ID;
-            
-            let _ = timesheet_repo._read_one(sheet_id).await.expect("Should succeed.");
 
-            let _ = timesheet_repo._delete(sheet_id).await.expect("Should succeed.");
-            
-            let _ = timesheet_repo._read_one(sheet_id).await.expect_err("Should fail.");
+            let _ = timesheet_repo
+                ._read_one(sheet_id)
+                .await
+                .expect("Should succeed.");
+
+            let _ = timesheet_repo
+                ._delete(sheet_id)
+                .await
+                .expect("Should succeed.");
+
+            let _ = timesheet_repo
+                ._read_one(sheet_id)
+                .await
+                .expect_err("Should fail.");
 
             // Deleting an already deleted sheet.
-            let _ = timesheet_repo._delete(sheet_id).await.expect_err("Should fail.");
+            let _ = timesheet_repo
+                ._delete(sheet_id)
+                .await
+                .expect_err("Should fail.");
         }
-
 
         // Non-existent sheet
         {
             let sheet_id = TIMESHEET4_ID;
 
-            let _ = timesheet_repo._read_one(sheet_id).await.expect_err("Should not succeed.");
+            let _ = timesheet_repo
+                ._read_one(sheet_id)
+                .await
+                .expect_err("Should not succeed.");
 
-            let _ = timesheet_repo._delete(sheet_id).await.expect_err("Should not succeed.");
+            let _ = timesheet_repo
+                ._delete(sheet_id)
+                .await
+                .expect_err("Should not succeed.");
         }
     }
 }
