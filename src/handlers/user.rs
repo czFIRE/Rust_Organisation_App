@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use crate::{
-    errors::parse_error,
+    errors::{handle_database_error, parse_error},
     repositories::user::models::{NewUser, UserData},
     templates::user::UserTemplate,
 };
@@ -22,9 +22,9 @@ pub async fn get_user(
     }
 
     let parsed_id = id_parse.expect("Should be valid.");
-    let query_result = user_repo.read_one(parsed_id).await;
+    let result = user_repo.read_one(parsed_id).await;
 
-    if let Ok(user) = query_result {
+    if let Ok(user) = result {
         let template: UserTemplate = user.into();
 
         let body = template.render();
@@ -39,14 +39,7 @@ pub async fn get_user(
             .body(body.expect("Should be valid"));
     }
 
-    let error = query_result.err().expect("Should be an error");
-    match error {
-        sqlx::Error::RowNotFound => {
-            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    }
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 #[post("/user")]
@@ -57,9 +50,9 @@ pub async fn create_user(
     if new_user.name.len() == 0 || new_user.email.len() == 0 {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
-    let created_user = user_repo.create(new_user.into_inner()).await;
+    let result = user_repo.create(new_user.into_inner()).await;
 
-    if let Ok(user) = created_user {
+    if let Ok(user) = result {
         let template: UserTemplate = user.into();
         let body = template.render();
 
@@ -75,25 +68,7 @@ pub async fn create_user(
             .body(unwrapped_body);
     }
 
-    let error = created_user.err().expect("Should be error.");
-    match error {
-        sqlx::Error::RowNotFound => {
-            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
-        sqlx::Error::Database(err) => {
-            if err.is_check_violation()
-                || err.is_foreign_key_violation()
-                || err.is_unique_violation()
-            {
-                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
-            } else {
-                HttpResponse::InternalServerError()
-                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
-            }
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    }
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 fn is_data_invalid(user_data: UserData) -> bool {
@@ -124,11 +99,11 @@ pub async fn update_user(
 
     let parsed_id = id_parse.expect("Should be valid.");
 
-    let updated_user = user_repo
+    let result = user_repo
         .update_user(parsed_id, user_data.into_inner())
         .await;
 
-    if let Ok(user) = updated_user {
+    if let Ok(user) = result {
         let template: UserTemplate = user.into();
 
         let body = template.render();
@@ -143,25 +118,7 @@ pub async fn update_user(
             .body(body.expect("Should be okay."));
     }
 
-    let error = updated_user.err().expect("Should be error.");
-    match error {
-        sqlx::Error::RowNotFound => {
-            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
-        sqlx::Error::Database(err) => {
-            if err.is_check_violation()
-                || err.is_foreign_key_violation()
-                || err.is_unique_violation()
-            {
-                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
-            } else {
-                HttpResponse::InternalServerError()
-                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
-            }
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    }
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 #[delete("/user/{user_id}")]
@@ -179,13 +136,7 @@ pub async fn delete_user(
     let result = user_repo.delete_user(parsed_id).await;
 
     if let Err(error) = result {
-        return match error {
-            sqlx::Error::RowNotFound => {
-                HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-            }
-            _ => HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-        };
+        return handle_database_error(error);
     }
 
     HttpResponse::NoContent().finish()

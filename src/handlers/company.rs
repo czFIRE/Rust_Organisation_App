@@ -6,7 +6,7 @@ use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::{
-    errors::parse_error,
+    errors::{handle_database_error, parse_error},
     handlers::common::QueryParams,
     repositories::company::{
         company_repo::CompanyRepository,
@@ -93,14 +93,7 @@ pub async fn get_all_companies(
         return HttpResponse::Ok().body(body.expect("Should be okay now."));
     }
 
-    let error = result.err().expect("Should be an error");
-    match error {
-        sqlx::Error::RowNotFound => {
-            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    }
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 #[get("/company/{company_id}")]
@@ -131,14 +124,7 @@ pub async fn get_company(
             .body(body.expect("Should be valid."));
     }
 
-    let error = result.err().expect("Should be an error");
-    match error {
-        sqlx::Error::RowNotFound => {
-            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    }
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 #[post("/company")]
@@ -182,27 +168,10 @@ pub async fn create_company(
             .body(body.expect("Should be valid."));
     }
 
-    let error = result.err().expect("Should be error.");
-    match error {
-        sqlx::Error::RowNotFound => {
-            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
-        sqlx::Error::Database(err) => {
-            if err.is_check_violation()
-                || err.is_foreign_key_violation()
-                || err.is_unique_violation()
-            {
-                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
-            } else {
-                HttpResponse::InternalServerError()
-                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
-            }
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    }
+    handle_database_error(result.err().expect("Should be error."))
 }
 
+// TODO: This is rather ugly. Might rewrite if there is time left at the end. :copium:
 fn is_update_data_empty(company_data: CompanyUpdateData) -> bool {
     (company_data.name.is_none()
         && company_data.description.is_none()
@@ -290,25 +259,7 @@ pub async fn update_company(
             .body(body.expect("Should be valid."));
     }
 
-    let error = result.err().expect("Should be error.");
-    match error {
-        sqlx::Error::RowNotFound => {
-            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
-        sqlx::Error::Database(err) => {
-            if err.is_check_violation()
-                || err.is_foreign_key_violation()
-                || err.is_unique_violation()
-            {
-                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
-            } else {
-                HttpResponse::InternalServerError()
-                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
-            }
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    }
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 #[delete("/company/{company_id}")]
@@ -325,13 +276,7 @@ pub async fn delete_company(
     let result = company_repo.delete(parsed_id).await;
 
     if let Err(error) = result {
-        return match error {
-            sqlx::Error::RowNotFound => {
-                HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-            }
-            _ => HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-        };
+        return handle_database_error(error);
     }
 
     HttpResponse::NoContent().finish()

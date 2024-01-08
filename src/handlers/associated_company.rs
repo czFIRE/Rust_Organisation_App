@@ -6,7 +6,7 @@ use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::{
-    errors::parse_error,
+    errors::{handle_database_error, parse_error},
     handlers::common::extract_path_tuple_ids,
     models::Association,
     repositories::associated_company::{
@@ -60,14 +60,7 @@ pub async fn get_all_associated_companies(
         return HttpResponse::Ok().body(body.expect("Should be valid now."));
     }
 
-    let error = result.err().expect("Should be an error");
-    match error {
-        sqlx::Error::RowNotFound => {
-            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    }
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 #[post("/event/{event_id}/company")]
@@ -102,25 +95,7 @@ pub async fn create_associated_company(
             .body(body.expect("Should be valid now."));
     }
 
-    let error = result.err().expect("Should be error.");
-    match error {
-        sqlx::Error::RowNotFound => {
-            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
-        sqlx::Error::Database(err) => {
-            if err.is_check_violation()
-                || err.is_foreign_key_violation()
-                || err.is_unique_violation()
-            {
-                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
-            } else {
-                HttpResponse::InternalServerError()
-                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
-            }
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    }
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 #[patch("/event/{event_id}/company/{company_id}")]
@@ -154,25 +129,7 @@ pub async fn update_associated_company(
             .body(body.expect("Should be valid now."));
     }
 
-    let error = result.err().expect("Should be error.");
-    match error {
-        sqlx::Error::RowNotFound => {
-            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
-        sqlx::Error::Database(err) => {
-            if err.is_check_violation()
-                || err.is_foreign_key_violation()
-                || err.is_unique_violation()
-            {
-                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
-            } else {
-                HttpResponse::InternalServerError()
-                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
-            }
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    }
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 #[delete("/event/{event_id}/company/{company_id}")]
@@ -188,13 +145,7 @@ pub async fn delete_associated_company(
     let (event_id, company_id) = parsed_ids.unwrap();
     let result = associated_repo.delete(company_id, event_id).await;
     if let Err(error) = result {
-        return match error {
-            sqlx::Error::RowNotFound => {
-                HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-            }
-            _ => HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-        };
+        return handle_database_error(error);
     }
 
     HttpResponse::NoContent().finish()

@@ -6,13 +6,17 @@ use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::{
-    errors::parse_error,
+    errors::{handle_database_error, parse_error},
     handlers::common::extract_path_tuple_ids,
-    repositories::{assigned_staff::{
-        assigned_staff_repo::AssignedStaffRepository,
-        models::{AssignedStaffData, AssignedStaffFilter, NewAssignedStaff},
-    }, event_staff::event_staff_repo::StaffRepository},
-    templates::staff::{AllAssignedStaffTemplate, AssignedStaffTemplate}, models::EventRole,
+    models::EventRole,
+    repositories::{
+        assigned_staff::{
+            assigned_staff_repo::AssignedStaffRepository,
+            models::{AssignedStaffData, AssignedStaffFilter, NewAssignedStaff},
+        },
+        event_staff::event_staff_repo::StaffRepository,
+    },
+    templates::staff::{AllAssignedStaffTemplate, AssignedStaffTemplate},
 };
 
 #[derive(Deserialize)]
@@ -60,14 +64,7 @@ pub async fn get_all_assigned_staff(
             .body(body.expect("Should be valid now."));
     }
 
-    let error = result.err().expect("Should be an error");
-    match error {
-        sqlx::Error::RowNotFound => {
-            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    }
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 #[get("/task/{task_id}/staff/{staff_id}")]
@@ -95,14 +92,7 @@ pub async fn get_assigned_staff(
             .body(body.expect("Should be valid now."));
     }
 
-    let error = result.err().expect("Should be an error");
-    match error {
-        sqlx::Error::RowNotFound => {
-            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    }
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 #[post("/task/{task_id}/staff")]
@@ -136,25 +126,7 @@ pub async fn create_assigned_staff(
             .body(body.expect("Should be valid now."));
     }
 
-    let error = result.err().expect("Should be error.");
-    match error {
-        sqlx::Error::RowNotFound => {
-            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
-        sqlx::Error::Database(err) => {
-            if err.is_check_violation()
-                || err.is_foreign_key_violation()
-                || err.is_unique_violation()
-            {
-                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
-            } else {
-                HttpResponse::InternalServerError()
-                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
-            }
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    }
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 #[patch("/task/{task_id}/staff/{staff_id}")]
@@ -171,7 +143,9 @@ pub async fn update_assigned_staff(
 
     let (task_id, staff_id) = parsed_ids.unwrap();
 
-    let decider = staff_repo.read_one(task_staff_data.decided_by.clone()).await;
+    let decider = staff_repo
+        .read_one(task_staff_data.decided_by.clone())
+        .await;
     if decider.is_err() {
         // Might specify this error further. But the decider needs to exist in the request, so it's a bad request.
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
@@ -184,7 +158,9 @@ pub async fn update_assigned_staff(
     }
     let staff_unwrapped = staff.expect("Should be valid here.");
 
-    if decider_unwrapped.event_id != staff_unwrapped.event_id || decider_unwrapped.role != EventRole::Organizer {
+    if decider_unwrapped.event_id != staff_unwrapped.event_id
+        || decider_unwrapped.role != EventRole::Organizer
+    {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
@@ -202,26 +178,7 @@ pub async fn update_assigned_staff(
             .content_type("text/html")
             .body(body.expect("Should be valid now."));
     }
-
-    let error = result.err().expect("Should be error.");
-    match error {
-        sqlx::Error::RowNotFound => {
-            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
-        sqlx::Error::Database(err) => {
-            if err.is_check_violation()
-                || err.is_foreign_key_violation()
-                || err.is_unique_violation()
-            {
-                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
-            } else {
-                HttpResponse::InternalServerError()
-                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
-            }
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    }
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 #[delete("/task/{task_id}/staff")]
@@ -237,13 +194,7 @@ pub async fn delete_all_rejected_assigned_staff(
     let parsed_id = id_parse.expect("Should be valid.");
     let result = assigned_repo.delete_rejected(parsed_id).await;
     if let Err(error) = result {
-        return match error {
-            sqlx::Error::RowNotFound => {
-                HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-            }
-            _ => HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-        };
+        return handle_database_error(error);
     }
 
     HttpResponse::NoContent().finish()
@@ -262,13 +213,7 @@ pub async fn delete_assigned_staff(
     let (task_id, staff_id) = parsed_ids.unwrap();
     let result = assigned_repo.delete(task_id, staff_id).await;
     if let Err(error) = result {
-        return match error {
-            sqlx::Error::RowNotFound => {
-                HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-            }
-            _ => HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-        };
+        return handle_database_error(error);
     }
 
     HttpResponse::NoContent().finish()

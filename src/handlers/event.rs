@@ -5,7 +5,7 @@ use askama::Template;
 use uuid::Uuid;
 
 use crate::{
-    errors::parse_error,
+    errors::{handle_database_error, parse_error},
     repositories::event::{
         event_repo::EventRepository,
         models::{EventData, EventFilter, NewEvent},
@@ -56,7 +56,7 @@ pub async fn get_events(
             .body(body.expect("Should be okay now."));
     }
 
-    HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 #[get("/event/{event_id}")]
@@ -100,14 +100,7 @@ pub async fn get_event(
             .body(body.expect("Should be valid."));
     }
 
-    let error = result.err().expect("Should be an error");
-    match error {
-        sqlx::Error::RowNotFound => {
-            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    }
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 #[post("/event")]
@@ -150,25 +143,7 @@ pub async fn create_event(
             .body(body.expect("Should be valid."));
     }
 
-    let error = result.err().expect("Should be error.");
-    match error {
-        sqlx::Error::RowNotFound => {
-            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
-        sqlx::Error::Database(err) => {
-            if err.is_check_violation()
-                || err.is_foreign_key_violation()
-                || err.is_unique_violation()
-            {
-                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
-            } else {
-                HttpResponse::InternalServerError()
-                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
-            }
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    }
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 fn is_update_data_empty(event_data: EventData) -> bool {
@@ -228,25 +203,7 @@ pub async fn update_event(
             .body(body.expect("Should be valid now."));
     }
 
-    let error = result.err().expect("Should be error.");
-    match error {
-        sqlx::Error::RowNotFound => {
-            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
-        sqlx::Error::Database(err) => {
-            if err.is_check_violation()
-                || err.is_foreign_key_violation()
-                || err.is_unique_violation()
-            {
-                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
-            } else {
-                HttpResponse::InternalServerError()
-                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
-            }
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    }
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 #[delete("/event/{event_id}")]
@@ -263,13 +220,7 @@ pub async fn delete_event(
     let result = event_repo.delete(parsed_id).await;
 
     if let Err(error) = result {
-        return match error {
-            sqlx::Error::RowNotFound => {
-                HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-            }
-            _ => HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-        };
+        return handle_database_error(error);
     }
 
     HttpResponse::NoContent().finish()

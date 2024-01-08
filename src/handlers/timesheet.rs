@@ -5,7 +5,7 @@ use askama::Template;
 use uuid::Uuid;
 
 use crate::{
-    errors::parse_error,
+    errors::{handle_database_error, parse_error},
     handlers::common::extract_path_tuple_ids,
     repositories::timesheet::{
         models::{TimesheetCreateData, TimesheetReadAllData, TimesheetUpdateData},
@@ -59,26 +59,7 @@ pub async fn get_all_timesheets_for_employment(
             .body(body.expect("Should be valid now."));
     }
 
-    let error = result.err().expect("Should be error.");
-    match error {
-        sqlx::Error::RowNotFound => {
-            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
-        sqlx::Error::Database(err) => {
-            if err.is_check_violation()
-                || err.is_foreign_key_violation()
-                || err.is_unique_violation()
-            {
-                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
-            } else {
-                HttpResponse::InternalServerError()
-                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
-            }
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    }
-    // HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 // Note: This is done automatically whenever event_staff is accepted to work on an event.
@@ -102,22 +83,7 @@ pub async fn create_timesheet(
             .body(body.expect("Should be valid now."));
     }
 
-    let error = result.err().expect("Should be error here.");
-    return match error {
-        sqlx::Error::Database(err) => {
-            if err.is_unique_violation()
-                || err.is_check_violation()
-                || err.is_foreign_key_violation()
-            {
-                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
-            } else {
-                HttpResponse::InternalServerError()
-                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
-            }
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    };
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 #[get("/timesheet/{timesheet_id}")]
@@ -146,14 +112,7 @@ pub async fn get_timesheet(
             .body(body.expect("Should be valid now."));
     }
 
-    let error = result.err().expect("Should be an error.");
-    match error {
-        sqlx::Error::RowNotFound => {
-            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    }
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 fn is_data_empty(data: TimesheetUpdateData) -> bool {
@@ -202,22 +161,7 @@ pub async fn update_timesheet(
             .body(body.expect("Should be valid now."));
     }
 
-    let error = result.err().expect("Should be error here.");
-    return match error {
-        sqlx::Error::Database(err) => {
-            if err.is_unique_violation()
-                || err.is_check_violation()
-                || err.is_foreign_key_violation()
-            {
-                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
-            } else {
-                HttpResponse::InternalServerError()
-                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
-            }
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    };
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 /*
@@ -249,20 +193,5 @@ pub async fn reset_timesheet_data(
             .body(body.expect("Should be valid now."));
     }
 
-    let error = result.err().expect("Should be error here.");
-    return match error {
-        sqlx::Error::Database(err) => {
-            if err.is_unique_violation()
-                || err.is_check_violation()
-                || err.is_foreign_key_violation()
-            {
-                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
-            } else {
-                HttpResponse::InternalServerError()
-                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
-            }
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    };
+    handle_database_error(result.err().expect("Should be error."))
 }

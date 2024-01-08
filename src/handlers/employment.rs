@@ -1,6 +1,7 @@
 use std::str::FromStr;
 
 use crate::{
+    errors::handle_database_error,
     handlers::common::extract_path_tuple_ids,
     repositories::employment::models::{EmploymentData, NewEmployment},
     templates::{
@@ -77,7 +78,7 @@ pub async fn get_employments_per_user(
             .body(body.expect("Should be valid now."));
     }
 
-    HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 async fn get_full_employment(
@@ -143,22 +144,7 @@ async fn get_full_employment(
         };
     }
 
-    let error = result.err().expect("Should be error.");
-    match error {
-        sqlx::Error::RowNotFound => {
-            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
-        sqlx::Error::Database(err) => {
-            if err.is_check_violation() || err.is_foreign_key_violation() {
-                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
-            } else {
-                HttpResponse::InternalServerError()
-                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
-            }
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    }
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 #[get("/user/{user_id}/employment/{company_id}")]
@@ -234,22 +220,7 @@ pub async fn get_subordinates(
             .body(body.expect("Should be valid now."));
     }
 
-    let error = result.err().expect("Should be error.");
-    match error {
-        sqlx::Error::RowNotFound => {
-            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
-        sqlx::Error::Database(err) => {
-            if err.is_check_violation() || err.is_foreign_key_violation() {
-                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
-            } else {
-                HttpResponse::InternalServerError()
-                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
-            }
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    }
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 #[post("/employment")]
@@ -263,21 +234,7 @@ pub async fn create_employment(
     let result = employment_repo.create(new_employment.into_inner()).await;
 
     if let Err(error) = result {
-        return match error {
-            sqlx::Error::Database(err) => {
-                if err.is_unique_violation()
-                    || err.is_check_violation()
-                    || err.is_foreign_key_violation()
-                {
-                    HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
-                } else {
-                    HttpResponse::InternalServerError()
-                        .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
-                }
-            }
-            _ => HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-        };
+        return handle_database_error(error);
     }
 
     // This isn't very pleasant, but it is what it is. Maybe fix later.
@@ -316,21 +273,7 @@ pub async fn update_employment(
         .await;
 
     if let Err(error) = result {
-        return match error {
-            sqlx::Error::RowNotFound => {
-                HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-            }
-            sqlx::Error::Database(err) => {
-                if err.is_check_violation() || err.is_foreign_key_violation() {
-                    HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
-                } else {
-                    HttpResponse::InternalServerError()
-                        .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
-                }
-            }
-            _ => HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-        };
+        return handle_database_error(error);
     }
 
     // This isn't very pleasant, but it is what it is. Maybe fix later.
@@ -352,13 +295,7 @@ pub async fn delete_employment(
 
     let result = employment_repo.delete(user_id, company_id).await;
     if let Err(error) = result {
-        return match error {
-            sqlx::Error::RowNotFound => {
-                HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-            }
-            _ => HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-        };
+        return handle_database_error(error);
     }
 
     HttpResponse::NoContent().finish()
