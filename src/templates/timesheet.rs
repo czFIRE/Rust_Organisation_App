@@ -1,5 +1,6 @@
 use askama::Template;
 use chrono::{NaiveDate, NaiveDateTime};
+use crate::repositories::timesheet::models::TimesheetWithEvent;
 use serde::Deserialize;
 use sqlx::types::uuid;
 use uuid::Uuid;
@@ -68,7 +69,7 @@ impl From<TimesheetWithWorkdays> for TimesheetTemplate {
             work_days: workdays,
             calculated_wage: 0,
             is_editable: full_timesheet.timesheet.is_editable,
-            status: full_timesheet.timesheet.status,
+            status: full_timesheet.timesheet.approval_status,
             manager_note: full_timesheet
                 .timesheet
                 .manager_note
@@ -95,6 +96,26 @@ pub struct TimesheetLiteTemplate {
     pub has_note: bool, // This is just an indicator for the presence / absence of a manager's note.
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
+}
+
+impl From<TimesheetWithEvent> for TimesheetLiteTemplate {
+    fn from(timesheet: TimesheetWithEvent) -> Self {
+        TimesheetLiteTemplate {
+            id: timesheet.id,
+            user_id: timesheet.user_id,
+            company_id: timesheet.company_id,
+            event_id: timesheet.event_id,
+            event_avatar_url: timesheet.event_avatar_url,
+            event_name: timesheet.event_name,
+            start_date: timesheet.start_date,
+            end_date: timesheet.end_date,
+            is_editable: timesheet.is_editable,
+            status: timesheet.approval_status,
+            has_note: timesheet.manager_note.is_some(),
+            created_at: timesheet.created_at,
+            edited_at: timesheet.edited_at,
+        }
+    }
 }
 
 #[derive(Template, Debug, Deserialize)]
