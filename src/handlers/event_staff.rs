@@ -1,7 +1,16 @@
 use std::str::FromStr;
 
+use crate::repositories::timesheet::models::TimesheetCreateData;
 use crate::{
-    repositories::event_staff::models::{NewStaff, StaffData, StaffFilter},
+    common::DbResult,
+    errors::handle_database_error,
+    handlers::common::extract_path_tuple_ids,
+    models::{AcceptanceStatus, EventRole},
+    repositories::{
+        event::event_repo::EventRepository,
+        event_staff::models::{NewStaff, StaffData, StaffFilter},
+        timesheet::timesheet_repo::TimesheetRepository,
+    },
     templates::staff::AllStaffTemplate,
 };
 use actix_web::{delete, get, http, patch, post, web, HttpResponse};
@@ -146,27 +155,78 @@ pub async fn create_event_staff(
 
 fn is_data_invalid(data: StaffData) -> bool {
     (data.role.is_none() && data.status.is_none() && data.decided_by.is_none())
-        || (data.status.is_some() && data.decided_by.is_none())
+        || (data.status.is_some()
+            && data.status.clone().unwrap() != AcceptanceStatus::Pending
+            && data.decided_by.is_none())
+        || (data.status.is_none() && data.decided_by.is_some())
 }
 
-#[patch("/event/staff/{staff_id}")]
+async fn create_timesheet_for_user(
+    user_id: Uuid,
+    company_id: Uuid,
+    event_id: Uuid,
+    timesheet_repo: web::Data<TimesheetRepository>,
+    event_repo: web::Data<EventRepository>,
+) -> DbResult<()> {
+    let event = event_repo.read_one(event_id).await?;
+
+    let timesheet_data = TimesheetCreateData {
+        start_date: event.start_date,
+        end_date: event.end_date,
+        user_id,
+        company_id,
+        event_id,
+    };
+
+    timesheet_repo.create(timesheet_data).await?;
+    Ok(())
+}
+
+#[patch("/event/{event_id}/staff/{staff_id}")]
 pub async fn update_event_staff(
-    staff_id: web::Path<String>,
+    path: web::Path<(String, String)>,
     event_staff_data: web::Form<StaffData>,
     event_staff_repo: web::Data<StaffRepository>,
+    timesheet_repo: web::Data<TimesheetRepository>,
+    event_repo: web::Data<EventRepository>,
 ) -> HttpResponse {
     if is_data_invalid(event_staff_data.clone()) {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
-    let id_parse = Uuid::from_str(staff_id.into_inner().as_str());
-    if id_parse.is_err() {
+    let parsed_ids = extract_path_tuple_ids(path.into_inner());
+    if parsed_ids.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
-    let parsed_id = id_parse.expect("Should be valid.");
+    let (event_id, staff_id) = parsed_ids.unwrap();
+
+    // Extract the old and new status of the event staff to check if status really changes.
+    let current_staff = event_staff_repo.read_one(staff_id).await;
+    if current_staff.is_err() {
+        return HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND));
+    }
+    let old_staff = current_staff.expect("Should be valid now.");
+    let status_change = event_staff_data.status.clone();
+
+    // Make sure the decider is a valid entity in the system.
+    if event_staff_data.decided_by.is_some() {
+        let decider_id = event_staff_data.decided_by.clone().unwrap();
+        let decider = event_staff_repo.read_one(decider_id).await;
+        if decider.is_err() {
+            // Might specify this error further. But the decider needs to exist in the request, so it's a bad request.
+            return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        }
+        let decider_unwrapped = decider.expect("Should be valid here.");
+        // Decider is not from this event. Whoops.
+        if decider_unwrapped.event_id != event_id || decider_unwrapped.role != EventRole::Organizer
+        {
+            return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        }
+    }
+
     let result = event_staff_repo
-        .update(parsed_id, event_staff_data.into_inner())
+        .update(staff_id, event_staff_data.into_inner())
         .await;
 
     if let Ok(staff) = result {
@@ -176,30 +236,32 @@ pub async fn update_event_staff(
             return HttpResponse::InternalServerError()
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
+
+        // If a status change occured, and everything else went well, then we
+        // need to create the timesheet.
+        if status_change.is_some()
+            && status_change.unwrap() == AcceptanceStatus::Accepted
+            && old_staff.status != AcceptanceStatus::Accepted
+        {
+            let timesheet_res = create_timesheet_for_user(
+                old_staff.user.id,
+                old_staff.company.id,
+                event_id,
+                timesheet_repo,
+                event_repo,
+            )
+            .await;
+            if timesheet_res.is_err() {
+                return handle_database_error(timesheet_res.err().expect("Should be err."));
+            }
+        }
+
         return HttpResponse::Ok()
             .content_type("text/html")
             .body(body.expect("Should be valid now."));
     }
 
-    let error = result.err().expect("Should be error.");
-    match error {
-        sqlx::Error::RowNotFound => {
-            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
-        }
-        sqlx::Error::Database(err) => {
-            if err.is_check_violation()
-                || err.is_foreign_key_violation()
-                || err.is_unique_violation()
-            {
-                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
-            } else {
-                HttpResponse::InternalServerError()
-                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
-            }
-        }
-        _ => HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
-    }
+    handle_database_error(result.err().expect("Should be error."))
 }
 
 #[delete("/event/{event_id}/staff")]

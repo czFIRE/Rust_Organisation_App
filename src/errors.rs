@@ -1,4 +1,4 @@
-use actix_web::http;
+use actix_web::{http, HttpResponse};
 use serde::Serialize;
 
 #[derive(Serialize)]
@@ -18,4 +18,25 @@ pub fn parse_error(code: http::StatusCode) -> String {
     };
 
     serde_json::to_string(&response).expect("Should be parsed correctly.")
+}
+
+pub fn handle_database_error(error: sqlx::Error) -> HttpResponse {
+    match error {
+        sqlx::Error::RowNotFound => {
+            HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND))
+        }
+        sqlx::Error::Database(err) => {
+            if err.is_check_violation()
+                || err.is_foreign_key_violation()
+                || err.is_unique_violation()
+            {
+                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
+            } else {
+                HttpResponse::InternalServerError()
+                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
+            }
+        }
+        _ => HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
+    }
 }
