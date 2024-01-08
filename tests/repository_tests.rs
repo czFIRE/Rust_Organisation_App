@@ -2946,7 +2946,7 @@ pub mod comment_repo_tests {
         let comment_id = test_constants::COMMENT0_ID;
 
         let comment = comment_repo
-            .read_one(comment_id)
+            ._read_one(comment_id)
             .await
             .expect("Read should succeed");
 
@@ -3044,7 +3044,7 @@ pub mod comment_repo_tests {
             let comment_id = test_constants::COMMENT0_ID;
 
             let _comment = comment_repo
-                .read_one(comment_id)
+                ._read_one(comment_id)
                 .await
                 .expect("Read should succeed");
 
@@ -3103,7 +3103,7 @@ pub mod comment_repo_tests {
             let comment_id = test_constants::COMMENT0_ID;
 
             let comment = comment_repo
-                .read_one(comment_id)
+                ._read_one(comment_id)
                 .await
                 .expect("Read should succeed");
 
@@ -3115,7 +3115,7 @@ pub mod comment_repo_tests {
                 .expect("Delete should succeed");
 
             let _ = comment_repo
-                .read_one(comment_id)
+                ._read_one(comment_id)
                 .await
                 .expect_err("Read should not succeed");
 
@@ -3146,7 +3146,7 @@ pub mod comment_repo_tests {
             let comment_id = test_constants::COMMENT0_ID;
 
             let comment = comment_repo
-                .read_one(comment_id)
+                ._read_one(comment_id)
                 .await
                 .expect("Read should succeed");
 
@@ -3155,7 +3155,7 @@ pub mod comment_repo_tests {
             comment_repo.delete(comment_id).await.unwrap();
 
             let _ = comment_repo
-                .read_one(comment_id)
+                ._read_one(comment_id)
                 .await
                 .expect_err("Read should not succeed");
         }
@@ -3166,7 +3166,7 @@ pub mod comment_repo_tests {
             let comment_id = test_constants::COMMENT0_ID;
 
             let _ = comment_repo
-                .read_one(comment_id)
+                ._read_one(comment_id)
                 .await
                 .expect_err("Read should not succeed");
 

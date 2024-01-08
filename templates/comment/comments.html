@@ -1,0 +1,13 @@
+{% for comment in comments %}
+{{ comment.id }}
+{{ comment.parent_category_id }}
+{{ comment.author.id }}
+{{ comment.author.name }}
+{{ comment.author.status }}
+{{ comment.author.age }}
+{{ comment.author.gender }}
+{{ comment.author.avatar_url }}
+{{ comment.content }}
+{{ comment.created_at }}
+{{ comment.edited_at }}
+{% endfor %}

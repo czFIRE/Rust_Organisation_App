@@ -23,7 +23,7 @@ impl From<CommentExtended> for CommentTemplate {
         let author_lite: UserLite = value.author.into();
         CommentTemplate {
             id: value.comment_id,
-            parent_category_id: value.event_id.expect("Should be set!"),
+            parent_category_id: if value.event_id.is_some() { value.event_id.unwrap()} else { value.task_id.expect("Should be set.") },
             author: author_lite.into(),
             content: value.content,
             created_at: value.created_at,

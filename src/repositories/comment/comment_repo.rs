@@ -68,12 +68,12 @@ impl CommentRepository {
         Ok(full_comment)
     }
 
-    pub async fn read_one(&self, comment_id: Uuid) -> DbResult<CommentExtended> {
+    pub async fn _read_one(&self, comment_id: Uuid) -> DbResult<CommentExtended> {
         // Redis here
-        self.read_one_db(comment_id).await
+        self._read_one_db(comment_id).await
     }
 
-    async fn read_one_db(&self, comment_id: Uuid) -> DbResult<CommentExtended> {
+    async fn _read_one_db(&self, comment_id: Uuid) -> DbResult<CommentExtended> {
         let executor = self.pool.as_ref();
 
         let comment: CommentUserFlattened = sqlx::query_as!(

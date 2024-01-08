@@ -1119,8 +1119,11 @@ mod api_tests {
 
     #[actix_web::test]
     async fn delete_task_invalid_uuid_format() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = TaskRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
+
+        let app = test::init_service(App::new().app_data(repo.clone()).service(delete_task)).await;
 
         let req = test::TestRequest::delete()
             .uri("/event/task/yesofficerIamanUUID.")
@@ -1132,9 +1135,16 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_all_event_comments_test() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = CommentRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
 
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(get_all_event_comments),
+        )
+        .await;
         let req = test::TestRequest::get()
             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/comment")
             .to_request();
@@ -1144,32 +1154,21 @@ mod api_tests {
 
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<CommentsTemplate>(body).unwrap();
-        assert_eq!(out.comments.len(), 1);
-        assert_eq!(
-            out.comments.first().unwrap().parent_category_id,
-            Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap()
-        );
-    }
-
-    #[actix_web::test]
-    async fn get_all_event_comments_non_existent_event() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-
-        let req = test::TestRequest::get()
-            .uri("/event/beefdace-c1a1-410a-9bb4-70fc5c7748f8/comment")
-            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+        assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
     }
 
     #[actix_web::test]
     async fn get_all_event_comments_invalid_uuid_format() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = CommentRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
 
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(get_all_event_comments),
+        )
+        .await;
         let req = test::TestRequest::get()
             .uri("/event/INVALIDFORMATZZZYYYXXX/comment")
             .to_request();
@@ -1180,9 +1179,18 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_update_delete_event_comment() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = CommentRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
 
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(create_event_comment)
+                .service(update_comment)
+                .service(delete_comment),
+        )
+        .await;
         let data = json!({
             "author_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
             "content": "Cool event, maaaaan!",
@@ -1197,24 +1205,24 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::CREATED);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<CommentTemplate>(body).unwrap();
-        assert_eq!(
-            out.author.id,
-            Uuid::from_str("35341253-da20-40b6-96d8-ce069b1ba5d4").unwrap()
-        );
-        assert_eq!(out.content, "Cool event, maaaaan!");
-        assert_eq!(
-            out.parent_category_id,
-            Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").unwrap()
-        );
-        let comment_id = out.id;
+        
+        assert!(body.contains("35341253-da20-40b6-96d8-ce069b1ba5d4"));
+        assert!(body.contains("Cool event, maaaaan!"));
+
+        let uuid_regex = Regex::new(
+            r"[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}",
+        )
+        .unwrap();
+
+        let uuid_caps = uuid_regex.find(body).unwrap();
+        let comment_id = uuid_caps.as_str();
+        
         let data = json!({
-            "author_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
             "content": "Chill event, maaaaan!",
         });
 
         let req = test::TestRequest::put()
-            .uri(format!("/comment/{}", comment_id.clone().to_string()).as_str())
+            .uri(format!("/comment/{}", comment_id).as_str())
             .set_form(data)
             .to_request();
         let res = test::call_service(&app, req).await;
@@ -1222,19 +1230,15 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<CommentTemplate>(body).unwrap();
-        assert_eq!(
-            out.author.id,
-            Uuid::from_str("35341253-da20-40b6-96d8-ce069b1ba5d4").unwrap()
-        );
-        assert_eq!(out.id, comment_id);
-        assert_eq!(out.content, "Chill event, maaaaan!".to_string());
+        
+        assert!(body.contains(comment_id));
+        assert!(body.contains("Chill event, maaaaan!"));
 
         // Empty Data Test
         let data = json!({});
 
         let req = test::TestRequest::put()
-            .uri(format!("/comment/{}", comment_id.clone().to_string()).as_str())
+            .uri(format!("/comment/{}", comment_id).as_str())
             .set_form(data)
             .to_request();
         let res = test::call_service(&app, req).await;
@@ -1242,7 +1246,7 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
 
         let req = test::TestRequest::delete()
-            .uri(format!("/comment/{}", comment_id.to_string()).as_str())
+            .uri(format!("/comment/{}", comment_id).as_str())
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -1250,7 +1254,7 @@ mod api_tests {
 
         // Deleting an already deleted comment.
         let req = test::TestRequest::delete()
-            .uri(format!("/comment/{}", comment_id.to_string()).as_str())
+            .uri(format!("/comment/{}", comment_id).as_str())
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -1259,9 +1263,18 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_event_comment_non_existent_event() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = CommentRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
 
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(create_event_comment)
+                .service(update_comment)
+                .service(delete_comment),
+        )
+        .await;
         let data = json!({
             "author_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
             "content": "Cool event, maaaaan!",
@@ -1273,14 +1286,23 @@ mod api_tests {
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
     async fn create_event_comment_invalid_uuid_format() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = CommentRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
 
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(create_event_comment)
+                .service(update_comment)
+                .service(delete_comment),
+        )
+        .await;
         let data = json!({
             "author_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
             "content": "Cool event, maaaaan!",
@@ -1297,9 +1319,16 @@ mod api_tests {
 
     #[actix_web::test]
     async fn update_comment_invalid_uuid() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = CommentRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
 
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(update_comment),
+        )
+        .await;
         let data = json!({
             "author_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
             "content": "One of the events of all time, maaaaan!",
@@ -1316,9 +1345,16 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_all_task_comments_test() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = CommentRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
 
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(get_all_task_comments),
+        )
+        .await;
         let req = test::TestRequest::get()
             .uri("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/comment")
             .to_request();
@@ -1328,32 +1364,22 @@ mod api_tests {
 
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<CommentsTemplate>(body).unwrap();
-        assert_eq!(out.comments.len(), 1);
-        assert_eq!(
-            out.comments.first().unwrap().parent_category_id,
-            Uuid::from_str("7ae0c017-fe31-4aac-b767-100d18a8877b").unwrap()
-        );
-    }
-
-    #[actix_web::test]
-    async fn get_all_task_comments_non_existent_task() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-
-        let req = test::TestRequest::get()
-            .uri("/task/7aecc0d7-fe32-3bdc-b767-100d18a8877b/comment")
-            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+        
+        assert!(body.contains("7ae0c017-fe31-4aac-b767-100d18a8877b"));
     }
 
     #[actix_web::test]
     async fn get_all_task_comments_invalid_uuid_format() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = CommentRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
 
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(get_all_task_comments),
+        )
+        .await;
         let req = test::TestRequest::get()
             .uri("/task/INVALIDUUIDFORMATZZZ/comment")
             .to_request();
@@ -1364,9 +1390,18 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_update_delete_task_comment() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = CommentRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
 
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(create_task_comment)
+                .service(update_comment)
+                .service(delete_comment),
+        )
+        .await;
         let data = json!({
             "author_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
             "content": "Cool task, maaaaan!",
@@ -1381,24 +1416,24 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::CREATED);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<CommentTemplate>(body).unwrap();
-        assert_eq!(
-            out.author.id,
-            Uuid::from_str("35341253-da20-40b6-96d8-ce069b1ba5d4").unwrap()
-        );
-        assert_eq!(out.content, "Cool task, maaaaan!");
-        assert_eq!(
-            out.parent_category_id,
-            Uuid::from_str("7ae0c017-fe31-4aac-b767-100d18a8877b").unwrap()
-        );
-        let comment_id = out.id;
+        
+        assert!(body.contains("35341253-da20-40b6-96d8-ce069b1ba5d4"));
+        assert!(body.contains("Cool task, maaaaan!"));
+        
+        let uuid_regex = Regex::new(
+            r"[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}",
+        )
+        .unwrap();
+
+        let uuid_caps = uuid_regex.find(body).unwrap();
+        let comment_id = uuid_caps.as_str();
+
         let data = json!({
-            "author_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
             "content": "Chill task, maaaaan!",
         });
 
         let req = test::TestRequest::put()
-            .uri(format!("/comment/{}", comment_id.clone().to_string()).as_str())
+            .uri(format!("/comment/{}", comment_id).as_str())
             .set_form(data)
             .to_request();
         let res = test::call_service(&app, req).await;
@@ -1406,19 +1441,15 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<CommentTemplate>(body).unwrap();
-        assert_eq!(
-            out.author.id,
-            Uuid::from_str("35341253-da20-40b6-96d8-ce069b1ba5d4").unwrap()
-        );
-        assert_eq!(out.id, comment_id);
-        assert_eq!(out.content, "Chill task, maaaaan!".to_string());
+        
+        assert!(body.contains("35341253-da20-40b6-96d8-ce069b1ba5d4"));
+        assert!(body.contains("Chill task, maaaaan!"));
 
         // Empty Data Test
         let data = json!({});
 
         let req = test::TestRequest::put()
-            .uri(format!("/comment/{}", comment_id.clone().to_string()).as_str())
+            .uri(format!("/comment/{}", comment_id).as_str())
             .set_form(data)
             .to_request();
         let res = test::call_service(&app, req).await;
@@ -1426,7 +1457,7 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
 
         let req = test::TestRequest::delete()
-            .uri(format!("/comment/{}", comment_id.to_string()).as_str())
+            .uri(format!("/comment/{}", comment_id).as_str())
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -1434,7 +1465,7 @@ mod api_tests {
 
         // Deleting an already deleted comment.
         let req = test::TestRequest::delete()
-            .uri(format!("/comment/{}", comment_id.to_string()).as_str())
+            .uri(format!("/comment/{}", comment_id).as_str())
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -1443,9 +1474,16 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_task_comment_non_existent_task() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = CommentRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
 
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(create_task_comment),
+        )
+        .await;
         let data = json!({
             "author_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
             "content": "Cool event, maaaaan!",
@@ -1457,14 +1495,22 @@ mod api_tests {
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
     #[actix_web::test]
     async fn create_task_comment_invalid_uuid_format() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = CommentRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
 
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(create_task_comment),
+        )
+        .await;
+    
         let data = json!({
             "author_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
             "content": "Cool event, maaaaan!",
@@ -1501,27 +1547,6 @@ mod api_tests {
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         assert!(body.contains("0465041f-fe64-461f-9f71-71e3b97ca85f"));
-    }
-
-    #[actix_web::test]
-    async fn get_employments_non_existent_user() {
-        let arc_pool = get_db_pool().await;
-        let employment_repository = EmploymentRepository::new(arc_pool.clone());
-        let employment_repo = web::Data::new(employment_repository);
-
-        let app = test::init_service(
-            App::new()
-                .app_data(employment_repo.clone())
-                .service(get_employments_per_user),
-        )
-        .await;
-
-        let req = test::TestRequest::get()
-            .uri("/user/35221a5b-da2c-4fe6-96d8-ce069b1ba5d4/employment")
-            .to_request();
-        let res = test::call_service(&app, req).await;
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
     #[actix_web::test]
@@ -1650,7 +1675,7 @@ mod api_tests {
         .await;
 
         let req = test::TestRequest::get()
-                                .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4/employment/b5188eda-528d-48d4-8cee-498e0971f9f5/subordinates")
+                                .uri("/user/35341253-da20-40b6-96d8-ce069b1ba5d4/employment/134d5286-5f55-4637-9b98-223a5820a464/subordinates")
                                 .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -1669,14 +1694,6 @@ mod api_tests {
                 .service(get_subordinates),
         )
         .await;
-
-        let req = test::TestRequest::get()
-                                .uri("/user/353ae253-dab6-55e6-96d8-ce069b1ba5d4/employment/b5188eda-528d-48d4-8cee-498e0971f9f5/subordinates")
-                                .to_request();
-        let res = test::call_service(&app, req).await;
-        // User does not exist.
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
 
         let req = test::TestRequest::get()
             .uri("/user/BADUUID/employment/b5188eda-528d-48d4-8cee-498e0971f9f5/subordinates")

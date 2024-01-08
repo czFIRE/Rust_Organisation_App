@@ -200,10 +200,6 @@ pub async fn get_subordinates(
         .await;
 
     if let Ok(employments) = result {
-        if employments.len() == 0 {
-            return HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND));
-        }
-
         let employment_vec = employments
             .into_iter()
             .map(|employment| {
