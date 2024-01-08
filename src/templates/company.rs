@@ -5,7 +5,10 @@ use sqlx::types::uuid;
 use uuid::Uuid;
 
 use crate::{
-    models::Association, repositories::{associated_company::models::AssociatedCompanyExtended, company::models::CompanyExtended},
+    models::Association,
+    repositories::{
+        associated_company::models::AssociatedCompanyExtended, company::models::CompanyExtended,
+    },
 };
 
 #[derive(Deserialize)]

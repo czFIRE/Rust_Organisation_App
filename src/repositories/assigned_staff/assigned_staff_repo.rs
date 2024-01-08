@@ -3,7 +3,7 @@ use crate::{
 };
 use async_trait::async_trait;
 use sqlx::{postgres::PgPool, Postgres, Transaction};
-use std::{sync::Arc, ops::DerefMut};
+use std::{ops::DerefMut, sync::Arc};
 use uuid::Uuid;
 
 use crate::models::{AcceptanceStatus, EventRole, Gender, UserRole, UserStatus};
@@ -59,7 +59,9 @@ impl AssignedStaffRepository {
         .fetch_one(tx.deref_mut())
         .await?;
 
-        let assigned_staff = self.read_one_tx(new_staff.task_id, new_staff.staff_id, tx).await?;
+        let assigned_staff = self
+            .read_one_tx(new_staff.task_id, new_staff.staff_id, tx)
+            .await?;
 
         // TODO - are we returning the right thing here?
         Ok(assigned_staff)
@@ -122,7 +124,7 @@ impl AssignedStaffRepository {
                 user_record_decided_by.name AS "decided_by_user_name?",
                 user_record_decided_by.email AS "decided_by_user_email?", 
                 user_record_decided_by.birth AS "decided_by_user_birth?", 
-                user_record_decided_by.avatar_url AS "decided_by_user_avatar_url", 
+                user_record_decided_by.avatar_url AS "decided_by_user_avatar_url?", 
                 user_record_decided_by.gender AS "decided_by_user_gender?: Gender", 
                 user_record_decided_by.role AS "decided_by_user_role?: UserRole", 
                 user_record_decided_by.status AS "decided_by_user_status?: UserStatus", 
@@ -149,7 +151,12 @@ impl AssignedStaffRepository {
         Ok(assigned_staff.into())
     }
 
-    async fn read_one_tx(&self, task_id: Uuid, staff_id: Uuid, mut tx: Transaction<'_, Postgres>) -> DbResult<AssignedStaffExtended> {
+    async fn read_one_tx(
+        &self,
+        task_id: Uuid,
+        staff_id: Uuid,
+        mut tx: Transaction<'_, Postgres>,
+    ) -> DbResult<AssignedStaffExtended> {
         let assigned_staff: AssignedStaffStaffUserCompanyFlattened = sqlx::query_as!(
             AssignedStaffStaffUserCompanyFlattened,
             r#"
@@ -198,7 +205,7 @@ impl AssignedStaffRepository {
                 user_record_decided_by.name AS "decided_by_user_name?",
                 user_record_decided_by.email AS "decided_by_user_email?", 
                 user_record_decided_by.birth AS "decided_by_user_birth?", 
-                user_record_decided_by.avatar_url AS "decided_by_user_avatar_url", 
+                user_record_decided_by.avatar_url AS "decided_by_user_avatar_url?", 
                 user_record_decided_by.gender AS "decided_by_user_gender?: Gender", 
                 user_record_decided_by.role AS "decided_by_user_role?: UserRole", 
                 user_record_decided_by.status AS "decided_by_user_status?: UserStatus", 
@@ -283,7 +290,7 @@ impl AssignedStaffRepository {
                 user_record_decided_by.name AS "decided_by_user_name?",
                 user_record_decided_by.email AS "decided_by_user_email?", 
                 user_record_decided_by.birth AS "decided_by_user_birth?", 
-                user_record_decided_by.avatar_url AS "decided_by_user_avatar_url", 
+                user_record_decided_by.avatar_url AS "decided_by_user_avatar_url?", 
                 user_record_decided_by.gender AS "decided_by_user_gender?: Gender", 
                 user_record_decided_by.role AS "decided_by_user_role?: UserRole", 
                 user_record_decided_by.status AS "decided_by_user_status?: UserStatus", 
@@ -349,7 +356,7 @@ impl AssignedStaffRepository {
         .fetch_one(tx.deref_mut())
         .await?;
 
-        let updated_staff = self.read_one(task_id, staff_id).await?;
+        let updated_staff = self.read_one_tx(task_id, staff_id, tx).await?;
 
         Ok(updated_staff)
     }

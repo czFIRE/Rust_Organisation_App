@@ -1,7 +1,7 @@
 use chrono::NaiveDate;
+use serde::Deserialize;
 use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
-use serde::Deserialize;
 
 use crate::{
     models::{AcceptanceStatus, EventRole, Gender, UserRole, UserStatus},
@@ -107,7 +107,7 @@ pub struct AssignedStaffStaffUserCompanyFlattened {
     pub decided_by_user_name: Option<String>,
     pub decided_by_user_email: Option<String>,
     pub decided_by_user_birth: Option<NaiveDate>,
-    pub decided_by_user_avatar_url: String,
+    pub decided_by_user_avatar_url: Option<String>,
     pub decided_by_user_gender: Option<Gender>,
     pub decided_by_user_role: Option<UserRole>,
     pub decided_by_user_status: Option<UserStatus>,
@@ -148,6 +148,7 @@ impl From<AssignedStaffStaffUserCompanyFlattened> for AssignedStaffExtended {
         };
 
         let tmp_event_staff = StaffLite {
+            id: value.staff_id,
             user: tmp_user,
             company: tmp_company,
             event_id: value.staff_event_id,
@@ -161,7 +162,7 @@ impl From<AssignedStaffStaffUserCompanyFlattened> for AssignedStaffExtended {
                 name: value.decided_by_user_name.unwrap(),
                 email: value.decided_by_user_email.unwrap(),
                 birth: value.decided_by_user_birth.unwrap(),
-                avatar_url: value.decided_by_user_avatar_url,
+                avatar_url: value.decided_by_user_avatar_url.unwrap(),
                 gender: value.decided_by_user_gender.unwrap(),
                 role: value.decided_by_user_role.unwrap(),
                 status: value.decided_by_user_status.unwrap(),
@@ -175,7 +176,7 @@ impl From<AssignedStaffStaffUserCompanyFlattened> for AssignedStaffExtended {
             task_id: value.assigned_staff_task_id,
             staff: tmp_event_staff,
             status: value.assigned_staff_status,
-            decided_by: value.staff_decided_by,
+            decided_by: value.assigned_staff_decided_by,
             decided_by_user: decided_by_user,
             created_at: value.assigned_staff_created_at,
             edited_at: value.assigned_staff_edited_at,

@@ -1,11 +1,19 @@
 use std::str::FromStr;
 
-use actix_web::{delete, get, patch, post, web, HttpResponse, http};
+use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;
 use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::{repositories::assigned_staff::{assigned_staff_repo::AssignedStaffRepository, models::{AssignedStaffFilter, NewAssignedStaff, AssignedStaffData}}, errors::parse_error, handlers::common::extract_path_tuple_ids, templates::staff::{AllAssignedStaffTemplate, AssignedStaffTemplate}};
+use crate::{
+    errors::parse_error,
+    handlers::common::extract_path_tuple_ids,
+    repositories::assigned_staff::{
+        assigned_staff_repo::AssignedStaffRepository,
+        models::{AssignedStaffData, AssignedStaffFilter, NewAssignedStaff},
+    },
+    templates::staff::{AllAssignedStaffTemplate, AssignedStaffTemplate},
+};
 
 #[derive(Deserialize)]
 pub struct NewAssignedStaffData {
@@ -18,8 +26,9 @@ pub async fn get_all_assigned_staff(
     query: web::Query<AssignedStaffFilter>,
     assigned_repo: web::Data<AssignedStaffRepository>,
 ) -> HttpResponse {
-    if (query.limit.is_some() && query.limit.clone().unwrap() <= 0 )
-        || (query.offset.is_some() && query.offset.clone().unwrap() <= 0) {
+    if (query.limit.is_some() && query.limit.clone().unwrap() <= 0)
+        || (query.offset.is_some() && query.offset.clone().unwrap() <= 0)
+    {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
@@ -29,20 +38,28 @@ pub async fn get_all_assigned_staff(
     }
 
     let parsed_id = id_parse.expect("Should be valid.");
-    let result = assigned_repo.read_all_per_task(parsed_id, query.into_inner()).await;
+    let result = assigned_repo
+        .read_all_per_task(parsed_id, query.into_inner())
+        .await;
 
     if let Ok(assigned) = result {
-        let assigned_vec: Vec<AssignedStaffTemplate> = assigned.into_iter().map(|assigned_staff| assigned_staff.into()).collect();
+        let assigned_vec: Vec<AssignedStaffTemplate> = assigned
+            .into_iter()
+            .map(|assigned_staff| assigned_staff.into())
+            .collect();
         let template = AllAssignedStaffTemplate {
             staff: assigned_vec,
         };
         let body = template.render();
         if body.is_err() {
-            return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
-        return HttpResponse::Ok().content_type("text/html").body(body.expect("Should be valid now."));
+        return HttpResponse::Ok()
+            .content_type("text/html")
+            .body(body.expect("Should be valid now."));
     }
-    
+
     let error = result.err().expect("Should be an error");
     match error {
         sqlx::Error::RowNotFound => {
@@ -70,11 +87,14 @@ pub async fn get_assigned_staff(
         let template: AssignedStaffTemplate = assigned_staff.into();
         let body = template.render();
         if body.is_err() {
-            return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
-        return HttpResponse::Ok().content_type("text/html").body(body.expect("Should be valid now."));
+        return HttpResponse::Ok()
+            .content_type("text/html")
+            .body(body.expect("Should be valid now."));
     }
-    
+
     let error = result.err().expect("Should be an error");
     match error {
         sqlx::Error::RowNotFound => {
@@ -108,11 +128,14 @@ pub async fn create_assigned_staff(
         let template: AssignedStaffTemplate = assigned_staff.into();
         let body = template.render();
         if body.is_err() {
-            return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
-        return HttpResponse::Created().content_type("text/html").body(body.expect("Should be valid now."));
+        return HttpResponse::Created()
+            .content_type("text/html")
+            .body(body.expect("Should be valid now."));
     }
-    
+
     let error = result.err().expect("Should be error.");
     match error {
         sqlx::Error::RowNotFound => {
@@ -146,16 +169,21 @@ pub async fn update_assigned_staff(
     }
 
     let (task_id, staff_id) = parsed_ids.unwrap();
-    let result = assigned_repo.update(task_id, staff_id, task_staff_data.into_inner()).await;
+    let result = assigned_repo
+        .update(task_id, staff_id, task_staff_data.into_inner())
+        .await;
     if let Ok(assigned_staff) = result {
         let template: AssignedStaffTemplate = assigned_staff.into();
         let body = template.render();
         if body.is_err() {
-            return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
-        return HttpResponse::Created().content_type("text/html").body(body.expect("Should be valid now."));
+        return HttpResponse::Ok()
+            .content_type("text/html")
+            .body(body.expect("Should be valid now."));
     }
-    
+
     let error = result.err().expect("Should be error.");
     match error {
         sqlx::Error::RowNotFound => {
@@ -179,9 +207,9 @@ pub async fn update_assigned_staff(
 
 #[delete("/task/{task_id}/staff")]
 pub async fn delete_all_rejected_assigned_staff(
-        task_id: web::Path<String>,
-        assigned_repo: web::Data<AssignedStaffRepository>
-    )-> HttpResponse {
+    task_id: web::Path<String>,
+    assigned_repo: web::Data<AssignedStaffRepository>,
+) -> HttpResponse {
     let id_parse = Uuid::from_str(task_id.into_inner().as_str());
     if id_parse.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));

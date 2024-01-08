@@ -27,7 +27,7 @@ use actix_web::web;
 
 use crate::handlers::{
     assigned_staff::{
-        create_assigned_staff, delete_assigned_staff, delete_all_rejected_assigned_staff,
+        create_assigned_staff, delete_all_rejected_assigned_staff, delete_assigned_staff,
         get_all_assigned_staff, get_assigned_staff, update_assigned_staff,
     },
     associated_company::{

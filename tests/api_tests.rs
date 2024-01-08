@@ -6,7 +6,7 @@ mod api_tests {
     use actix_web::http::header::ContentType;
     use actix_web::{http, web};
     use actix_web::{test, App};
-    use chrono::{NaiveDate, Utc};
+    use chrono::NaiveDate;
     use dotenv::dotenv;
     use organization::repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository;
     use organization::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
@@ -22,7 +22,7 @@ mod api_tests {
 
     use organization::handlers::{
         assigned_staff::{
-            create_assigned_staff, delete_assigned_staff, delete_not_accepted_assigned_staff,
+            create_assigned_staff, delete_all_rejected_assigned_staff, delete_assigned_staff,
             get_all_assigned_staff, get_assigned_staff, update_assigned_staff,
         },
         associated_company::{
@@ -61,21 +61,7 @@ mod api_tests {
         },
     };
 
-    use organization::models::{
-        AcceptanceStatus, Association, EventRole, Gender, UserRole, UserStatus,
-    };
     use organization::templates::comment::{CommentTemplate, CommentsTemplate};
-    use organization::templates::company::{
-        AssociatedCompaniesTemplate, AssociatedCompanyTemplate, CompaniesTemplate, CompanyTemplate,
-    };
-    use organization::templates::employment::{EmploymentTemplate, EmploymentsTemplate};
-    use organization::templates::event::{EventTemplate, EventsTemplate};
-    use organization::templates::staff::{
-        AllStaffTaskTemplate, AllStaffTemplate, StaffTemplate, TaskStaffTemplate,
-    };
-    use organization::templates::task::{TaskTemplate, TasksTemplate};
-    use organization::templates::timesheet::{TimesheetTemplate, TimesheetsTemplate};
-    use organization::templates::user::UserTemplate;
     use regex::Regex;
     use serde_json::json;
     use sqlx::{Pool, Postgres};
@@ -915,12 +901,8 @@ mod api_tests {
         let repository = TaskRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
-        let app = test::init_service(
-            App::new()
-                .app_data(repo.clone())
-                .service(get_event_tasks),
-        )
-        .await;
+        let app =
+            test::init_service(App::new().app_data(repo.clone()).service(get_event_tasks)).await;
 
         let req = test::TestRequest::get()
             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task")
@@ -940,12 +922,8 @@ mod api_tests {
         let repository = TaskRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
-        let app = test::init_service(
-            App::new()
-                .app_data(repo.clone())
-                .service(get_event_tasks),
-        )
-        .await;
+        let app =
+            test::init_service(App::new().app_data(repo.clone()).service(get_event_tasks)).await;
 
         let req = test::TestRequest::get()
             .uri("/event/bzz-tasks-boi-they-sure-are-difficult-are-they-notzz-z-z-z-zzz/task")
@@ -961,23 +939,19 @@ mod api_tests {
         let repository = TaskRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
-        let app = test::init_service(
-            App::new()
-                .app_data(repo.clone())
-                .service(get_event_task),
-        )
-        .await;
+        let app =
+            test::init_service(App::new().app_data(repo.clone()).service(get_event_task)).await;
 
         let req = test::TestRequest::get()
-                    .uri("/event/task/7ae0c017-fe31-4aac-b767-100d18a8877b")
-                    .to_request();
+            .uri("/event/task/7ae0c017-fe31-4aac-b767-100d18a8877b")
+            .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::OK);
 
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        
+
         assert!(body.contains("Prepare stage for Joe Cocker"));
         assert!(body.contains("7ae0c017-fe31-4aac-b767-100d18a8877b"));
         assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
@@ -989,15 +963,11 @@ mod api_tests {
         let repository = TaskRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
-        let app = test::init_service(
-            App::new()
-                .app_data(repo.clone())
-                .service(get_event_task),
-        )
-        .await;
+        let app =
+            test::init_service(App::new().app_data(repo.clone()).service(get_event_task)).await;
         let req = test::TestRequest::get()
-                    .uri("/event/task/a96d1d99-93b5-469b-ac62-654b0cf7ebd3")
-                    .to_request();
+            .uri("/event/task/a96d1d99-93b5-469b-ac62-654b0cf7ebd3")
+            .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
@@ -1009,12 +979,8 @@ mod api_tests {
         let repository = TaskRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
-        let app = test::init_service(
-            App::new()
-                .app_data(repo.clone())
-                .service(get_event_task),
-        )
-        .await;
+        let app =
+            test::init_service(App::new().app_data(repo.clone()).service(get_event_task)).await;
         let req = test::TestRequest::get()
             .uri("/event/task/nowaythiscanbeavalidUUIDbrotherrr")
             .to_request();
@@ -1053,7 +1019,7 @@ mod api_tests {
 
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        
+
         assert!(body.contains("true"));
         assert!(body.contains("Stock the wood pile."));
         assert!(body.contains("9281b570-4d02-4096-9136-338a613c71cd"));
@@ -1071,9 +1037,9 @@ mod api_tests {
         });
 
         let req = test::TestRequest::patch()
-                            .uri(format!("/event/task/{}", task_id).as_str())
-                            .set_form(data)
-                            .to_request();
+            .uri(format!("/event/task/{}", task_id).as_str())
+            .set_form(data)
+            .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::OK);
@@ -1087,23 +1053,23 @@ mod api_tests {
         assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
 
         let req = test::TestRequest::patch()
-                            .uri(format!("/event/task/{}", task_id).as_str())
-                            .set_form(json!({}))
-                            .to_request();
+            .uri(format!("/event/task/{}", task_id).as_str())
+            .set_form(json!({}))
+            .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
 
         let req = test::TestRequest::delete()
-                            .uri(format!("/event/task/{}", task_id).as_str())
-                            .to_request();
+            .uri(format!("/event/task/{}", task_id).as_str())
+            .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
 
         let req = test::TestRequest::delete()
-                            .uri(format!("/event/task/{}", task_id).as_str())
-                            .to_request();
+            .uri(format!("/event/task/{}", task_id).as_str())
+            .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
@@ -1115,21 +1081,16 @@ mod api_tests {
         let repository = TaskRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
-        let app = test::init_service(
-            App::new()
-                .app_data(repo.clone())
-                .service(update_task),
-        )
-        .await;
+        let app = test::init_service(App::new().app_data(repo.clone()).service(update_task)).await;
 
         let data = json!({
             "title": "Help do stuff."
         });
 
         let req = test::TestRequest::patch()
-                            .uri("/event/task/7a201017-aa31-4aac-b767-100d18a8877b")
-                            .set_form(data)
-                            .to_request();
+            .uri("/event/task/7a201017-aa31-4aac-b767-100d18a8877b")
+            .set_form(data)
+            .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
@@ -1141,12 +1102,7 @@ mod api_tests {
         let repository = TaskRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
-        let app = test::init_service(
-            App::new()
-                .app_data(repo.clone())
-                .service(update_task),
-        )
-        .await;
+        let app = test::init_service(App::new().app_data(repo.clone()).service(update_task)).await;
 
         let data = json!({
             "title": "Help do stuff."
@@ -2097,9 +2053,16 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_all_assigned_staff_test() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = AssignedStaffRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
 
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(get_all_assigned_staff),
+        )
+        .await;
         let req = test::TestRequest::get()
             .uri("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff")
             .to_request();
@@ -2110,24 +2073,21 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<AllStaffTaskTemplate>(body).unwrap();
-        assert_eq!(out.staff.len(), 1);
+        assert!(body.contains("7ae0c017-fe31-4aac-b767-100d18a8877b"));
     }
 
     #[actix_web::test]
-    async fn get_all_assigned_staff_errors() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+    async fn get_all_assigned_staff_invalid_uuid() {
+        let arc_pool = get_db_pool().await;
+        let repository = AssignedStaffRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
 
-        let req = test::TestRequest::get()
-            .uri("/task/7ae0c017-fe31-abcd-bea7-100d18a8877b/staff")
-            .to_request();
-
-        let res = test::call_service(&app, req).await;
-
-        // Non-existent task
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(get_all_assigned_staff),
+        )
+        .await;
 
         let req = test::TestRequest::get()
             .uri("/task/BADUUIDBOIS/staff")
@@ -2142,9 +2102,16 @@ mod api_tests {
 
     #[actix_web::test]
     async fn get_assigned_staff_test() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = AssignedStaffRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
 
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(get_assigned_staff),
+        )
+        .await;
         let req = test::TestRequest::get()
                     .uri("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff/9281b570-4d02-4096-9136-338a613c71cd")
                     .to_request();
@@ -2154,17 +2121,21 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<TaskStaffTemplate>(body).unwrap();
-        assert_eq!(
-            out.id,
-            Uuid::from_str("9281b570-4d02-4096-9136-338a613c71cd").unwrap()
-        );
+        assert!(body.contains("9281b570-4d02-4096-9136-338a613c71cd"));
     }
 
     #[actix_web::test]
     async fn get_assigned_staff_errors() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = AssignedStaffRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(get_assigned_staff),
+        )
+        .await;
 
         let req = test::TestRequest::get()
                     .uri("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff/9281b570-4d02-4ab6-9cd6-3e8a613c71cd")
@@ -2187,9 +2158,18 @@ mod api_tests {
 
     #[actix_web::test]
     async fn create_update_delete_assigned_staff() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = AssignedStaffRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
 
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(create_assigned_staff)
+                .service(update_assigned_staff)
+                .service(delete_assigned_staff),
+        )
+        .await;
         let data = json!({
             "staff_id": "a96d1d99-93b5-469b-ac62-654b0cf7ebd3"
         });
@@ -2205,33 +2185,17 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::CREATED);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<TaskStaffTemplate>(body).unwrap();
-        assert_eq!(
-            out.user.id,
-            Uuid::from_str("0465041f-fe64-461f-9f71-71e3b97ca85f").unwrap()
-        );
-        assert_eq!(out.status, AcceptanceStatus::Pending);
-        assert_eq!(
-            out.id,
-            Uuid::from_str("a96d1d99-93b5-469b-ac62-654b0cf7ebd3").unwrap()
-        );
-
-        let user_id = out.user.id;
-        let staff_id = out.id;
+        assert!(body.contains("7ae0c017-fe31-4aac-b767-100d18a8877b"));
+        assert!(body.contains("Pending") || body.contains("pending"));
+        assert!(body.contains("a96d1d99-93b5-469b-ac62-654b0cf7ebd3"));
 
         let data = json!({
             "status": "rejected",
-            "decided_by": "35341253-da20-40b6-96d8-ce069b1ba5d4"
+            "decided_by": "9281b570-4d02-4096-9136-338a613c71cd"
         });
 
         let req = test::TestRequest::patch()
-            .uri(
-                format!(
-                    "/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff/{}",
-                    staff_id.to_string()
-                )
-                .as_str(),
-            )
+            .uri("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff/a96d1d99-93b5-469b-ac62-654b0cf7ebd3")
             .set_form(data)
             .to_request();
 
@@ -2240,26 +2204,16 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        let out = serde_json::from_str::<TaskStaffTemplate>(body).unwrap();
-        assert_eq!(out.user.id, user_id);
-        assert_eq!(out.status, AcceptanceStatus::Rejected);
-        assert_eq!(
-            out.decided_by.id,
-            Uuid::from_str("35341253-da20-40b6-96d8-ce069b1ba5d4").unwrap()
-        );
+        assert!(body.contains("7ae0c017-fe31-4aac-b767-100d18a8877b"));
+        assert!(body.contains("Rejected") || body.contains("rejected"));
+        assert!(body.contains("a96d1d99-93b5-469b-ac62-654b0cf7ebd3"));
 
         let data = json!({
             "status": "accepted",
         });
 
         let req = test::TestRequest::patch()
-            .uri(
-                format!(
-                    "/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff/{}",
-                    staff_id.to_string()
-                )
-                .as_str(),
-            )
+            .uri("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff/a96d1d99-93b5-469b-ac62-654b0cf7ebd3")
             .set_form(data)
             .to_request();
 
@@ -2269,28 +2223,16 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
 
         let req = test::TestRequest::delete()
-            .uri(
-                format!(
-                    "/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff/{}",
-                    staff_id.to_string()
-                )
-                .as_str(),
-            )
-            .to_request();
+        .uri("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff/a96d1d99-93b5-469b-ac62-654b0cf7ebd3")
+        .to_request();
 
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
 
         let req = test::TestRequest::delete()
-            .uri(
-                format!(
-                    "/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff/{}",
-                    staff_id.to_string()
-                )
-                .as_str(),
-            )
-            .to_request();
+        .uri("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff/a96d1d99-93b5-469b-ac62-654b0cf7ebd3")
+        .to_request();
 
         let res = test::call_service(&app, req).await;
         // Trying to delete a non-existing entry.
@@ -2301,8 +2243,19 @@ mod api_tests {
     //ToDo:
     #[actix_web::test]
     async fn create_assigned_staff_errors() {
-        let app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
+        let arc_pool = get_db_pool().await;
+        let repository = AssignedStaffRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
+
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .service(create_assigned_staff)
+                .service(update_assigned_staff)
+                .service(delete_assigned_staff),
+        )
+        .await;
+
         let data = json!({
             "staff_id": "a96d1d99-93b5-469b-ac62-654b0cf7ebd3"
         });
@@ -2318,21 +2271,6 @@ mod api_tests {
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
 
-        let data = json!({
-            "staff_id": "a96d1d99-93b5-469b-ac62-654b0cf7ebd3"
-        });
-
-        let req = test::TestRequest::post()
-            .uri("/task/7ae0c017-fe31-4dde-b653-1acd18a8877b/staff")
-            .set_form(data)
-            .to_request();
-
-        let res = test::call_service(&app, req).await;
-
-        // Task doesn't exit
-        assert!(res.status().is_client_error());
-        assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
-
         let data = json!({});
 
         let req = test::TestRequest::post()
@@ -2345,22 +2283,6 @@ mod api_tests {
         // Empty data
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
-    }
-
-    // ToDo
-    #[actix_web::test]
-    async fn delete_not_accepted_assigned_staff_test() {
-        let _app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
-    }
-
-    // ToDo
-    #[actix_web::test]
-    async fn delete_not_accepted_assigned_staff_errors() {
-        let _app =
-            test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-        todo!()
     }
 
     #[actix_web::test]

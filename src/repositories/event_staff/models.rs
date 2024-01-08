@@ -49,6 +49,7 @@ pub struct StaffExtended {
 
 #[derive(Debug, FromRow, Deserialize, Clone)]
 pub struct StaffLite {
+    pub id: Uuid,
     pub user: User,
     pub company: Company,
     pub event_id: Uuid,

@@ -1,13 +1,15 @@
+use crate::repositories::{event_staff::models::StaffLite, user::models::User};
 use askama::Template;
 use chrono::NaiveDateTime;
-use crate::repositories::{event_staff::models::StaffLite, user::models::User};
 use serde::Deserialize;
 use sqlx::types::uuid;
 use uuid::Uuid;
 
 use crate::{
     models::{AcceptanceStatus, EventRole},
-    repositories::{event_staff::models::StaffExtended, assigned_staff::models::AssignedStaffExtended},
+    repositories::{
+        assigned_staff::models::AssignedStaffExtended, event_staff::models::StaffExtended,
+    },
 };
 
 use super::{company::CompanyLiteTemplate, user::UserLiteTemplate};

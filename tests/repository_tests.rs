@@ -2639,7 +2639,7 @@ pub mod assigned_staff_repo_tests {
             .await
             .expect("Create should succeed");
 
-        assert_eq!(new_assigned_staff.staff_id, assigned_staff_data.staff_id);
+        assert_eq!(new_assigned_staff.staff.id, assigned_staff_data.staff_id);
         assert_eq!(new_assigned_staff.task_id, assigned_staff_data.task_id);
         assert_eq!(new_assigned_staff.status, AcceptanceStatus::Pending);
 
@@ -2674,7 +2674,7 @@ pub mod assigned_staff_repo_tests {
             .expect("Read should succeed");
 
         assert_eq!(assigned_staff.staff.user.name, "Dave Null");
-        assert_eq!(assigned_staff.decided_by.unwrap().name, "Dave Null");
+        assert_eq!(assigned_staff.decided_by_user.unwrap().name, "Dave Null");
 
         assigned_staff_repo.disconnect().await;
 
@@ -2706,7 +2706,10 @@ pub mod assigned_staff_repo_tests {
         let assigned_staff = &assigned_staffs[0];
 
         assert_eq!(assigned_staff.staff.user.name, "Dave Null");
-        assert_eq!(assigned_staff.decided_by.clone().unwrap().name, "Dave Null");
+        assert_eq!(
+            assigned_staff.decided_by_user.clone().unwrap().name,
+            "Dave Null"
+        );
 
         let assigned_staff = &assigned_staffs[1];
 
@@ -2733,8 +2736,8 @@ pub mod assigned_staff_repo_tests {
             let task_id = test_constants::TASK0_ID;
 
             let assigned_staff_data = AssignedStaffData {
-                status: Some(AcceptanceStatus::Accepted),
-                decided_by: Some(decider_staff_id),
+                status: AcceptanceStatus::Accepted,
+                decided_by: decider_staff_id,
             };
 
             let updated_assigned_staff = assigned_staff_repo
@@ -2745,7 +2748,7 @@ pub mod assigned_staff_repo_tests {
             assert_eq!(updated_assigned_staff.status, AcceptanceStatus::Accepted);
             assert_eq!(
                 updated_assigned_staff.decided_by,
-                Some(assigned_staff_data.decided_by.unwrap())
+                Some(assigned_staff_data.decided_by)
             );
 
             let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
@@ -2756,23 +2759,6 @@ pub mod assigned_staff_repo_tests {
             assert!(updated_assigned_staff.deleted_at.is_none());
         }
 
-        // All are none
-
-        {
-            let staff_id = test_constants::EVENT_STAFF1_ID;
-            let task_id = test_constants::TASK0_ID;
-
-            let assigned_staff_data = AssignedStaffData {
-                status: None,
-                decided_by: None,
-            };
-
-            let _updated_assigned_staff = assigned_staff_repo
-                .update(task_id, staff_id, assigned_staff_data)
-                .await
-                .expect_err("Update should fail - all fields are none");
-        }
-
         // Non existent
 
         {
@@ -2780,8 +2766,8 @@ pub mod assigned_staff_repo_tests {
             let task_id = uuid!("a96d1d99-93b5-469b-ac62-654b0cf7ebd9");
 
             let assigned_staff_data = AssignedStaffData {
-                status: Some(AcceptanceStatus::Accepted),
-                decided_by: Some(test_constants::EVENT_STAFF0_ID),
+                status: AcceptanceStatus::Accepted,
+                decided_by: test_constants::EVENT_STAFF0_ID,
             };
 
             let _updated_assigned_staff = assigned_staff_repo
@@ -2811,13 +2797,11 @@ pub mod assigned_staff_repo_tests {
             let deleted_assigned_staff = assigned_staff_repo
                 .read_one(task_id, staff_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(deleted_assigned_staff.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             let assigned_staff_data = AssignedStaffData {
-                status: Some(AcceptanceStatus::Accepted),
-                decided_by: Some(test_constants::EVENT_STAFF0_ID),
+                status: AcceptanceStatus::Accepted,
+                decided_by: test_constants::EVENT_STAFF0_ID,
             };
 
             let _updated_assigned_staff = assigned_staff_repo
@@ -2853,14 +2837,7 @@ pub mod assigned_staff_repo_tests {
             let new_assigned_staff = assigned_staff_repo
                 .read_one(task_id, staff_id)
                 .await
-                .expect("Read should succeed");
-
-            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
-            let time_difference_edited = time - new_assigned_staff.edited_at;
-            let time_difference_deleted = time - new_assigned_staff.deleted_at.unwrap();
-
-            assert!(time_difference_edited.num_seconds() < 2);
-            assert!(time_difference_deleted.num_seconds() < 2);
+                .expect_err("Read should not succeed");
         }
 
         // delete on already deleted assigned staff
@@ -2872,9 +2849,7 @@ pub mod assigned_staff_repo_tests {
             let assigned_staff = assigned_staff_repo
                 .read_one(task_id, staff_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(assigned_staff.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             assigned_staff_repo
                 .delete(task_id, staff_id)
