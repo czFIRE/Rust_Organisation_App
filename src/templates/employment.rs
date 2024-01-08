@@ -4,7 +4,7 @@ use serde::Deserialize;
 use sqlx::types::uuid;
 use uuid::Uuid;
 
-use crate::models::{EmploymentContract, EmployeeLevel};
+use crate::models::{EmployeeLevel, EmploymentContract};
 
 use super::{company::CompanyLiteTemplate, user::UserLiteTemplate};
 

@@ -1506,7 +1506,7 @@ pub mod employment_repo_tests {
     use chrono::{NaiveDate, NaiveDateTime, Utc};
     use organization_app::{
         common::DbResult,
-        models::{EmploymentContract, EmployeeLevel},
+        models::{EmployeeLevel, EmploymentContract},
         repositories::{
             employment::{
                 employment_repo::EmploymentRepository,

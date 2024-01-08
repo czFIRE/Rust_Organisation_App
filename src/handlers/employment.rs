@@ -3,7 +3,7 @@ use chrono::Utc;
 use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::models::{EmploymentContract, EmployeeLevel};
+use crate::models::{EmployeeLevel, EmploymentContract};
 
 #[derive(Deserialize)]
 pub struct NewEmploymentData {
