@@ -67,16 +67,16 @@ impl AssociatedCompanyRepository {
         Ok(new_associated_company)
     }
 
-    pub async fn read_one(
+    pub async fn _read_one(
         &self,
         company_id: Uuid,
         event_id: Uuid,
     ) -> DbResult<AssociatedCompanyExtended> {
         // TODO REDIS here
-        self.read_one_db(company_id, event_id).await
+        self._read_one_db(company_id, event_id).await
     }
 
-    pub async fn read_one_db(
+    pub async fn _read_one_db(
         &self,
         company_id: Uuid,
         event_id: Uuid,
@@ -183,15 +183,15 @@ impl AssociatedCompanyRepository {
         Ok(associated_company.into())
     }
 
-    pub async fn read_all(
+    pub async fn _read_all(
         &self,
         filter: AssociatedCompanyFilter,
     ) -> DbResult<Vec<AssociatedCompanyExtended>> {
         // TODO REDIS here
-        self.read_all_db(filter).await
+        self._read_all_db(filter).await
     }
 
-    pub async fn read_all_db(
+    pub async fn _read_all_db(
         &self,
         filter: AssociatedCompanyFilter,
     ) -> DbResult<Vec<AssociatedCompanyExtended>> {
@@ -311,17 +311,17 @@ impl AssociatedCompanyRepository {
             .collect())
     }
 
-    pub async fn read_all_events_for_company(
+    pub async fn _read_all_events_for_company(
         &self,
         company_id: Uuid,
         filter: AssociatedCompanyFilter,
     ) -> DbResult<Vec<AssociatedCompanyExtended>> {
         // TODO REDIS here
-        self.read_all_events_for_company_db(company_id, filter)
+        self._read_all_events_for_company_db(company_id, filter)
             .await
     }
 
-    pub async fn read_all_events_for_company_db(
+    pub async fn _read_all_events_for_company_db(
         &self,
         company_id: Uuid,
         filter: AssociatedCompanyFilter,

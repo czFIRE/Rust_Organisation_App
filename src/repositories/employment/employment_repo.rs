@@ -217,7 +217,7 @@ impl EmploymentRepository {
     }
 
     // Retrieves all employments for a given company.
-    pub async fn read_all_for_company(
+    pub async fn _read_all_for_company(
         &self,
         company_uuid: Uuid,
         filter: EmploymentFilter,

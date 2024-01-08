@@ -414,7 +414,7 @@ pub mod company_repo_tests {
             let company_id = test_constants::COMPANY0_ID;
 
             let company = company_repo
-                .read_one(company_id)
+                ._read_one(company_id)
                 .await
                 .expect("Read should succeed");
 
@@ -1207,7 +1207,7 @@ pub mod associated_company_repo_tests {
         let event_id = test_constants::EVENT0_ID;
 
         let associated_company = associated_company_repo
-            .read_one(company_id, event_id)
+            ._read_one(company_id, event_id)
             .await
             .expect("Read should succeed");
 
@@ -1235,7 +1235,7 @@ pub mod associated_company_repo_tests {
             };
 
             let associated_companies = associated_company_repo
-                .read_all(filter)
+                ._read_all(filter)
                 .await
                 .expect("Read all should succeed");
 
@@ -1295,7 +1295,7 @@ pub mod associated_company_repo_tests {
             };
 
             let associated_companies = associated_company_repo
-                .read_all_events_for_company(company_id, filter)
+                ._read_all_events_for_company(company_id, filter)
                 .await
                 .expect("Read all should succeed");
 
@@ -1328,7 +1328,7 @@ pub mod associated_company_repo_tests {
 
         {
             let associated_company = associated_company_repo
-                .read_one(company_id, event_id)
+                ._read_one(company_id, event_id)
                 .await
                 .expect("Read should succeed");
 
@@ -1393,7 +1393,7 @@ pub mod associated_company_repo_tests {
 
         {
             let associated_company = associated_company_repo
-                .read_one(company_id, event_id)
+                ._read_one(company_id, event_id)
                 .await
                 .expect("Read should succeed");
 
@@ -1405,7 +1405,7 @@ pub mod associated_company_repo_tests {
                 .expect("Delete should succeed");
 
             let _deleted_associated_company = associated_company_repo
-                .read_one(company_id, event_id)
+                ._read_one(company_id, event_id)
                 .await
                 .expect_err("Read should not succeed");
 
@@ -1435,7 +1435,7 @@ pub mod associated_company_repo_tests {
             let event_id = test_constants::EVENT0_ID;
 
             let associated_company = associated_company_repo
-                .read_one(company_id, event_id)
+                ._read_one(company_id, event_id)
                 .await
                 .expect("Read should succeed");
 
@@ -1447,7 +1447,7 @@ pub mod associated_company_repo_tests {
                 .unwrap();
 
             let _deleted_associated_company = associated_company_repo
-                .read_one(company_id, event_id)
+                ._read_one(company_id, event_id)
                 .await
                 .expect_err("Read should not succeed");
         }
@@ -1459,7 +1459,7 @@ pub mod associated_company_repo_tests {
             let event_id = test_constants::EVENT0_ID;
 
             let _ = associated_company_repo
-                .read_one(company_id, event_id)
+                ._read_one(company_id, event_id)
                 .await
                 .expect_err("Read should not succeed");
 
@@ -1655,7 +1655,7 @@ pub mod employment_repo_tests {
         };
 
         let employments = employment_repo
-            .read_all_for_company(company_id, filter)
+            ._read_all_for_company(company_id, filter)
             .await
             .expect("Read should succeed");
 
@@ -2348,7 +2348,7 @@ pub mod task_repo_tests {
 
         {
             let tasks = task_repo
-                .read_all(filter)
+                ._read_all(filter)
                 .await
                 .expect("Read should succeed");
 

@@ -150,7 +150,7 @@ impl TaskRepository {
         Ok(task_user_flattened.into())
     }
 
-    pub async fn read_all(&self, filter: TaskFilter) -> DbResult<Vec<TaskExtended>> {
+    pub async fn _read_all(&self, filter: TaskFilter) -> DbResult<Vec<TaskExtended>> {
         let executor = self.pool.as_ref();
 
         let tasks: Vec<TaskUserFlattened> = sqlx::query_as!(

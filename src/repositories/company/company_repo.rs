@@ -102,12 +102,12 @@ impl CompanyRepository {
         Ok(company_extended)
     }
 
-    pub async fn read_one(&self, company_id: Uuid) -> DbResult<Company> {
+    pub async fn _read_one(&self, company_id: Uuid) -> DbResult<Company> {
         // TODO - Redis here
-        self.read_one_db(company_id).await
+        self._read_one_db(company_id).await
     }
 
-    pub async fn read_one_db(&self, company_id: Uuid) -> DbResult<Company> {
+    pub async fn _read_one_db(&self, company_id: Uuid) -> DbResult<Company> {
         let executor = self.pool.as_ref();
 
         let company = sqlx::query_as!(
@@ -182,7 +182,7 @@ impl CompanyRepository {
         Ok(companies)
     }
 
-    pub async fn read_all_extended(&self, filter: CompanyFilter) -> DbResult<Vec<CompanyExtended>> {
+    pub async fn _read_all_extended(&self, filter: CompanyFilter) -> DbResult<Vec<CompanyExtended>> {
         let executor = self.pool.as_ref();
 
         let companies = sqlx::query_as!(
