@@ -2241,10 +2241,11 @@ mod api_tests {
         let arc_pool = get_db_pool().await;
         let repository = AssignedStaffRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
-
+        let staff_repo = web::Data::new(StaffRepository::new(arc_pool.clone()));
         let app = test::init_service(
             App::new()
                 .app_data(repo.clone())
+                .app_data(staff_repo.clone())
                 .service(create_assigned_staff)
                 .service(update_assigned_staff)
                 .service(delete_assigned_staff),

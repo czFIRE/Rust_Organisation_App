@@ -8,11 +8,11 @@ use uuid::Uuid;
 use crate::{
     errors::parse_error,
     handlers::common::extract_path_tuple_ids,
-    repositories::assigned_staff::{
+    repositories::{assigned_staff::{
         assigned_staff_repo::AssignedStaffRepository,
         models::{AssignedStaffData, AssignedStaffFilter, NewAssignedStaff},
-    },
-    templates::staff::{AllAssignedStaffTemplate, AssignedStaffTemplate},
+    }, event_staff::event_staff_repo::StaffRepository},
+    templates::staff::{AllAssignedStaffTemplate, AssignedStaffTemplate}, models::EventRole,
 };
 
 #[derive(Deserialize)]
@@ -162,6 +162,7 @@ pub async fn update_assigned_staff(
     path: web::Path<(String, String)>,
     task_staff_data: web::Form<AssignedStaffData>,
     assigned_repo: web::Data<AssignedStaffRepository>,
+    staff_repo: web::Data<StaffRepository>,
 ) -> HttpResponse {
     let parsed_ids = extract_path_tuple_ids(path.into_inner());
     if parsed_ids.is_err() {
@@ -169,6 +170,24 @@ pub async fn update_assigned_staff(
     }
 
     let (task_id, staff_id) = parsed_ids.unwrap();
+
+    let decider = staff_repo.read_one(task_staff_data.decided_by.clone()).await;
+    if decider.is_err() {
+        // Might specify this error further. But the decider needs to exist in the request, so it's a bad request.
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+    let decider_unwrapped = decider.expect("Should be valid here.");
+
+    let staff = staff_repo.read_one(staff_id.clone()).await;
+    if staff.is_err() {
+        return HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND));
+    }
+    let staff_unwrapped = staff.expect("Should be valid here.");
+
+    if decider_unwrapped.event_id != staff_unwrapped.event_id || decider_unwrapped.role != EventRole::Organizer {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
     let result = assigned_repo
         .update(task_id, staff_id, task_staff_data.into_inner())
         .await;
