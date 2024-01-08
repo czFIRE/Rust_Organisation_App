@@ -51,7 +51,7 @@ pub mod user_repo_tests {
     };
     use uuid::uuid;
 
-    use crate::test_constants::{self, USER0_ID};
+    use crate::test_constants;
 
     #[sqlx::test(fixtures("users"))]
     async fn create(pool: PgPool) -> DbResult<()> {
@@ -251,12 +251,10 @@ pub mod user_repo_tests {
                 .await
                 .expect("Delete should succeed");
 
-            let deleted_user = user_repo
+            let _ = user_repo
                 .read_one(user_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(deleted_user.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             let new_user_data = UserData {
                 name: Some("Test User".to_string()),
@@ -292,24 +290,13 @@ pub mod user_repo_tests {
 
             user_repo.delete_user(user_id).await.unwrap();
 
-            let new_user = user_repo.read_one(user_id).await.unwrap();
-
-            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
-            let time_difference_edited = time - new_user.edited_at;
-            let time_difference_deleted = time - new_user.deleted_at.unwrap();
-
-            assert!(time_difference_edited.num_seconds() < 2);
-            assert!(time_difference_deleted.num_seconds() < 2);
+            let _ = user_repo.read_one(user_id).await.expect_err("Should fail.");
         }
 
         // delete on already deleted user
 
         {
             let user_id = test_constants::USER0_ID;
-
-            let user = user_repo.read_one(user_id).await.unwrap();
-
-            assert!(user.deleted_at.is_some());
 
             user_repo
                 .delete_user(user_id)
@@ -408,8 +395,8 @@ pub mod company_repo_tests {
         let time_difference_created = time - new_company.created_at;
         let time_difference_edited = time - new_company.edited_at;
 
-        // assert!(time_difference_created.num_seconds() < 2);
-        // assert!(time_difference_edited.num_seconds() < 2);
+        assert!(time_difference_created.num_seconds() < 2);
+        assert!(time_difference_edited.num_seconds() < 2);
         assert!(new_company.deleted_at.is_none());
 
         company_repo.disconnect().await;
@@ -642,7 +629,7 @@ pub mod company_repo_tests {
         {
             let company_id = test_constants::COMPANY0_ID;
 
-            let company = company_repo
+            let _ = company_repo
                 .read_one_extended(company_id)
                 .await
                 .expect("Read should succeed");
@@ -667,7 +654,7 @@ pub mod company_repo_tests {
                 street_number: None,
             };
 
-            let updated_company = company_repo
+            let _ = company_repo
                 .update(company_id, company_data.clone(), address_update)
                 .await
                 .expect_err("Update should fail - nothing to update");
@@ -698,7 +685,7 @@ pub mod company_repo_tests {
                 street_number: None,
             };
 
-            let updated_company = company_repo
+            let _ = company_repo
                 .update(company_id, company_data.clone(), address_update)
                 .await
                 .expect_err("Update should fail - non existent company");
@@ -721,12 +708,10 @@ pub mod company_repo_tests {
                 .await
                 .expect("Delete should succeed");
 
-            let deleted_company = company_repo
+            let _ = company_repo
                 .read_one_extended(company_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(deleted_company.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             let company_data = CompanyData {
                 name: Some("Test Company".to_string()),
@@ -748,7 +733,7 @@ pub mod company_repo_tests {
                 street_number: None,
             };
 
-            let updated_company = company_repo
+            let _ = company_repo
                 .update(company_id, company_data.clone(), address_update)
                 .await
                 .expect_err("Update should fail - already deleted company");
@@ -777,17 +762,10 @@ pub mod company_repo_tests {
 
             company_repo.delete(company_id).await.unwrap();
 
-            let new_company = company_repo
+            let _ = company_repo
                 .read_one_extended(company_id)
                 .await
-                .expect("Read should succeed");
-
-            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
-            let time_difference_edited = time - new_company.edited_at;
-            let time_difference_deleted = time - new_company.deleted_at.unwrap();
-
-            assert!(time_difference_edited.num_seconds() < 2);
-            assert!(time_difference_deleted.num_seconds() < 2);
+                .expect_err("Read should not succeed");
         }
 
         // delete on already deleted company
@@ -795,12 +773,10 @@ pub mod company_repo_tests {
         {
             let company_id = test_constants::COMPANY0_ID;
 
-            let company = company_repo
+            let _ = company_repo
                 .read_one_extended(company_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(company.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             company_repo.delete(company_id).await.expect_err(
                 "Repository should return error on deleting an already deleted company",
@@ -840,7 +816,7 @@ pub mod event_repo_tests {
         },
     };
     use sqlx::PgPool;
-    use uuid::{uuid, Uuid};
+    use uuid::uuid;
 
     use crate::test_constants;
 
@@ -1073,12 +1049,10 @@ pub mod event_repo_tests {
                 .await
                 .expect("Delete should succeed");
 
-            let deleted_event = event_repo
+            let _ = event_repo
                 .read_one(event_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(deleted_event.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             let new_event_data = EventData {
                 name: Some("Test Event".to_string()),
@@ -1118,17 +1092,10 @@ pub mod event_repo_tests {
 
             event_repo.delete(event_id).await.unwrap();
 
-            let new_event = event_repo
+            let _ = event_repo
                 .read_one(event_id)
                 .await
-                .expect("Read should succeed");
-
-            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
-            let time_difference_edited = time - new_event.edited_at;
-            let time_difference_deleted = time - new_event.deleted_at.unwrap();
-
-            assert!(time_difference_edited.num_seconds() < 2);
-            assert!(time_difference_deleted.num_seconds() < 2);
+                .expect_err("Read should not succeed");
         }
 
         // delete on already deleted event
@@ -1136,12 +1103,10 @@ pub mod event_repo_tests {
         {
             let event_id = test_constants::EVENT0_ID;
 
-            let event = event_repo
+            let _ = event_repo
                 .read_one(event_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(event.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             event_repo
                 .delete(event_id)
@@ -1222,8 +1187,8 @@ pub mod associated_company_repo_tests {
         let time_difference_created = time - new_associated_company.created_at;
         let time_difference_edited = time - new_associated_company.edited_at;
 
-        // assert!(time_difference_created.num_seconds() < 2);
-        // assert!(time_difference_edited.num_seconds() < 2);
+        assert!(time_difference_created.num_seconds() < 2);
+        assert!(time_difference_edited.num_seconds() < 2);
 
         assert!(new_associated_company.deleted_at.is_none());
 
@@ -1493,7 +1458,7 @@ pub mod associated_company_repo_tests {
             let company_id = test_constants::COMPANY0_ID;
             let event_id = test_constants::EVENT0_ID;
 
-            let associated_company = associated_company_repo
+            let _ = associated_company_repo
                 .read_one(company_id, event_id)
                 .await
                 .expect_err("Read should not succeed");
@@ -1544,7 +1509,6 @@ pub mod employment_repo_tests {
         },
     };
     use sqlx::PgPool;
-    use uuid::uuid;
 
     use crate::test_constants;
 
@@ -1588,8 +1552,8 @@ pub mod employment_repo_tests {
         let time_difference_created = time - new_employment.created_at;
         let time_difference_edited = time - new_employment.edited_at;
 
-        // assert!(time_difference_created.num_seconds() < 2);
-        // assert!(time_difference_edited.num_seconds() < 2);
+        assert!(time_difference_created.num_seconds() < 2);
+        assert!(time_difference_edited.num_seconds() < 2);
 
         assert!(new_employment.deleted_at.is_none());
 
@@ -1935,7 +1899,7 @@ pub mod employment_repo_tests {
             let company_id = test_constants::COMPANY0_ID;
             let user_id = test_constants::USER2_ID;
 
-            let employment = employment_repo
+            let _ = employment_repo
                 .read_one(user_id, company_id)
                 .await
                 .expect_err("Read should not succeed");
@@ -1978,7 +1942,7 @@ pub mod event_staff_repo_tests {
         repositories::{
             event_staff::{
                 event_staff_repo::StaffRepository,
-                models::{NewStaff, Staff, StaffData, StaffFilter},
+                models::{NewStaff, StaffData, StaffFilter},
             },
             repository::DbRepository,
         },
@@ -2020,8 +1984,8 @@ pub mod event_staff_repo_tests {
         let time_difference_created = time - new_event_staff.created_at;
         let time_difference_edited = time - new_event_staff.edited_at;
 
-        // assert!(time_difference_created.num_seconds() < 2);
-        // assert!(time_difference_edited.num_seconds() < 2);
+        assert!(time_difference_created.num_seconds() < 2);
+        assert!(time_difference_edited.num_seconds() < 2);
 
         event_staff_repo.disconnect().await;
 
@@ -2191,7 +2155,7 @@ pub mod event_staff_repo_tests {
                 .await
                 .expect("Delete should succeed");
 
-            let deleted_event_staff = event_staff_repo
+            let _ = event_staff_repo
                 .read_one(event_staff_id)
                 .await
                 .expect_err("Read should not succeed");
@@ -2242,7 +2206,7 @@ pub mod event_staff_repo_tests {
         {
             let event_staff_id = test_constants::EVENT_STAFF1_ID;
 
-            let event_staff = event_staff_repo
+            let _ = event_staff_repo
                 .read_one(event_staff_id)
                 .await
                 .expect_err("Read should not succeed");
@@ -2321,8 +2285,8 @@ pub mod task_repo_tests {
         let time_difference_created = time - new_task.created_at;
         let time_difference_edited = time - new_task.edited_at;
 
-        // assert!(time_difference_created.num_seconds() < 2);
-        // assert!(time_difference_edited.num_seconds() < 2);
+        assert!(time_difference_created.num_seconds() < 2);
+        assert!(time_difference_edited.num_seconds() < 2);
 
         task_repo.disconnect().await;
 
@@ -2417,7 +2381,7 @@ pub mod task_repo_tests {
         {
             let task_id = test_constants::TASK0_ID;
 
-            let task = task_repo
+            let _ = task_repo
                 .read_one(task_id)
                 .await
                 .expect("Read should succeed");
@@ -2651,8 +2615,8 @@ pub mod assigned_staff_repo_tests {
         let time_difference_created = time - new_assigned_staff.created_at;
         let time_difference_edited = time - new_assigned_staff.edited_at;
 
-        // assert!(time_difference_created.num_seconds() < 2);
-        // assert!(time_difference_edited.num_seconds() < 2);
+        assert!(time_difference_created.num_seconds() < 2);
+        assert!(time_difference_edited.num_seconds() < 2);
 
         assigned_staff_repo.disconnect().await;
 
@@ -2794,7 +2758,7 @@ pub mod assigned_staff_repo_tests {
                 .await
                 .expect("Delete should succeed");
 
-            let deleted_assigned_staff = assigned_staff_repo
+            let _ = assigned_staff_repo
                 .read_one(task_id, staff_id)
                 .await
                 .expect_err("Read should not succeed");
@@ -2834,7 +2798,7 @@ pub mod assigned_staff_repo_tests {
 
             assigned_staff_repo.delete(task_id, staff_id).await.unwrap();
 
-            let new_assigned_staff = assigned_staff_repo
+            let _ = assigned_staff_repo
                 .read_one(task_id, staff_id)
                 .await
                 .expect_err("Read should not succeed");
@@ -2846,7 +2810,7 @@ pub mod assigned_staff_repo_tests {
             let staff_id = test_constants::EVENT_STAFF1_ID;
             let task_id = test_constants::TASK0_ID;
 
-            let assigned_staff = assigned_staff_repo
+            let _ = assigned_staff_repo
                 .read_one(task_id, staff_id)
                 .await
                 .expect_err("Read should not succeed");
@@ -2884,7 +2848,6 @@ pub mod assigned_staff_repo_tests {
 pub mod comment_repo_tests {
     use std::sync::Arc;
 
-    use actix_web::rt::time;
     use chrono::{NaiveDateTime, Utc};
     use organization::{
         common::DbResult,
@@ -2922,7 +2885,7 @@ pub mod comment_repo_tests {
                 .await
                 .expect("Create should succeed");
 
-            assert_eq!(new_comment.author_id, new_comment_data.author_id);
+            assert_eq!(new_comment.author.id, new_comment_data.author_id);
             assert_eq!(new_comment.event_id, new_comment_data.event_id);
             assert_eq!(new_comment.task_id, new_comment_data.task_id);
             assert_eq!(new_comment.content, new_comment_data.content);
@@ -2933,8 +2896,8 @@ pub mod comment_repo_tests {
             let time_difference_created = time - new_comment.created_at;
             let time_difference_edited = time - new_comment.edited_at;
 
-            // assert!(time_difference_created.num_seconds() < 2);
-            // assert!(time_difference_edited.num_seconds() < 2);
+            assert!(time_difference_created.num_seconds() < 2);
+            assert!(time_difference_edited.num_seconds() < 2);
         }
 
         // All are none
@@ -3080,7 +3043,7 @@ pub mod comment_repo_tests {
         {
             let comment_id = test_constants::COMMENT0_ID;
 
-            let comment = comment_repo
+            let _comment = comment_repo
                 .read_one(comment_id)
                 .await
                 .expect("Read should succeed");
@@ -3099,7 +3062,7 @@ pub mod comment_repo_tests {
             let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
 
             let time_difference_edited = time - updated_comment.edited_at;
-            // assert!(time_difference_edited.num_seconds() < 2);
+            assert!(time_difference_edited.num_seconds() < 2);
 
             assert!(updated_comment.deleted_at.is_none());
         }
@@ -3151,12 +3114,10 @@ pub mod comment_repo_tests {
                 .await
                 .expect("Delete should succeed");
 
-            let deleted_comment = comment_repo
+            let _ = comment_repo
                 .read_one(comment_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(deleted_comment.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             let new_comment_data = CommentData {
                 content: "New Content".to_string(),
@@ -3193,17 +3154,10 @@ pub mod comment_repo_tests {
 
             comment_repo.delete(comment_id).await.unwrap();
 
-            let new_comment = comment_repo
+            let _ = comment_repo
                 .read_one(comment_id)
                 .await
-                .expect("Read should succeed");
-
-            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
-            let time_difference_edited = time - new_comment.edited_at;
-            let time_difference_deleted = time - new_comment.deleted_at.unwrap();
-
-            // assert!(time_difference_edited.num_seconds() < 2);
-            // assert!(time_difference_deleted.num_seconds() < 2);
+                .expect_err("Read should not succeed");
         }
 
         // delete on already deleted comment
@@ -3211,12 +3165,10 @@ pub mod comment_repo_tests {
         {
             let comment_id = test_constants::COMMENT0_ID;
 
-            let comment = comment_repo
+            let _ = comment_repo
                 .read_one(comment_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(comment.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             comment_repo.delete(comment_id).await.expect_err(
                 "Repository should return error on deleting an already deleted comment",

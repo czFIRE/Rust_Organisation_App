@@ -40,7 +40,7 @@ pub struct CommentExtended {
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct CommentData {
     pub content: String,
 }
