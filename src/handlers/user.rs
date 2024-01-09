@@ -39,7 +39,7 @@ pub async fn get_user(
             .body(body.expect("Should be valid"));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[post("/user")]
@@ -47,7 +47,7 @@ pub async fn create_user(
     new_user: web::Json<NewUser>,
     user_repo: web::Data<UserRepository>,
 ) -> HttpResponse {
-    if new_user.name.len() == 0 || new_user.email.len() == 0 {
+    if new_user.name.is_empty() || new_user.email.is_empty() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
     let result = user_repo.create(new_user.into_inner()).await;
@@ -68,7 +68,7 @@ pub async fn create_user(
             .body(unwrapped_body);
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 fn is_data_invalid(user_data: UserData) -> bool {
@@ -77,9 +77,9 @@ fn is_data_invalid(user_data: UserData) -> bool {
         && user_data.birth.is_none()
         && user_data.avatar_url.is_none()
         && user_data.role.is_none())
-        || (user_data.name.is_some() && user_data.name.unwrap().len() == 0)
-        || (user_data.email.is_some() && user_data.email.unwrap().len() == 0)
-        || (user_data.avatar_url.is_some() && user_data.avatar_url.unwrap().len() == 0)
+        || (user_data.name.is_some() && user_data.name.unwrap().is_empty())
+        || (user_data.email.is_some() && user_data.email.unwrap().is_empty())
+        || (user_data.avatar_url.is_some() && user_data.avatar_url.unwrap().is_empty())
 }
 
 #[patch("/user/{user_id}")]
@@ -118,7 +118,7 @@ pub async fn update_user(
             .body(body.expect("Should be okay."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[delete("/user/{user_id}")]

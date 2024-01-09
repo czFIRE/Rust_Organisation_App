@@ -231,7 +231,7 @@ impl TimesheetRepository {
 
         tx.commit().await?;
 
-        return Ok(timesheet.expect("Should be valid here."));
+        Ok(timesheet.expect("Should be valid here."))
     }
 
     pub async fn _read_all(&self, data: TimesheetReadAllData) -> DbResult<Vec<TimesheetWithEvent>> {

@@ -257,8 +257,8 @@ impl EventRepository {
 
         if data.start_date.is_some() || data.end_date.is_some() {
             let time_range = TimeRange {
-                start_date: data.start_date.unwrap_or(result_event.start_date.clone()),
-                end_date: data.end_date.unwrap_or(result_event.end_date.clone()),
+                start_date: data.start_date.unwrap_or(result_event.start_date),
+                end_date: data.end_date.unwrap_or(result_event.end_date),
             };
 
             self.update_timesheet_range_for_event(event_id, time_range, tx)

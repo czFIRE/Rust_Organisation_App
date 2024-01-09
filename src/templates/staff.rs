@@ -50,13 +50,11 @@ impl From<StaffExtended> for StaffTemplate {
             avatar_url: staff.company.avatar_url,
         };
 
-        let decided_by: Option<UserLiteTemplate>;
-        if staff.decided_by.is_some() {
-            let decider = staff.decided_by_user.unwrap();
-            decided_by = Some(decider.into());
+        let decided_by_user: Option<UserLiteTemplate> = if staff.decided_by_user.is_some() {
+            Some(staff.decided_by_user.expect("Should be some.").into())
         } else {
-            decided_by = None;
-        }
+            None
+        };
 
         StaffTemplate {
             id: staff.id,
@@ -66,7 +64,7 @@ impl From<StaffExtended> for StaffTemplate {
             role: staff.role,
             status: staff.status,
             decided_by: staff.decided_by,
-            decided_by_user: decided_by,
+            decided_by_user,
             created_at: staff.created_at,
             edited_at: staff.edited_at,
         }

@@ -30,8 +30,8 @@ pub async fn get_all_assigned_staff(
     query: web::Query<AssignedStaffFilter>,
     assigned_repo: web::Data<AssignedStaffRepository>,
 ) -> HttpResponse {
-    if (query.limit.is_some() && query.limit.clone().unwrap() <= 0)
-        || (query.offset.is_some() && query.offset.clone().unwrap() <= 0)
+    if (query.limit.is_some() && query.limit.unwrap() <= 0)
+        || (query.offset.is_some() && query.offset.unwrap() <= 0)
     {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
@@ -64,7 +64,7 @@ pub async fn get_all_assigned_staff(
             .body(body.expect("Should be valid now."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[get("/task/{task_id}/staff/{staff_id}")]
@@ -92,7 +92,7 @@ pub async fn get_assigned_staff(
             .body(body.expect("Should be valid now."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[post("/task/{task_id}/staff")]
@@ -126,7 +126,7 @@ pub async fn create_assigned_staff(
             .body(body.expect("Should be valid now."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[patch("/task/{task_id}/staff/{staff_id}")]
@@ -143,16 +143,14 @@ pub async fn update_assigned_staff(
 
     let (task_id, staff_id) = parsed_ids.unwrap();
 
-    let decider = staff_repo
-        .read_one(task_staff_data.decided_by.clone())
-        .await;
+    let decider = staff_repo.read_one(task_staff_data.decided_by).await;
     if decider.is_err() {
         // Might specify this error further. But the decider needs to exist in the request, so it's a bad request.
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
     let decider_unwrapped = decider.expect("Should be valid here.");
 
-    let staff = staff_repo.read_one(staff_id.clone()).await;
+    let staff = staff_repo.read_one(staff_id).await;
     if staff.is_err() {
         return HttpResponse::NotFound().body(parse_error(http::StatusCode::NOT_FOUND));
     }
@@ -178,7 +176,7 @@ pub async fn update_assigned_staff(
             .content_type("text/html")
             .body(body.expect("Should be valid now."));
     }
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[delete("/task/{task_id}/staff")]

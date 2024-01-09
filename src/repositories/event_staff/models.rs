@@ -141,19 +141,19 @@ impl From<StaffUserCompanyFlattened> for StaffExtended {
             deleted_at: value.user_deleted_at,
         };
 
-        let tmp_decider: Option<UserLite>;
-        if value.decider_id.is_some() {
-            tmp_decider = Some(UserLite {
+        // if the id is some, then logically all other values of decider are some.
+        let tmp_decider: Option<UserLite> = if value.decider_id.is_some() {
+            Some(UserLite {
                 id: value.decider_id.expect("Should be valid."),
                 name: value.decider_name.expect("Should be valid."),
                 status: value.decider_status.expect("Should be valid."),
                 birth: value.decider_birth.expect("Should be valid."),
                 gender: value.decider_gender.expect("Should be valid."),
                 avatar_url: value.decider_avatar_url.expect("Should be valid."),
-            });
+            })
         } else {
-            tmp_decider = None;
-        }
+            None
+        };
 
         let tmp_company = Company {
             id: value.company_id,

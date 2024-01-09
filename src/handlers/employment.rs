@@ -27,8 +27,8 @@ pub async fn get_employments_per_user(
 ) -> HttpResponse {
     let query_params = params.into_inner();
 
-    if (query_params.limit.is_some() && query_params.limit.clone().unwrap() < 0)
-        || (query_params.offset.is_some() && query_params.offset.clone().unwrap() < 0)
+    if (query_params.limit.is_some() && query_params.limit.unwrap() < 0)
+        || (query_params.offset.is_some() && query_params.offset.unwrap() < 0)
     {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
@@ -78,7 +78,7 @@ pub async fn get_employments_per_user(
             .body(body.expect("Should be valid now."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 async fn get_full_employment(
@@ -144,7 +144,7 @@ async fn get_full_employment(
         };
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[get("/user/{user_id}/employment/{company_id}")]
@@ -169,8 +169,8 @@ pub async fn get_subordinates(
 ) -> HttpResponse {
     let query_params = params.into_inner();
 
-    if (query_params.limit.is_some() && query_params.limit.clone().unwrap() < 0)
-        || (query_params.offset.is_some() && query_params.offset.clone().unwrap() < 0)
+    if (query_params.limit.is_some() && query_params.limit.unwrap() < 0)
+        || (query_params.offset.is_some() && query_params.offset.unwrap() < 0)
     {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
@@ -220,7 +220,7 @@ pub async fn get_subordinates(
             .body(body.expect("Should be valid now."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[post("/employment")]

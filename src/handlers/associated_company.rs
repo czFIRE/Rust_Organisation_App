@@ -31,8 +31,8 @@ pub async fn get_all_associated_companies(
     query: web::Query<AssociatedCompanyFilter>,
     associated_repo: web::Data<AssociatedCompanyRepository>,
 ) -> HttpResponse {
-    if (query.limit.is_some() && query.limit.clone().unwrap() < 0)
-        || (query.offset.is_some() && query.offset.clone().unwrap() < 0)
+    if (query.limit.is_some() && query.limit.unwrap() < 0)
+        || (query.offset.is_some() && query.offset.unwrap() < 0)
     {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
@@ -63,7 +63,7 @@ pub async fn get_all_associated_companies(
         return HttpResponse::Ok().body(body.expect("Should be valid now."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[get("/event/{event_id}/user/{user_id}/company")]
@@ -91,7 +91,7 @@ pub async fn get_all_associated_companies_per_event_and_user(
         .await;
 
     if user_employments.is_err() {
-        return handle_database_error(user_employments.err().expect("Should be error."));
+        return handle_database_error(user_employments.expect_err("Should be error."));
     }
 
     let result = associated_repo
@@ -129,7 +129,7 @@ pub async fn get_all_associated_companies_per_event_and_user(
         return HttpResponse::Ok().body(body.expect("Should be valid now."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[post("/event/{event_id}/company")]
@@ -164,7 +164,7 @@ pub async fn create_associated_company(
             .body(body.expect("Should be valid now."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[patch("/event/{event_id}/company/{company_id}")]
@@ -198,7 +198,7 @@ pub async fn update_associated_company(
             .body(body.expect("Should be valid now."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[delete("/event/{event_id}/company/{company_id}")]

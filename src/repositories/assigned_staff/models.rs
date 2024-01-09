@@ -177,7 +177,7 @@ impl From<AssignedStaffStaffUserCompanyFlattened> for AssignedStaffExtended {
             staff: tmp_event_staff,
             status: value.assigned_staff_status,
             decided_by: value.assigned_staff_decided_by,
-            decided_by_user: decided_by_user,
+            decided_by_user,
             created_at: value.assigned_staff_created_at,
             edited_at: value.assigned_staff_edited_at,
             deleted_at: value.assigned_staff_deleted_at,

@@ -20,8 +20,8 @@ pub async fn get_events(
 ) -> HttpResponse {
     let query_params = params.into_inner();
 
-    if (query_params.limit.is_some() && query_params.limit.clone().unwrap() < 0)
-        || (query_params.offset.is_some() && query_params.offset.clone().unwrap() < 0)
+    if (query_params.limit.is_some() && query_params.limit.unwrap() < 0)
+        || (query_params.offset.is_some() && query_params.offset.unwrap() < 0)
     {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
@@ -56,7 +56,7 @@ pub async fn get_events(
             .body(body.expect("Should be okay now."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[get("/event/{event_id}")]
@@ -100,7 +100,7 @@ pub async fn get_event(
             .body(body.expect("Should be valid."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[post("/event")]
@@ -108,8 +108,8 @@ pub async fn create_event(
     new_event: web::Json<NewEvent>,
     event_repo: web::Data<EventRepository>,
 ) -> HttpResponse {
-    if (new_event.website.is_some() && new_event.website.as_ref().unwrap().len() == 0)
-        || (new_event.description.is_some() && new_event.description.as_ref().unwrap().len() == 0)
+    if (new_event.website.is_some() && new_event.website.as_ref().unwrap().is_empty())
+        || (new_event.description.is_some() && new_event.description.as_ref().unwrap().is_empty())
     {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
@@ -143,7 +143,7 @@ pub async fn create_event(
             .body(body.expect("Should be valid."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 fn is_update_data_empty(event_data: EventData) -> bool {
@@ -153,9 +153,9 @@ fn is_update_data_empty(event_data: EventData) -> bool {
         && event_data.start_date.is_none()
         && event_data.end_date.is_none()
         && event_data.avatar_url.is_none())
-        || (event_data.avatar_url.is_some() && event_data.avatar_url.unwrap().len() == 0)
-        || (event_data.website.is_some() && event_data.website.unwrap().len() == 0)
-        || (event_data.description.is_some() && event_data.description.unwrap().len() == 0)
+        || (event_data.avatar_url.is_some() && event_data.avatar_url.unwrap().is_empty())
+        || (event_data.website.is_some() && event_data.website.unwrap().is_empty())
+        || (event_data.description.is_some() && event_data.description.unwrap().is_empty())
 }
 
 #[patch("/event/{event_id}")]
@@ -203,7 +203,7 @@ pub async fn update_event(
             .body(body.expect("Should be valid now."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[delete("/event/{event_id}")]

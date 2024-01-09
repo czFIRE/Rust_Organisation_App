@@ -28,8 +28,8 @@ pub async fn get_all_event_comments(
     query: web::Query<CommentFilter>,
     comment_repo: web::Data<CommentRepository>,
 ) -> HttpResponse {
-    if (query.limit.is_some() && query.limit.clone().unwrap() <= 0)
-        || (query.offset.is_some() && query.offset.clone().unwrap() <= 0)
+    if (query.limit.is_some() && query.limit.unwrap() <= 0)
+        || (query.offset.is_some() && query.offset.unwrap() <= 0)
     {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
@@ -57,7 +57,7 @@ pub async fn get_all_event_comments(
             .body(body.expect("Should be valid now."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[post("/event/{event_id}/comment")]
@@ -96,7 +96,7 @@ pub async fn create_event_comment(
             .content_type("text/html")
             .body(body.expect("Should be valid now."));
     }
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[get("/task/{task_id}/comment")]
@@ -105,8 +105,8 @@ pub async fn get_all_task_comments(
     query: web::Query<CommentFilter>,
     comment_repo: web::Data<CommentRepository>,
 ) -> HttpResponse {
-    if (query.limit.is_some() && query.limit.clone().unwrap() <= 0)
-        || (query.offset.is_some() && query.offset.clone().unwrap() <= 0)
+    if (query.limit.is_some() && query.limit.unwrap() <= 0)
+        || (query.offset.is_some() && query.offset.unwrap() <= 0)
     {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
@@ -134,7 +134,7 @@ pub async fn get_all_task_comments(
             .body(body.expect("Should be valid now."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[post("/task/{task_id}/comment")]
@@ -173,7 +173,7 @@ pub async fn create_task_comment(
             .content_type("text/html")
             .body(body.expect("Should be valid now."));
     }
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[put("/comment/{comment_id}")]
@@ -206,7 +206,7 @@ pub async fn update_comment(
             .content_type("text/html")
             .body(body.expect("Should be valid now."));
     }
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[delete("/comment/{comment_id}")]

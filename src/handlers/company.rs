@@ -56,8 +56,8 @@ pub async fn get_all_companies(
 ) -> HttpResponse {
     let query_params = params.into_inner();
 
-    if (query_params.limit.is_some() && query_params.limit.clone().unwrap() < 0)
-        || (query_params.offset.is_some() && query_params.offset.clone().unwrap() < 0)
+    if (query_params.limit.is_some() && query_params.limit.unwrap() < 0)
+        || (query_params.offset.is_some() && query_params.offset.unwrap() < 0)
     {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
@@ -93,7 +93,7 @@ pub async fn get_all_companies(
         return HttpResponse::Ok().body(body.expect("Should be okay now."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[get("/company/{company_id}")]
@@ -124,7 +124,7 @@ pub async fn get_company(
             .body(body.expect("Should be valid."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[post("/company")]
@@ -168,7 +168,7 @@ pub async fn create_company(
             .body(body.expect("Should be valid."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 // TODO: This is rather ugly. Might rewrite if there is time left at the end. :copium:
@@ -259,7 +259,7 @@ pub async fn update_company(
             .body(body.expect("Should be valid."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[delete("/company/{company_id}")]

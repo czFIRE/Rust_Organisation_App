@@ -30,8 +30,8 @@ pub async fn get_all_event_staff(
     event_staff_repo: web::Data<StaffRepository>,
 ) -> HttpResponse {
     let query_info = query.into_inner();
-    if (query_info.limit.is_some() && query_info.limit.clone().unwrap() <= 0)
-        || (query_info.offset.is_some() && query_info.offset.clone().unwrap() <= 0)
+    if (query_info.limit.is_some() && query_info.limit.unwrap() <= 0)
+        || (query_info.offset.is_some() && query_info.offset.unwrap() <= 0)
     {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
@@ -61,7 +61,7 @@ pub async fn get_all_event_staff(
             .body(body.expect("Should be valid now."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[get("/event/staff/{staff_id}")]
@@ -88,7 +88,7 @@ pub async fn get_event_staff(
             .body(body.expect("Should be valid now."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[post("/event/{event_id}/staff")]
@@ -105,9 +105,9 @@ pub async fn create_event_staff(
 
     let parsed_id = id_parse.expect("Should be valid.");
 
-    let company_id = new_event_staff.company_id.clone();
+    let company_id = new_event_staff.company_id;
     let associated_company = associated_company_repo
-        .read_one(company_id, parsed_id.clone())
+        .read_one(company_id, parsed_id)
         .await;
     // An error here likely means the company is not associated with the event.
     if associated_company.is_err() {
@@ -130,7 +130,7 @@ pub async fn create_event_staff(
             .body(body.expect("Should be valid now."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 fn is_data_invalid(data: StaffData) -> bool {
@@ -191,7 +191,7 @@ pub async fn update_event_staff(
 
     // Make sure the decider is a valid entity in the system.
     if event_staff_data.decided_by.is_some() {
-        let decider_id = event_staff_data.decided_by.clone().unwrap();
+        let decider_id = event_staff_data.decided_by.unwrap();
         let decider = event_staff_repo.read_one(decider_id).await;
         if decider.is_err() {
             // Might specify this error further. But the decider needs to exist in the request, so it's a bad request.
@@ -232,7 +232,7 @@ pub async fn update_event_staff(
             )
             .await;
             if timesheet_res.is_err() {
-                return handle_database_error(timesheet_res.err().expect("Should be err."));
+                return handle_database_error(timesheet_res.expect_err("Should be err."));
             }
         }
 
@@ -241,7 +241,7 @@ pub async fn update_event_staff(
             .body(body.expect("Should be valid now."));
     }
 
-    handle_database_error(result.err().expect("Should be error."))
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[delete("/event/{event_id}/staff")]
