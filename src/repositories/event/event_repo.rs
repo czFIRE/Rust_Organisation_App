@@ -1,7 +1,8 @@
-use crate::common::DbResult;
+use crate::{common::DbResult, repositories::timesheet::models::{TimeRange, TimesheetStructureData}};
 use async_trait::async_trait;
-use sqlx::postgres::PgPool;
-use std::sync::Arc;
+use chrono::{DateTime, Utc, TimeZone, Datelike};
+use sqlx::{postgres::PgPool, Transaction, Postgres};
+use std::{sync::Arc, ops::DerefMut};
 use uuid::Uuid;
 
 use super::models::{Event, EventData, EventFilter, NewEvent};
@@ -120,6 +121,66 @@ impl EventRepository {
         Ok(events)
     }
 
+    //TODO: This should probably be in timesheet.
+    pub async fn update_timesheet_range_for_event(
+        &self,
+        event_id: Uuid,
+        data: TimeRange,
+        mut tx: Transaction<'_, Postgres>,
+    ) -> DbResult<()> {
+        let updated_sheets = sqlx::query_as!(
+            TimesheetStructureData,
+            r#"
+            UPDATE timesheet
+            SET start_date = $1,
+                end_date = $2,
+                edited_at = NOW()
+            WHERE event_id = $3
+              AND deleted_at IS NULL
+            RETURNING id,
+                      start_date,
+                      end_date;
+            "#,
+            data.start_date,
+            data.end_date,
+            event_id,
+        )
+        .fetch_all(tx.deref_mut())
+        .await?;
+
+        for sheet in updated_sheets.into_iter() {
+            let start_date_time: DateTime<Utc> = Utc.with_ymd_and_hms(sheet.start_date.year(), sheet.start_date.month(), sheet.start_date.day(), 0, 0, 0).unwrap();
+            let end_date_time: DateTime<Utc> = Utc.with_ymd_and_hms(sheet.end_date.year(), sheet.end_date.month(), sheet.end_date.day(), 0, 0, 0).unwrap();
+            sqlx::query!(
+                r#"DELETE FROM workday
+                   WHERE timesheet_id = $1 AND (date < $2 OR date > $3);"#,
+                sheet.id,
+                sheet.start_date,
+                sheet.end_date,
+            )
+            .execute(tx.deref_mut())
+            .await?;
+
+            sqlx::query!(
+                r#"INSERT INTO workday (timesheet_id, date, is_editable)
+                 SELECT $1, curr_date, $2
+                 FROM generate_series($3, $4, interval '1 day') as curr_date
+                 ON CONFLICT DO NOTHING;"#,
+                sheet.id,
+                true,
+                start_date_time,
+                end_date_time,
+            )
+            .execute(tx.deref_mut())
+            .await?;
+        }
+
+        tx.commit().await?;
+
+        Ok(())
+    }
+
+
     pub async fn update(&self, event_id: Uuid, data: EventData) -> DbResult<Event> {
         if data.name.is_none()
             && data.description.is_none()
@@ -131,7 +192,7 @@ impl EventRepository {
             return Err(sqlx::Error::RowNotFound);
         }
 
-        let executor = self.pool.as_ref();
+        let mut tx = self.pool.begin().await?;
 
         let event = sqlx::query_as!(
             Event,
@@ -165,14 +226,27 @@ impl EventRepository {
             data.avatar_url,
             event_id,
         )
-        .fetch_optional(executor)
+        .fetch_optional(tx.deref_mut())
         .await?;
 
         if event.is_none() {
             return Err(sqlx::Error::RowNotFound);
         }
 
-        Ok(event.expect("Should be valid"))
+        let result_event = event.expect("Should be valid");
+
+        if data.start_date.is_some() || data.end_date.is_some() {
+            let time_range = TimeRange {
+                start_date: data.start_date.unwrap_or(result_event.start_date.clone()),
+                end_date: data.end_date.unwrap_or(result_event.end_date.clone()),
+            };
+
+            self.update_timesheet_range_for_event(event_id, time_range, tx).await?;
+        } else {
+            tx.commit().await?;
+        }
+
+        Ok(result_event)
     }
 
     pub async fn delete(&self, event_id: Uuid) -> DbResult<()> {

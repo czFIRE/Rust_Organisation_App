@@ -160,6 +160,8 @@ impl TimesheetRepository {
             return Err(sqlx::Error::RowNotFound);
         }
 
+        let sheet_clone = timesheet.clone().unwrap();
+
         let workdays = sqlx::query_as!(
             Workday,
             r#"SELECT timesheet_id,
@@ -169,8 +171,13 @@ impl TimesheetRepository {
                     is_editable,
                     created_at,
                     edited_at 
-            FROM workday WHERE timesheet_id = $1;"#,
-            timesheet_id
+            FROM workday 
+            WHERE timesheet_id = $1
+              AND date >= $2
+              AND date <= $3;"#,
+            timesheet_id,
+            sheet_clone.start_date,
+            sheet_clone.end_date,
         )
         .fetch_all(tx.deref_mut())
         .await?;

@@ -11,7 +11,7 @@ pub struct TimesheetStructureData {
     pub end_date: NaiveDate,
 }
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, Clone, FromRow)]
 pub struct TimesheetWithEvent {
     pub id: Uuid,
     pub start_date: NaiveDate,
@@ -36,6 +36,12 @@ pub struct TimesheetCreateData {
     pub user_id: Uuid,
     pub company_id: Uuid,
     pub event_id: Uuid,
+}
+
+#[derive(Debug, Deserialize, FromRow)]
+pub struct TimeRange {
+    pub start_date: NaiveDate,
+    pub end_date: NaiveDate,
 }
 
 #[derive(Debug, Clone, Deserialize, FromRow)]
