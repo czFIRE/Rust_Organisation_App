@@ -32,7 +32,7 @@ use crate::handlers::{
     },
     associated_company::{
         create_associated_company, delete_associated_company, get_all_associated_companies,
-        update_associated_company,
+        update_associated_company, get_all_associated_companies_per_event_and_user
     },
     comment::{
         create_event_comment, create_task_comment, delete_comment, get_all_event_comments,
@@ -159,6 +159,7 @@ async fn main() -> Result<()> {
             .service(delete_all_rejected_event_staff)
             .service(delete_event_staff)
             .service(get_all_associated_companies)
+            .service(get_all_associated_companies_per_event_and_user)
             .service(create_associated_company)
             .service(update_associated_company)
             .service(delete_associated_company)

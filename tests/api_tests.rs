@@ -8,6 +8,7 @@ mod api_tests {
     use actix_web::{test, App};
     use chrono::NaiveDate;
     use dotenv::dotenv;
+    use organization::handlers::associated_company::get_all_associated_companies_per_event_and_user;
     use organization::repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository;
     use organization::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
     use organization::repositories::comment::comment_repo::CommentRepository;
@@ -2407,6 +2408,72 @@ mod api_tests {
 
         let req = test::TestRequest::get()
             .uri("/event/BADUUIDZZZZZZZZZc7748f8/company")
+            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+    }
+
+    #[actix_web::test]
+    async fn get_all_associated_companies_per_event_and_user_test() {
+        let arc_pool = get_db_pool().await;
+        let repository = AssociatedCompanyRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
+        let emp_repo = web::Data::new(EmploymentRepository::new(arc_pool.clone()));
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .app_data(emp_repo.clone())
+                .service(get_all_associated_companies_per_event_and_user),
+        )
+        .await;
+
+        let req = test::TestRequest::get()
+            .uri("/event/3f152d12-0bbd-429a-a9c5-28967d6370cc/user/0465041f-fe64-461f-9f71-71e3b97ca85f/company")
+            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+
+        assert!(body.contains("134d5286-5f55-4637-9b98-223a5820a464"));
+
+        let req = test::TestRequest::get()
+            .uri("/event/3f152dad-0bbd-4e9a-aec5-2a567d6370cc/user/0465041f-fe64-461f-9f71-71e3b97ca85f/company")
+            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_success());
+        assert_eq!(res.status(), http::StatusCode::OK);
+        let body_bytes = test::read_body(res).await;
+        let body = str::from_utf8(body_bytes.borrow()).unwrap();
+
+        assert!(!body.contains("134d5286-5f55-4637-9b98-223a5820a464"));
+    }
+
+    #[actix_web::test]
+    async fn get_all_associated_companies_per_event_and_user_errors_test() {
+        let arc_pool = get_db_pool().await;
+        let repository = AssociatedCompanyRepository::new(arc_pool.clone());
+        let repo = web::Data::new(repository);
+        let emp_repo = web::Data::new(EmploymentRepository::new(arc_pool.clone()));
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .app_data(emp_repo.clone())
+                .service(get_all_associated_companies_per_event_and_user),
+        )
+        .await;
+
+        let req = test::TestRequest::get()
+            .uri("/event/3f152fds-asddasc5-zzz/user/0465041f-fe64-461f-9f71-71e3b97ca85f/company")
+            .to_request();
+        let res = test::call_service(&app, req).await;
+        assert!(res.status().is_client_error());
+        assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+
+        let req = test::TestRequest::get()
+            .uri("/event/3f152d12-0bbd-429a-a9c5-28967d6370cc/user/zzzyyy-71zzzcooo7ca85f/company")
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());

@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{str::FromStr, collections::HashSet};
 
 use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;
@@ -9,10 +9,10 @@ use crate::{
     errors::{handle_database_error, parse_error},
     handlers::common::extract_path_tuple_ids,
     models::Association,
-    repositories::associated_company::{
+    repositories::{associated_company::{
         associated_company_repo::AssociatedCompanyRepository,
         models::{AssociatedCompanyData, AssociatedCompanyFilter, NewAssociatedCompany},
-    },
+    }, employment::{employment_repo::EmploymentRepository, models::EmploymentFilter}},
     templates::company::{AssociatedCompaniesTemplate, AssociatedCompanyTemplate},
 };
 
@@ -55,7 +55,55 @@ pub async fn get_all_associated_companies(
         let body = template.render();
         if body.is_err() {
             return HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::BAD_REQUEST));
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+        return HttpResponse::Ok().body(body.expect("Should be valid now."));
+    }
+
+    handle_database_error(result.err().expect("Should be error."))
+}
+
+#[get("/event/{event_id}/user/{user_id}/company")]
+pub async fn get_all_associated_companies_per_event_and_user(
+    path: web::Path<(String, String)>,
+    associated_repo: web::Data<AssociatedCompanyRepository>,
+    employment_repo: web::Data<EmploymentRepository>,
+) -> HttpResponse {
+    let parsed_ids = extract_path_tuple_ids(path.into_inner());
+    if parsed_ids.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let (event_id, user_id) = parsed_ids.unwrap();
+
+    // Retrieve user employments for checking of companies employing user.
+    let user_employments = employment_repo.read_all_for_user(user_id, EmploymentFilter{ limit: None, offset: None}).await;
+
+    if user_employments.is_err() {
+        return handle_database_error(user_employments.err().expect("Should be error."));
+    }
+
+    let result = associated_repo
+        .read_all_companies_for_event(event_id, AssociatedCompanyFilter { limit: None, offset: None })
+        .await;
+
+    if let Ok(associated_companies) = result {
+        // Retrieve company IDs the user is employed at.
+        let user_companies: HashSet<Uuid> = user_employments.expect("Should be valid.").into_iter().map(|employment| employment.company.id).collect();
+
+        // Extra step: filter out companies NOT employing user.
+        let associated_companies_vec: Vec<AssociatedCompanyTemplate> = associated_companies
+            .into_iter()
+            .filter(|company| user_companies.contains(&company.company.id))
+            .map(|company| company.into())
+            .collect();
+        let template = AssociatedCompaniesTemplate {
+            associated_companies: associated_companies_vec,
+        };
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
         return HttpResponse::Ok().body(body.expect("Should be valid now."));
     }
