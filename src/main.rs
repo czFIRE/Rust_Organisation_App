@@ -32,7 +32,7 @@ use crate::handlers::{
     },
     associated_company::{
         create_associated_company, delete_associated_company, get_all_associated_companies,
-        update_associated_company, get_all_associated_companies_per_event_and_user
+        get_all_associated_companies_per_event_and_user, update_associated_company,
     },
     comment::{
         create_event_comment, create_task_comment, delete_comment, get_all_event_comments,

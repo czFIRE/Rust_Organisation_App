@@ -1,8 +1,11 @@
-use crate::{common::DbResult, repositories::timesheet::models::{TimeRange, TimesheetStructureData}};
+use crate::{
+    common::DbResult,
+    repositories::timesheet::models::{TimeRange, TimesheetStructureData},
+};
 use async_trait::async_trait;
-use chrono::{DateTime, Utc, TimeZone, Datelike};
-use sqlx::{postgres::PgPool, Transaction, Postgres};
-use std::{sync::Arc, ops::DerefMut};
+use chrono::{DateTime, Datelike, TimeZone, Utc};
+use sqlx::{postgres::PgPool, Postgres, Transaction};
+use std::{ops::DerefMut, sync::Arc};
 use uuid::Uuid;
 
 use super::models::{Event, EventData, EventFilter, NewEvent};
@@ -149,8 +152,26 @@ impl EventRepository {
         .await?;
 
         for sheet in updated_sheets.into_iter() {
-            let start_date_time: DateTime<Utc> = Utc.with_ymd_and_hms(sheet.start_date.year(), sheet.start_date.month(), sheet.start_date.day(), 0, 0, 0).unwrap();
-            let end_date_time: DateTime<Utc> = Utc.with_ymd_and_hms(sheet.end_date.year(), sheet.end_date.month(), sheet.end_date.day(), 0, 0, 0).unwrap();
+            let start_date_time: DateTime<Utc> = Utc
+                .with_ymd_and_hms(
+                    sheet.start_date.year(),
+                    sheet.start_date.month(),
+                    sheet.start_date.day(),
+                    0,
+                    0,
+                    0,
+                )
+                .unwrap();
+            let end_date_time: DateTime<Utc> = Utc
+                .with_ymd_and_hms(
+                    sheet.end_date.year(),
+                    sheet.end_date.month(),
+                    sheet.end_date.day(),
+                    0,
+                    0,
+                    0,
+                )
+                .unwrap();
             sqlx::query!(
                 r#"DELETE FROM workday
                    WHERE timesheet_id = $1 AND (date < $2 OR date > $3);"#,
@@ -179,7 +200,6 @@ impl EventRepository {
 
         Ok(())
     }
-
 
     pub async fn update(&self, event_id: Uuid, data: EventData) -> DbResult<Event> {
         if data.name.is_none()
@@ -241,7 +261,8 @@ impl EventRepository {
                 end_date: data.end_date.unwrap_or(result_event.end_date.clone()),
             };
 
-            self.update_timesheet_range_for_event(event_id, time_range, tx).await?;
+            self.update_timesheet_range_for_event(event_id, time_range, tx)
+                .await?;
         } else {
             tx.commit().await?;
         }

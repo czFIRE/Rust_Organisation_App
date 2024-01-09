@@ -1,4 +1,4 @@
-use std::{str::FromStr, collections::HashSet};
+use std::{collections::HashSet, str::FromStr};
 
 use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;
@@ -9,10 +9,13 @@ use crate::{
     errors::{handle_database_error, parse_error},
     handlers::common::extract_path_tuple_ids,
     models::Association,
-    repositories::{associated_company::{
-        associated_company_repo::AssociatedCompanyRepository,
-        models::{AssociatedCompanyData, AssociatedCompanyFilter, NewAssociatedCompany},
-    }, employment::{employment_repo::EmploymentRepository, models::EmploymentFilter}},
+    repositories::{
+        associated_company::{
+            associated_company_repo::AssociatedCompanyRepository,
+            models::{AssociatedCompanyData, AssociatedCompanyFilter, NewAssociatedCompany},
+        },
+        employment::{employment_repo::EmploymentRepository, models::EmploymentFilter},
+    },
     templates::company::{AssociatedCompaniesTemplate, AssociatedCompanyTemplate},
 };
 
@@ -77,19 +80,37 @@ pub async fn get_all_associated_companies_per_event_and_user(
     let (event_id, user_id) = parsed_ids.unwrap();
 
     // Retrieve user employments for checking of companies employing user.
-    let user_employments = employment_repo.read_all_for_user(user_id, EmploymentFilter{ limit: None, offset: None}).await;
+    let user_employments = employment_repo
+        .read_all_for_user(
+            user_id,
+            EmploymentFilter {
+                limit: None,
+                offset: None,
+            },
+        )
+        .await;
 
     if user_employments.is_err() {
         return handle_database_error(user_employments.err().expect("Should be error."));
     }
 
     let result = associated_repo
-        .read_all_companies_for_event(event_id, AssociatedCompanyFilter { limit: None, offset: None })
+        .read_all_companies_for_event(
+            event_id,
+            AssociatedCompanyFilter {
+                limit: None,
+                offset: None,
+            },
+        )
         .await;
 
     if let Ok(associated_companies) = result {
         // Retrieve company IDs the user is employed at.
-        let user_companies: HashSet<Uuid> = user_employments.expect("Should be valid.").into_iter().map(|employment| employment.company.id).collect();
+        let user_companies: HashSet<Uuid> = user_employments
+            .expect("Should be valid.")
+            .into_iter()
+            .map(|employment| employment.company.id)
+            .collect();
 
         // Extra step: filter out companies NOT employing user.
         let associated_companies_vec: Vec<AssociatedCompanyTemplate> = associated_companies

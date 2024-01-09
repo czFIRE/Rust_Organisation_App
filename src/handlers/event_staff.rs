@@ -106,7 +106,9 @@ pub async fn create_event_staff(
     let parsed_id = id_parse.expect("Should be valid.");
 
     let company_id = new_event_staff.company_id.clone();
-    let associated_company = associated_company_repo.read_one(company_id, parsed_id.clone()).await;
+    let associated_company = associated_company_repo
+        .read_one(company_id, parsed_id.clone())
+        .await;
     // An error here likely means the company is not associated with the event.
     if associated_company.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
