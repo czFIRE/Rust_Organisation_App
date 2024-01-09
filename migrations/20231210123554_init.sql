@@ -193,7 +193,7 @@ CREATE TABLE timesheet
     start_date   DATE NOT NULL,
     end_date     DATE NOT NULL,
     total_hours  REAL NOT NULL DEFAULT 0.0,
-    is_editable  BOOLEAN NOT NULL DEFAULT TRUE,
+    is_editable  BOOLEAN NOT NULL DEFAULT 'true',
     status       approval_status NOT NULL DEFAULT 'not_requested',
     manager_note TEXT,
     -------------------------------------------------------
@@ -204,6 +204,7 @@ CREATE TABLE timesheet
 	FOREIGN KEY (user_id, company_id)
 	    REFERENCES employment (user_id, company_id),
     FOREIGN KEY  (event_id) REFERENCES event (id),
+    UNIQUE(user_id, company_id, event_id),
     --------------------------------------------------------
     CONSTRAINT check_timesheet_is_editable_iff_not_requested_or_rejected
         CHECK (NOT(is_editable IS TRUE AND status IN ('pending', 'accepted'))),
@@ -263,6 +264,7 @@ CREATE TABLE event_staff
 	    REFERENCES employment (user_id, company_id),
     FOREIGN KEY (decided_by) REFERENCES event_staff (id),
     FOREIGN KEY (event_id) REFERENCES event (id),
+    UNIQUE(user_id, company_id, event_id),
     -------------------------------------------------------
     CONSTRAINT check_event_staff_decided_by_null_iff_pending
         CHECK (NOT(decided_by IS NULL AND status != 'pending')),
