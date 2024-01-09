@@ -20,8 +20,6 @@ RUN cargo fetch
 # remove temporary rust project
 RUN rm -rf src
 
-# what a hack
 COPY . .
 
-# what a genius
 CMD sqlx migrate run && cargo run

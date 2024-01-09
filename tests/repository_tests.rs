@@ -53,7 +53,7 @@ pub mod user_repo_tests {
 
     use crate::test_constants;
 
-    #[sqlx::test(fixtures("users"))]
+    #[sqlx::test(fixtures("users"), migrations = "migrations/no_seed")]
     async fn create(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -94,7 +94,7 @@ pub mod user_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("users"))]
+    #[sqlx::test(fixtures("users"), migrations = "migrations/no_seed")]
     async fn read(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -121,7 +121,7 @@ pub mod user_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("users"))]
+    #[sqlx::test(fixtures("users"), migrations = "migrations/no_seed")]
     async fn read_all(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -153,7 +153,7 @@ pub mod user_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("users"))]
+    #[sqlx::test(fixtures("users"), migrations = "migrations/no_seed")]
     async fn update(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -275,7 +275,7 @@ pub mod user_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("users"))]
+    #[sqlx::test(fixtures("users"), migrations = "migrations/no_seed")]
     async fn delete(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -341,7 +341,7 @@ pub mod company_repo_tests {
 
     use crate::test_constants;
 
-    #[sqlx::test(fixtures("companies"))]
+    #[sqlx::test(fixtures("companies"), migrations = "migrations/no_seed")]
     async fn create_company_test(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -404,7 +404,7 @@ pub mod company_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("companies"))]
+    #[sqlx::test(fixtures("companies"), migrations = "migrations/no_seed")]
     async fn read_company_test(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -451,7 +451,7 @@ pub mod company_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("companies"))]
+    #[sqlx::test(fixtures("companies"), migrations = "migrations/no_seed")]
     async fn read_all_companies_test(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -499,7 +499,7 @@ pub mod company_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("companies"))]
+    #[sqlx::test(fixtures("companies"), migrations = "migrations/no_seed")]
     async fn update_company_test(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -744,7 +744,7 @@ pub mod company_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("companies"))]
+    #[sqlx::test(fixtures("companies"), migrations = "migrations/no_seed")]
     async fn delete_company_test(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -820,7 +820,7 @@ pub mod event_repo_tests {
 
     use crate::test_constants;
 
-    #[sqlx::test(fixtures("events"))]
+    #[sqlx::test(fixtures("events"), migrations = "migrations/no_seed")]
     async fn create(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -862,7 +862,7 @@ pub mod event_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("events"))]
+    #[sqlx::test(fixtures("events"), migrations = "migrations/no_seed")]
     async fn read(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -898,7 +898,7 @@ pub mod event_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("events"))]
+    #[sqlx::test(fixtures("events"), migrations = "migrations/no_seed")]
     async fn read_all(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -951,7 +951,7 @@ pub mod event_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("events"))]
+    #[sqlx::test(fixtures("events"), migrations = "migrations/no_seed")]
     async fn update(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1074,7 +1074,7 @@ pub mod event_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("events"))]
+    #[sqlx::test(fixtures("events"), migrations = "migrations/no_seed")]
     async fn delete(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1152,7 +1152,7 @@ pub mod associated_company_repo_tests {
 
     use crate::test_constants;
 
-    #[sqlx::test(fixtures("associated_company"))]
+    #[sqlx::test(fixtures("associated_company"), migrations = "migrations/no_seed")]
     async fn create(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1197,7 +1197,7 @@ pub mod associated_company_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("associated_company"))]
+    #[sqlx::test(fixtures("associated_company"), migrations = "migrations/no_seed")]
     async fn read(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1220,7 +1220,7 @@ pub mod associated_company_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("associated_company"))]
+    #[sqlx::test(fixtures("associated_company"), migrations = "migrations/no_seed")]
     async fn read_all(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1315,7 +1315,7 @@ pub mod associated_company_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("associated_company"))]
+    #[sqlx::test(fixtures("associated_company"), migrations = "migrations/no_seed")]
     async fn update(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1424,7 +1424,7 @@ pub mod associated_company_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("associated_company"))]
+    #[sqlx::test(fixtures("associated_company"), migrations = "migrations/no_seed")]
     async fn delete(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1512,7 +1512,7 @@ pub mod employment_repo_tests {
 
     use crate::test_constants;
 
-    #[sqlx::test(fixtures("employments"))]
+    #[sqlx::test(fixtures("employments"), migrations = "migrations/no_seed")]
     async fn create(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1562,7 +1562,7 @@ pub mod employment_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("employments"))]
+    #[sqlx::test(fixtures("employments"), migrations = "migrations/no_seed")]
     async fn read(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1605,7 +1605,7 @@ pub mod employment_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("employments"))]
+    #[sqlx::test(fixtures("employments"), migrations = "migrations/no_seed")]
     async fn read_all_per_user(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1641,7 +1641,7 @@ pub mod employment_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("employments"))]
+    #[sqlx::test(fixtures("employments"), migrations = "migrations/no_seed")]
     pub fn read_all_per_company(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1681,7 +1681,7 @@ pub mod employment_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("employments"))]
+    #[sqlx::test(fixtures("employments"), migrations = "migrations/no_seed")]
     pub fn read_all_subordinates(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1721,7 +1721,7 @@ pub mod employment_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("employments"))]
+    #[sqlx::test(fixtures("employments"), migrations = "migrations/no_seed")]
     pub fn update(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1868,7 +1868,7 @@ pub mod employment_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("employments"))]
+    #[sqlx::test(fixtures("employments"), migrations = "migrations/no_seed")]
     pub fn delete(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1952,7 +1952,7 @@ pub mod event_staff_repo_tests {
 
     use crate::test_constants;
 
-    #[sqlx::test(fixtures("event_staff"))]
+    #[sqlx::test(fixtures("event_staff"), migrations = "migrations/no_seed")]
     async fn create(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1992,7 +1992,7 @@ pub mod event_staff_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("event_staff"))]
+    #[sqlx::test(fixtures("event_staff"), migrations = "migrations/no_seed")]
     async fn read(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2016,7 +2016,7 @@ pub mod event_staff_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("event_staff"))]
+    #[sqlx::test(fixtures("event_staff"), migrations = "migrations/no_seed")]
     async fn read_all_per_event(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2049,7 +2049,7 @@ pub mod event_staff_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("event_staff"))]
+    #[sqlx::test(fixtures("event_staff"), migrations = "migrations/no_seed")]
     async fn update(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2177,7 +2177,7 @@ pub mod event_staff_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("event_staff"))]
+    #[sqlx::test(fixtures("event_staff"), migrations = "migrations/no_seed")]
     async fn delete(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2253,7 +2253,7 @@ pub mod task_repo_tests {
 
     use crate::test_constants;
 
-    #[sqlx::test(fixtures("task"))]
+    #[sqlx::test(fixtures("task"), migrations = "migrations/no_seed")]
     async fn create(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2293,7 +2293,7 @@ pub mod task_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("task"))]
+    #[sqlx::test(fixtures("task"), migrations = "migrations/no_seed")]
     async fn read_one(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2316,7 +2316,7 @@ pub mod task_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("task"))]
+    #[sqlx::test(fixtures("task"), migrations = "migrations/no_seed")]
     async fn read_all_per_event(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2370,7 +2370,7 @@ pub mod task_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("task"))]
+    #[sqlx::test(fixtures("task"), migrations = "migrations/no_seed")]
     async fn update(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2499,7 +2499,7 @@ pub mod task_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("task"))]
+    #[sqlx::test(fixtures("task"), migrations = "migrations/no_seed")]
     async fn delete(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2587,7 +2587,7 @@ pub mod assigned_staff_repo_tests {
 
     use crate::test_constants;
 
-    #[sqlx::test(fixtures("assigned_staff"))]
+    #[sqlx::test(fixtures("assigned_staff"), migrations = "migrations/no_seed")]
     pub fn create(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2623,7 +2623,7 @@ pub mod assigned_staff_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("assigned_staff"))]
+    #[sqlx::test(fixtures("assigned_staff"), migrations = "migrations/no_seed")]
     pub fn read_one(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2645,7 +2645,7 @@ pub mod assigned_staff_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("assigned_staff"))]
+    #[sqlx::test(fixtures("assigned_staff"), migrations = "migrations/no_seed")]
     pub fn read_all_per_task(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2685,7 +2685,7 @@ pub mod assigned_staff_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("assigned_staff"))]
+    #[sqlx::test(fixtures("assigned_staff"), migrations = "migrations/no_seed")]
     pub fn update(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2779,7 +2779,7 @@ pub mod assigned_staff_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("assigned_staff"))]
+    #[sqlx::test(fixtures("assigned_staff"), migrations = "migrations/no_seed")]
     pub fn delete(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2864,7 +2864,7 @@ pub mod comment_repo_tests {
 
     use crate::test_constants;
 
-    #[sqlx::test(fixtures("comments"))]
+    #[sqlx::test(fixtures("comments"), migrations = "migrations/no_seed")]
     async fn create(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2937,7 +2937,7 @@ pub mod comment_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("comments"))]
+    #[sqlx::test(fixtures("comments"), migrations = "migrations/no_seed")]
     async fn read_one(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2958,7 +2958,7 @@ pub mod comment_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("comments"))]
+    #[sqlx::test(fixtures("comments"), migrations = "migrations/no_seed")]
     async fn read_all_per_event(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2995,7 +2995,7 @@ pub mod comment_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("comments"))]
+    #[sqlx::test(fixtures("comments"), migrations = "migrations/no_seed")]
     async fn read_all_per_task(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -3032,7 +3032,7 @@ pub mod comment_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("comments"))]
+    #[sqlx::test(fixtures("comments"), migrations = "migrations/no_seed")]
     async fn update(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -3134,7 +3134,7 @@ pub mod comment_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("comments"))]
+    #[sqlx::test(fixtures("comments"), migrations = "migrations/no_seed")]
     async fn delete(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -3210,7 +3210,7 @@ mod timesheet_repo_tests {
         COMPANY1_ID, COMPANY2_ID, EVENT1_ID, TIMESHEET0_ID, TIMESHEET1_ID, TIMESHEET4_ID, USER1_ID,
         USER2_ID,
     };
-    #[sqlx::test(fixtures("all_inclusive"))]
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
     async fn create(pool: PgPool) {
         let arc_pool = Arc::new(pool);
 
@@ -3244,7 +3244,7 @@ mod timesheet_repo_tests {
         }
     }
 
-    #[sqlx::test(fixtures("all_inclusive"))]
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
     async fn read_one(pool: PgPool) {
         let arc_pool = Arc::new(pool);
 
@@ -3293,7 +3293,7 @@ mod timesheet_repo_tests {
         }
     }
 
-    #[sqlx::test(fixtures("all_inclusive"))]
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
     async fn read_all_per_employment(pool: PgPool) {
         let arc_pool = Arc::new(pool);
 
@@ -3331,7 +3331,7 @@ mod timesheet_repo_tests {
         }
     }
 
-    #[sqlx::test(fixtures("all_inclusive"))]
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
     async fn update(pool: PgPool) {
         let arc_pool = Arc::new(pool);
 
@@ -3492,7 +3492,7 @@ mod timesheet_repo_tests {
         }
     }
 
-    #[sqlx::test(fixtures("all_inclusive"))]
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
     async fn delete(pool: PgPool) {
         let arc_pool = Arc::new(pool);
 
