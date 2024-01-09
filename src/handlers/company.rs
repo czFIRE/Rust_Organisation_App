@@ -127,11 +127,29 @@ pub async fn get_company(
     handle_database_error(result.expect_err("Should be error."))
 }
 
+fn is_creation_data_invalid(data: NewCompanyData) -> bool {
+    (data.description.is_some() && data.description.unwrap().is_empty())
+        || (data.website.is_some() && data.website.unwrap().is_empty)
+        || data.phone.is_empty()
+        || data.email.is_empty()
+        || data.crn.is_empty()
+        || data.vatin.is_empty()
+        || data.region.is_empty()
+        || data.country.is_empty()
+        || data.city.is_empty()
+        || data.postal_code.is_empty()
+        || data.street.is_empty()
+        || data.street.is_empty()
+}
+
 #[post("/company")]
 pub async fn create_company(
     new_company: web::Json<NewCompanyData>,
     company_repo: web::Data<CompanyRepository>,
 ) -> HttpResponse {
+    if is_creation_data_invalid(new_company.clone()) {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
     let company_data = NewCompany {
         name: new_company.name.clone(),
         description: new_company.description.clone(),
