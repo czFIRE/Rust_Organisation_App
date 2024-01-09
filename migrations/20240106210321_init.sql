@@ -26,7 +26,7 @@ CREATE TABLE user_record
     name        VARCHAR(255) NOT NULL,
     email       VARCHAR(255) NOT NULL UNIQUE,
     birth       DATE NOT NULL,
-    avatar_url  VARCHAR(255) NOT NULL DEFAULT 'img/default/user.jpg',
+    avatar_url  VARCHAR(255) DEFAULT 'img/default/user.jpg',
     gender      gender NOT NULL,
     role        user_role NOT NULL DEFAULT 'user',
     status      user_status NOT NULL DEFAULT 'available',
@@ -55,7 +55,7 @@ CREATE TABLE company
     vatin       VARCHAR(18) NOT NULL UNIQUE,
     phone       VARCHAR(255) NOT NULL UNIQUE,
     email       VARCHAR(255) NOT NULL UNIQUE,
-    avatar_url  VARCHAR(255) NOT NULL DEFAULT 'img/default/company.jpg',
+    avatar_url  VARCHAR(255) DEFAULT 'img/default/company.jpg',
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
@@ -149,7 +149,7 @@ CREATE TABLE event
     accepts_staff  BOOLEAN NOT NULL DEFAULT true,
     start_date     DATE NOT NULL,
     end_date       DATE NOT NULL,
-    avatar_url     VARCHAR(255) NOT NULL DEFAULT 'img/default/event.jpg',
+    avatar_url     VARCHAR(255) DEFAULT 'img/default/event.jpg',
     -------------------------------------------------------
     created_at     TIMESTAMP NOT NULL DEFAULT now(),
     edited_at      TIMESTAMP NOT NULL DEFAULT now(),
@@ -206,7 +206,6 @@ CREATE TABLE timesheet
     FOREIGN KEY (user_id, company_id)
         REFERENCES employment (user_id, company_id),
     FOREIGN KEY  (event_id) REFERENCES event (id),
-    UNIQUE(user_id, company_id, event_id),
     --------------------------------------------------------
     CONSTRAINT check_timesheet_is_editable_iff_not_requested_or_rejected
         CHECK (NOT(is_editable IS TRUE AND status IN ('pending', 'accepted'))),
@@ -265,7 +264,6 @@ CREATE TABLE event_staff
         REFERENCES employment (user_id, company_id),
     FOREIGN KEY (event_id) REFERENCES event (id),
     FOREIGN KEY (decided_by) REFERENCES event_staff (id),
-    UNIQUE(user_id, company_id, event_id),
     -------------------------------------------------------
     CONSTRAINT check_event_staff_decided_by_null_iff_pending
         CHECK (NOT(decided_by IS NULL AND status != 'pending')),

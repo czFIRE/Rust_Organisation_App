@@ -165,7 +165,7 @@ pub async fn update_timesheet(
 }
 
 /*
-* Reset every work_day for a corresponding timesheet, as well as worked_hours and comments in the timesheet record.
+* Reset every workday for a corresponding timesheet, as well as worked_hours and comments in the timesheet record.
 */
 #[delete("/timesheet/{timesheet_id}/workdays")]
 pub async fn reset_timesheet_data(

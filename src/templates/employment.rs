@@ -4,7 +4,7 @@ use serde::Deserialize;
 use sqlx::types::uuid;
 use uuid::Uuid;
 
-use crate::models::{EmployeeContract, EmployeeLevel};
+use crate::models::{EmployeeLevel, EmploymentContract};
 
 use super::{company::CompanyLiteTemplate, user::UserLiteTemplate};
 
@@ -29,7 +29,7 @@ pub struct EmploymentTemplate {
 pub struct EmploymentLiteTemplate {
     pub user_id: Uuid,
     pub company: CompanyLiteTemplate,
-    pub employment_type: EmployeeContract,
+    pub employment_type: EmploymentContract,
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
 }

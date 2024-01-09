@@ -1499,7 +1499,7 @@ pub mod employment_repo_tests {
     use chrono::{NaiveDate, NaiveDateTime, Utc};
     use organization::{
         common::DbResult,
-        models::{EmployeeContract, EmployeeLevel},
+        models::{EmployeeLevel, EmploymentContract},
         repositories::{
             employment::{
                 employment_repo::EmploymentRepository,
@@ -1526,7 +1526,7 @@ pub mod employment_repo_tests {
             start_date: NaiveDate::from_ymd_opt(2021, 9, 15).unwrap(),
             end_date: NaiveDate::from_ymd_opt(2024, 9, 16).unwrap(),
             description: Some("Test Description".to_string()),
-            employment_type: EmployeeContract::Hpp,
+            employment_type: EmploymentContract::Hpp,
             level: EmployeeLevel::CompanyAdministrator,
         };
 
@@ -1739,7 +1739,7 @@ pub mod employment_repo_tests {
                 start_date: Some(NaiveDate::from_ymd_opt(2027, 9, 15).unwrap()),
                 end_date: Some(NaiveDate::from_ymd_opt(2027, 9, 16).unwrap()),
                 description: Some("Test Description".to_string()),
-                employment_type: Some(EmployeeContract::Hpp),
+                employment_type: Some(EmploymentContract::Hpp),
                 level: Some(EmployeeLevel::CompanyAdministrator),
             };
 
@@ -1819,7 +1819,7 @@ pub mod employment_repo_tests {
                 start_date: None,
                 end_date: None,
                 description: None,
-                employment_type: Some(EmployeeContract::Hpp),
+                employment_type: Some(EmploymentContract::Hpp),
                 level: Some(EmployeeLevel::CompanyAdministrator),
             };
 
@@ -1853,7 +1853,7 @@ pub mod employment_repo_tests {
                 start_date: None,
                 end_date: None,
                 description: None,
-                employment_type: Some(EmployeeContract::Hpp),
+                employment_type: Some(EmploymentContract::Hpp),
                 level: Some(EmployeeLevel::CompanyAdministrator),
             };
 
