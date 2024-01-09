@@ -129,7 +129,7 @@ pub async fn get_company(
 
 #[post("/company")]
 pub async fn create_company(
-    new_company: web::Form<NewCompanyData>,
+    new_company: web::Json<NewCompanyData>,
     company_repo: web::Data<CompanyRepository>,
 ) -> HttpResponse {
     let company_data = NewCompany {
@@ -204,7 +204,7 @@ fn is_update_data_empty(company_data: CompanyUpdateData) -> bool {
 #[patch("/company/{company_id}")]
 pub async fn update_company(
     company_id: web::Path<String>,
-    company_data: web::Form<CompanyUpdateData>,
+    company_data: web::Json<CompanyUpdateData>,
     company_repo: web::Data<CompanyRepository>,
 ) -> HttpResponse {
     let data = company_data.into_inner();

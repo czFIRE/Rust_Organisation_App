@@ -66,7 +66,7 @@ pub async fn get_all_associated_companies(
 #[post("/event/{event_id}/company")]
 pub async fn create_associated_company(
     event_id: web::Path<String>,
-    new_associated_company: web::Form<NewAssociatedCompanyData>,
+    new_associated_company: web::Json<NewAssociatedCompanyData>,
     associated_repo: web::Data<AssociatedCompanyRepository>,
 ) -> HttpResponse {
     let id_parse = Uuid::from_str(event_id.into_inner().as_str());
@@ -101,7 +101,7 @@ pub async fn create_associated_company(
 #[patch("/event/{event_id}/company/{company_id}")]
 pub async fn update_associated_company(
     path: web::Path<(String, String)>,
-    associated_company_data: web::Form<AssociatedCompanyData>,
+    associated_company_data: web::Json<AssociatedCompanyData>,
     associated_repo: web::Data<AssociatedCompanyRepository>,
 ) -> HttpResponse {
     if associated_company_data.association_type.is_none() {

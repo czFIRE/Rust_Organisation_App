@@ -225,7 +225,7 @@ pub async fn get_subordinates(
 
 #[post("/employment")]
 pub async fn create_employment(
-    new_employment: web::Form<NewEmployment>,
+    new_employment: web::Json<NewEmployment>,
     employment_repo: web::Data<EmploymentRepository>,
 ) -> HttpResponse {
     let user_id = new_employment.user_id;
@@ -255,7 +255,7 @@ fn is_data_empty(data: EmploymentData) -> bool {
 #[patch("/user/{user_id}/employment/{company_id}")]
 pub async fn update_employment(
     path: web::Path<(String, String)>,
-    employment_data: web::Form<EmploymentData>,
+    employment_data: web::Json<EmploymentData>,
     employment_repo: web::Data<EmploymentRepository>,
 ) -> HttpResponse {
     if is_data_empty(employment_data.clone()) {

@@ -101,7 +101,7 @@ mod api_tests {
         });
         let req = test::TestRequest::post()
             .uri("/user")
-            .set_form(user.clone())
+            .set_json(user.clone())
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -122,7 +122,7 @@ mod api_tests {
 
         let req = test::TestRequest::post()
             .uri("/user")
-            .set_form(user)
+            .set_json(user)
             .to_request();
         let res = test::call_service(&app, req).await;
         // Email should be unique.
@@ -135,7 +135,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
             .uri(format!("/user/{}", uuid_str).as_str())
-            .set_form(user_update)
+            .set_json(user_update)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -150,7 +150,7 @@ mod api_tests {
         // Update with no data should fail
         let req = test::TestRequest::patch()
             .uri(format!("/user/{}", uuid_str).as_str())
-            .set_form(json!({}))
+            .set_json(json!({}))
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -241,7 +241,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
             .uri("/user/35341289-d420-40b6-96d8-ce069b1ba5d4")
-            .set_form(user_update)
+            .set_json(user_update)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -269,7 +269,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
             .uri("/user/Sleepyhead-d420-zzz6-ygd8-5d4")
-            .set_form(user_update)
+            .set_json(user_update)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -448,7 +448,7 @@ mod api_tests {
 
         let req = test::TestRequest::post()
             .uri("/company")
-            .set_form(company.clone())
+            .set_json(company.clone())
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -477,7 +477,7 @@ mod api_tests {
         // Attempt to create a duplicate.
         let req = test::TestRequest::post()
             .uri("/company")
-            .set_form(company)
+            .set_json(company)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -489,7 +489,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
             .uri(format!("/company/{}", uuid_str).as_str())
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -502,7 +502,7 @@ mod api_tests {
         // Empty data body.
         let req = test::TestRequest::patch()
             .uri(format!("/company/{}", uuid_str).as_str())
-            .set_form(json!({}))
+            .set_json(json!({}))
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -543,7 +543,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
             .uri("/company/b548eed1-538d-48d4-8cee-498e0971f9f5")
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -570,7 +570,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
             .uri("/company/b5188gda-sleepy-head-123zzz")
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -719,7 +719,7 @@ mod api_tests {
 
         let req = test::TestRequest::post()
             .uri("/event")
-            .set_form(data.clone())
+            .set_json(data.clone())
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -744,7 +744,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
             .uri(format!("/event/{}", uuid_str).as_str())
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -788,7 +788,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
             .uri("/event/b71fd7ce-c891-410a-9bba-1aacececc8fa")
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -812,7 +812,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
             .uri("/event/b71fd7ce-deaf-listenerz-zz123zy")
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -836,7 +836,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8")
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -1002,7 +1002,7 @@ mod api_tests {
 
         let req = test::TestRequest::post()
             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task")
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -1029,7 +1029,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
             .uri(format!("/event/task/{}", task_id).as_str())
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -1045,7 +1045,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
             .uri(format!("/event/task/{}", task_id).as_str())
-            .set_form(json!({}))
+            .set_json(json!({}))
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -1080,7 +1080,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
             .uri("/event/task/7a201017-aa31-4aac-b767-100d18a8877b")
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -1101,7 +1101,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
                             .uri("/event/task/IllhaveyouknowIgraduatedtopofmyclassintheNavySealsandIvebeeninvolvedinnumeroussecretraids")
-                            .set_form(data)
+                            .set_json(data)
                             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -1189,7 +1189,7 @@ mod api_tests {
 
         let req = test::TestRequest::post()
             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/comment")
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -1214,7 +1214,7 @@ mod api_tests {
 
         let req = test::TestRequest::put()
             .uri(format!("/comment/{}", comment_id).as_str())
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -1230,7 +1230,7 @@ mod api_tests {
 
         let req = test::TestRequest::put()
             .uri(format!("/comment/{}", comment_id).as_str())
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -1273,7 +1273,7 @@ mod api_tests {
 
         let req = test::TestRequest::post()
             .uri("/event/b554d7ac-cdea-410a-9bb4-70fc5c7748f8/comment")
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -1301,7 +1301,7 @@ mod api_tests {
 
         let req = test::TestRequest::post()
             .uri("/event/uuidied-writingthis/comment")
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -1323,7 +1323,7 @@ mod api_tests {
 
         let req = test::TestRequest::put()
             .uri("/comment/uuidied-writingthis")
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -1396,7 +1396,7 @@ mod api_tests {
 
         let req = test::TestRequest::post()
             .uri("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/comment")
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -1421,7 +1421,7 @@ mod api_tests {
 
         let req = test::TestRequest::put()
             .uri(format!("/comment/{}", comment_id).as_str())
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -1437,7 +1437,7 @@ mod api_tests {
 
         let req = test::TestRequest::put()
             .uri(format!("/comment/{}", comment_id).as_str())
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -1478,7 +1478,7 @@ mod api_tests {
 
         let req = test::TestRequest::post()
             .uri("/task/b554d7ac-cdea-410a-9bb4-70fc5c7748f8/comment")
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -1505,7 +1505,7 @@ mod api_tests {
 
         let req = test::TestRequest::post()
             .uri("/task/uuidied-writingthis/comment")
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -1728,7 +1728,7 @@ mod api_tests {
 
         let req = test::TestRequest::post()
             .uri("/employment")
-            .set_form(data.clone())
+            .set_json(data.clone())
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -1744,7 +1744,7 @@ mod api_tests {
 
         let req = test::TestRequest::post()
             .uri("/employment")
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
 
@@ -1758,7 +1758,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
                             .uri("/user/ac9bf689-a713-4b66-a3d0-41faaf0f8d0c/employment/b5188eda-528d-48d4-8cee-498e0971f9f5")
-                            .set_form(data)
+                            .set_json(data)
                             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -1775,7 +1775,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
                             .uri("/user/ac9bf689-a713-4b66-a3d0-41faaf0f8d0c/employment/b5188eda-528d-48d4-8cee-498e0971f9f5")
-                            .set_form(data)
+                            .set_json(data)
                             .to_request();
         let res = test::call_service(&app, req).await;
         // Patching empty data.
@@ -1823,7 +1823,7 @@ mod api_tests {
 
         let req = test::TestRequest::post()
             .uri("/employment")
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         // The user ID is invalid.
@@ -1842,7 +1842,7 @@ mod api_tests {
 
         let req = test::TestRequest::post()
             .uri("/employment")
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         // Error: No company ID
@@ -1984,7 +1984,7 @@ mod api_tests {
 
         let req = test::TestRequest::post()
             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff")
-            .set_form(data.clone())
+            .set_json(data.clone())
             .to_request();
 
         let res = test::call_service(&app, req).await;
@@ -2014,7 +2014,7 @@ mod api_tests {
                 )
                 .as_str(),
             )
-            .set_form(json!({}))
+            .set_json(json!({}))
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -2029,7 +2029,7 @@ mod api_tests {
                 )
                 .as_str(),
             )
-            .set_form(json!({
+            .set_json(json!({
                 "status": "accepted"
             }))
             .to_request();
@@ -2046,7 +2046,7 @@ mod api_tests {
                 )
                 .as_str(),
             )
-            .set_form(json!({
+            .set_json(json!({
                 "status": "accepted",
                 "decided_by": staff_id.to_string(),
             }))
@@ -2064,7 +2064,7 @@ mod api_tests {
                 )
                 .as_str(),
             )
-            .set_form(json!({
+            .set_json(json!({
                 "status": "accepted",
                 "decided_by": "aa7f3d0e-ab48-473b-ac69-b84cb74f34f7",
             }))
@@ -2082,7 +2082,7 @@ mod api_tests {
                 )
                 .as_str(),
             )
-            .set_form(json!({
+            .set_json(json!({
                 "status": "accepted",
                 "decided_by": "9281b570-4d02-4096-9136-338a613c71cd"
             }))
@@ -2103,7 +2103,7 @@ mod api_tests {
                 )
                 .as_str(),
             )
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -2257,7 +2257,7 @@ mod api_tests {
 
         let req = test::TestRequest::post()
             .uri("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff")
-            .set_form(data)
+            .set_json(data)
             .to_request();
 
         let res = test::call_service(&app, req).await;
@@ -2277,7 +2277,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
             .uri("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff/a96d1d99-93b5-469b-ac62-654b0cf7ebd3")
-            .set_form(data)
+            .set_json(data)
             .to_request();
 
         let res = test::call_service(&app, req).await;
@@ -2295,7 +2295,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
             .uri("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff/a96d1d99-93b5-469b-ac62-654b0cf7ebd3")
-            .set_form(data)
+            .set_json(data)
             .to_request();
 
         let res = test::call_service(&app, req).await;
@@ -2343,7 +2343,7 @@ mod api_tests {
 
         let req = test::TestRequest::post()
             .uri("/task/7aey-FEELZ-INVALIDUUIDUDE767-100d18a8877b/staff")
-            .set_form(data)
+            .set_json(data)
             .to_request();
 
         let res = test::call_service(&app, req).await;
@@ -2356,7 +2356,7 @@ mod api_tests {
 
         let req = test::TestRequest::post()
             .uri("/task/7ae0c017-fe31-4dde-b653-1acd18a8877b/staff")
-            .set_form(data)
+            .set_json(data)
             .to_request();
 
         let res = test::call_service(&app, req).await;
@@ -2434,7 +2434,7 @@ mod api_tests {
 
         let req = test::TestRequest::post()
             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/company")
-            .set_form(data.clone())
+            .set_json(data.clone())
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -2448,7 +2448,7 @@ mod api_tests {
         //Duplicate creation should fail
         let req = test::TestRequest::post()
             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/company")
-            .set_form(data.clone())
+            .set_json(data.clone())
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -2457,7 +2457,7 @@ mod api_tests {
         // Invalid UUID should fail
         let req = test::TestRequest::post()
             .uri("/event/BADUUIDFORMATZZZ/company")
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -2469,7 +2469,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
                     .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/company/134d5286-5f55-4637-9b98-223a5820a464")
-                    .set_form(data)
+                    .set_json(data)
                     .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -2484,7 +2484,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
                     .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/company/134d5286-5f55-4637-9b98-223a5820a464")
-                    .set_form(data)
+                    .set_json(data)
                     .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -2496,7 +2496,7 @@ mod api_tests {
 
         let req = test::TestRequest::patch()
             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/company/INVALIDUUID")
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -2655,7 +2655,7 @@ mod api_tests {
 
         let req = test::TestRequest::post()
             .uri("/timesheet")
-            .set_form(data.clone())
+            .set_json(data.clone())
             .to_request();
         let res = test::call_service(&app, req).await;
 
@@ -2679,7 +2679,7 @@ mod api_tests {
         });
         let req = test::TestRequest::patch()
             .uri(format!("/timesheet/{}", timesheet_id.to_string()).as_str())
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
 
@@ -2693,7 +2693,7 @@ mod api_tests {
         let data = json!({});
         let req = test::TestRequest::patch()
             .uri(format!("/timesheet/{}", timesheet_id.to_string()).as_str())
-            .set_form(data)
+            .set_json(data)
             .to_request();
         let res = test::call_service(&app, req).await;
 

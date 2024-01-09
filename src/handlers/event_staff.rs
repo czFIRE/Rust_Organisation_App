@@ -93,7 +93,7 @@ pub async fn get_event_staff(
 #[post("/event/{event_id}/staff")]
 pub async fn create_event_staff(
     event_id: web::Path<String>,
-    new_event_staff: web::Form<NewStaff>,
+    new_event_staff: web::Json<NewStaff>,
     event_staff_repo: web::Data<StaffRepository>,
 ) -> HttpResponse {
     let id_parse = Uuid::from_str(event_id.into_inner().as_str());
@@ -153,7 +153,7 @@ async fn create_timesheet_for_user(
 #[patch("/event/{event_id}/staff/{staff_id}")]
 pub async fn update_event_staff(
     path: web::Path<(String, String)>,
-    event_staff_data: web::Form<StaffData>,
+    event_staff_data: web::Json<StaffData>,
     event_staff_repo: web::Data<StaffRepository>,
     timesheet_repo: web::Data<TimesheetRepository>,
     event_repo: web::Data<EventRepository>,

@@ -65,7 +65,7 @@ pub async fn get_all_timesheets_for_employment(
 // Note: This is done automatically whenever event_staff is accepted to work on an event.
 #[post("/timesheet")]
 pub async fn create_timesheet(
-    new_timesheet: web::Form<TimesheetCreateData>,
+    new_timesheet: web::Json<TimesheetCreateData>,
     timesheet_repo: web::Data<TimesheetRepository>,
 ) -> HttpResponse {
     let result = timesheet_repo.create(new_timesheet.into_inner()).await;
@@ -130,7 +130,7 @@ fn is_data_empty(data: TimesheetUpdateData) -> bool {
 #[patch("/timesheet/{timesheet_id}")]
 pub async fn update_timesheet(
     timesheet_id: web::Path<String>,
-    timesheet_data: web::Form<TimesheetUpdateData>,
+    timesheet_data: web::Json<TimesheetUpdateData>,
     timesheet_repo: web::Data<TimesheetRepository>,
 ) -> HttpResponse {
     if is_data_empty(timesheet_data.clone()) {

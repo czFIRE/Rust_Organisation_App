@@ -98,7 +98,7 @@ pub async fn get_assigned_staff(
 #[post("/task/{task_id}/staff")]
 pub async fn create_assigned_staff(
     task_id: web::Path<String>,
-    new_task_staff: web::Form<NewAssignedStaffData>,
+    new_task_staff: web::Json<NewAssignedStaffData>,
     assigned_repo: web::Data<AssignedStaffRepository>,
 ) -> HttpResponse {
     let id_parse = Uuid::from_str(task_id.into_inner().as_str());
@@ -132,7 +132,7 @@ pub async fn create_assigned_staff(
 #[patch("/task/{task_id}/staff/{staff_id}")]
 pub async fn update_assigned_staff(
     path: web::Path<(String, String)>,
-    task_staff_data: web::Form<AssignedStaffData>,
+    task_staff_data: web::Json<AssignedStaffData>,
     assigned_repo: web::Data<AssignedStaffRepository>,
     staff_repo: web::Data<StaffRepository>,
 ) -> HttpResponse {

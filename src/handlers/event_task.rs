@@ -89,7 +89,7 @@ pub async fn get_event_task(
 #[post("/event/{event_id}/task")]
 pub async fn create_task(
     event_id: web::Path<String>,
-    new_task: web::Form<NewEventTaskData>,
+    new_task: web::Json<NewEventTaskData>,
     task_repo: web::Data<TaskRepository>,
 ) -> HttpResponse {
     let id_parse = Uuid::from_str(event_id.into_inner().as_str());
@@ -132,7 +132,7 @@ fn is_data_invalid(data: TaskData) -> bool {
 #[patch("/event/task/{task_id}")]
 pub async fn update_task(
     task_id: web::Path<String>,
-    task_data: web::Form<TaskData>,
+    task_data: web::Json<TaskData>,
     task_repo: web::Data<TaskRepository>,
 ) -> HttpResponse {
     if is_data_invalid(task_data.clone()) {

@@ -44,7 +44,7 @@ pub async fn get_user(
 
 #[post("/user")]
 pub async fn create_user(
-    new_user: web::Form<NewUser>,
+    new_user: web::Json<NewUser>,
     user_repo: web::Data<UserRepository>,
 ) -> HttpResponse {
     if new_user.name.len() == 0 || new_user.email.len() == 0 {
@@ -85,7 +85,7 @@ fn is_data_invalid(user_data: UserData) -> bool {
 #[patch("/user/{user_id}")]
 pub async fn update_user(
     user_id: web::Path<String>,
-    user_data: web::Form<UserData>,
+    user_data: web::Json<UserData>,
     user_repo: web::Data<UserRepository>,
 ) -> HttpResponse {
     if is_data_invalid(user_data.clone()) {

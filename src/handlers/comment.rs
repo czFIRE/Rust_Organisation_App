@@ -63,7 +63,7 @@ pub async fn get_all_event_comments(
 #[post("/event/{event_id}/comment")]
 pub async fn create_event_comment(
     event_id: web::Path<String>,
-    new_comment: web::Form<NewCommentData>,
+    new_comment: web::Json<NewCommentData>,
     comment_repo: web::Data<CommentRepository>,
 ) -> HttpResponse {
     let id_parse = Uuid::from_str(event_id.into_inner().as_str());
@@ -140,7 +140,7 @@ pub async fn get_all_task_comments(
 #[post("/task/{task_id}/comment")]
 pub async fn create_task_comment(
     task_id: web::Path<String>,
-    new_comment: web::Form<NewCommentData>,
+    new_comment: web::Json<NewCommentData>,
     comment_repo: web::Data<CommentRepository>,
 ) -> HttpResponse {
     let id_parse = Uuid::from_str(task_id.into_inner().as_str());
@@ -179,7 +179,7 @@ pub async fn create_task_comment(
 #[put("/comment/{comment_id}")]
 pub async fn update_comment(
     comment_id: web::Path<String>,
-    comment_data: web::Form<CommentData>,
+    comment_data: web::Json<CommentData>,
     comment_repo: web::Data<CommentRepository>,
 ) -> HttpResponse {
     if comment_data.content.clone().is_empty() {

@@ -105,7 +105,7 @@ pub async fn get_event(
 
 #[post("/event")]
 pub async fn create_event(
-    new_event: web::Form<NewEvent>,
+    new_event: web::Json<NewEvent>,
     event_repo: web::Data<EventRepository>,
 ) -> HttpResponse {
     if (new_event.website.is_some() && new_event.website.as_ref().unwrap().len() == 0)
@@ -161,7 +161,7 @@ fn is_update_data_empty(event_data: EventData) -> bool {
 #[patch("/event/{event_id}")]
 pub async fn update_event(
     event_id: web::Path<String>,
-    event_data: web::Form<EventData>,
+    event_data: web::Json<EventData>,
     event_repo: web::Data<EventRepository>,
 ) -> HttpResponse {
     if is_update_data_empty(event_data.clone()) {
