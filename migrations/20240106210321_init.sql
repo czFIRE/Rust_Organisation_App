@@ -26,7 +26,7 @@ CREATE TABLE user_record
     name        VARCHAR(255) NOT NULL,
     email       VARCHAR(255) NOT NULL UNIQUE,
     birth       DATE NOT NULL,
-    avatar_url  VARCHAR(255) DEFAULT 'img/default/user.jpg',
+    avatar_url  VARCHAR(255) NOT NULL DEFAULT 'img/default/user.jpg',
     gender      gender NOT NULL,
     role        user_role NOT NULL DEFAULT 'user',
     status      user_status NOT NULL DEFAULT 'available',
@@ -55,7 +55,7 @@ CREATE TABLE company
     vatin       VARCHAR(18) NOT NULL UNIQUE,
     phone       VARCHAR(255) NOT NULL UNIQUE,
     email       VARCHAR(255) NOT NULL UNIQUE,
-    avatar_url  VARCHAR(255) DEFAULT 'img/default/company.jpg',
+    avatar_url  VARCHAR(255) NOT NULL DEFAULT 'img/default/company.jpg',
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
@@ -114,7 +114,7 @@ CREATE TABLE employment
     -------------------------------------------------------
     hourly_wage FLOAT NOT NULL,
     start_date  DATE NOT NULL,
-    end_date    DATE,
+    end_date    DATE NOT NULL default '9999-12-31',
     description TEXT,
     type        employment_contract NOT NULL,
     level       employee_level NOT NULL DEFAULT 'basic',
@@ -149,7 +149,7 @@ CREATE TABLE event
     accepts_staff  BOOLEAN NOT NULL DEFAULT true,
     start_date     DATE NOT NULL,
     end_date       DATE NOT NULL,
-    avatar_url     VARCHAR(255) DEFAULT 'img/default/event.jpg',
+    avatar_url     VARCHAR(255) NOT NULL DEFAULT 'img/default/event.jpg',
     -------------------------------------------------------
     created_at     TIMESTAMP NOT NULL DEFAULT now(),
     edited_at      TIMESTAMP NOT NULL DEFAULT now(),
