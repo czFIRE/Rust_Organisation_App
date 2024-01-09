@@ -68,6 +68,10 @@ pub async fn create_timesheet(
     new_timesheet: web::Json<TimesheetCreateData>,
     timesheet_repo: web::Data<TimesheetRepository>,
 ) -> HttpResponse {
+    if new_timesheet.end_date < new_timesheet.start_date {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
     let result = timesheet_repo.create(new_timesheet.into_inner()).await;
 
     if let Ok(full_timesheet) = result {
@@ -125,6 +129,9 @@ fn is_data_empty(data: TimesheetUpdateData) -> bool {
             || (data.manager_note.is_some() && data.manager_note.unwrap().is_empty()))
         && (data.workdays.is_none()
             || (data.workdays.is_some() && data.workdays.unwrap().is_empty()))
+        || (data.start_date.is_some()
+            && data.end_date.is_some()
+            && data.start_date.unwrap() > data.end_date.unwrap())
 }
 
 #[patch("/timesheet/{timesheet_id}")]
