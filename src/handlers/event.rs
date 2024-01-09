@@ -29,17 +29,8 @@ pub async fn get_events(
     let result = event_repo.read_all(query_params).await;
 
     if let Ok(events) = result {
-        let lite_events = events
-            .into_iter()
-            .map(|event| EventLiteTemplate {
-                id: event.id,
-                avatar_url: event.avatar_url,
-                name: event.name,
-                accepts_staff: event.accepts_staff,
-                start_date: event.start_date,
-                end_date: event.end_date,
-            })
-            .collect();
+        let lite_events: Vec<EventLiteTemplate> =
+            events.into_iter().map(|event| event.into()).collect();
 
         let template = EventsTemplate {
             events: lite_events,
@@ -74,20 +65,7 @@ pub async fn get_event(
     let result = event_repo.read_one(parsed_id).await;
 
     if let Ok(event) = result {
-        let template = EventTemplate {
-            id: event.id,
-            avatar_url: event.avatar_url,
-            name: event.name,
-            description: event
-                .description
-                .unwrap_or("No description set.".to_string()),
-            website: event.website.unwrap_or("No website set.".to_string()),
-            accepts_staff: event.accepts_staff,
-            start_date: event.start_date,
-            end_date: event.end_date,
-            created_at: event.created_at,
-            edited_at: event.edited_at,
-        };
+        let template: EventTemplate = event.into();
 
         let body = template.render();
         if body.is_err() {
@@ -117,20 +95,7 @@ pub async fn create_event(
     let result = event_repo.create(new_event.into_inner()).await;
 
     if let Ok(event) = result {
-        let template = EventTemplate {
-            id: event.id,
-            avatar_url: event.avatar_url,
-            name: event.name,
-            description: event
-                .description
-                .unwrap_or("No description set.".to_string()),
-            website: event.website.unwrap_or("No website set.".to_string()),
-            accepts_staff: event.accepts_staff,
-            start_date: event.start_date,
-            end_date: event.end_date,
-            created_at: event.created_at,
-            edited_at: event.edited_at,
-        };
+        let template: EventTemplate = event.into();
 
         let body = template.render();
         if body.is_err() {
@@ -177,20 +142,7 @@ pub async fn update_event(
     let result = event_repo.update(parsed_id, event_data.into_inner()).await;
 
     if let Ok(event) = result {
-        let template = EventTemplate {
-            id: event.id,
-            avatar_url: event.avatar_url,
-            name: event.name,
-            description: event
-                .description
-                .unwrap_or("No description set.".to_string()),
-            website: event.website.unwrap_or("No website set.".to_string()),
-            accepts_staff: event.accepts_staff,
-            start_date: event.start_date,
-            end_date: event.end_date,
-            created_at: event.created_at,
-            edited_at: event.edited_at,
-        };
+        let template: EventTemplate = event.into();
 
         let body = template.render();
         if body.is_err() {
