@@ -1964,12 +1964,13 @@ mod api_tests {
 
         let timesheet_repo = web::Data::new(TimesheetRepository::new(arc_pool.clone()));
         let event_repo = web::Data::new(EventRepository::new(arc_pool.clone()));
-
+        let associated_repo = web::Data::new(AssociatedCompanyRepository::new(arc_pool.clone()));
         let app = test::init_service(
             App::new()
                 .app_data(staff_repo.clone())
                 .app_data(timesheet_repo.clone())
                 .app_data(event_repo.clone())
+                .app_data(associated_repo.clone())
                 .service(create_event_staff)
                 .service(update_event_staff)
                 .service(delete_event_staff),

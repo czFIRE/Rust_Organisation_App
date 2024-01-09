@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use crate::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
 use crate::repositories::timesheet::models::TimesheetCreateData;
 use crate::{
     common::DbResult,
@@ -95,6 +96,7 @@ pub async fn create_event_staff(
     event_id: web::Path<String>,
     new_event_staff: web::Json<NewStaff>,
     event_staff_repo: web::Data<StaffRepository>,
+    associated_company_repo: web::Data<AssociatedCompanyRepository>,
 ) -> HttpResponse {
     let id_parse = Uuid::from_str(event_id.into_inner().as_str());
     if id_parse.is_err() {
@@ -102,6 +104,14 @@ pub async fn create_event_staff(
     }
 
     let parsed_id = id_parse.expect("Should be valid.");
+
+    let company_id = new_event_staff.company_id.clone();
+    let associated_company = associated_company_repo.read_one(company_id, parsed_id.clone()).await;
+    // An error here likely means the company is not associated with the event.
+    if associated_company.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
     let result = event_staff_repo
         .create(parsed_id, new_event_staff.into_inner())
         .await;

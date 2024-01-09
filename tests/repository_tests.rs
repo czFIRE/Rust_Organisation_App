@@ -1207,7 +1207,7 @@ pub mod associated_company_repo_tests {
         let event_id = test_constants::EVENT0_ID;
 
         let associated_company = associated_company_repo
-            ._read_one(company_id, event_id)
+            .read_one(company_id, event_id)
             .await
             .expect("Read should succeed");
 
@@ -1328,7 +1328,7 @@ pub mod associated_company_repo_tests {
 
         {
             let associated_company = associated_company_repo
-                ._read_one(company_id, event_id)
+                .read_one(company_id, event_id)
                 .await
                 .expect("Read should succeed");
 
@@ -1393,7 +1393,7 @@ pub mod associated_company_repo_tests {
 
         {
             let associated_company = associated_company_repo
-                ._read_one(company_id, event_id)
+                .read_one(company_id, event_id)
                 .await
                 .expect("Read should succeed");
 
@@ -1405,7 +1405,7 @@ pub mod associated_company_repo_tests {
                 .expect("Delete should succeed");
 
             let _deleted_associated_company = associated_company_repo
-                ._read_one(company_id, event_id)
+                .read_one(company_id, event_id)
                 .await
                 .expect_err("Read should not succeed");
 
@@ -1435,7 +1435,7 @@ pub mod associated_company_repo_tests {
             let event_id = test_constants::EVENT0_ID;
 
             let associated_company = associated_company_repo
-                ._read_one(company_id, event_id)
+                .read_one(company_id, event_id)
                 .await
                 .expect("Read should succeed");
 
@@ -1447,7 +1447,7 @@ pub mod associated_company_repo_tests {
                 .unwrap();
 
             let _deleted_associated_company = associated_company_repo
-                ._read_one(company_id, event_id)
+                .read_one(company_id, event_id)
                 .await
                 .expect_err("Read should not succeed");
         }
@@ -1459,7 +1459,7 @@ pub mod associated_company_repo_tests {
             let event_id = test_constants::EVENT0_ID;
 
             let _ = associated_company_repo
-                ._read_one(company_id, event_id)
+                .read_one(company_id, event_id)
                 .await
                 .expect_err("Read should not succeed");
 

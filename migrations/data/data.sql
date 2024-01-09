@@ -291,6 +291,13 @@ BEGIN
         (company2_id, event1_id, 'sponsor',
         '2023-12-12 12:38', '2023-12-12 12:38');
 
+    INSERT INTO associated_company
+        (company_id, event_id, type,
+        created_at, edited_at)
+        VALUES
+        (company2_id, event0_id, 'other',
+        '2023-12-12 12:39', '2023-12-12 12:39');
+
 --------------------------------------------------------------------------------
 
     INSERT INTO timesheet
