@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE timesheet \n            SET total_hours = 0,\n                edited_at = NOW()\n            WHERE id = $1\n                  AND deleted_at IS NULL\n            RETURNING id,\n                      start_date,\n                      end_date;",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "start_date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 2,
+        "name": "end_date",
+        "type_info": "Date"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "832574dca10b92c5b7648643410fbba07c1e2feb15f13fad6ca45b9373e47d9d"
+}

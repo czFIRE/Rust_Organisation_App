@@ -1,0 +1,65 @@
+{
+  "db_name": "PostgreSQL",
+  "query": " UPDATE associated_company SET \n                deleted_at = NOW(),\n                edited_at = NOW()\n            WHERE company_id = $1 \n              AND event_id = $2\n              AND deleted_at IS NULL\n            RETURNING \n              company_id, \n              event_id, \n              type as \"association_type!: Association\", \n              created_at, \n              edited_at, \n              deleted_at;\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "company_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "event_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "association_type!: Association",
+        "type_info": {
+          "Custom": {
+            "name": "association",
+            "kind": {
+              "Enum": [
+                "sponsor",
+                "organizer",
+                "media",
+                "other"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 4,
+        "name": "edited_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 5,
+        "name": "deleted_at",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "dfd1f019ba745def1e4b3d91554437e9f95e915254026dc42419952bed6c3c40"
+}

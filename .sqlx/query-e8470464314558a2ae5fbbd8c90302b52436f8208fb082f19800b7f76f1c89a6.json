@@ -1,0 +1,161 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT \n                comment.id AS comment_id, \n                comment.author_id AS comment_author_id, \n                comment.event_id AS comment_event_id, \n                comment.task_id AS comment_task_id, \n                comment.content AS comment_content, \n                comment.created_at AS comment_created_at, \n                comment.edited_at AS comment_edited_at, \n                comment.deleted_at AS comment_deleted_at, \n                user_record.id AS user_id, \n                user_record.name AS user_name, \n                user_record.email AS user_email, \n                user_record.birth AS user_birth, \n                user_record.avatar_url AS user_avatar_url, \n                user_record.gender AS \"user_gender!: Gender\", \n                user_record.role AS \"user_role!: UserRole\", \n                user_record.status AS \"user_status!: UserStatus\", \n                user_record.created_at AS user_created_at, \n                user_record.edited_at AS user_edited_at, \n                user_record.deleted_at AS user_deleted_at \n            FROM \n                comment \n                INNER JOIN user_record ON comment.author_id = user_record.id \n            WHERE \n                comment.id = $1\n                AND comment.deleted_at IS NULL     \n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "comment_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "comment_author_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "comment_event_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "comment_task_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "comment_content",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "comment_created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 6,
+        "name": "comment_edited_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 7,
+        "name": "comment_deleted_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 8,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 9,
+        "name": "user_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 10,
+        "name": "user_email",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 11,
+        "name": "user_birth",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 12,
+        "name": "user_avatar_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 13,
+        "name": "user_gender!: Gender",
+        "type_info": {
+          "Custom": {
+            "name": "gender",
+            "kind": {
+              "Enum": [
+                "male",
+                "female",
+                "other"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "user_role!: UserRole",
+        "type_info": {
+          "Custom": {
+            "name": "user_role",
+            "kind": {
+              "Enum": [
+                "user",
+                "admin"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "user_status!: UserStatus",
+        "type_info": {
+          "Custom": {
+            "name": "user_status",
+            "kind": {
+              "Enum": [
+                "available",
+                "unavailable"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "user_created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 17,
+        "name": "user_edited_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 18,
+        "name": "user_deleted_at",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "e8470464314558a2ae5fbbd8c90302b52436f8208fb082f19800b7f76f1c89a6"
+}

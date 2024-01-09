@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": " INSERT INTO employment (\n                    user_id, company_id, manager_id, hourly_wage, \n                    start_date, end_date, description, \n                    type, level\n                ) \n                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) \n                RETURNING user_id, \n                    company_id, \n                    manager_id, \n                    hourly_wage, \n                    start_date, \n                    end_date, \n                    description, \n                    type AS \"employment_type!: EmploymentContract\", \n                    level AS \"level!: EmployeeLevel\", \n                    created_at, \n                    edited_at, \n                    deleted_at;",
+  "query": "UPDATE employment\n            SET deleted_at = NOW(), edited_at = NOW()\n            WHERE user_id = $1 AND company_id = $2\n            AND deleted_at IS NULL\n            RETURNING \n                user_id, \n                company_id, \n                manager_id, \n                hourly_wage, \n                start_date, \n                end_date, \n                description, \n                type AS \"employment_type!: EmploymentContract\", \n                level AS \"level!: EmployeeLevel\", \n                created_at, \n                edited_at, \n                deleted_at;",
   "describe": {
     "columns": [
       {
@@ -89,36 +89,7 @@
     "parameters": {
       "Left": [
         "Uuid",
-        "Uuid",
-        "Uuid",
-        "Float8",
-        "Date",
-        "Date",
-        "Text",
-        {
-          "Custom": {
-            "name": "employment_contract",
-            "kind": {
-              "Enum": [
-                "dpp",
-                "dpc",
-                "hpp"
-              ]
-            }
-          }
-        },
-        {
-          "Custom": {
-            "name": "employee_level",
-            "kind": {
-              "Enum": [
-                "basic",
-                "manager",
-                "company_administrator"
-              ]
-            }
-          }
-        }
+        "Uuid"
       ]
     },
     "nullable": [
@@ -136,5 +107,5 @@
       true
     ]
   },
-  "hash": "defb3ea4ec9d445c2c9a2a3fc4962d5ece87b4e3963b56090b6c787066a8cad3"
+  "hash": "44bf904037ff8b5f71e71981ada19859d07bbb0525b6b25e8134e88287828264"
 }

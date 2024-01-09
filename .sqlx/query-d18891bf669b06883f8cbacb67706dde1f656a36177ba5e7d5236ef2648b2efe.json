@@ -1,0 +1,46 @@
+{
+  "db_name": "PostgreSQL",
+  "query": " UPDATE event_staff SET \n                role = COALESCE($1, role), \n                status = COALESCE($2, status), \n                decided_by = COALESCE($3, decided_by), \n                edited_at = now() \n            WHERE id = $4 \n              AND deleted_at IS NULL\n            RETURNING id;\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        {
+          "Custom": {
+            "name": "event_role",
+            "kind": {
+              "Enum": [
+                "staff",
+                "organizer"
+              ]
+            }
+          }
+        },
+        {
+          "Custom": {
+            "name": "acceptance_status",
+            "kind": {
+              "Enum": [
+                "pending",
+                "accepted",
+                "rejected"
+              ]
+            }
+          }
+        },
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "d18891bf669b06883f8cbacb67706dde1f656a36177ba5e7d5236ef2648b2efe"
+}
