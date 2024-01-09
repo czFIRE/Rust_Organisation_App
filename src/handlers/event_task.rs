@@ -96,6 +96,13 @@ pub async fn create_task(
     if id_parse.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
+
+    if (new_task.title.is_some() && new_task.title.as_ref().is_empty())
+        || (new_task.description.is_some() && new_task.description.as_ref().is_empty())
+    {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
     let parsed_id = id_parse.expect("Should be valid.");
     let data = NewTask {
         event_id: parsed_id,
