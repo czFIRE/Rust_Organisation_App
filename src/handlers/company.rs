@@ -15,7 +15,7 @@ use crate::{
     templates::company::{CompaniesTemplate, CompanyLiteTemplate, CompanyTemplate},
 };
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Clone)]
 pub struct NewCompanyData {
     name: String,
     description: Option<String>,
