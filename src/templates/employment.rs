@@ -14,7 +14,7 @@ pub struct EmploymentTemplate {
     pub user_id: Uuid,
     pub company: CompanyLiteTemplate,
     pub manager: Option<UserLiteTemplate>,
-    pub employment_type: EmployeeContract,
+    pub employment_type: EmploymentContract,
     pub hourly_wage: f64,
     pub level: EmployeeLevel,
     pub description: String,

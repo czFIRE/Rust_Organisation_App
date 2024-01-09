@@ -160,12 +160,12 @@ pub enum EmploymentContract {
     Hpp,
 }
 
-impl fmt::Display for EmployeeContract {
+impl fmt::Display for EmploymentContract {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            EmployeeContract::Dpp => write!(f, "DPP"),
-            EmployeeContract::Dpc => write!(f, "DPC"),
-            EmployeeContract::Hpp => write!(f, "HPP"),
+            EmploymentContract::Dpp => write!(f, "DPP"),
+            EmploymentContract::Dpc => write!(f, "DPC"),
+            EmploymentContract::Hpp => write!(f, "HPP"),
         }
     }
 }

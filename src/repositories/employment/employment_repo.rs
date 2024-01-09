@@ -434,7 +434,7 @@ impl EmploymentRepository {
                 start_date, 
                 end_date, 
                 description, 
-                type AS "employment_type!: EmployeeContract", 
+                type AS "employment_type!: EmploymentContract", 
                 level AS "level!: EmployeeLevel", 
                 created_at, 
                 edited_at, 
