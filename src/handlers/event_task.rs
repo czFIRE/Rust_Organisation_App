@@ -97,8 +97,8 @@ pub async fn create_task(
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
-    if (new_task.title.is_some() && new_task.title.as_ref().is_empty())
-        || (new_task.description.is_some() && new_task.description.as_ref().is_empty())
+    if (new_task.title.is_some() && new_task.title.clone().unwrap().is_empty())
+        || (new_task.description.is_some() && new_task.description.clone().unwrap().is_empty())
     {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }

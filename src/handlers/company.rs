@@ -130,7 +130,7 @@ pub async fn get_company(
 fn is_creation_data_invalid(data: NewCompanyData) -> bool {
     data.name.is_empty()
         || (data.description.is_some() && data.description.unwrap().is_empty())
-        || (data.website.is_some() && data.website.unwrap().is_empty)
+        || (data.website.is_some() && data.website.unwrap().is_empty())
         || data.phone.is_empty()
         || data.email.is_empty()
         || data.crn.is_empty()
@@ -148,27 +148,28 @@ pub async fn create_company(
     new_company: web::Json<NewCompanyData>,
     company_repo: web::Data<CompanyRepository>,
 ) -> HttpResponse {
-    if is_creation_data_invalid(new_company.clone()) {
+    let data = new_company.into_inner();
+    if is_creation_data_invalid(data.clone()) {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
     let company_data = NewCompany {
-        name: new_company.name.clone(),
-        description: new_company.description.clone(),
-        phone: new_company.phone.clone(),
-        email: new_company.email.clone(),
-        website: new_company.website.clone(),
-        crn: new_company.crn.clone(),
-        vatin: new_company.vatin.clone(),
+        name: data.name.clone(),
+        description: data.description.clone(),
+        phone: data.phone.clone(),
+        email: data.email.clone(),
+        website: data.website.clone(),
+        crn: data.crn.clone(),
+        vatin: data.vatin.clone(),
     };
 
     let address = AddressData {
-        country: new_company.country.clone(),
-        region: new_company.region.clone(),
-        city: new_company.city.clone(),
-        postal_code: new_company.postal_code.clone(),
-        street: new_company.street.clone(),
-        street_number: new_company.number.clone(),
+        country: data.country.clone(),
+        region: data.region.clone(),
+        city: data.city.clone(),
+        postal_code: data.postal_code.clone(),
+        street: data.street.clone(),
+        street_number: data.number.clone(),
     };
 
     let result = company_repo.create(company_data, address).await;
