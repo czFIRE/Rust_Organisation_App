@@ -1718,12 +1718,12 @@ mod api_tests {
             "user_id": "ac9bf689-a713-4b66-a3d0-41faaf0f8d0c",
             "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
             "manager_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
-            "employment_type": "hpp",
-            "hourly_wage": "200.0",
-            "level": "basic",
+            "hourly_wage": 200.0,
             "start_date": "2022-12-23",
             "end_date": "2022-12-26",
             "description": "A person.",
+            "employment_type": "hpp",
+            "level": "basic"
         });
 
         let req = test::TestRequest::post()
