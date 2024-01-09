@@ -7,7 +7,8 @@ use uuid::Uuid;
 use crate::{
     models::Association,
     repositories::{
-        associated_company::models::AssociatedCompanyExtended, company::models::CompanyExtended,
+        associated_company::models::AssociatedCompanyExtended,
+        company::models::{Company, CompanyExtended},
     },
 };
 
@@ -73,6 +74,16 @@ pub struct CompanyLiteTemplate {
     pub id: Uuid,
     pub name: String,
     pub avatar_url: String,
+}
+
+impl From<Company> for CompanyLiteTemplate {
+    fn from(company: Company) -> Self {
+        CompanyLiteTemplate {
+            id: company.id,
+            name: company.name,
+            avatar_url: company.avatar_url,
+        }
+    }
 }
 
 #[derive(Template, Debug, Deserialize)]

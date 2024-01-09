@@ -68,3 +68,20 @@ impl From<UserLite> for UserLiteTemplate {
         }
     }
 }
+
+impl From<User> for UserLiteTemplate {
+    fn from(user: User) -> UserLiteTemplate {
+        UserLiteTemplate {
+            id: user.id,
+            name: user.name,
+            status: user.status,
+            age: chrono::offset::Local::now()
+                .naive_local()
+                .date()
+                .years_since(user.birth)
+                .expect("Should be valid"),
+            gender: user.gender,
+            avatar_url: user.avatar_url,
+        }
+    }
+}

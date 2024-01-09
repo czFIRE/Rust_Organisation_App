@@ -4,10 +4,7 @@ use crate::{
     errors::handle_database_error,
     handlers::common::extract_path_tuple_ids,
     repositories::employment::models::{EmploymentData, NewEmployment},
-    templates::{
-        employment::{EmploymentLiteTemplate, EmploymentTemplate},
-        user::UserLiteTemplate,
-    },
+    templates::employment::{EmploymentLiteTemplate, EmploymentTemplate},
 };
 use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;
@@ -16,7 +13,7 @@ use uuid::Uuid;
 use crate::{
     errors::parse_error,
     repositories::employment::{employment_repo::EmploymentRepository, models::EmploymentFilter},
-    templates::{company::CompanyLiteTemplate, employment::EmploymentsTemplate},
+    templates::employment::EmploymentsTemplate,
 };
 
 #[get("/user/{user_id}/employment")]
@@ -44,23 +41,9 @@ pub async fn get_employments_per_user(
         .await;
 
     if let Ok(employments) = result {
-        let employment_vec = employments
+        let employment_vec: Vec<EmploymentLiteTemplate> = employments
             .into_iter()
-            .map(|employment| {
-                let company = CompanyLiteTemplate {
-                    id: employment.company.id,
-                    name: employment.company.name,
-                    avatar_url: employment.company.avatar_url,
-                };
-
-                EmploymentLiteTemplate {
-                    user_id: employment.user_id,
-                    company,
-                    employment_type: employment.employment_type,
-                    start_date: employment.start_date,
-                    end_date: employment.end_date,
-                }
-            })
+            .map(|employment| employment.into())
             .collect();
 
         let template = EmploymentsTemplate {
@@ -89,43 +72,7 @@ async fn get_full_employment(
 ) -> HttpResponse {
     let result = employment_repo.read_one(user_id, company_id).await;
     if let Ok(employment) = result {
-        let company = CompanyLiteTemplate {
-            id: employment.company.id,
-            name: employment.company.name,
-            avatar_url: employment.company.avatar_url,
-        };
-
-        let manager = match employment.manager {
-            Some(user) => Some(UserLiteTemplate {
-                id: user.id,
-                name: user.name,
-                status: user.status,
-                age: chrono::offset::Local::now()
-                    .naive_local()
-                    .date()
-                    .years_since(user.birth)
-                    .expect("Should be valid"),
-                gender: user.gender,
-                avatar_url: user.avatar_url,
-            }),
-            _ => None,
-        };
-
-        let template = EmploymentTemplate {
-            user_id: employment.user_id,
-            company,
-            manager,
-            employment_type: employment.employment_type,
-            hourly_wage: employment.hourly_wage,
-            level: employment.level,
-            description: employment
-                .description
-                .unwrap_or("No description.".to_string()),
-            start_date: employment.start_date,
-            end_date: employment.end_date,
-            created_at: employment.created_at,
-            edited_at: employment.edited_at,
-        };
+        let template: EmploymentTemplate = employment.into();
 
         let body = template.render();
         if body.is_err() {
@@ -186,23 +133,9 @@ pub async fn get_subordinates(
         .await;
 
     if let Ok(employments) = result {
-        let employment_vec = employments
+        let employment_vec: Vec<EmploymentLiteTemplate> = employments
             .into_iter()
-            .map(|employment| {
-                let company = CompanyLiteTemplate {
-                    id: employment.company.id,
-                    name: employment.company.name,
-                    avatar_url: employment.company.avatar_url,
-                };
-
-                EmploymentLiteTemplate {
-                    user_id: employment.user_id,
-                    company,
-                    employment_type: employment.employment_type,
-                    start_date: employment.start_date,
-                    end_date: employment.end_date,
-                }
-            })
+            .map(|employment| employment.into())
             .collect();
 
         let template = EmploymentsTemplate {
