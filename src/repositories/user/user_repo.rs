@@ -93,8 +93,8 @@ impl UserRepository {
                 deleted_at 
             FROM 
                 user_record 
-            WHERE 
-                id = $1
+            WHERE id = $1
+              AND deleted_at IS NULL
             "#,
             user_id,
         )
@@ -104,13 +104,13 @@ impl UserRepository {
         Ok(user)
     }
 
-    pub async fn read_all(&self) -> DbResult<Vec<User>> {
+    pub async fn _read_all(&self) -> DbResult<Vec<User>> {
         // TODO: Redis here
 
-        self.read_all_db().await
+        self._read_all_db().await
     }
 
-    async fn read_all_db(&self) -> DbResult<Vec<User>> {
+    async fn _read_all_db(&self) -> DbResult<Vec<User>> {
         let executor = self.pool.as_ref();
 
         let user: Vec<User> = sqlx::query_as!(

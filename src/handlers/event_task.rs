@@ -1,9 +1,19 @@
-use actix_web::{delete, get, patch, post, web, HttpResponse};
-use chrono::Utc;
+use std::str::FromStr;
+
+use actix_web::{delete, get, http, patch, post, web, HttpResponse};
+use askama::Template;
 use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::models::TaskPriority;
+use crate::{
+    errors::{handle_database_error, parse_error},
+    models::TaskPriority,
+    repositories::task::{
+        models::{NewTask, TaskData, TaskFilter},
+        task_repo::TaskRepository,
+    },
+    templates::task::{TaskTemplate, TasksTemplate},
+};
 
 #[derive(Deserialize)]
 pub struct NewEventTaskData {
@@ -13,49 +23,165 @@ pub struct NewEventTaskData {
     priority: TaskPriority,
 }
 
-#[derive(Deserialize)]
-pub struct EventTaskData {
-    title: Option<String>,
-    description: Option<String>,
-    finished_at: Option<chrono::DateTime<Utc>>,
-    priority: Option<TaskPriority>,
-    accepts_staff: Option<bool>,
-}
-
 #[get("/event/{event_id}/task")]
-pub async fn get_event_tasks(_event_id: web::Path<String>) -> HttpResponse {
-    todo!()
+pub async fn get_event_tasks(
+    event_id: web::Path<String>,
+    query: web::Query<TaskFilter>,
+    task_repo: web::Data<TaskRepository>,
+) -> HttpResponse {
+    if (query.limit.is_some() && query.limit.unwrap() <= 0)
+        || (query.offset.is_some() && query.offset.unwrap() <= 0)
+    {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let id_parse = Uuid::from_str(event_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+    let parsed_id = id_parse.expect("Should be valid.");
+    let result = task_repo
+        .read_all_for_event(parsed_id, query.into_inner())
+        .await;
+
+    if let Ok(tasks) = result {
+        let task_vector: Vec<TaskTemplate> = tasks.into_iter().map(|task| task.into()).collect();
+        let template = TasksTemplate { tasks: task_vector };
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        }
+        return HttpResponse::Ok()
+            .content_type("text/html")
+            .body(body.expect("Should be valid now."));
+    }
+
+    handle_database_error(result.expect_err("Should be error."))
 }
 
-#[get("/event/{event_id}/task/{task_id}")]
+#[get("/event/task/{task_id}")]
 pub async fn get_event_task(
-    _event_id: web::Path<String>,
-    _task_id: web::Path<String>,
+    task_id: web::Path<String>,
+    task_repo: web::Data<TaskRepository>,
 ) -> HttpResponse {
-    todo!()
+    let id_parse = Uuid::from_str(task_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+    let parsed_id = id_parse.expect("Should be valid.");
+
+    let result = task_repo.read_one(parsed_id).await;
+    if let Ok(task) = result {
+        let template: TaskTemplate = task.into();
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+        return HttpResponse::Ok()
+            .content_type("text/html")
+            .body(body.expect("Should be valid now."));
+    }
+
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[post("/event/{event_id}/task")]
 pub async fn create_task(
-    _event_id: web::Path<String>,
-    _new_task: web::Form<NewEventTaskData>,
+    event_id: web::Path<String>,
+    new_task: web::Json<NewEventTaskData>,
+    task_repo: web::Data<TaskRepository>,
 ) -> HttpResponse {
-    todo!()
+    let id_parse = Uuid::from_str(event_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    if (new_task.title.is_empty())
+        || (new_task.description.is_some() && new_task.description.clone().unwrap().is_empty())
+    {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let parsed_id = id_parse.expect("Should be valid.");
+    let data = NewTask {
+        event_id: parsed_id,
+        creator_id: new_task.creator_id,
+        title: new_task.title.clone(),
+        description: new_task.description.clone(),
+        priority: new_task.priority.clone(),
+    };
+    let result = task_repo.create(data).await;
+    if let Ok(task) = result {
+        let template: TaskTemplate = task.into();
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+        return HttpResponse::Created()
+            .content_type("text/html")
+            .body(body.expect("Should be valid now."));
+    }
+
+    handle_database_error(result.expect_err("Should be error."))
 }
 
-#[patch("/event/{event_id}/task/{task_id}")]
+fn is_data_invalid(data: TaskData) -> bool {
+    (data.title.is_none() || (data.title.is_some() && data.title.unwrap().is_empty()))
+        && (data.description.is_none()
+            || (data.description.is_some() && data.description.unwrap().is_empty()))
+        && data.finished_at.is_none()
+        && data.priority.is_none()
+        && data.accepts_staff.is_none()
+}
+
+#[patch("/event/task/{task_id}")]
 pub async fn update_task(
-    _event_id: web::Path<String>,
-    _task_id: web::Path<String>,
-    _task_data: web::Form<EventTaskData>,
+    task_id: web::Path<String>,
+    task_data: web::Json<TaskData>,
+    task_repo: web::Data<TaskRepository>,
 ) -> HttpResponse {
-    todo!()
+    if is_data_invalid(task_data.clone()) {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let id_parse = Uuid::from_str(task_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+    let parsed_id = id_parse.expect("Should be valid.");
+
+    let result = task_repo.update(parsed_id, task_data.into_inner()).await;
+    if let Ok(task) = result {
+        let template: TaskTemplate = task.into();
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+        return HttpResponse::Ok()
+            .content_type("text/html")
+            .body(body.expect("Should be valid now."));
+    }
+
+    handle_database_error(result.expect_err("Should be error."))
 }
 
-#[delete("/event/{event_id}/task/{task_id}")]
+#[delete("/event/task/{task_id}")]
 pub async fn delete_task(
-    _event_id: web::Path<String>,
-    _task_id: web::Path<String>,
+    task_id: web::Path<String>,
+    task_repo: web::Data<TaskRepository>,
 ) -> HttpResponse {
-    todo!()
+    let id_parse = Uuid::from_str(task_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+    let parsed_id = id_parse.expect("Should be valid.");
+    let result = task_repo.delete(parsed_id).await;
+    if let Err(error) = result {
+        return handle_database_error(error);
+    }
+
+    HttpResponse::NoContent().finish()
 }

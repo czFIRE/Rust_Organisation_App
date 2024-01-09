@@ -43,7 +43,7 @@
         "name": "employment_type!: EmploymentContract",
         "type_info": {
           "Custom": {
-            "name": "employee_contract",
+            "name": "employment_contract",
             "kind": {
               "Enum": [
                 "dpp",
@@ -97,7 +97,7 @@
         "Text",
         {
           "Custom": {
-            "name": "employee_contract",
+            "name": "employment_contract",
             "kind": {
               "Enum": [
                 "dpp",

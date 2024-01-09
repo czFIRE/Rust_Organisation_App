@@ -1,10 +1,11 @@
 use chrono::NaiveDate;
+use serde::Deserialize;
 use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
 
 use crate::{
     models::{Gender, TaskPriority, UserRole, UserStatus},
-    repositories::{event_staff::models::Staff, user::models::User},
+    repositories::user::models::User,
 };
 
 #[derive(Debug, Clone)]
@@ -24,7 +25,7 @@ pub struct Task {
     pub creator_id: Uuid, // references event_staff
     pub title: String,
     pub description: Option<String>,
-    pub finished_at: Option<NaiveDateTime>, // TODO: In the db it was a Date
+    pub finished_at: Option<NaiveDateTime>,
     pub priority: TaskPriority,
     pub accepts_staff: bool,
     pub created_at: NaiveDateTime,
@@ -36,6 +37,7 @@ pub struct Task {
 pub struct TaskExtended {
     pub task_id: Uuid,
     pub event_id: Uuid,
+    pub creator_id: Uuid,
     pub creator: User,
     pub title: String,
     pub description: Option<String>,
@@ -47,7 +49,7 @@ pub struct TaskExtended {
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct TaskData {
     pub title: Option<String>,
     pub description: Option<String>,
@@ -56,7 +58,7 @@ pub struct TaskData {
     pub accepts_staff: Option<bool>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct TaskFilter {
     pub limit: Option<i64>,
     pub offset: Option<i64>,
@@ -84,7 +86,7 @@ pub struct TaskUserFlattened {
     pub user_name: String,
     pub user_email: String,
     pub user_birth: NaiveDate,
-    pub user_avatar_url: Option<String>, // TODO: Now is the same as in INIT.SQL but do we want this?
+    pub user_avatar_url: String,
     pub user_gender: Gender,
     pub user_role: UserRole,
     pub user_status: UserStatus,
@@ -112,6 +114,7 @@ impl From<TaskUserFlattened> for TaskExtended {
         Self {
             task_id: value.task_id,
             event_id: value.task_event_id,
+            creator_id: value.task_creator_id,
             creator: tmp_user,
             title: value.task_title,
             description: value.task_description,

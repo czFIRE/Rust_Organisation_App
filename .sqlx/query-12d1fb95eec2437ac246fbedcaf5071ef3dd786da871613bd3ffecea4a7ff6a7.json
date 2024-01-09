@@ -1,0 +1,192 @@
+{
+  "db_name": "PostgreSQL",
+  "query": " SELECT \n                company.id as \"company_id!\", \n                company.name as \"company_name!\", \n                company.description as \"company_description\", \n                company.phone as \"company_phone!\", \n                company.email as \"company_email!\", \n                company.avatar_url as \"company_avatar_url\", \n                company.website as \"company_website\", \n                company.crn as \"company_crn!\", \n                company.vatin as \"company_vatin!\", \n                company.created_at as \"company_created_at!\", \n                company.edited_at as \"company_edited_at!\", \n                company.deleted_at as \"company_deleted_at\", \n                event.id as \"event_id!\", \n                event.name as \"event_name!\", \n                event.description as \"event_description\", \n                event.website as \"event_website\", \n                event.accepts_staff as \"event_accepts_staff!\", \n                event.start_date as \"event_start_date!\", \n                event.end_date as \"event_end_date!\", \n                event.avatar_url as \"event_avatar_url\", \n                event.created_at as \"event_created_at!\", \n                event.edited_at as \"event_edited_at!\", \n                event.deleted_at as \"event_deleted_at\", \n                associated_company.type as \"association_type!: Association\", \n                associated_company.created_at as \"created_at!\", \n                associated_company.edited_at as \"edited_at!\", \n                associated_company.deleted_at as \"deleted_at\" \n            FROM associated_company \n            INNER JOIN company ON associated_company.company_id = company.id \n            INNER JOIN event ON associated_company.event_id = event.id \n            WHERE associated_company.event_id = $1 \n              AND associated_company.deleted_at IS NULL\n            LIMIT $2 OFFSET $3;\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "company_id!",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "company_name!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "company_description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "company_phone!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "company_email!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "company_avatar_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "company_website",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "company_crn!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "company_vatin!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "company_created_at!",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 10,
+        "name": "company_edited_at!",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 11,
+        "name": "company_deleted_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 12,
+        "name": "event_id!",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 13,
+        "name": "event_name!",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 14,
+        "name": "event_description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 15,
+        "name": "event_website",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 16,
+        "name": "event_accepts_staff!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 17,
+        "name": "event_start_date!",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 18,
+        "name": "event_end_date!",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 19,
+        "name": "event_avatar_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 20,
+        "name": "event_created_at!",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 21,
+        "name": "event_edited_at!",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 22,
+        "name": "event_deleted_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 23,
+        "name": "association_type!: Association",
+        "type_info": {
+          "Custom": {
+            "name": "association",
+            "kind": {
+              "Enum": [
+                "sponsor",
+                "organizer",
+                "media",
+                "other"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 24,
+        "name": "created_at!",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 25,
+        "name": "edited_at!",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 26,
+        "name": "deleted_at",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "12d1fb95eec2437ac246fbedcaf5071ef3dd786da871613bd3ffecea4a7ff6a7"
+}

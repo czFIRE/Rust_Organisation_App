@@ -1,12 +1,11 @@
 use chrono::NaiveDate;
+use serde::Deserialize;
 use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
 
 use crate::{
     models::{AcceptanceStatus, EventRole, Gender, UserRole, UserStatus},
-    repositories::{
-        company::models::Company, event_staff::models::StaffExtended, user::models::User,
-    },
+    repositories::{company::models::Company, event_staff::models::StaffLite, user::models::User},
 };
 
 #[derive(Debug, Clone)]
@@ -29,22 +28,23 @@ pub struct AssignedStaff {
 #[derive(Debug)]
 pub struct AssignedStaffExtended {
     pub task_id: Uuid,
-    pub staff: StaffExtended,
+    pub staff: StaffLite,
     pub status: AcceptanceStatus,
-    pub decided_by: Option<User>,
+    pub decided_by: Option<Uuid>, // ID to staff
+    pub decided_by_user: Option<User>,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-// TODO - remove this option if not needed
-#[derive(Debug, Clone)]
+// These two changes are dependent on each other.
+#[derive(Debug, Deserialize, Clone)]
 pub struct AssignedStaffData {
-    pub status: Option<AcceptanceStatus>,
-    pub decided_by: Option<Uuid>,
+    pub status: AcceptanceStatus,
+    pub decided_by: Uuid,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize)]
 pub struct AssignedStaffFilter {
     pub limit: Option<i64>,
     pub offset: Option<i64>,
@@ -82,7 +82,7 @@ pub struct AssignedStaffStaffUserCompanyFlattened {
     pub user_name: String,
     pub user_email: String,
     pub user_birth: NaiveDate,
-    pub user_avatar_url: Option<String>, // TODO: Now is the same as in INIT.SQL but do we want this?
+    pub user_avatar_url: String,
     pub user_gender: Gender,
     pub user_role: UserRole,
     pub user_status: UserStatus,
@@ -95,7 +95,7 @@ pub struct AssignedStaffStaffUserCompanyFlattened {
     pub company_description: Option<String>,
     pub company_phone: String,
     pub company_email: String,
-    pub company_avatar_url: Option<String>,
+    pub company_avatar_url: String,
     pub company_website: Option<String>,
     pub company_crn: String,
     pub company_vatin: String,
@@ -107,7 +107,7 @@ pub struct AssignedStaffStaffUserCompanyFlattened {
     pub decided_by_user_name: Option<String>,
     pub decided_by_user_email: Option<String>,
     pub decided_by_user_birth: Option<NaiveDate>,
-    pub decided_by_user_avatar_url: Option<String>, // TODO: Now is the same as in INIT.SQL but do we want this?
+    pub decided_by_user_avatar_url: Option<String>,
     pub decided_by_user_gender: Option<Gender>,
     pub decided_by_user_role: Option<UserRole>,
     pub decided_by_user_status: Option<UserStatus>,
@@ -147,16 +147,12 @@ impl From<AssignedStaffStaffUserCompanyFlattened> for AssignedStaffExtended {
             deleted_at: value.company_deleted_at,
         };
 
-        let tmp_event_staff = StaffExtended {
+        let tmp_event_staff = StaffLite {
+            id: value.staff_id,
             user: tmp_user,
             company: tmp_company,
             event_id: value.staff_event_id,
             role: value.staff_role,
-            status: value.staff_status,
-            decided_by: value.staff_decided_by,
-            created_at: value.staff_created_at,
-            edited_at: value.staff_edited_at,
-            deleted_at: value.staff_deleted_at,
         };
 
         let decided_by_user: Option<User> = match value.decided_by_user_id {
@@ -166,7 +162,7 @@ impl From<AssignedStaffStaffUserCompanyFlattened> for AssignedStaffExtended {
                 name: value.decided_by_user_name.unwrap(),
                 email: value.decided_by_user_email.unwrap(),
                 birth: value.decided_by_user_birth.unwrap(),
-                avatar_url: value.decided_by_user_avatar_url,
+                avatar_url: value.decided_by_user_avatar_url.unwrap(),
                 gender: value.decided_by_user_gender.unwrap(),
                 role: value.decided_by_user_role.unwrap(),
                 status: value.decided_by_user_status.unwrap(),
@@ -180,7 +176,8 @@ impl From<AssignedStaffStaffUserCompanyFlattened> for AssignedStaffExtended {
             task_id: value.assigned_staff_task_id,
             staff: tmp_event_staff,
             status: value.assigned_staff_status,
-            decided_by: decided_by_user,
+            decided_by: value.assigned_staff_decided_by,
+            decided_by_user,
             created_at: value.assigned_staff_created_at,
             edited_at: value.assigned_staff_edited_at,
             deleted_at: value.assigned_staff_deleted_at,

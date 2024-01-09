@@ -1,0 +1,84 @@
+{
+  "db_name": "PostgreSQL",
+  "query": " SELECT * \n                        FROM event \n                        WHERE accepts_staff = $1 \n                          AND deleted_at IS NULL\n                        LIMIT $2 \n                        OFFSET $3;",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "website",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "accepts_staff",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "start_date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 6,
+        "name": "end_date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 7,
+        "name": "avatar_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 9,
+        "name": "edited_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 10,
+        "name": "deleted_at",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Bool",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "f77b285a85ae8cab962cf8fa07d586da64ff924dfdaa4f973e9cda82ff3722e4"
+}

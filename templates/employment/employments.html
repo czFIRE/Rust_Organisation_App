@@ -1,0 +1,9 @@
+{% for employment in employments %}
+{{ employment.user_id }}
+{{ employment.company.id}}
+{{ employment.company.name }}
+{{ employment.company.avatar_url }}
+{{ employment.employment_type }}
+{{ employment.start_date }}
+{{ employment.end_date }}
+{% endfor %}

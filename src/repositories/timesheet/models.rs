@@ -1,42 +1,50 @@
 use crate::models::ApprovalStatus;
 use chrono::{NaiveDate, NaiveDateTime};
+use serde::Deserialize;
 use sqlx::prelude::FromRow;
 use uuid::Uuid;
 
 #[derive(Debug, FromRow)]
-pub struct TimesheetDb {
+pub struct TimesheetStructureData {
+    pub id: Uuid,
+    pub start_date: NaiveDate,
+    pub end_date: NaiveDate,
+}
+
+#[derive(Debug, Clone, FromRow)]
+pub struct TimesheetWithEvent {
     pub id: Uuid,
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
     pub total_hours: f32,
     pub is_editable: bool,
-    pub status: ApprovalStatus,
+    pub approval_status: ApprovalStatus,
     pub manager_note: Option<String>,
-    // foreign keys
     pub user_id: Uuid,
     pub company_id: Uuid,
     pub event_id: Uuid,
-    // timestamps
+    pub event_avatar_url: String,
+    pub event_name: String,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
-    pub deleted_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, Deserialize, FromRow)]
 pub struct TimesheetCreateData {
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
-    pub total_hours: f32,
-    pub is_editable: bool,
-    pub status: ApprovalStatus,
-    pub manager_note: Option<String>,
-    // foreign keys
     pub user_id: Uuid,
     pub company_id: Uuid,
     pub event_id: Uuid,
 }
 
-#[derive(Debug, Clone, FromRow)]
+#[derive(Debug, Deserialize, FromRow)]
+pub struct TimeRange {
+    pub start_date: NaiveDate,
+    pub end_date: NaiveDate,
+}
+
+#[derive(Debug, Clone, Deserialize, FromRow)]
 pub struct WorkdayUpdateData {
     pub timesheet_id: Uuid,
     pub date: NaiveDate,
@@ -45,7 +53,7 @@ pub struct WorkdayUpdateData {
     pub is_editable: Option<bool>,
 }
 
-#[derive(Debug, Clone, FromRow)]
+#[derive(Debug, Clone, Deserialize, FromRow)]
 pub struct TimesheetUpdateData {
     pub start_date: Option<NaiveDate>,
     pub end_date: Option<NaiveDate>,
@@ -56,7 +64,7 @@ pub struct TimesheetUpdateData {
     pub workdays: Option<Vec<WorkdayUpdateData>>,
 }
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, Deserialize, FromRow)]
 pub struct TimesheetReadAllData {
     pub limit: Option<i64>,
     pub offset: Option<i64>,
@@ -69,12 +77,12 @@ pub struct Workday {
     pub total_hours: f32,
     pub comment: Option<String>,
     pub is_editable: bool,
-    pub created_at: NaiveDate,
-    pub edited_at: NaiveDate,
+    pub created_at: NaiveDateTime,
+    pub edited_at: NaiveDateTime,
 }
 
-#[allow(dead_code)]
+#[derive(Debug, FromRow)]
 pub struct TimesheetWithWorkdays {
-    pub timesheet: TimesheetDb,
+    pub timesheet: TimesheetWithEvent,
     pub workdays: Vec<Workday>,
 }

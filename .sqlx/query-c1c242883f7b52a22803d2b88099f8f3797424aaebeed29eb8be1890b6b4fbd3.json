@@ -1,0 +1,88 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE company \n            SET deleted_at = NOW(), \n                edited_at = NOW() \n            WHERE id = $1\n              AND deleted_at IS NULL\n            RETURNING id,\n                      name,\n                      description,\n                      phone,\n                      email,\n                      avatar_url,\n                      website,\n                      crn,\n                      vatin,\n                      company.created_at,\n                      company.edited_at,\n                      company.deleted_at;",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "phone",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "email",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 5,
+        "name": "avatar_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 6,
+        "name": "website",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "crn",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 8,
+        "name": "vatin",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 10,
+        "name": "edited_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 11,
+        "name": "deleted_at",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "c1c242883f7b52a22803d2b88099f8f3797424aaebeed29eb8be1890b6b4fbd3"
+}

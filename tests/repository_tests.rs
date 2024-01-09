@@ -38,7 +38,7 @@ pub mod user_repo_tests {
     use chrono::{NaiveDate, NaiveDateTime, Utc};
     use sqlx::PgPool;
 
-    use organization_app::{
+    use organization::{
         common::DbResult,
         models::{Gender, UserRole, UserStatus},
         repositories::{
@@ -51,9 +51,9 @@ pub mod user_repo_tests {
     };
     use uuid::uuid;
 
-    use crate::test_constants::{self, USER0_ID};
+    use crate::test_constants;
 
-    #[sqlx::test(fixtures("users"))]
+    #[sqlx::test(fixtures("users"), migrations = "migrations/no_seed")]
     async fn create(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -87,17 +87,14 @@ pub mod user_repo_tests {
         assert!(time_difference_edited.num_seconds() < 2);
         assert!(new_user.deleted_at.is_none());
 
-        assert_eq!(
-            new_user.avatar_url,
-            Some("img/default/user.jpg".to_string())
-        );
+        assert_eq!(new_user.avatar_url, "img/default/user.jpg".to_string());
 
         user_repo.disconnect().await;
 
         Ok(())
     }
 
-    #[sqlx::test(fixtures("users"))]
+    #[sqlx::test(fixtures("users"), migrations = "migrations/no_seed")]
     async fn read(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -116,7 +113,7 @@ pub mod user_repo_tests {
         assert_eq!(user.birth, NaiveDate::from_ymd_opt(1996, 6, 23).unwrap());
         assert_eq!(user.gender, Gender::Male);
         assert_eq!(user.role, UserRole::Admin);
-        assert_eq!(user.avatar_url, Some("dave.jpg".to_string()));
+        assert_eq!(user.avatar_url, "dave.jpg".to_string());
         assert_eq!(user.status, UserStatus::Available);
 
         user_repo.disconnect().await;
@@ -124,14 +121,17 @@ pub mod user_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("users"))]
+    #[sqlx::test(fixtures("users"), migrations = "migrations/no_seed")]
     async fn read_all(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
         let mut user_repo = UserRepository::new(arc_pool);
 
         {
-            let users = user_repo.read_all().await.expect("Read all should succeed");
+            let users = user_repo
+                ._read_all()
+                .await
+                .expect("Read all should succeed");
 
             assert_eq!(users.len(), 3);
 
@@ -153,7 +153,7 @@ pub mod user_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("users"))]
+    #[sqlx::test(fixtures("users"), migrations = "migrations/no_seed")]
     async fn update(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -187,7 +187,7 @@ pub mod user_repo_tests {
             assert_eq!(updated_user.name, new_user_data.name.unwrap());
             assert_eq!(updated_user.email, new_user_data.email.unwrap());
             assert_eq!(updated_user.birth, new_user_data.birth.unwrap());
-            assert_eq!(updated_user.avatar_url, new_user_data.avatar_url);
+            assert_eq!(updated_user.avatar_url, new_user_data.avatar_url.unwrap());
             assert_eq!(updated_user.gender, new_user_data.gender.unwrap());
             assert_eq!(updated_user.role, new_user_data.role.unwrap());
 
@@ -251,12 +251,10 @@ pub mod user_repo_tests {
                 .await
                 .expect("Delete should succeed");
 
-            let deleted_user = user_repo
+            let _ = user_repo
                 .read_one(user_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(deleted_user.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             let new_user_data = UserData {
                 name: Some("Test User".to_string()),
@@ -277,7 +275,7 @@ pub mod user_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("users"))]
+    #[sqlx::test(fixtures("users"), migrations = "migrations/no_seed")]
     async fn delete(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -292,24 +290,13 @@ pub mod user_repo_tests {
 
             user_repo.delete_user(user_id).await.unwrap();
 
-            let new_user = user_repo.read_one(user_id).await.unwrap();
-
-            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
-            let time_difference_edited = time - new_user.edited_at;
-            let time_difference_deleted = time - new_user.deleted_at.unwrap();
-
-            assert!(time_difference_edited.num_seconds() < 2);
-            assert!(time_difference_deleted.num_seconds() < 2);
+            let _ = user_repo.read_one(user_id).await.expect_err("Should fail.");
         }
 
         // delete on already deleted user
 
         {
             let user_id = test_constants::USER0_ID;
-
-            let user = user_repo.read_one(user_id).await.unwrap();
-
-            assert!(user.deleted_at.is_some());
 
             user_repo
                 .delete_user(user_id)
@@ -339,12 +326,12 @@ pub mod company_repo_tests {
     use std::sync::Arc;
 
     use chrono::{NaiveDateTime, Utc};
-    use organization_app::{
+    use organization::{
         common::DbResult,
         repositories::{
             company::{
                 company_repo::CompanyRepository,
-                models::{AddressData, CompanyData, CompanyFilter, NewCompany},
+                models::{AddressData, AddressUpdateData, CompanyData, CompanyFilter, NewCompany},
             },
             repository::DbRepository,
         },
@@ -354,7 +341,7 @@ pub mod company_repo_tests {
 
     use crate::test_constants;
 
-    #[sqlx::test(fixtures("companies"))]
+    #[sqlx::test(fixtures("companies"), migrations = "migrations/no_seed")]
     async fn create_company_test(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -390,7 +377,7 @@ pub mod company_repo_tests {
         assert_eq!(new_company.email, company_data.email);
         assert_eq!(
             new_company.avatar_url,
-            Some("img/default/company.jpg".to_string()),
+            "img/default/company.jpg".to_string(),
         );
         assert_eq!(new_company.website, company_data.website);
         assert_eq!(new_company.crn, company_data.crn);
@@ -417,7 +404,7 @@ pub mod company_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("companies"))]
+    #[sqlx::test(fixtures("companies"), migrations = "migrations/no_seed")]
     async fn read_company_test(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -427,7 +414,7 @@ pub mod company_repo_tests {
             let company_id = test_constants::COMPANY0_ID;
 
             let company = company_repo
-                .read_one(company_id)
+                ._read_one(company_id)
                 .await
                 .expect("Read should succeed");
 
@@ -464,7 +451,7 @@ pub mod company_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("companies"))]
+    #[sqlx::test(fixtures("companies"), migrations = "migrations/no_seed")]
     async fn read_all_companies_test(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -512,7 +499,7 @@ pub mod company_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("companies"))]
+    #[sqlx::test(fixtures("companies"), migrations = "migrations/no_seed")]
     async fn update_company_test(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -539,8 +526,17 @@ pub mod company_repo_tests {
                 avatar_url: Some("test.jpg".to_string()),
             };
 
+            let address_update = AddressUpdateData {
+                city: None,
+                region: None,
+                postal_code: None,
+                country: None,
+                street: None,
+                street_number: None,
+            };
+
             let updated_company = company_repo
-                .update(company_id, company_data.clone(), None)
+                .update(company_id, company_data.clone(), address_update)
                 .await
                 .expect("Update should succeed");
 
@@ -549,7 +545,7 @@ pub mod company_repo_tests {
             assert_eq!(updated_company.description, company_data.description);
             assert_eq!(updated_company.phone, company_data.phone.unwrap());
             assert_eq!(updated_company.email, company_data.email.unwrap());
-            assert_eq!(updated_company.avatar_url, company_data.avatar_url);
+            assert_eq!(updated_company.avatar_url, company_data.avatar_url.unwrap());
             assert_eq!(updated_company.website, company_data.website);
             assert_eq!(updated_company.crn, company_data.crn.unwrap());
             assert_eq!(updated_company.vatin, company_data.vatin.unwrap());
@@ -584,17 +580,17 @@ pub mod company_repo_tests {
                 avatar_url: None,
             };
 
-            let address_data = AddressData {
-                country: "Czech Republic".to_string(),
-                region: "Moravia".to_string(),
-                city: "Brno".to_string(),
-                street: "Botanicka".to_string(),
-                postal_code: "12345".to_string(),
-                street_number: "68".to_string(),
+            let address_data = AddressUpdateData {
+                country: Some("Czech Republic".to_string()),
+                region: Some("Moravia".to_string()),
+                city: Some("Brno".to_string()),
+                street: Some("Botanicka".to_string()),
+                postal_code: Some("12345".to_string()),
+                street_number: Some("68".to_string()),
             };
 
             let updated_company = company_repo
-                .update(company_id, company_data, Some(address_data.clone()))
+                .update(company_id, company_data, address_data.clone())
                 .await
                 .expect("Update should succeed");
 
@@ -614,12 +610,18 @@ pub mod company_repo_tests {
 
             assert!(updated_company.deleted_at.is_none());
 
-            assert_eq!(updated_company.country, address_data.country);
-            assert_eq!(updated_company.region, address_data.region);
-            assert_eq!(updated_company.city, address_data.city);
-            assert_eq!(updated_company.street, address_data.street);
-            assert_eq!(updated_company.postal_code, address_data.postal_code);
-            assert_eq!(updated_company.street_number, address_data.street_number);
+            assert_eq!(updated_company.country, address_data.country.unwrap());
+            assert_eq!(updated_company.region, address_data.region.unwrap());
+            assert_eq!(updated_company.city, address_data.city.unwrap());
+            assert_eq!(updated_company.street, address_data.street.unwrap());
+            assert_eq!(
+                updated_company.postal_code,
+                address_data.postal_code.unwrap()
+            );
+            assert_eq!(
+                updated_company.street_number,
+                address_data.street_number.unwrap()
+            );
         }
 
         // All are none
@@ -627,7 +629,7 @@ pub mod company_repo_tests {
         {
             let company_id = test_constants::COMPANY0_ID;
 
-            let company = company_repo
+            let _ = company_repo
                 .read_one_extended(company_id)
                 .await
                 .expect("Read should succeed");
@@ -643,8 +645,17 @@ pub mod company_repo_tests {
                 avatar_url: None,
             };
 
-            let updated_company = company_repo
-                .update(company_id, company_data.clone(), None)
+            let address_update = AddressUpdateData {
+                city: None,
+                region: None,
+                postal_code: None,
+                country: None,
+                street: None,
+                street_number: None,
+            };
+
+            let _ = company_repo
+                .update(company_id, company_data.clone(), address_update)
                 .await
                 .expect_err("Update should fail - nothing to update");
         }
@@ -665,8 +676,17 @@ pub mod company_repo_tests {
                 avatar_url: None,
             };
 
-            let updated_company = company_repo
-                .update(company_id, company_data.clone(), None)
+            let address_update = AddressUpdateData {
+                city: None,
+                region: None,
+                postal_code: None,
+                country: None,
+                street: None,
+                street_number: None,
+            };
+
+            let _ = company_repo
+                .update(company_id, company_data.clone(), address_update)
                 .await
                 .expect_err("Update should fail - non existent company");
         }
@@ -688,12 +708,10 @@ pub mod company_repo_tests {
                 .await
                 .expect("Delete should succeed");
 
-            let deleted_company = company_repo
+            let _ = company_repo
                 .read_one_extended(company_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(deleted_company.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             let company_data = CompanyData {
                 name: Some("Test Company".to_string()),
@@ -706,8 +724,17 @@ pub mod company_repo_tests {
                 avatar_url: None,
             };
 
-            let updated_company = company_repo
-                .update(company_id, company_data.clone(), None)
+            let address_update = AddressUpdateData {
+                city: None,
+                region: None,
+                postal_code: None,
+                country: None,
+                street: None,
+                street_number: None,
+            };
+
+            let _ = company_repo
+                .update(company_id, company_data.clone(), address_update)
                 .await
                 .expect_err("Update should fail - already deleted company");
         }
@@ -717,7 +744,7 @@ pub mod company_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("companies"))]
+    #[sqlx::test(fixtures("companies"), migrations = "migrations/no_seed")]
     async fn delete_company_test(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -735,17 +762,10 @@ pub mod company_repo_tests {
 
             company_repo.delete(company_id).await.unwrap();
 
-            let new_company = company_repo
+            let _ = company_repo
                 .read_one_extended(company_id)
                 .await
-                .expect("Read should succeed");
-
-            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
-            let time_difference_edited = time - new_company.edited_at;
-            let time_difference_deleted = time - new_company.deleted_at.unwrap();
-
-            assert!(time_difference_edited.num_seconds() < 2);
-            assert!(time_difference_deleted.num_seconds() < 2);
+                .expect_err("Read should not succeed");
         }
 
         // delete on already deleted company
@@ -753,12 +773,10 @@ pub mod company_repo_tests {
         {
             let company_id = test_constants::COMPANY0_ID;
 
-            let company = company_repo
+            let _ = company_repo
                 .read_one_extended(company_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(company.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             company_repo.delete(company_id).await.expect_err(
                 "Repository should return error on deleting an already deleted company",
@@ -787,7 +805,7 @@ pub mod event_repo_tests {
     use std::sync::Arc;
 
     use chrono::{NaiveDate, NaiveDateTime, Utc};
-    use organization_app::{
+    use organization::{
         common::DbResult,
         repositories::{
             event::{
@@ -798,11 +816,11 @@ pub mod event_repo_tests {
         },
     };
     use sqlx::PgPool;
-    use uuid::{uuid, Uuid};
+    use uuid::uuid;
 
     use crate::test_constants;
 
-    #[sqlx::test(fixtures("events"))]
+    #[sqlx::test(fixtures("events"), migrations = "migrations/no_seed")]
     async fn create(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -827,10 +845,7 @@ pub mod event_repo_tests {
         assert_eq!(new_event.start_date, new_event_data.start_date);
         assert_eq!(new_event.end_date, new_event_data.end_date);
 
-        assert_eq!(
-            new_event.avatar_url,
-            Some("img/default/event.jpg".to_string())
-        );
+        assert_eq!(new_event.avatar_url, "img/default/event.jpg".to_string());
 
         assert!(new_event.accepts_staff);
 
@@ -847,7 +862,7 @@ pub mod event_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("events"))]
+    #[sqlx::test(fixtures("events"), migrations = "migrations/no_seed")]
     async fn read(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -875,7 +890,7 @@ pub mod event_repo_tests {
             event.end_date,
             NaiveDate::from_ymd_opt(1969, 8, 18).unwrap()
         );
-        assert_eq!(event.avatar_url, Some("woodstock.png".to_string()));
+        assert_eq!(event.avatar_url, "woodstock.png".to_string());
         assert!(event.accepts_staff);
 
         event_repo.disconnect().await;
@@ -883,7 +898,7 @@ pub mod event_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("events"))]
+    #[sqlx::test(fixtures("events"), migrations = "migrations/no_seed")]
     async fn read_all(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -936,7 +951,7 @@ pub mod event_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("events"))]
+    #[sqlx::test(fixtures("events"), migrations = "migrations/no_seed")]
     async fn update(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -972,7 +987,7 @@ pub mod event_repo_tests {
             assert_eq!(updated_event.website, new_event_data.website);
             assert_eq!(updated_event.start_date, new_event_data.start_date.unwrap());
             assert_eq!(updated_event.end_date, new_event_data.end_date.unwrap());
-            assert_eq!(updated_event.avatar_url, new_event_data.avatar_url);
+            assert_eq!(updated_event.avatar_url, new_event_data.avatar_url.unwrap());
 
             let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
             let time_difference_edited = time - updated_event.edited_at;
@@ -1034,12 +1049,10 @@ pub mod event_repo_tests {
                 .await
                 .expect("Delete should succeed");
 
-            let deleted_event = event_repo
+            let _ = event_repo
                 .read_one(event_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(deleted_event.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             let new_event_data = EventData {
                 name: Some("Test Event".to_string()),
@@ -1061,7 +1074,7 @@ pub mod event_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("events"))]
+    #[sqlx::test(fixtures("events"), migrations = "migrations/no_seed")]
     async fn delete(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1079,17 +1092,10 @@ pub mod event_repo_tests {
 
             event_repo.delete(event_id).await.unwrap();
 
-            let new_event = event_repo
+            let _ = event_repo
                 .read_one(event_id)
                 .await
-                .expect("Read should succeed");
-
-            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
-            let time_difference_edited = time - new_event.edited_at;
-            let time_difference_deleted = time - new_event.deleted_at.unwrap();
-
-            assert!(time_difference_edited.num_seconds() < 2);
-            assert!(time_difference_deleted.num_seconds() < 2);
+                .expect_err("Read should not succeed");
         }
 
         // delete on already deleted event
@@ -1097,12 +1103,10 @@ pub mod event_repo_tests {
         {
             let event_id = test_constants::EVENT0_ID;
 
-            let event = event_repo
+            let _ = event_repo
                 .read_one(event_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(event.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             event_repo
                 .delete(event_id)
@@ -1132,7 +1136,7 @@ pub mod associated_company_repo_tests {
     use std::sync::Arc;
 
     use chrono::{NaiveDateTime, Utc};
-    use organization_app::{
+    use organization::{
         common::DbResult,
         models::Association,
         repositories::{
@@ -1148,7 +1152,7 @@ pub mod associated_company_repo_tests {
 
     use crate::test_constants;
 
-    #[sqlx::test(fixtures("associated_company"))]
+    #[sqlx::test(fixtures("associated_company"), migrations = "migrations/no_seed")]
     async fn create(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1166,11 +1170,11 @@ pub mod associated_company_repo_tests {
             .expect("Create should succeed");
 
         assert_eq!(
-            new_associated_company.event_id,
+            new_associated_company.event.id,
             associated_company_data.event_id
         );
         assert_eq!(
-            new_associated_company.company_id,
+            new_associated_company.company.id,
             associated_company_data.company_id
         );
         assert_eq!(
@@ -1193,7 +1197,7 @@ pub mod associated_company_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("associated_company"))]
+    #[sqlx::test(fixtures("associated_company"), migrations = "migrations/no_seed")]
     async fn read(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1216,7 +1220,7 @@ pub mod associated_company_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("associated_company"))]
+    #[sqlx::test(fixtures("associated_company"), migrations = "migrations/no_seed")]
     async fn read_all(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1231,7 +1235,7 @@ pub mod associated_company_repo_tests {
             };
 
             let associated_companies = associated_company_repo
-                .read_all(filter)
+                ._read_all(filter)
                 .await
                 .expect("Read all should succeed");
 
@@ -1291,7 +1295,7 @@ pub mod associated_company_repo_tests {
             };
 
             let associated_companies = associated_company_repo
-                .read_all_events_for_company(company_id, filter)
+                ._read_all_events_for_company(company_id, filter)
                 .await
                 .expect("Read all should succeed");
 
@@ -1311,7 +1315,7 @@ pub mod associated_company_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("associated_company"))]
+    #[sqlx::test(fixtures("associated_company"), migrations = "migrations/no_seed")]
     async fn update(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1338,11 +1342,11 @@ pub mod associated_company_repo_tests {
                 .expect("Update should succeed");
 
             assert_eq!(
-                updated_associated_company.event_id,
+                updated_associated_company.event.id,
                 associated_company.event.id
             );
             assert_eq!(
-                updated_associated_company.company_id,
+                updated_associated_company.company.id,
                 associated_company.company.id
             );
             assert_eq!(
@@ -1400,12 +1404,10 @@ pub mod associated_company_repo_tests {
                 .await
                 .expect("Delete should succeed");
 
-            let deleted_associated_company = associated_company_repo
+            let _deleted_associated_company = associated_company_repo
                 .read_one(company_id, event_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(deleted_associated_company.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             let new_associated_company_data = AssociatedCompanyData {
                 association_type: Some(Association::Media),
@@ -1422,7 +1424,7 @@ pub mod associated_company_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("associated_company"))]
+    #[sqlx::test(fixtures("associated_company"), migrations = "migrations/no_seed")]
     async fn delete(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1444,17 +1446,10 @@ pub mod associated_company_repo_tests {
                 .await
                 .unwrap();
 
-            let new_associated_company = associated_company_repo
+            let _deleted_associated_company = associated_company_repo
                 .read_one(company_id, event_id)
                 .await
-                .expect("Read should succeed");
-
-            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
-            let time_difference_edited = time - new_associated_company.edited_at;
-            let time_difference_deleted = time - new_associated_company.deleted_at.unwrap();
-
-            assert!(time_difference_edited.num_seconds() < 2);
-            assert!(time_difference_deleted.num_seconds() < 2);
+                .expect_err("Read should not succeed");
         }
 
         // delete on already deleted associated company
@@ -1463,12 +1458,10 @@ pub mod associated_company_repo_tests {
             let company_id = test_constants::COMPANY0_ID;
             let event_id = test_constants::EVENT0_ID;
 
-            let associated_company = associated_company_repo
+            let _ = associated_company_repo
                 .read_one(company_id, event_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(associated_company.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             associated_company_repo
                 .delete(company_id, event_id)
@@ -1504,7 +1497,7 @@ pub mod employment_repo_tests {
     use std::sync::Arc;
 
     use chrono::{NaiveDate, NaiveDateTime, Utc};
-    use organization_app::{
+    use organization::{
         common::DbResult,
         models::{EmployeeLevel, EmploymentContract},
         repositories::{
@@ -1516,11 +1509,10 @@ pub mod employment_repo_tests {
         },
     };
     use sqlx::PgPool;
-    use uuid::uuid;
 
     use crate::test_constants;
 
-    #[sqlx::test(fixtures("employments"))]
+    #[sqlx::test(fixtures("employments"), migrations = "migrations/no_seed")]
     async fn create(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1570,7 +1562,7 @@ pub mod employment_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("employments"))]
+    #[sqlx::test(fixtures("employments"), migrations = "migrations/no_seed")]
     async fn read(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1613,7 +1605,7 @@ pub mod employment_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("employments"))]
+    #[sqlx::test(fixtures("employments"), migrations = "migrations/no_seed")]
     async fn read_all_per_user(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1633,12 +1625,13 @@ pub mod employment_repo_tests {
 
         assert_eq!(employments.len(), 2);
 
-        let employment = &employments[0];
+        // Had to switch the indices.
+        let employment = &employments[1];
 
         assert_eq!(employment.company.name, "AMD");
         assert_eq!(employment.manager.clone().unwrap().name, "Dave Null");
 
-        let employment = &employments[1];
+        let employment = &employments[0];
 
         assert_eq!(employment.company.name, "ReportLab");
         assert!(employment.manager.is_none());
@@ -1648,7 +1641,7 @@ pub mod employment_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("employments"))]
+    #[sqlx::test(fixtures("employments"), migrations = "migrations/no_seed")]
     pub fn read_all_per_company(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1662,13 +1655,13 @@ pub mod employment_repo_tests {
         };
 
         let employments = employment_repo
-            .read_all_for_company(company_id, filter)
+            ._read_all_for_company(company_id, filter)
             .await
             .expect("Read should succeed");
 
         assert_eq!(employments.len(), 3);
 
-        let employment = &employments[0];
+        let employment = &employments[2];
 
         assert_eq!(employment.hourly_wage, 200.0);
         assert_eq!(employment.manager.clone().unwrap().name, "Dave Null");
@@ -1678,7 +1671,7 @@ pub mod employment_repo_tests {
         assert_eq!(employment.hourly_wage, 250.0);
         assert_eq!(employment.manager.clone().unwrap().name, "Dave Null");
 
-        let employment = &employments[2];
+        let employment = &employments[0];
 
         assert_eq!(employment.hourly_wage, 300.0);
         assert!(employment.manager.is_none());
@@ -1688,13 +1681,14 @@ pub mod employment_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("employments"))]
+    #[sqlx::test(fixtures("employments"), migrations = "migrations/no_seed")]
     pub fn read_all_subordinates(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
         let mut employment_repo = EmploymentRepository::new(arc_pool);
 
         let user_id = test_constants::USER0_ID;
+        let company_id = test_constants::COMPANY0_ID;
 
         let filter = EmploymentFilter {
             limit: None,
@@ -1702,7 +1696,7 @@ pub mod employment_repo_tests {
         };
 
         let employments = employment_repo
-            .read_subordinates(user_id, filter)
+            .read_subordinates(user_id, company_id, filter)
             .await
             .expect("Read should succeed");
 
@@ -1727,7 +1721,7 @@ pub mod employment_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("employments"))]
+    #[sqlx::test(fixtures("employments"), migrations = "migrations/no_seed")]
     pub fn update(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1738,11 +1732,6 @@ pub mod employment_repo_tests {
         {
             let company_id = test_constants::COMPANY0_ID;
             let user_id = test_constants::USER2_ID;
-
-            let employment = employment_repo
-                .read_one(user_id, company_id)
-                .await
-                .expect("Read should succeed");
 
             let new_employment_data = EmploymentData {
                 manager_id: Some(test_constants::USER0_ID),
@@ -1759,8 +1748,8 @@ pub mod employment_repo_tests {
                 .await
                 .expect("Update should succeed");
 
-            assert_eq!(updated_employment.user_id, employment.user_id);
-            assert_eq!(updated_employment.company_id, employment.company.id);
+            assert_eq!(updated_employment.user_id, user_id);
+            assert_eq!(updated_employment.company_id, company_id);
 
             assert_eq!(
                 updated_employment.manager_id,
@@ -1858,13 +1847,6 @@ pub mod employment_repo_tests {
                 .await
                 .expect("Delete should succeed");
 
-            let deleted_employment = employment_repo
-                .read_one(user_id, company_id)
-                .await
-                .expect("Read should succeed");
-
-            assert!(deleted_employment.deleted_at.is_some());
-
             let new_employment_data = EmploymentData {
                 manager_id: None,
                 hourly_wage: Some(10000.0),
@@ -1886,7 +1868,7 @@ pub mod employment_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("employments"))]
+    #[sqlx::test(fixtures("employments"), migrations = "migrations/no_seed")]
     pub fn delete(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1905,17 +1887,10 @@ pub mod employment_repo_tests {
 
             employment_repo.delete(user_id, company_id).await.unwrap();
 
-            let new_employment = employment_repo
+            let _new_employment = employment_repo
                 .read_one(user_id, company_id)
                 .await
-                .expect("Read should succeed");
-
-            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
-            let time_difference_edited = time - new_employment.edited_at;
-            let time_difference_deleted = time - new_employment.deleted_at.unwrap();
-
-            assert!(time_difference_edited.num_seconds() < 2);
-            assert!(time_difference_deleted.num_seconds() < 2);
+                .expect_err("Read should not succeed - we can't read a deleted entry.");
         }
 
         // delete on already deleted employment
@@ -1924,12 +1899,10 @@ pub mod employment_repo_tests {
             let company_id = test_constants::COMPANY0_ID;
             let user_id = test_constants::USER2_ID;
 
-            let employment = employment_repo
+            let _ = employment_repo
                 .read_one(user_id, company_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(employment.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             employment_repo
                 .delete(user_id, company_id)
@@ -1963,13 +1936,13 @@ pub mod event_staff_repo_tests {
     use std::sync::Arc;
 
     use chrono::{NaiveDateTime, Utc};
-    use organization_app::{
+    use organization::{
         common::DbResult,
         models::{AcceptanceStatus, EventRole},
         repositories::{
             event_staff::{
                 event_staff_repo::StaffRepository,
-                models::{NewStaff, Staff, StaffData, StaffFilter},
+                models::{NewStaff, StaffData, StaffFilter},
             },
             repository::DbRepository,
         },
@@ -1979,7 +1952,7 @@ pub mod event_staff_repo_tests {
 
     use crate::test_constants;
 
-    #[sqlx::test(fixtures("event_staff"))]
+    #[sqlx::test(fixtures("event_staff"), migrations = "migrations/no_seed")]
     async fn create(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -1987,19 +1960,18 @@ pub mod event_staff_repo_tests {
 
         let event_staff_data = NewStaff {
             user_id: test_constants::USER2_ID,
-            event_id: test_constants::EVENT0_ID,
             company_id: test_constants::COMPANY2_ID,
             role: EventRole::Organizer,
         };
 
         let new_event_staff = event_staff_repo
-            .create(event_staff_data.clone())
+            .create(test_constants::EVENT0_ID, event_staff_data.clone())
             .await
             .expect("Create should succeed");
 
-        assert_eq!(new_event_staff.user_id, event_staff_data.user_id);
-        assert_eq!(new_event_staff.event_id, event_staff_data.event_id);
-        assert_eq!(new_event_staff.company_id, event_staff_data.company_id);
+        assert_eq!(new_event_staff.user.id, event_staff_data.user_id);
+        assert_eq!(new_event_staff.event_id, test_constants::EVENT0_ID);
+        assert_eq!(new_event_staff.company.id, event_staff_data.company_id);
         assert_eq!(new_event_staff.role, event_staff_data.role);
 
         assert_eq!(new_event_staff.status, AcceptanceStatus::Pending);
@@ -2020,7 +1992,7 @@ pub mod event_staff_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("event_staff"))]
+    #[sqlx::test(fixtures("event_staff"), migrations = "migrations/no_seed")]
     async fn read(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2037,14 +2009,14 @@ pub mod event_staff_repo_tests {
         assert_eq!(event_staff.company.name, "AMD");
         assert_eq!(event_staff.role, EventRole::Organizer);
         assert_eq!(event_staff.status, AcceptanceStatus::Accepted);
-        assert!(event_staff.decided_by.is_none());
+        assert!(event_staff.decided_by.is_some());
 
         event_staff_repo.disconnect().await;
 
         Ok(())
     }
 
-    #[sqlx::test(fixtures("event_staff"))]
+    #[sqlx::test(fixtures("event_staff"), migrations = "migrations/no_seed")]
     async fn read_all_per_event(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2077,7 +2049,7 @@ pub mod event_staff_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("event_staff"))]
+    #[sqlx::test(fixtures("event_staff"), migrations = "migrations/no_seed")]
     async fn update(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2098,7 +2070,7 @@ pub mod event_staff_repo_tests {
             let new_event_staff_data = StaffData {
                 role: Some(EventRole::Staff),
                 status: Some(AcceptanceStatus::Rejected),
-                decided_by: decider_staff_id,
+                decided_by: Some(decider_staff_id),
             };
 
             let updated_event_staff = event_staff_repo
@@ -2106,16 +2078,16 @@ pub mod event_staff_repo_tests {
                 .await
                 .expect("Update should succeed");
 
-            assert_eq!(updated_event_staff.user_id, event_staff.user.id);
-            assert_eq!(updated_event_staff.company_id, event_staff.company.id);
+            assert_eq!(updated_event_staff.user.id, event_staff.user.id);
+            assert_eq!(updated_event_staff.company.id, event_staff.company.id);
             assert_eq!(updated_event_staff.role, new_event_staff_data.role.unwrap());
             assert_eq!(
                 updated_event_staff.status,
                 new_event_staff_data.status.unwrap()
             );
             assert_eq!(
-                updated_event_staff.decided_by,
-                Some(new_event_staff_data.decided_by)
+                updated_event_staff.decided_by.unwrap(),
+                new_event_staff_data.decided_by.unwrap()
             );
 
             let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
@@ -2136,7 +2108,7 @@ pub mod event_staff_repo_tests {
             let new_event_staff_data = StaffData {
                 role: None,
                 status: None,
-                decided_by: decider_staff_id,
+                decided_by: Some(decider_staff_id),
             };
 
             let _updated_event_staff = event_staff_repo
@@ -2155,7 +2127,7 @@ pub mod event_staff_repo_tests {
             let new_event_staff_data = StaffData {
                 role: None,
                 status: Some(AcceptanceStatus::Rejected),
-                decided_by: decider_staff_id,
+                decided_by: Some(decider_staff_id),
             };
 
             let _updated_event_staff = event_staff_repo
@@ -2183,17 +2155,15 @@ pub mod event_staff_repo_tests {
                 .await
                 .expect("Delete should succeed");
 
-            let deleted_event_staff = event_staff_repo
+            let _ = event_staff_repo
                 .read_one(event_staff_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(deleted_event_staff.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             let new_event_staff_data = StaffData {
                 role: None,
                 status: Some(AcceptanceStatus::Rejected),
-                decided_by: decider_staff_id,
+                decided_by: Some(decider_staff_id),
             };
 
             let _updated_event_staff = event_staff_repo
@@ -2207,7 +2177,7 @@ pub mod event_staff_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("event_staff"))]
+    #[sqlx::test(fixtures("event_staff"), migrations = "migrations/no_seed")]
     async fn delete(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2225,17 +2195,10 @@ pub mod event_staff_repo_tests {
 
             event_staff_repo.delete(event_staff_id).await.unwrap();
 
-            let new_event_staff = event_staff_repo
+            let _new_event_staff = event_staff_repo
                 .read_one(event_staff_id)
                 .await
-                .expect("Read should succeed");
-
-            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
-            let time_difference_edited = time - new_event_staff.edited_at;
-            let time_difference_deleted = time - new_event_staff.deleted_at.unwrap();
-
-            assert!(time_difference_edited.num_seconds() < 2);
-            assert!(time_difference_deleted.num_seconds() < 2);
+                .expect_err("Read should not succeed");
         }
 
         // delete on already deleted event staff
@@ -2243,12 +2206,10 @@ pub mod event_staff_repo_tests {
         {
             let event_staff_id = test_constants::EVENT_STAFF1_ID;
 
-            let event_staff = event_staff_repo
+            let _ = event_staff_repo
                 .read_one(event_staff_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(event_staff.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             event_staff_repo.delete(event_staff_id).await.expect_err(
                 "Repository should return error on deleting an already deleted event staff",
@@ -2275,7 +2236,7 @@ pub mod event_staff_repo_tests {
 #[cfg(test)]
 pub mod task_repo_tests {
     use chrono::{NaiveDateTime, Utc};
-    use organization_app::{
+    use organization::{
         common::DbResult,
         models::TaskPriority,
         repositories::{
@@ -2292,7 +2253,7 @@ pub mod task_repo_tests {
 
     use crate::test_constants;
 
-    #[sqlx::test(fixtures("task"))]
+    #[sqlx::test(fixtures("task"), migrations = "migrations/no_seed")]
     async fn create(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2332,7 +2293,7 @@ pub mod task_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("task"))]
+    #[sqlx::test(fixtures("task"), migrations = "migrations/no_seed")]
     async fn read_one(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2355,7 +2316,7 @@ pub mod task_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("task"))]
+    #[sqlx::test(fixtures("task"), migrations = "migrations/no_seed")]
     async fn read_all_per_event(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2387,7 +2348,7 @@ pub mod task_repo_tests {
 
         {
             let tasks = task_repo
-                .read_all(filter)
+                ._read_all(filter)
                 .await
                 .expect("Read should succeed");
 
@@ -2409,7 +2370,7 @@ pub mod task_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("task"))]
+    #[sqlx::test(fixtures("task"), migrations = "migrations/no_seed")]
     async fn update(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2420,7 +2381,7 @@ pub mod task_repo_tests {
         {
             let task_id = test_constants::TASK0_ID;
 
-            let task = task_repo
+            let _ = task_repo
                 .read_one(task_id)
                 .await
                 .expect("Read should succeed");
@@ -2538,7 +2499,7 @@ pub mod task_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("task"))]
+    #[sqlx::test(fixtures("task"), migrations = "migrations/no_seed")]
     async fn delete(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2610,7 +2571,7 @@ pub mod assigned_staff_repo_tests {
     use std::sync::Arc;
 
     use chrono::{NaiveDateTime, Utc};
-    use organization_app::{
+    use organization::{
         common::DbResult,
         models::AcceptanceStatus,
         repositories::{
@@ -2626,7 +2587,7 @@ pub mod assigned_staff_repo_tests {
 
     use crate::test_constants;
 
-    #[sqlx::test(fixtures("assigned_staff"))]
+    #[sqlx::test(fixtures("assigned_staff"), migrations = "migrations/no_seed")]
     pub fn create(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2642,7 +2603,7 @@ pub mod assigned_staff_repo_tests {
             .await
             .expect("Create should succeed");
 
-        assert_eq!(new_assigned_staff.staff_id, assigned_staff_data.staff_id);
+        assert_eq!(new_assigned_staff.staff.id, assigned_staff_data.staff_id);
         assert_eq!(new_assigned_staff.task_id, assigned_staff_data.task_id);
         assert_eq!(new_assigned_staff.status, AcceptanceStatus::Pending);
 
@@ -2662,7 +2623,7 @@ pub mod assigned_staff_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("assigned_staff"))]
+    #[sqlx::test(fixtures("assigned_staff"), migrations = "migrations/no_seed")]
     pub fn read_one(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2677,14 +2638,14 @@ pub mod assigned_staff_repo_tests {
             .expect("Read should succeed");
 
         assert_eq!(assigned_staff.staff.user.name, "Dave Null");
-        assert_eq!(assigned_staff.decided_by.unwrap().name, "Dave Null");
+        assert_eq!(assigned_staff.decided_by_user.unwrap().name, "Dave Null");
 
         assigned_staff_repo.disconnect().await;
 
         Ok(())
     }
 
-    #[sqlx::test(fixtures("assigned_staff"))]
+    #[sqlx::test(fixtures("assigned_staff"), migrations = "migrations/no_seed")]
     pub fn read_all_per_task(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2709,7 +2670,10 @@ pub mod assigned_staff_repo_tests {
         let assigned_staff = &assigned_staffs[0];
 
         assert_eq!(assigned_staff.staff.user.name, "Dave Null");
-        assert_eq!(assigned_staff.decided_by.clone().unwrap().name, "Dave Null");
+        assert_eq!(
+            assigned_staff.decided_by_user.clone().unwrap().name,
+            "Dave Null"
+        );
 
         let assigned_staff = &assigned_staffs[1];
 
@@ -2721,7 +2685,7 @@ pub mod assigned_staff_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("assigned_staff"))]
+    #[sqlx::test(fixtures("assigned_staff"), migrations = "migrations/no_seed")]
     pub fn update(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2736,8 +2700,8 @@ pub mod assigned_staff_repo_tests {
             let task_id = test_constants::TASK0_ID;
 
             let assigned_staff_data = AssignedStaffData {
-                status: Some(AcceptanceStatus::Accepted),
-                decided_by: Some(decider_staff_id),
+                status: AcceptanceStatus::Accepted,
+                decided_by: decider_staff_id,
             };
 
             let updated_assigned_staff = assigned_staff_repo
@@ -2748,7 +2712,7 @@ pub mod assigned_staff_repo_tests {
             assert_eq!(updated_assigned_staff.status, AcceptanceStatus::Accepted);
             assert_eq!(
                 updated_assigned_staff.decided_by,
-                Some(assigned_staff_data.decided_by.unwrap())
+                Some(assigned_staff_data.decided_by)
             );
 
             let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
@@ -2759,23 +2723,6 @@ pub mod assigned_staff_repo_tests {
             assert!(updated_assigned_staff.deleted_at.is_none());
         }
 
-        // All are none
-
-        {
-            let staff_id = test_constants::EVENT_STAFF1_ID;
-            let task_id = test_constants::TASK0_ID;
-
-            let assigned_staff_data = AssignedStaffData {
-                status: None,
-                decided_by: None,
-            };
-
-            let _updated_assigned_staff = assigned_staff_repo
-                .update(task_id, staff_id, assigned_staff_data)
-                .await
-                .expect_err("Update should fail - all fields are none");
-        }
-
         // Non existent
 
         {
@@ -2783,8 +2730,8 @@ pub mod assigned_staff_repo_tests {
             let task_id = uuid!("a96d1d99-93b5-469b-ac62-654b0cf7ebd9");
 
             let assigned_staff_data = AssignedStaffData {
-                status: Some(AcceptanceStatus::Accepted),
-                decided_by: Some(test_constants::EVENT_STAFF0_ID),
+                status: AcceptanceStatus::Accepted,
+                decided_by: test_constants::EVENT_STAFF0_ID,
             };
 
             let _updated_assigned_staff = assigned_staff_repo
@@ -2811,16 +2758,14 @@ pub mod assigned_staff_repo_tests {
                 .await
                 .expect("Delete should succeed");
 
-            let deleted_assigned_staff = assigned_staff_repo
+            let _ = assigned_staff_repo
                 .read_one(task_id, staff_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(deleted_assigned_staff.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             let assigned_staff_data = AssignedStaffData {
-                status: Some(AcceptanceStatus::Accepted),
-                decided_by: Some(test_constants::EVENT_STAFF0_ID),
+                status: AcceptanceStatus::Accepted,
+                decided_by: test_constants::EVENT_STAFF0_ID,
             };
 
             let _updated_assigned_staff = assigned_staff_repo
@@ -2834,7 +2779,7 @@ pub mod assigned_staff_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("assigned_staff"))]
+    #[sqlx::test(fixtures("assigned_staff"), migrations = "migrations/no_seed")]
     pub fn delete(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2853,17 +2798,10 @@ pub mod assigned_staff_repo_tests {
 
             assigned_staff_repo.delete(task_id, staff_id).await.unwrap();
 
-            let new_assigned_staff = assigned_staff_repo
+            let _ = assigned_staff_repo
                 .read_one(task_id, staff_id)
                 .await
-                .expect("Read should succeed");
-
-            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
-            let time_difference_edited = time - new_assigned_staff.edited_at;
-            let time_difference_deleted = time - new_assigned_staff.deleted_at.unwrap();
-
-            assert!(time_difference_edited.num_seconds() < 2);
-            assert!(time_difference_deleted.num_seconds() < 2);
+                .expect_err("Read should not succeed");
         }
 
         // delete on already deleted assigned staff
@@ -2872,12 +2810,10 @@ pub mod assigned_staff_repo_tests {
             let staff_id = test_constants::EVENT_STAFF1_ID;
             let task_id = test_constants::TASK0_ID;
 
-            let assigned_staff = assigned_staff_repo
+            let _ = assigned_staff_repo
                 .read_one(task_id, staff_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(assigned_staff.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             assigned_staff_repo
                 .delete(task_id, staff_id)
@@ -2912,9 +2848,8 @@ pub mod assigned_staff_repo_tests {
 pub mod comment_repo_tests {
     use std::sync::Arc;
 
-    use actix_web::rt::time;
     use chrono::{NaiveDateTime, Utc};
-    use organization_app::{
+    use organization::{
         common::DbResult,
         repositories::{
             comment::{
@@ -2929,7 +2864,7 @@ pub mod comment_repo_tests {
 
     use crate::test_constants;
 
-    #[sqlx::test(fixtures("comments"))]
+    #[sqlx::test(fixtures("comments"), migrations = "migrations/no_seed")]
     async fn create(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -2950,7 +2885,7 @@ pub mod comment_repo_tests {
                 .await
                 .expect("Create should succeed");
 
-            assert_eq!(new_comment.author_id, new_comment_data.author_id);
+            assert_eq!(new_comment.author.id, new_comment_data.author_id);
             assert_eq!(new_comment.event_id, new_comment_data.event_id);
             assert_eq!(new_comment.task_id, new_comment_data.task_id);
             assert_eq!(new_comment.content, new_comment_data.content);
@@ -3002,7 +2937,7 @@ pub mod comment_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("comments"))]
+    #[sqlx::test(fixtures("comments"), migrations = "migrations/no_seed")]
     async fn read_one(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -3011,7 +2946,7 @@ pub mod comment_repo_tests {
         let comment_id = test_constants::COMMENT0_ID;
 
         let comment = comment_repo
-            .read_one(comment_id)
+            ._read_one(comment_id)
             .await
             .expect("Read should succeed");
 
@@ -3023,7 +2958,7 @@ pub mod comment_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("comments"))]
+    #[sqlx::test(fixtures("comments"), migrations = "migrations/no_seed")]
     async fn read_all_per_event(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -3060,7 +2995,7 @@ pub mod comment_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("comments"))]
+    #[sqlx::test(fixtures("comments"), migrations = "migrations/no_seed")]
     async fn read_all_per_task(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -3097,7 +3032,7 @@ pub mod comment_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("comments"))]
+    #[sqlx::test(fixtures("comments"), migrations = "migrations/no_seed")]
     async fn update(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -3108,8 +3043,8 @@ pub mod comment_repo_tests {
         {
             let comment_id = test_constants::COMMENT0_ID;
 
-            let comment = comment_repo
-                .read_one(comment_id)
+            let _comment = comment_repo
+                ._read_one(comment_id)
                 .await
                 .expect("Read should succeed");
 
@@ -3168,7 +3103,7 @@ pub mod comment_repo_tests {
             let comment_id = test_constants::COMMENT0_ID;
 
             let comment = comment_repo
-                .read_one(comment_id)
+                ._read_one(comment_id)
                 .await
                 .expect("Read should succeed");
 
@@ -3179,12 +3114,10 @@ pub mod comment_repo_tests {
                 .await
                 .expect("Delete should succeed");
 
-            let deleted_comment = comment_repo
-                .read_one(comment_id)
+            let _ = comment_repo
+                ._read_one(comment_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(deleted_comment.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             let new_comment_data = CommentData {
                 content: "New Content".to_string(),
@@ -3201,7 +3134,7 @@ pub mod comment_repo_tests {
         Ok(())
     }
 
-    #[sqlx::test(fixtures("comments"))]
+    #[sqlx::test(fixtures("comments"), migrations = "migrations/no_seed")]
     async fn delete(pool: PgPool) -> DbResult<()> {
         let arc_pool = Arc::new(pool);
 
@@ -3213,7 +3146,7 @@ pub mod comment_repo_tests {
             let comment_id = test_constants::COMMENT0_ID;
 
             let comment = comment_repo
-                .read_one(comment_id)
+                ._read_one(comment_id)
                 .await
                 .expect("Read should succeed");
 
@@ -3221,17 +3154,10 @@ pub mod comment_repo_tests {
 
             comment_repo.delete(comment_id).await.unwrap();
 
-            let new_comment = comment_repo
-                .read_one(comment_id)
+            let _ = comment_repo
+                ._read_one(comment_id)
                 .await
-                .expect("Read should succeed");
-
-            let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
-            let time_difference_edited = time - new_comment.edited_at;
-            let time_difference_deleted = time - new_comment.deleted_at.unwrap();
-
-            assert!(time_difference_edited.num_seconds() < 2);
-            assert!(time_difference_deleted.num_seconds() < 2);
+                .expect_err("Read should not succeed");
         }
 
         // delete on already deleted comment
@@ -3239,12 +3165,10 @@ pub mod comment_repo_tests {
         {
             let comment_id = test_constants::COMMENT0_ID;
 
-            let comment = comment_repo
-                .read_one(comment_id)
+            let _ = comment_repo
+                ._read_one(comment_id)
                 .await
-                .expect("Read should succeed");
-
-            assert!(comment.deleted_at.is_some());
+                .expect_err("Read should not succeed");
 
             comment_repo.delete(comment_id).await.expect_err(
                 "Repository should return error on deleting an already deleted comment",
@@ -3265,5 +3189,353 @@ pub mod comment_repo_tests {
         comment_repo.disconnect().await;
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod timesheet_repo_tests {
+    use std::sync::Arc;
+
+    use chrono::NaiveDate;
+    use organization::{
+        models::ApprovalStatus,
+        repositories::timesheet::{
+            models::{TimesheetCreateData, TimesheetReadAllData, TimesheetUpdateData},
+            timesheet_repo::TimesheetRepository,
+        },
+    };
+    use sqlx::PgPool;
+
+    use crate::test_constants::{
+        COMPANY1_ID, COMPANY2_ID, EVENT1_ID, TIMESHEET0_ID, TIMESHEET1_ID, TIMESHEET4_ID, USER1_ID,
+        USER2_ID,
+    };
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn create(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
+
+        let timesheet_repo = TimesheetRepository::new(arc_pool);
+
+        {
+            let user_id = USER1_ID;
+            let company_id = COMPANY1_ID;
+            let event_id = EVENT1_ID;
+            let start_date = NaiveDate::from_ymd_opt(1969, 8, 15).unwrap();
+            let end_date = NaiveDate::from_ymd_opt(1969, 08, 18).unwrap();
+            let data = TimesheetCreateData {
+                start_date,
+                end_date,
+                user_id,
+                company_id,
+                event_id,
+            };
+
+            let result = timesheet_repo.create(data).await.expect("Should succed");
+            assert_eq!(result.workdays.len(), 4);
+            for day in result.workdays.into_iter() {
+                assert!(day.date >= start_date);
+                assert!(day.date <= end_date);
+            }
+            assert_eq!(
+                result.timesheet.approval_status,
+                ApprovalStatus::NotRequested
+            );
+            assert!(result.timesheet.is_editable);
+        }
+    }
+
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn read_one(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
+
+        let timesheet_repo = TimesheetRepository::new(arc_pool);
+
+        {
+            let sheet_id = TIMESHEET0_ID;
+            let user_id = USER2_ID;
+            let company_id = COMPANY1_ID;
+            let event_id = EVENT1_ID;
+
+            let result = timesheet_repo
+                ._read_one(sheet_id)
+                .await
+                .expect("Should succed");
+            assert_eq!(result.workdays.len(), 2);
+            assert_eq!(
+                result.timesheet.approval_status,
+                ApprovalStatus::NotRequested
+            );
+            assert!(result.timesheet.is_editable);
+            assert_eq!(result.timesheet.company_id, company_id);
+            assert_eq!(result.timesheet.event_id, event_id);
+            assert_eq!(result.timesheet.user_id, user_id);
+        }
+
+        {
+            let sheet_id = TIMESHEET1_ID;
+
+            let result = timesheet_repo
+                ._read_one(sheet_id)
+                .await
+                .expect("Should succed");
+            assert_eq!(result.workdays.len(), 3);
+            assert_eq!(result.timesheet.approval_status, ApprovalStatus::Accepted);
+        }
+
+        // Non-existent sheet
+        {
+            let sheet_id = TIMESHEET4_ID;
+
+            let _ = timesheet_repo
+                ._read_one(sheet_id)
+                .await
+                .expect_err("Should not succed");
+        }
+    }
+
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn read_all_per_employment(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
+
+        let timesheet_repo = TimesheetRepository::new(arc_pool);
+
+        {
+            let user_id = USER2_ID;
+            let company_id = COMPANY1_ID;
+
+            let data = TimesheetReadAllData {
+                limit: None,
+                offset: None,
+            };
+            let result = timesheet_repo
+                .read_all_timesheets_per_employment(user_id, company_id, data)
+                .await
+                .expect("Should succed");
+            assert_eq!(result.len(), 1);
+        }
+
+        // Non-existent employment
+        {
+            let user_id = USER2_ID;
+            let company_id = COMPANY2_ID;
+
+            let data = TimesheetReadAllData {
+                limit: None,
+                offset: None,
+            };
+            let result = timesheet_repo
+                .read_all_timesheets_per_employment(user_id, company_id, data)
+                .await
+                .expect("Should succed");
+            assert_eq!(result.len(), 0);
+        }
+    }
+
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn update(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
+
+        let timesheet_repo = TimesheetRepository::new(arc_pool);
+
+        {
+            let sheet_id = TIMESHEET0_ID;
+            let user_id = USER2_ID;
+            let company_id = COMPANY1_ID;
+            let event_id = EVENT1_ID;
+
+            let result = timesheet_repo
+                ._read_one(sheet_id)
+                .await
+                .expect("Should succeed.");
+            assert_eq!(result.workdays.len(), 2);
+            assert_eq!(
+                result.timesheet.approval_status,
+                ApprovalStatus::NotRequested
+            );
+            assert!(result.timesheet.is_editable);
+            assert_eq!(result.timesheet.company_id, company_id);
+            assert_eq!(result.timesheet.event_id, event_id);
+            assert_eq!(result.timesheet.user_id, user_id);
+
+            let data = TimesheetUpdateData {
+                start_date: None,
+                end_date: None,
+                total_hours: None,
+                is_editable: None,
+                status: None,
+                manager_note: Some("Change X and Y.".to_string()),
+                workdays: None,
+            };
+
+            let result = timesheet_repo
+                .update(sheet_id, data)
+                .await
+                .expect("Should succeed.");
+            assert_eq!(result.workdays.len(), 2);
+            assert_eq!(
+                result.timesheet.approval_status,
+                ApprovalStatus::NotRequested
+            );
+            assert!(result.timesheet.is_editable);
+            assert_eq!(result.timesheet.company_id, company_id);
+            assert_eq!(result.timesheet.event_id, event_id);
+            assert_eq!(result.timesheet.user_id, user_id);
+            assert!(result.timesheet.manager_note.is_some());
+            assert_eq!(
+                result.timesheet.manager_note.expect("Should be some"),
+                "Change X and Y.".to_string()
+            );
+        }
+
+        // Empty data
+        {
+            let sheet_id = TIMESHEET0_ID;
+            let user_id = USER2_ID;
+            let company_id = COMPANY1_ID;
+            let event_id = EVENT1_ID;
+
+            let result = timesheet_repo
+                ._read_one(sheet_id)
+                .await
+                .expect("Should succeed.");
+            assert_eq!(result.workdays.len(), 2);
+            assert_eq!(
+                result.timesheet.approval_status,
+                ApprovalStatus::NotRequested
+            );
+            assert!(result.timesheet.is_editable);
+            assert_eq!(result.timesheet.company_id, company_id);
+            assert_eq!(result.timesheet.event_id, event_id);
+            assert_eq!(result.timesheet.user_id, user_id);
+
+            let data = TimesheetUpdateData {
+                start_date: None,
+                end_date: None,
+                total_hours: None,
+                is_editable: None,
+                status: None,
+                manager_note: None,
+                workdays: None,
+            };
+
+            let _ = timesheet_repo
+                .update(sheet_id, data)
+                .await
+                .expect_err("Should not succeed.");
+        }
+
+        // Non-existent sheet
+        {
+            let sheet_id = TIMESHEET4_ID;
+
+            let _ = timesheet_repo
+                ._read_one(sheet_id)
+                .await
+                .expect_err("Should not succeed.");
+
+            let data = TimesheetUpdateData {
+                start_date: None,
+                end_date: None,
+                total_hours: None,
+                is_editable: None,
+                status: None,
+                manager_note: Some("Change X and Y.".to_string()),
+                workdays: None,
+            };
+
+            let _ = timesheet_repo
+                .update(sheet_id, data)
+                .await
+                .expect_err("Should succeed.");
+        }
+
+        // Deleted sheet
+        {
+            let sheet_id = TIMESHEET0_ID;
+            let user_id = USER2_ID;
+            let company_id = COMPANY1_ID;
+            let event_id = EVENT1_ID;
+
+            let result = timesheet_repo
+                ._read_one(sheet_id)
+                .await
+                .expect("Should succeed.");
+            assert_eq!(result.workdays.len(), 2);
+            assert_eq!(
+                result.timesheet.approval_status,
+                ApprovalStatus::NotRequested
+            );
+            assert!(result.timesheet.is_editable);
+            assert_eq!(result.timesheet.company_id, company_id);
+            assert_eq!(result.timesheet.event_id, event_id);
+            assert_eq!(result.timesheet.user_id, user_id);
+
+            let _ = timesheet_repo
+                ._delete(sheet_id)
+                .await
+                .expect("Should succeed");
+
+            let data = TimesheetUpdateData {
+                start_date: None,
+                end_date: None,
+                total_hours: None,
+                is_editable: None,
+                status: None,
+                manager_note: Some("Change X and Y.".to_string()),
+                workdays: None,
+            };
+
+            let _ = timesheet_repo
+                .update(sheet_id, data)
+                .await
+                .expect_err("Should fail because we can't edit a deleted timesheet.");
+        }
+    }
+
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn delete(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
+
+        let timesheet_repo = TimesheetRepository::new(arc_pool);
+
+        {
+            let sheet_id = TIMESHEET0_ID;
+
+            let _ = timesheet_repo
+                ._read_one(sheet_id)
+                .await
+                .expect("Should succeed.");
+
+            let _ = timesheet_repo
+                ._delete(sheet_id)
+                .await
+                .expect("Should succeed.");
+
+            let _ = timesheet_repo
+                ._read_one(sheet_id)
+                .await
+                .expect_err("Should fail.");
+
+            // Deleting an already deleted sheet.
+            let _ = timesheet_repo
+                ._delete(sheet_id)
+                .await
+                .expect_err("Should fail.");
+        }
+
+        // Non-existent sheet
+        {
+            let sheet_id = TIMESHEET4_ID;
+
+            let _ = timesheet_repo
+                ._read_one(sheet_id)
+                .await
+                .expect_err("Should not succeed.");
+
+            let _ = timesheet_repo
+                ._delete(sheet_id)
+                .await
+                .expect_err("Should not succeed.");
+        }
     }
 }

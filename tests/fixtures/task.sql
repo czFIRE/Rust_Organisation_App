@@ -162,7 +162,7 @@ BEGIN
         created_at, edited_at)
         VALUES
         (event_staff0_id, user0_id, company0_id, event0_id,
-        NULL, 'organizer', 'accepted',
+        event_staff0_id, 'organizer', 'accepted',
         '2023-05-03 10:40:20.1', '2023-05-04 08:11:20.4');
 
     INSERT INTO event_staff
@@ -171,7 +171,7 @@ BEGIN
         created_at, edited_at)
         VALUES
         (event_staff1_id, user1_id, company1_id, event0_id,
-        event_staff0_id, 'staff', 'pending',
+        NULL, 'staff', 'pending',
         '2023-05-03 10:40:20.1', '2023-05-04 08:11:20.4');
 
     INSERT INTO task

@@ -21,7 +21,8 @@ DECLARE
   user5_id UUID := 'ced9f31c-8662-4812-9005-b8ae85d3b951';
 
   event0_id UUID := 'b71fd7ce-c891-410a-9bb4-70fc5c7748f8';
-  event1_id UUID :='3f152d12-0bbd-429a-a9c5-28967d6370cc';
+  event1_id UUID := '3f152d12-0bbd-429a-a9c5-28967d6370cc';
+  event2_id UUID := '3f152dad-0bbd-4e9a-aec5-2a567d6370cc';
 
   timesheet0_id UUID := 'd47e8141-a77e-4d55-a2d5-4a77de24b6d0';
   timesheet1_id UUID := '0f0f0ff5-0073-47cc-bd1f-540a04fee9ea';
@@ -160,7 +161,8 @@ BEGIN
         '2023-12-31 09:33', '2024-01-01 12:33');
 
     INSERT INTO user_record
-        (id, name, email, birth, avatar_url,
+        (id, name, email,
+        birth, avatar_url,
         gender, role, status,
         created_at, edited_at)
         VALUES
@@ -177,6 +179,17 @@ BEGIN
         created_at, edited_at)
         VALUES
         (user0_id, company0_id, NULL, 300,
+        '2023-01-01', '2025-01-01', '-',
+        'hpp', 'company_administrator',
+        '2022-12-29 12:38', '2023-12-10 14:52');
+
+    INSERT INTO employment
+        (user_id, company_id, manager_id, hourly_wage,
+        start_date, end_date, description,
+        type, level,
+        created_at, edited_at)
+        VALUES
+        (user0_id, company1_id, NULL, 300,
         '2023-01-01', '2025-01-01', '-',
         'hpp', 'company_administrator',
         '2022-12-29 12:38', '2023-12-10 14:52');
@@ -249,6 +262,17 @@ BEGIN
         '2024-01-01', '2024-01-03', 'darkness_2024.png',
         '2023-06-06 06:06:6.66', '2023-06-06 16:26:6.66');
 
+    INSERT INTO event
+        (id, name, description,
+        website, accepts_staff,
+        start_date, end_date, avatar_url,
+        created_at, edited_at)
+        VALUES
+        (event2_id, 'Beep Boop 2024', 'An event so controversial no companies associated with it. Please sponsor us?',
+        'https://beepboop2024.com', true,
+        '2024-01-01', '2024-01-03', 'beep_boop_2024.png',
+        '2023-06-06 06:06:6.66', '2023-06-06 16:26:6.66');
+
 --------------------------------------------------------------------------------
 
     INSERT INTO associated_company
@@ -279,6 +303,20 @@ BEGIN
         (company2_id, event1_id, 'sponsor',
         '2023-12-12 12:38', '2023-12-12 12:38');
 
+    INSERT INTO associated_company
+        (company_id, event_id, type,
+        created_at, edited_at)
+        VALUES
+        (company2_id, event0_id, 'other',
+        '2023-12-12 12:39', '2023-12-12 12:39');
+
+    INSERT INTO associated_company
+        (company_id, event_id, type,
+        created_at, edited_at)
+        VALUES
+        (company0_id, event2_id, 'organizer',
+        '2023-06-06 10:38', '2023-06-07 14:30');
+
 --------------------------------------------------------------------------------
 
     INSERT INTO timesheet
@@ -288,9 +326,9 @@ BEGIN
         created_at, edited_at)
         VALUES
         (timesheet0_id, user2_id, company1_id, event1_id,
-        '1969-08-16', '1969-08-17', 22,
+        '1969-08-15', '1969-08-16', 22,
         true, 'not_requested', NULL,
-        '1969-08-16 18:26', '1969-08-17 20:00');
+        '1969-08-15 18:26', '1969-08-16 20:00');
 
     INSERT INTO timesheet
         (id, user_id, company_id, event_id,
