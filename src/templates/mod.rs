@@ -7,3 +7,4 @@ pub mod staff;
 pub mod task;
 pub mod timesheet;
 pub mod user;
+pub mod index;

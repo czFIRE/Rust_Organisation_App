@@ -5,6 +5,7 @@ mod models;
 mod repositories;
 mod templates;
 
+use actix_files::Files as ActixFiles;
 use actix_web::{App, HttpServer};
 use dotenv::dotenv;
 use sqlx::{Pool, Postgres};
@@ -66,7 +67,7 @@ use crate::handlers::{
     },
 };
 
-const HOST: &str = "0.0.0.0:8000";
+const HOST: &str = "localhost:8000";
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -174,6 +175,8 @@ async fn main() -> Result<()> {
             .service(create_timesheet)
             .service(update_timesheet)
             .service(reset_timesheet_data)
+            // For serving css
+            .service(ActixFiles::new("/", "./src/static").prefer_utf8(true))
     })
     .bind(HOST)?
     .run()
