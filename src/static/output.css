@@ -570,6 +570,11 @@ video {
   border-width: 2px;
 }
 
+.bg-background {
+  --tw-bg-opacity: 1;
+  background-color: rgb(23 24 33 / var(--tw-bg-opacity));
+}
+
 .p-3 {
   padding: 0.75rem;
 }
@@ -585,4 +590,9 @@ video {
 
 .font-extrabold {
   font-weight: 800;
+}
+
+.text-texthl {
+  --tw-text-opacity: 1;
+  color: rgb(0 173 181 / var(--tw-text-opacity));
 }
