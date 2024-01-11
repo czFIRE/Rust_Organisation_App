@@ -4,7 +4,7 @@ use crate::{
     errors::handle_database_error,
     handlers::common::extract_path_tuple_ids,
     repositories::employment::models::{EmploymentData, NewEmployment},
-    templates::employment::{EmploymentLiteTemplate, EmploymentTemplate},
+    templates::employment::{EmploymentLiteTemplate, EmploymentTemplate, EmploymentLite},
 };
 use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;
@@ -23,7 +23,7 @@ pub async fn get_employments_per_user(
     employment_repo: web::Data<EmploymentRepository>,
 ) -> HttpResponse {
     let query_params = params.into_inner();
-
+    println!("EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEPY");
     if (query_params.limit.is_some() && query_params.limit.unwrap() < 0)
         || (query_params.offset.is_some() && query_params.offset.unwrap() < 0)
     {
@@ -41,11 +41,11 @@ pub async fn get_employments_per_user(
         .await;
 
     if let Ok(employments) = result {
-        let employment_vec: Vec<EmploymentLiteTemplate> = employments
+        let employment_vec: Vec<EmploymentLite> = employments
             .into_iter()
             .map(|employment| employment.into())
             .collect();
-
+        println!("VEEEEEEEEEEEEEEEEEEEEEEEC");
         let template = EmploymentsTemplate {
             employments: employment_vec,
         };
@@ -55,12 +55,13 @@ pub async fn get_employments_per_user(
             return HttpResponse::InternalServerError()
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
+        println!("RENDEEEEEEEEEEEEEER");
 
         return HttpResponse::Ok()
             .content_type("text/html")
             .body(body.expect("Should be valid now."));
     }
-
+    println!("DB ERRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
     handle_database_error(result.expect_err("Should be error."))
 }
 
@@ -133,7 +134,7 @@ pub async fn get_subordinates(
         .await;
 
     if let Ok(employments) = result {
-        let employment_vec: Vec<EmploymentLiteTemplate> = employments
+        let employment_vec: Vec<EmploymentLite> = employments
             .into_iter()
             .map(|employment| employment.into())
             .collect();

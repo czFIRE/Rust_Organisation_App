@@ -125,7 +125,7 @@ impl fmt::Display for Association {
 }
 
 #[derive(Serialize, Deserialize, Debug, sqlx::Type, Clone, PartialEq)]
-#[sqlx(type_name = "employee_level", rename_all = "lowercase")]
+#[sqlx(type_name = "employee_level", rename_all = "snake_case")]
 pub enum EmployeeLevel {
     Basic,
     Manager,
