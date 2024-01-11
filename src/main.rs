@@ -13,7 +13,7 @@ use std::io::Result;
 
 use std::sync::Arc;
 
-use crate::repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository;
+use crate::{repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository, handlers::user::get_users};
 use crate::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
 use crate::repositories::comment::comment_repo::CommentRepository;
 use crate::repositories::company::company_repo::CompanyRepository;
@@ -175,6 +175,8 @@ async fn main() -> Result<()> {
             .service(create_timesheet)
             .service(update_timesheet)
             .service(reset_timesheet_data)
+            // Temporary
+            .service(get_users)
             // For serving css
             .service(ActixFiles::new("/", "./src/static").prefer_utf8(true))
     })

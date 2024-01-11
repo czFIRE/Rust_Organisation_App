@@ -85,3 +85,9 @@ impl From<User> for UserLiteTemplate {
         }
     }
 }
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "user/users.html")]
+pub struct UsersTemplate {
+    pub users: Vec<UserLiteTemplate>,
+}

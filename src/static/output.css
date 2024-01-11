@@ -16,7 +16,7 @@
   /* 2 */
   border-style: solid;
   /* 2 */
-  border-color: currentColor;
+  border-color: #e5e7eb;
   /* 2 */
 }
 
@@ -544,8 +544,76 @@ video {
   --tw-backdrop-sepia:  ;
 }
 
+.col-span-5 {
+  grid-column: span 5 / span 5;
+}
+
+.col-span-6 {
+  grid-column: span 6 / span 6;
+}
+
+.col-span-2 {
+  grid-column: span 2 / span 2;
+}
+
+.col-span-7 {
+  grid-column: span 7 / span 7;
+}
+
+.ml-5 {
+  margin-left: 1.25rem;
+}
+
+.mt-10 {
+  margin-top: 2.5rem;
+}
+
 .flex {
   display: flex;
+}
+
+.grid {
+  display: grid;
+}
+
+.h-10 {
+  height: 2.5rem;
+}
+
+.h-5 {
+  height: 1.25rem;
+}
+
+.h-8 {
+  height: 2rem;
+}
+
+.w-10 {
+  width: 2.5rem;
+}
+
+.w-5 {
+  width: 1.25rem;
+}
+
+.w-8 {
+  width: 2rem;
+}
+
+.grid-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.grid-cols-8 {
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+}
+
+.grid-cols-10 {
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+}
+
+.flex-row {
+  flex-direction: row;
 }
 
 .flex-col {
@@ -556,18 +624,38 @@ video {
   align-items: center;
 }
 
+.gap-4 {
+  gap: 1rem;
+}
+
+.gap-1 {
+  gap: 0.25rem;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
 .space-y-1 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-y-reverse: 0;
   margin-top: calc(0.25rem * calc(1 - var(--tw-space-y-reverse)));
   margin-bottom: calc(0.25rem * var(--tw-space-y-reverse));
 }
 
-.rounded-sm {
-  border-radius: 0.125rem;
+.space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(0.5rem * var(--tw-space-x-reverse));
+  margin-left: calc(0.5rem * calc(1 - var(--tw-space-x-reverse)));
 }
 
-.border-2 {
-  border-width: 2px;
+.space-x-5 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 0;
+  margin-right: calc(1.25rem * var(--tw-space-x-reverse));
+  margin-left: calc(1.25rem * calc(1 - var(--tw-space-x-reverse)));
+}
+
+.text-wrap {
+  text-wrap: wrap;
 }
 
 .bg-background {
@@ -575,8 +663,14 @@ video {
   background-color: rgb(23 24 33 / var(--tw-bg-opacity));
 }
 
-.p-3 {
-  padding: 0.75rem;
+.bg-foreground1 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(34 35 48 / var(--tw-bg-opacity));
+}
+
+.py-3 {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
 }
 
 .font-mono {
@@ -588,11 +682,26 @@ video {
   line-height: 2.5rem;
 }
 
+.text-xl {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
+.text-xs {
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
 .font-extrabold {
   font-weight: 800;
 }
 
-.text-texthl {
+.text-txt {
+  --tw-text-opacity: 1;
+  color: rgb(210 210 210 / var(--tw-text-opacity));
+}
+
+.text-txthl {
   --tw-text-opacity: 1;
   color: rgb(0 173 181 / var(--tw-text-opacity));
 }

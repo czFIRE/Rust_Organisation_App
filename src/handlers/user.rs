@@ -3,7 +3,7 @@ use std::str::FromStr;
 use crate::{
     errors::{handle_database_error, parse_error},
     repositories::user::models::{NewUser, UserData},
-    templates::user::UserTemplate,
+    templates::user::{UserTemplate, UserLiteTemplate, UsersTemplate},
 };
 use actix_web::{delete, get, http, patch, post, put, web, HttpResponse};
 use askama::Template;
@@ -26,6 +26,34 @@ pub async fn get_user(
 
     if let Ok(user) = result {
         let template: UserTemplate = user.into();
+
+        let body = template.render();
+
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Ok()
+            .content_type("text/html")
+            .body(body.expect("Should be valid"));
+    }
+
+    handle_database_error(result.expect_err("Should be error."))
+}
+
+// Temporary workaround to the lack of auth.
+#[get("/user")]
+pub async fn get_users(
+    user_repo: web::Data<UserRepository>,
+) -> HttpResponse {
+    let result = user_repo._read_all().await;
+
+    if let Ok(users) = result {
+        let lite_users: Vec<UserLiteTemplate> = users.into_iter().map(|user| user.into()).collect();
+        let template: UsersTemplate = UsersTemplate {
+            users: lite_users,
+        };
 
         let body = template.render();
 
