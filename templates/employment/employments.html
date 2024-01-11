@@ -1,10 +1,10 @@
-<div id="employments" class="flex flex-col space-y-2 items-center">
+<div id="employments" class="flex flex-col space-y-5 items-center">
     <div id="title">
         <h2 class="font-mono text-4xl font-extrabold text-txthl">Employments</h2>
     </div>
     {% for employment in employments %}
     <button hx-get="/user/{{ employment.user_id }}/employment/{{ employment.company.id }}" hx-target="#content" hx-swap="innerHTML">
-        <div class="flex flex-row space-x-5 mr-10 items-start w-max bg-foreground1">
+        <div class="flex flex-row space-x-5 pr-10 items-start w-max bg-foreground1">
             <div class="bg-foreground1 w-24 h-24 max-w-24 max-h-24">
                 <img src="{{ employment.company.avatar_url }}" 
                      class="object-contain" 

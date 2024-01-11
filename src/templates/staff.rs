@@ -12,14 +12,14 @@ use crate::{
     },
 };
 
-use super::{company::CompanyLiteTemplate, user::UserLiteTemplate};
+use super::{company::CompanyLite, user::UserLiteTemplate};
 
 #[derive(Template, Deserialize, Debug)]
 #[template(path = "event/staff/staff.html")]
 pub struct StaffTemplate {
     pub id: Uuid,
     pub user: UserLiteTemplate,
-    pub company: CompanyLiteTemplate,
+    pub company: CompanyLite,
     pub event_id: Uuid,
     pub role: EventRole,
     pub status: AcceptanceStatus,
@@ -44,7 +44,7 @@ impl From<StaffExtended> for StaffTemplate {
             avatar_url: staff.user.avatar_url,
         };
 
-        let company = CompanyLiteTemplate {
+        let company = CompanyLite {
             id: staff.company.id,
             name: staff.company.name,
             avatar_url: staff.company.avatar_url,

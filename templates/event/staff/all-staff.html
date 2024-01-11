@@ -1,7 +1,9 @@
 {% for staff_member in staff %}
 {{ staff_member.id }}
 {{ staff_member.user }}
-{{ staff_member.company }}
+{{ staff_member.company.id }}
+{{ staff_member.company.name }}
+{{ staff_member.company.avatar_url }}
 {{ staff_member.event_id }}
 {{ staff_member.role }}
 {{ staff_member.status }}

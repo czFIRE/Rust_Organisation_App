@@ -12,7 +12,7 @@ use crate::{
         company_repo::CompanyRepository,
         models::{AddressData, AddressUpdateData, CompanyData, CompanyFilter, NewCompany},
     },
-    templates::company::{CompaniesTemplate, CompanyLiteTemplate, CompanyTemplate},
+    templates::company::{CompaniesTemplate, CompanyTemplate, CompanyLite},
 };
 
 #[derive(Deserialize, Clone)]
@@ -72,7 +72,7 @@ pub async fn get_all_companies(
     if let Ok(companies) = result {
         let lite_companies = companies
             .into_iter()
-            .map(|company| CompanyLiteTemplate {
+            .map(|company| CompanyLite {
                 id: company.id,
                 name: company.name,
                 avatar_url: company.avatar_url,

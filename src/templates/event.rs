@@ -40,9 +40,8 @@ impl From<Event> for EventTemplate {
     }
 }
 
-#[derive(Template, Debug, Deserialize)]
-#[template(path = "event/event-lite.html")]
-pub struct EventLiteTemplate {
+#[derive(Debug, Deserialize)]
+pub struct EventLite {
     pub id: Uuid,
     pub avatar_url: String,
     pub name: String,
@@ -51,9 +50,9 @@ pub struct EventLiteTemplate {
     pub end_date: NaiveDate,
 }
 
-impl From<Event> for EventLiteTemplate {
+impl From<Event> for EventLite {
     fn from(event: Event) -> Self {
-        EventLiteTemplate {
+        EventLite {
             id: event.id,
             avatar_url: event.avatar_url,
             name: event.name,
@@ -67,5 +66,5 @@ impl From<Event> for EventLiteTemplate {
 #[derive(Template, Debug, Deserialize)]
 #[template(path = "event/events.html")]
 pub struct EventsTemplate {
-    pub events: Vec<EventLiteTemplate>,
+    pub events: Vec<EventLite>,
 }

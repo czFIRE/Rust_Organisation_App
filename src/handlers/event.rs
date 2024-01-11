@@ -10,7 +10,7 @@ use crate::{
         event_repo::EventRepository,
         models::{EventData, EventFilter, NewEvent},
     },
-    templates::event::{EventLiteTemplate, EventTemplate, EventsTemplate},
+    templates::event::{EventTemplate, EventsTemplate, EventLite},
 };
 
 #[get("/event")]
@@ -29,7 +29,7 @@ pub async fn get_events(
     let result = event_repo.read_all(query_params).await;
 
     if let Ok(events) = result {
-        let lite_events: Vec<EventLiteTemplate> =
+        let lite_events: Vec<EventLite> =
             events.into_iter().map(|event| event.into()).collect();
 
         let template = EventsTemplate {

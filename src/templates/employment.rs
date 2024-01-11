@@ -9,13 +9,13 @@ use crate::{
     repositories::employment::models::EmploymentExtended,
 };
 
-use super::{company::CompanyLiteTemplate, user::UserLiteTemplate};
+use super::{company::CompanyLite, user::UserLiteTemplate};
 
 #[derive(Template, Deserialize)]
 #[template(path = "employment/employment.html")]
 pub struct EmploymentTemplate {
     pub user_id: Uuid,
-    pub company: CompanyLiteTemplate,
+    pub company: CompanyLite,
     pub manager: Option<UserLiteTemplate>,
     pub employment_type: EmploymentContract,
     pub hourly_wage: f64,
@@ -52,7 +52,7 @@ impl From<EmploymentExtended> for EmploymentTemplate {
 #[derive(Debug, Deserialize)]
 pub struct EmploymentLite {
     pub user_id: Uuid,
-    pub company: CompanyLiteTemplate,
+    pub company: CompanyLite,
     pub employment_type: EmploymentContract,
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
@@ -68,17 +68,14 @@ impl From<EmploymentExtended> for EmploymentLite {
             start_date: employment.start_date,
             end_date: employment.end_date,
         }
-
-        // EmploymentLiteTemplate { employment }
     }
 }
 
 #[derive(Template, Debug, Deserialize)]
 #[template(path = "employment/employment-lite.html")]
 pub struct EmploymentLiteTemplate {
-    // pub employment: EmploymentLite,
     pub user_id: Uuid,
-    pub company: CompanyLiteTemplate,
+    pub company: CompanyLite,
     pub employment_type: EmploymentContract,
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,

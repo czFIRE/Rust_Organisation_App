@@ -68,17 +68,16 @@ impl From<CompanyExtended> for CompanyTemplate {
     }
 }
 
-#[derive(Template, Debug, Deserialize)]
-#[template(path = "company/company-lite.html")]
-pub struct CompanyLiteTemplate {
+#[derive(Debug, Deserialize)]
+pub struct CompanyLite {
     pub id: Uuid,
     pub name: String,
     pub avatar_url: String,
 }
 
-impl From<Company> for CompanyLiteTemplate {
+impl From<Company> for CompanyLite {
     fn from(company: Company) -> Self {
-        CompanyLiteTemplate {
+        CompanyLite {
             id: company.id,
             name: company.name,
             avatar_url: company.avatar_url,
@@ -89,14 +88,14 @@ impl From<Company> for CompanyLiteTemplate {
 #[derive(Template, Debug, Deserialize)]
 #[template(path = "company/companies.html")]
 pub struct CompaniesTemplate {
-    pub companies: Vec<CompanyLiteTemplate>,
+    pub companies: Vec<CompanyLite>,
 }
 
 #[derive(Template, Debug, Deserialize)]
 #[template(path = "company/associated-company.html")]
 pub struct AssociatedCompanyTemplate {
     pub event_id: Uuid,
-    pub company: CompanyLiteTemplate,
+    pub company: CompanyLite,
     pub association_type: Association,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
@@ -104,7 +103,7 @@ pub struct AssociatedCompanyTemplate {
 
 impl From<AssociatedCompanyExtended> for AssociatedCompanyTemplate {
     fn from(associated: AssociatedCompanyExtended) -> Self {
-        let company_lite = CompanyLiteTemplate {
+        let company_lite = CompanyLite {
             id: associated.company.id,
             name: associated.company.name,
             avatar_url: associated.company.avatar_url,
