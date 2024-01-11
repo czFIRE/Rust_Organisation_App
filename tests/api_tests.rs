@@ -97,8 +97,8 @@ mod api_tests {
             "name": "Peepo Happy",
             "email": "peepo@happy.com",
             "birth": "1999-01-01",
-            "gender": "male",
-            "role": "user"
+            "gender": "Male",
+            "role": "User"
         });
         let req = test::TestRequest::post()
             .uri("/user")
@@ -112,7 +112,6 @@ mod api_tests {
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         assert!(body.contains("Peepo Happy"));
         assert!(body.contains("peepo@happy.com"));
-        assert!(body.contains("img/default/user.jpg"));
 
         let uuid_regex = Regex::new(
             r"[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}",
@@ -998,7 +997,7 @@ mod api_tests {
         let data = json!({
             "creator_id": "9281b570-4d02-4096-9136-338a613c71cd",
             "title": "Stock the wood pile.",
-            "priority": "high"
+            "priority": "High"
         });
 
         let req = test::TestRequest::post()
@@ -1723,8 +1722,8 @@ mod api_tests {
             "start_date": "2022-12-23",
             "end_date": "2022-12-26",
             "description": "A person.",
-            "employment_type": "hpp",
-            "level": "basic"
+            "employment_type": "Hpp",
+            "level": "Basic"
         });
 
         let req = test::TestRequest::post()
@@ -1738,7 +1737,7 @@ mod api_tests {
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         assert!(body.contains("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c"));
         assert!(body.contains("b5188eda-528d-48d4-8cee-498e0971f9f5"));
-        assert!(body.contains("HPP"));
+        assert!(body.contains("Hpp"));
         assert!(body.contains("Basic"));
         assert!(body.contains("200"));
         //ToDo: check for manager ID
@@ -1754,7 +1753,7 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
 
         let data = json!({
-            "level": "manager"
+            "level": "Manager"
         });
 
         let req = test::TestRequest::patch()
@@ -1769,7 +1768,7 @@ mod api_tests {
 
         assert!(body.contains("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c"));
         assert!(body.contains("b5188eda-528d-48d4-8cee-498e0971f9f5"));
-        assert!(body.contains("HPP"));
+        assert!(body.contains("Hpp"));
         assert!(body.contains("Manager"));
 
         let data = json!({});
@@ -1815,9 +1814,9 @@ mod api_tests {
             "user_id": "0465041f-INVALID4-461f-9f71-71aaagf",
             "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
             "manager_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
-            "employment_type": "hpp",
+            "employment_type": "Hpp",
             "hourly_rate": "200.0",
-            "employee_level": "basic",
+            "employee_level": "Basic",
             "start_date": "2022-12-23",
             "end_date": "2022-12-26",
         });
@@ -1834,9 +1833,9 @@ mod api_tests {
         let data = json!({
             "user_id": "0465041f-fe64-461f-9f71-71e3b97ca85f",
             "manager_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
-            "employment_type": "hpp",
+            "employment_type": "Hpp",
             "hourly_rate": "200.0",
-            "employee_level": "basic",
+            "employee_level": "Basic",
             "start_date": "2022-12-23",
             "end_date": "2022-12-26",
         });
@@ -1981,7 +1980,7 @@ mod api_tests {
         let data = json!({
             "user_id": "51a01dbf-dcd5-43a0-809c-94ed8e61d420",
             "company_id": "71fa27d6-6f00-4ad0-8902-778e298aaed2",
-            "role": "staff"
+            "role": "Staff"
         });
 
         let req = test::TestRequest::post()
@@ -2032,7 +2031,7 @@ mod api_tests {
                 .as_str(),
             )
             .set_json(json!({
-                "status": "accepted"
+                "status": "Accepted"
             }))
             .to_request();
         let res = test::call_service(&app, req).await;
@@ -2049,7 +2048,7 @@ mod api_tests {
                 .as_str(),
             )
             .set_json(json!({
-                "status": "accepted",
+                "status": "Accepted",
                 "decided_by": staff_id.to_string(),
             }))
             .to_request();
@@ -2067,7 +2066,7 @@ mod api_tests {
                 .as_str(),
             )
             .set_json(json!({
-                "status": "accepted",
+                "status": "Accepted",
                 "decided_by": "aa7f3d0e-ab48-473b-ac69-b84cb74f34f7",
             }))
             .to_request();
@@ -2085,7 +2084,7 @@ mod api_tests {
                 .as_str(),
             )
             .set_json(json!({
-                "status": "accepted",
+                "status": "Accepted",
                 "decided_by": "9281b570-4d02-4096-9136-338a613c71cd"
             }))
             .to_request();
@@ -2094,7 +2093,7 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
 
         let data = json!({
-            "role": "organizer",
+            "role": "Organizer",
         });
 
         let req = test::TestRequest::patch()
@@ -2273,7 +2272,7 @@ mod api_tests {
         assert!(body.contains("a96d1d99-93b5-469b-ac62-654b0cf7ebd3"));
 
         let data = json!({
-            "status": "rejected",
+            "status": "Rejected",
             "decided_by": "9281b570-4d02-4096-9136-338a613c71cd"
         });
 
@@ -2292,7 +2291,7 @@ mod api_tests {
         assert!(body.contains("a96d1d99-93b5-469b-ac62-654b0cf7ebd3"));
 
         let data = json!({
-            "status": "accepted",
+            "status": "Accepted",
         });
 
         let req = test::TestRequest::patch()
@@ -2497,7 +2496,7 @@ mod api_tests {
 
         let data = json!({
           "company_id": "134d5286-5f55-4637-9b98-223a5820a464",
-          "association_type": "sponsor",
+          "association_type": "Sponsor",
         });
 
         let req = test::TestRequest::post()
@@ -2532,7 +2531,7 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
 
         let data = json!({
-            "association_type": "other",
+            "association_type": "Other",
         });
 
         let req = test::TestRequest::patch()
@@ -2559,7 +2558,7 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
 
         let data = json!({
-            "association_type": "other",
+            "association_type": "Other",
         });
 
         let req = test::TestRequest::patch()

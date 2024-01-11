@@ -128,7 +128,9 @@ impl UserRepository {
                 edited_at, 
                 deleted_at 
             FROM 
-                user_record 
+                user_record
+            WHERE
+                deleted_at IS NULL
             "#,
         )
         .fetch_all(executor)
@@ -150,15 +152,9 @@ impl UserRepository {
             && data.role.is_none()
         {
             // TODO - add better error
-            return Err(sqlx::Error::RowNotFound);
-        }
-
-        // Should return error if we can't find the user
-        let user_check = self.read_one(user_id).await?;
-
-        if user_check.deleted_at.is_some() {
-            // TODO better error
-            return Err(sqlx::Error::RowNotFound);
+            return Err(sqlx::Error::TypeNotFound {
+                type_name: "User Error".to_string(),
+            });
         }
 
         let user_res: User = sqlx::query_as!(

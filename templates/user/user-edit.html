@@ -1,0 +1,58 @@
+<div id="user" class="flex flex-col space-y-5 items-center">
+    <div id="title">
+        <h2 class=" col-span-4 font-mono text-4xl font-extrabold text-txthl">My Account</h1>
+    </div>
+    <div id="user-content" class="flex flex-row space-x-10">
+        <form hx-patch="/user/{{ id }}" hx-ext="json-enc" class="flex flex-col space-y-5 items-center" hx-swap="innerHTML" hx-target="#content">
+            <p class="font-mono text-xl text-pnd">Input only values you wish to change! Leave others empty.</p>
+                <div class="flex flex-row space-x-5">
+                    <label class="font-mono text-xl text-txt" for="name">Name:</label>
+                    <input class="font-mono text-xl bg-foreground2 text-txt" type="text" id="name" name="name" placeholder="new name" value="{{ name }}">
+                </div>
+                <div class="flex flex-row space-x-5">
+                    <label class="font-mono text-xl text-txt" for="email">Email:</label>
+                    <input class="font-mono text-xl bg-foreground2 text-txt" type="text" id="email" name="email" placeholder="new email" value="{{ email }}">
+                </div>
+                <div class="flex flex-row space-x-5">
+                    <label class="font-mono text-xl text-txt" for="name">Birth Date:</label>
+                    <input class="font-mono text-xl bg-foreground2 text-txt" type="date" id="birth" name="birth" placeholder="new birth date" value="{{ birth }}">
+                </div>
+                <div class="flex flex-row space-x-5">
+                    <label class="font-mono text-xl text-txt" for="gender">Gender:</label>
+                    <input class="font-mono text-xl bg-foreground2 text-txt" type="gender-list" id="gender" name="gender" placeholder="new gender" value="{{ gender }}">
+                </div>
+
+                <datalist id="gender-list">
+                    <option value="Male"/>
+                    <option value="Female"/>
+                    <option value="Orchestrate"/>
+                </datalist>
+
+                <div class="flex flex-row space-x-5">
+                    <button type="submit">
+                        <svg class="h-8 w-8 text-acc"
+                             xmlns="http://www.w3.org/2000/svg" 
+                             fill="none" 
+                             viewBox="0 0 24 24" 
+                             stroke-width="1.5" 
+                             stroke="currentColor">
+                            <path stroke-linecap="round" 
+                                  stroke-linejoin="round" 
+                                  d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                          </svg>                      
+                    </button>
+                    <button hx-get="/user/{{ id }}" hx-swap="innerHTML" hx-target="#content">
+                        <svg class="h-8 w-8 text-rej"
+                             xmlns="http://www.w3.org/2000/svg" 
+                             fill="none" 
+                             viewBox="0 0 24 24" 
+                             stroke-width="1.5" 
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                          </svg>
+                          
+                    </button>
+                </div>
+        </form>
+    </div>
+</div>

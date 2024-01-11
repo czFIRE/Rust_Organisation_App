@@ -91,3 +91,13 @@ impl From<User> for UserLiteTemplate {
 pub struct UsersTemplate {
     pub users: Vec<UserLiteTemplate>,
 }
+
+#[derive(Template)]
+#[template(path = "user/user-edit.html")]
+pub struct UserEditTemplate {
+    pub id: Uuid,
+    pub name: String,
+    pub email: String,
+    pub birth: NaiveDate,
+    pub gender: Gender,
+}

@@ -3,7 +3,6 @@ use std::fmt;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, sqlx::Type, PartialEq, Clone)]
-#[serde(rename_all = "snake_case")]
 #[sqlx(type_name = "user_role", rename_all = "lowercase")]
 pub enum UserRole {
     User,
@@ -20,7 +19,6 @@ impl fmt::Display for UserRole {
 }
 
 #[derive(Serialize, Deserialize, Debug, sqlx::Type, Clone, PartialEq)]
-#[serde(rename_all = "snake_case")]
 #[sqlx(type_name = "user_status", rename_all = "lowercase")]
 pub enum UserStatus {
     Available,
@@ -37,7 +35,6 @@ impl fmt::Display for UserStatus {
 }
 
 #[derive(Serialize, Deserialize, Debug, sqlx::Type, PartialEq, Clone)]
-#[serde(rename_all = "snake_case")]
 #[sqlx(type_name = "gender", rename_all = "lowercase")]
 pub enum Gender {
     Male,
@@ -56,7 +53,6 @@ impl fmt::Display for Gender {
 }
 
 #[derive(Serialize, Deserialize, Debug, sqlx::Type, PartialEq, Clone)]
-#[serde(rename_all = "snake_case")]
 #[sqlx(type_name = "event_role", rename_all = "lowercase")]
 pub enum EventRole {
     Staff,
@@ -73,7 +69,6 @@ impl fmt::Display for EventRole {
 }
 
 #[derive(Serialize, Deserialize, Debug, sqlx::Type, PartialEq, Clone)]
-#[serde(rename_all = "snake_case")]
 #[sqlx(type_name = "acceptance_status", rename_all = "snake_case")]
 pub enum AcceptanceStatus {
     Pending,
@@ -92,7 +87,6 @@ impl fmt::Display for AcceptanceStatus {
 }
 
 #[derive(Serialize, Deserialize, Debug, sqlx::Type, PartialEq, Clone)]
-#[serde(rename_all = "snake_case")]
 #[sqlx(type_name = "task_priority", rename_all = "lowercase")]
 pub enum TaskPriority {
     Low,
@@ -111,7 +105,6 @@ impl fmt::Display for TaskPriority {
 }
 
 #[derive(Serialize, Deserialize, Debug, sqlx::Type, Clone, PartialEq)]
-#[serde(rename_all = "snake_case")]
 #[sqlx(type_name = "association", rename_all = "lowercase")]
 pub enum Association {
     Sponsor,
@@ -132,12 +125,10 @@ impl fmt::Display for Association {
 }
 
 #[derive(Serialize, Deserialize, Debug, sqlx::Type, Clone, PartialEq)]
-#[serde(rename_all = "snake_case")]
 #[sqlx(type_name = "employee_level", rename_all = "lowercase")]
 pub enum EmployeeLevel {
     Basic,
     Manager,
-    #[sqlx(rename = "company_administrator")]
     CompanyAdministrator,
 }
 
@@ -152,7 +143,6 @@ impl fmt::Display for EmployeeLevel {
 }
 
 #[derive(Serialize, Deserialize, Debug, sqlx::Type, Clone, PartialEq)]
-#[serde(rename_all = "snake_case")]
 #[sqlx(type_name = "employment_contract", rename_all = "lowercase")]
 pub enum EmploymentContract {
     Dpp,
@@ -163,15 +153,14 @@ pub enum EmploymentContract {
 impl fmt::Display for EmploymentContract {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            EmploymentContract::Dpp => write!(f, "DPP"),
-            EmploymentContract::Dpc => write!(f, "DPC"),
-            EmploymentContract::Hpp => write!(f, "HPP"),
+            EmploymentContract::Dpp => write!(f, "Dpp"),
+            EmploymentContract::Dpc => write!(f, "Dpc"),
+            EmploymentContract::Hpp => write!(f, "Hpp"),
         }
     }
 }
 
 #[derive(Serialize, Deserialize, Debug, sqlx::Type, Clone, PartialEq)]
-#[serde(rename_all = "snake_case")]
 #[sqlx(type_name = "approval_status", rename_all = "snake_case")]
 pub enum ApprovalStatus {
     Pending,

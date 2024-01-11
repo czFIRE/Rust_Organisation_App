@@ -1,7 +1,7 @@
 use actix_web::{get, http, HttpResponse};
 use askama::Template;
 
-use crate::{templates::index::IndexTemplate, errors::parse_error};
+use crate::{errors::parse_error, templates::index::IndexTemplate};
 
 #[get("/")]
 pub async fn index() -> HttpResponse {
@@ -13,5 +13,7 @@ pub async fn index() -> HttpResponse {
     if body.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
-    HttpResponse::Ok().content_type("text/html").body(body.expect("Should be valid now."))
+    HttpResponse::Ok()
+        .content_type("text/html")
+        .body(body.expect("Should be valid now."))
 }

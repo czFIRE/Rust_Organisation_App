@@ -6,14 +6,15 @@ mod repositories;
 mod templates;
 
 use actix_files::Files as ActixFiles;
-use actix_web::{App, HttpServer};
+use actix_web::{middleware::Logger, App, HttpServer};
 use dotenv::dotenv;
+use env_logger::Env;
 use sqlx::{Pool, Postgres};
 use std::io::Result;
 
 use std::sync::Arc;
 
-use crate::{repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository, handlers::user::get_users};
+use crate::handlers::user::toggle_user_edit;
 use crate::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
 use crate::repositories::comment::comment_repo::CommentRepository;
 use crate::repositories::company::company_repo::CompanyRepository;
@@ -24,6 +25,10 @@ use crate::repositories::repository::DbRepository;
 use crate::repositories::task::task_repo::TaskRepository;
 use crate::repositories::timesheet::timesheet_repo::TimesheetRepository;
 use crate::repositories::user::user_repo::UserRepository;
+use crate::{
+    handlers::user::get_users,
+    repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository,
+};
 use actix_web::web;
 
 use crate::handlers::{
@@ -72,10 +77,11 @@ const HOST: &str = "localhost:8000";
 #[tokio::main]
 async fn main() -> Result<()> {
     dotenv().expect("Failed to load .env file");
+    std::env::set_var("RUST_LOG", "debug");
+    env_logger::Builder::from_env(Env::default().default_filter_or("debug")).init();
 
     let pool = setup_db_pool().await;
     let arc_pool = Arc::new(pool);
-
     // Add repositories here.
     let user_repository = UserRepository::new(arc_pool.clone());
     let company_repository = CompanyRepository::new(arc_pool.clone());
@@ -112,8 +118,11 @@ async fn main() -> Result<()> {
             .app_data(associated_company_repo.clone())
             .app_data(timesheet_repo.clone())
             .app_data(comment_repo.clone())
+            .wrap(Logger::default())
+            .wrap(Logger::new("%a %{User-Agent}i"))
             .service(index)
             .service(get_user)
+            .service(toggle_user_edit)
             .service(create_user)
             .service(update_user)
             .service(delete_user)
