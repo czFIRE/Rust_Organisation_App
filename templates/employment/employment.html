@@ -4,7 +4,7 @@
             <img src="{{ company.avatar_url }}" 
                  class="object-fill rounded-md"/>
         </div>
-        <div class="flex flex-col space-y-4 items-start">
+        <div class="flex flex-col space-y-4 items-start text-wrap">
             <button hx-get="/company/{{ company.id }}" hx-target="#content" hx-swap="innerHTML">
                 <h2 class="font-mono text-4xl font-extrabold text-txthl">{{ company.name }}</h2>
             </button>
@@ -24,6 +24,8 @@
             <p class="font-mono text-xl text-txt"><b>Hourly Rate:</b> {{ hourly_wage }} CZK</p>
             <p class="font-mono text-xl text-txt"><b>Employee Level:</b> {{ level }}</p>
             </div>
+
+            <p class="font-mono text-xl text-txt"><b>Description:</b> {{ description }}</p>
 
             <div class="grid grid-cols-3 grid-rows-2">
             {% if manager.is_some() -%}

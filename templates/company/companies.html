@@ -10,10 +10,10 @@
         <div class="flex flex-row w-full space-x-5 pr-10 items-start align-middle bg-foreground1 rounded-sm">
             <div class="bg-foreground1 w-14 h-14 rounded-md">
                 <img src="{{ company.avatar_url }}" 
-                     class="w-full h-full object-contain"
-                     class="rounded-md"/>
+                     class="w-full h-full object-contain rounded-md"
+                     alt="Company avatar"/>
             </div>
-            <p class="font-mono text-3xl mt-2 text-txthl">{{ company.name }}</p>
+            <h3 class="font-mono text-3xl mt-2 text-txthl">{{ company.name }}</h3>
         </div>
     </button>
     {% endfor %}
