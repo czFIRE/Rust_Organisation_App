@@ -7,13 +7,21 @@
             hx-target="#content" 
             hx-swap="innerHTML"
             class="w-full">
-        <div class="flex flex-row w-full space-x-5 pr-10 items-start align-middle bg-foreground1 rounded-sm">
-            <div class="bg-foreground1 w-14 h-14 rounded-md">
+        <div class="flex
+                    flex-row
+                    w-full
+                    space-x-5
+                    pr-10
+                    items-start
+                    align-middle
+                    bg-foreground1
+                    rounded-sm">
+            <div class="bg-foreground1 w-24 h-24 rounded-md">
                 <img src="{{ company.avatar_url }}" 
                      class="w-full h-full object-contain rounded-md"
                      alt="Company avatar"/>
             </div>
-            <h3 class="font-mono text-3xl mt-2 text-txthl">{{ company.name }}</h3>
+            <h3 class="font-mono text-3xl my-2 text-txthl">{{ company.name }}</h3>
         </div>
     </button>
     {% endfor %}
