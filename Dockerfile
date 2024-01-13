@@ -2,7 +2,8 @@ FROM rust:latest
 
 RUN cargo install sqlx-cli
 
-# create temporary rust project
+# temporary rust project
+# to create another layer for fetching dependencies
 RUN cargo new /app
 
 WORKDIR /app
@@ -11,15 +12,14 @@ WORKDIR /app
 COPY Cargo.lock .
 COPY Cargo.toml .
 
-# tmp
-COPY src/lib.rs src/lib.rs
+# fetch all dependencies
+# and remove temporary rust project
+RUN touch src/lib.rs && \
+    cargo fetch && \
+    rm -rf src
 
-# download dependencies
-RUN cargo fetch
-
-# remove temporary rust project
-RUN rm -rf src
-
+# copy source code
+COPY .env.docker .env
 COPY . .
 
-CMD sqlx migrate run && cargo run
+CMD sqlx migrate run && cargo run --release
