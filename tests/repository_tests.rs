@@ -3308,7 +3308,7 @@ mod timesheet_repo_tests {
                 offset: None,
             };
             let result = timesheet_repo
-                .read_all_timesheets_per_employment(user_id, company_id, data)
+                .read_all_per_employment(user_id, company_id, data)
                 .await
                 .expect("Should succed");
             assert_eq!(result.len(), 1);
@@ -3324,7 +3324,7 @@ mod timesheet_repo_tests {
                 offset: None,
             };
             let result = timesheet_repo
-                .read_all_timesheets_per_employment(user_id, company_id, data)
+                .read_all_per_employment(user_id, company_id, data)
                 .await
                 .expect("Should succed");
             assert_eq!(result.len(), 0);

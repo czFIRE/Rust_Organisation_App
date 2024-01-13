@@ -274,7 +274,7 @@ impl TimesheetRepository {
         Ok(timesheets)
     }
 
-    pub async fn read_all_timesheets_per_employment(
+    pub async fn read_all_per_employment(
         &self,
         user_id: Uuid,
         company_id: Uuid,

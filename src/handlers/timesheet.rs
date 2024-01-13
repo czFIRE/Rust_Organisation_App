@@ -35,7 +35,7 @@ pub async fn get_all_timesheets_for_employment(
 
     let (user_id, company_id) = parsed_ids.unwrap();
     let result = timesheet_repo
-        .read_all_timesheets_per_employment(user_id, company_id, query_params)
+        .read_all_per_employment(user_id, company_id, query_params)
         .await;
 
     if let Ok(timesheets) = result {
@@ -155,6 +155,20 @@ pub async fn update_timesheet(
         .await;
 
     if let Ok(full_timesheet) = result {
+        // Now we need
+        //
+        // todo: Write a function converting TimesheetWithWorkdays
+        //       to TimesheetWithWorkdaysExtended.
+        // let TimesheetWithWorkdaysExtended = {
+        //     .. full_timesheet
+
+        //     hourly_wage: ,
+        //     employment_type: ,
+        //     wage_preset: ,
+        // }
+
+
+
         let template: TimesheetTemplate = full_timesheet.into();
 
         let body = template.render();
@@ -172,8 +186,9 @@ pub async fn update_timesheet(
 }
 
 /*
-* Reset every workday for a corresponding timesheet, as well as worked_hours and comments in the timesheet record.
-*/
+ * Reset every workday for a corresponding timesheet, as well as worked_hours
+ * and comments in the timesheet record.
+ */
 #[delete("/timesheet/{timesheet_id}/workdays")]
 pub async fn reset_timesheet_data(
     timesheet_id: web::Path<String>,
