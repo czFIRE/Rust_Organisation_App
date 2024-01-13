@@ -60,19 +60,18 @@
                           d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                   </svg>                      
             </button>
-            <!-- Return to the editor's page, not the user's page. -->
-            <button hx-get="/user/{{ editor_id }}/employment/{{ company_id }}" hx-swap="innerHTML" hx-target="#content">
-                <svg class="h-8 w-8 text-rej"
-                     xmlns="http://www.w3.org/2000/svg" 
-                     fill="none" 
-                     viewBox="0 0 24 24" 
-                     stroke-width="1.5" 
-                     stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                  </svg>
-                  
-            </button>
         </div>
-
     </form>
+    <!-- Return to the editor's page, not the user's page. -->
+    <button hx-get="/user/{{ editor_id }}/employment/{{ company_id }}" hx-swap="innerHTML" hx-target="#content">
+        <svg class="h-8 w-8 text-rej"
+             xmlns="http://www.w3.org/2000/svg" 
+             fill="none" 
+             viewBox="0 0 24 24" 
+             stroke-width="1.5" 
+             stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+          
+    </button>
 </div>
