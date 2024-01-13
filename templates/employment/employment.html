@@ -27,7 +27,6 @@
 
             <div class="grid grid-cols-3 grid-rows-2">
             {% if manager.is_some() -%}
-            <!-- <div id="manager-info" class="p-2"> -->
                 <p class="font-mono text-xl text-txthl col-span-3 align-bottom"><b>Manager</b></p>
                 <div id="user-lite-card" class="bg-foreground1 flex flex-row rounded-md pe-10 space-x-5 items-start align-middle justify-center">
                     <div id="user-avatar" class="bg-foreground2 w-14 h-14">
@@ -35,7 +34,6 @@
                     </div>
                     <p class="font-mono text-xl text-txt my-3">{{ manager.as_ref().unwrap().name }}</p>
                 </div>
-            <!-- </div> -->
             {%- endif %}
             <div></div>
             <button hx-get="/user/{{ user_id }}/employment/{{ company.id }}/sheet" hx-swap="innerHTML" hx-target="#content" class="font-mono text-xl text-txthl rounded-md bg-foreground1 p-3">

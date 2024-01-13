@@ -9,8 +9,7 @@ use crate::{
 use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;
 use chrono::NaiveDate;
-use serde::{Deserialize, Deserializer, de};
-use serde_json::Value;
+use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::{
@@ -23,21 +22,12 @@ use crate::{
 pub struct EmploymentUpdateData {
     pub editor_id: Uuid,
     pub manager_id: Option<Uuid>,
-    #[serde(deserialize_with = "deserialize_wage")]
     pub hourly_wage: Option<f64>,
     pub start_date: Option<NaiveDate>,
     pub end_date: Option<NaiveDate>,
     pub description: Option<String>,
     pub employment_type: Option<EmploymentContract>,
     pub level: Option<EmployeeLevel>,
-}
-
-fn deserialize_wage<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Option<f64>, D::Error> {
-    Ok(match Value::deserialize(deserializer)? {
-        Value::String(s) => Some(s.parse().map_err(de::Error::custom)?),
-        Value::Number(num) => Some(num.as_f64().ok_or(de::Error::custom("Invalid number"))? as f64),
-        _ => return Err(de::Error::custom("Incorrect type for wage"))
-    })
 }
 
 #[get("/user/{user_id}/employment")]

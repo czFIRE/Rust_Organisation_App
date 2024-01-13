@@ -1,16 +1,19 @@
-<div id="companies" class="flex flex-col space-y-2 items-center">
+<div id="companies" class="flex flex-col w-1/3 space-y-2 items-center">
     <div id="title">
         <h2 class="font-mono text-4xl font-extrabold text-txthl">Companies</h2>
     </div>
     {% for company in companies %}
-    <button hx-get="/company/{{ company.id }}" hx-target="#content" hx-swap="innerHTML">
-        <div class="flex flex-row space-x-5 pr-20 items-start w-max bg-foreground1">
-            <div class="bg-foreground1 w-24 h-24 max-w-24 max-h-24">
+    <button hx-get="/company/{{ company.id }}" 
+            hx-target="#content" 
+            hx-swap="innerHTML"
+            class="w-full">
+        <div class="flex flex-row w-full space-x-5 pr-10 items-start align-middle bg-foreground1 rounded-sm">
+            <div class="bg-foreground1 w-14 h-14 rounded-md">
                 <img src="{{ company.avatar_url }}" 
-                     class="object-contain" 
-                     width="100rem" height="100rem"/>
+                     class="w-full h-full object-contain"
+                     class="rounded-md"/>
             </div>
-            <p class="font-mono text-3xl text-txthl">{{ company.name }}</p>
+            <p class="font-mono text-3xl mt-2 text-txthl">{{ company.name }}</p>
         </div>
     </button>
     {% endfor %}

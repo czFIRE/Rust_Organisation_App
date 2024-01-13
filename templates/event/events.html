@@ -1,8 +1,29 @@
+<div id="events" class="grid grid-flow-col auto-cols-auto auto-rows-auto w-1/2 space-x-2 items-center align-middle">
 {% for event in events %}
-{{ event.id }}
-{{ event.avatar_url }}
-{{ event.name }}
-{{ event.accepts_staff }}
-{{ event.start_date }}
-{{ event.end_date }}
+    {% if event.accepts_staff -%}
+        <div id="event" 
+             class="bg-foreground1
+                    border-acc
+                      border-2
+                      bg-cover
+                      bg-no-repeat
+                      text-start
+                      text-wrap
+                      bg-[url({{ event.avatar_url }})]">
+            <p class="font-mono text-xl text-txt font-bold">{{ event.name }}</p>
+        </div>
+    {%- else -%}
+        <div id="event" 
+             class="bg-foreground1
+                    border-rej
+                      border-2
+                      bg-cover
+                      bg-no-repeat
+                      text-start
+                      text-wrap
+                      bg-[url({{ event.avatar_url }})]">
+            <p class="font-mono text-xl text-txt font-bold">{{ event.name }}</p>
+        </div>
+    {%- endif %}
 {% endfor %}
+</div>
