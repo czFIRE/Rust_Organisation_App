@@ -1,14 +1,15 @@
 <div id="employment" class="flex flex-col space-y-10 items-center w-max">
     <div class="flex flex-row space-x-5 items-start">
-        <div class="bg-foreground1 w-36 h-36">
-            <img src="{{ company.avatar_url }}" />
+        <div class="bg-foreground1 w-80 h-80 rounded-md border-foreground2 border-2">
+            <img src="{{ company.avatar_url }}" 
+                 class="object-fill rounded-md"/>
         </div>
-        <div class="flex flex-col space-y-5 items-start">
+        <div class="flex flex-col space-y-4 items-start">
             <button hx-get="/company/{{ company.id }}" hx-target="#content" hx-swap="innerHTML">
                 <h2 class="font-mono text-4xl font-extrabold text-txthl">{{ company.name }}</h2>
             </button>
             <div class="flex flex-row space-x-2 items-start align-middle">
-                <svg class="w-5 h-5 text-txt"
+                <svg class="w-6 h-6 text-txt"
                      xmlns="http://www.w3.org/2000/svg" 
                      fill="none" 
                      viewBox="0 0 24 24" 
@@ -16,15 +17,37 @@
                      stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
                 </svg>
-                <p class="font-mono text-xl text-txt">{{start_date}} - {{end_date}}</p>
+                <p class="font-mono text-xl text-txt">{{start_date.format("%d.%m.%Y").to_string()}} - {{end_date.format("%d.%m.%Y").to_string()}}</p>
             </div>
+            <div>
             <p class="font-mono text-xl text-txt"><b>Employment Type:</b> {{ employment_type }}</p>
-            <p class="font-mono text-xl text-txt"><b>Hourly Rate:</b> {{ hourly_wage }}</p>
-            <p class="font-mono text-xl text-txt"><b>Level:</b> {{ level }}</p>
+            <p class="font-mono text-xl text-txt"><b>Hourly Rate:</b> {{ hourly_wage }} CZK</p>
+            <p class="font-mono text-xl text-txt"><b>Employee Level:</b> {{ level }}</p>
+            </div>
+
+            <div class="grid grid-cols-3 grid-rows-2">
+            {% if manager.is_some() -%}
+            <!-- <div id="manager-info" class="p-2"> -->
+                <p class="font-mono text-xl text-txthl col-span-3 align-bottom"><b>Manager</b></p>
+                <div id="user-lite-card" class="bg-foreground1 flex flex-row rounded-md pe-10 space-x-5 items-start align-middle justify-center">
+                    <div id="user-avatar" class="bg-foreground2 w-14 h-14">
+                        <img src="{{ manager.as_ref().unwrap().avatar_url }}" class="object-fill"/>
+                    </div>
+                    <p class="font-mono text-xl text-txt my-3">{{ manager.as_ref().unwrap().name }}</p>
+                </div>
+            <!-- </div> -->
+            {%- endif %}
+            <div></div>
+            <button hx-get="/user/{{ user_id }}/employment/{{ company.id }}/sheet" hx-swap="innerHTML" hx-target="#content" class="font-mono text-xl text-txthl rounded-md bg-foreground1 p-3">
+                View Timesheets
+            </button>
+            </div>
         </div>
     </div>
-</div>
+    {% if level != EmployeeLevel::Basic -%}
+        <div hx-get="/user/{{ user_id }}/employment/{{ company.id }}/subordinates" hx-trigger="load"></div>
+    {%- endif %}
+    <div>
 
-{{ user_id }} {{ company.id }} {{ company.name }} {{ company.avatar_url}}
-{{ employment_type }} {{ hourly_wage }} {{ level }} {{ start_date }} {{ end_date }}
-{{ created_at }} {{ edited_at }}
+    </div>
+</div>

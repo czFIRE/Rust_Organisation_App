@@ -14,6 +14,7 @@ use std::io::Result;
 
 use std::sync::Arc;
 
+use crate::handlers::employment::toggle_employment_edit;
 use crate::handlers::user::toggle_user_edit;
 use crate::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
 use crate::repositories::comment::comment_repo::CommentRepository;
@@ -151,6 +152,7 @@ async fn main() -> Result<()> {
             .service(create_employment)
             .service(update_employment)
             .service(delete_employment)
+            .service(toggle_employment_edit)
             .service(get_all_assigned_staff)
             .service(get_assigned_staff)
             .service(create_assigned_staff)

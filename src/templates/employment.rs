@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 use crate::{
     models::{EmployeeLevel, EmploymentContract},
-    repositories::employment::models::EmploymentExtended,
+    repositories::employment::models::{EmploymentExtended, Subordinate},
 };
 
 use super::{company::CompanyLite, user::UserLiteTemplate};
@@ -99,4 +99,25 @@ impl From<EmploymentExtended> for EmploymentLiteTemplate {
 #[template(path = "employment/employments.html")]
 pub struct EmploymentsTemplate {
     pub employments: Vec<EmploymentLite>,
+}
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "employment/employment-edit.html")]
+pub struct EmploymentEditTemplate {
+    pub editor_id: Uuid,
+    pub user_id: Uuid,
+    pub company_id: Uuid,
+    pub hourly_wage: f64,
+    pub start_date: NaiveDate,
+    pub end_date: NaiveDate,
+    pub description: Option<String>,
+    pub employment_type: EmploymentContract,
+    pub level: EmployeeLevel,
+}
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "employment/subordinates.html")]
+pub struct SubordinatesTemplate {
+    pub user_id: Uuid,
+    pub subordinates: Vec<Subordinate>
 }

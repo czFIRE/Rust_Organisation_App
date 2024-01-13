@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 use super::models::{
     Employment, EmploymentData, EmploymentExtended, EmploymentFilter,
-    EmploymentUserCompanyFlattened, NewEmployment,
+    EmploymentUserCompanyFlattened, NewEmployment, Subordinate,
 };
 
 use crate::models::{EmployeeLevel, EmploymentContract, Gender, UserRole, UserStatus};
@@ -288,57 +288,36 @@ impl EmploymentRepository {
         manager_uuid: Uuid,
         company_uuid: Uuid,
         filter: EmploymentFilter,
-    ) -> DbResult<Vec<EmploymentExtended>> {
+    ) -> DbResult<Vec<Subordinate>> {
         let executor = self.pool.as_ref();
 
-        let employment: Vec<EmploymentUserCompanyFlattened> = sqlx::query_as!(
-            EmploymentUserCompanyFlattened,
+        let employment: Vec<Subordinate> = sqlx::query_as!(
+            Subordinate,
             r#"
             SELECT 
-                employment.user_id AS employment_user_id, 
-                employment.company_id AS employment_company_id, 
-                employment.manager_id AS employment_manager_id, 
-                employment.hourly_wage AS employment_hourly_wage, 
-                employment.start_date AS employment_start_date, 
-                employment.end_date AS employment_end_date, 
-                employment.description AS employment_description, 
-                employment.type AS "employment_type!: EmploymentContract", 
-                employment.level AS "employment_level!: EmployeeLevel", 
-                employment.created_at AS employment_created_at, 
-                employment.edited_at AS employment_edited_at, 
-                employment.deleted_at AS employment_deleted_at, 
-                user_record.id AS "manager_id?", 
-                user_record.name AS "manager_name?", 
-                user_record.email AS "manager_email?", 
-                user_record.birth AS "manager_birth?", 
-                user_record.avatar_url AS "manager_avatar_url?", 
-                user_record.gender AS "manager_gender?: Gender", 
-                user_record.role AS "manager_role?: UserRole", 
-                user_record.status AS "manager_status?: UserStatus", 
-                user_record.created_at AS "manager_created_at?", 
-                user_record.edited_at AS "manager_edited_at?", 
-                user_record.deleted_at AS "manager_deleted_at?",
-                company.id AS company_id, 
-                company.name AS company_name, 
-                company.description AS company_description, 
-                company.phone AS company_phone, 
-                company.email AS company_email, 
-                company.avatar_url AS company_avatar_url, 
-                company.website AS company_website, 
-                company.crn AS company_crn, 
-                company.vatin AS company_vatin, 
-                company.created_at AS company_created_at, 
-                company.edited_at AS company_edited_at, 
-                company.deleted_at AS company_deleted_at 
+                employment.user_id AS user_id, 
+                subordinate.name AS user_name,
+                subordinate.avatar_url AS avatar_url,
+                employment.company_id AS company_id,
+                employment.start_date AS start_date, 
+                employment.end_date AS end_date, 
+                employment.type AS "employment_type!: EmploymentContract",
+                employment.manager_id AS "manager_id!",
+                (SELECT COUNT(id) 
+                 FROM timesheet 
+                 WHERE user_id = employment.user_id 
+                   AND company_id = employment.company_id 
+                   AND status = 'pending') > 0 
+                   AS "review_requested!"
             FROM 
                 employment 
+                INNER JOIN user_record AS subordinate ON employment.user_id = subordinate.id
                 INNER JOIN company ON employment.company_id = company.id 
-                LEFT OUTER JOIN user_record ON employment.manager_id = user_record.id 
             WHERE 
                 employment.manager_id = $1
                 AND employment.company_id = $2
                 AND employment.deleted_at IS NULL
-            LIMIT $3 OFFSET $4          
+            LIMIT $3 OFFSET $4;
             "#,
             manager_uuid,
             company_uuid,

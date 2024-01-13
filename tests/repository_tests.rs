@@ -1704,16 +1704,14 @@ pub mod employment_repo_tests {
 
         let employment = &employments[0];
 
-        assert_eq!(employment.company.name, "AMD");
-        assert_eq!(employment.manager.clone().unwrap().name, "Dave Null");
-        assert_eq!(employment.hourly_wage, 250.0);
+        assert_eq!(employment.company_id, company_id);
+        assert_eq!(employment.manager_id, test_constants::USER0_ID);
         assert_eq!(employment.user_id, test_constants::USER1_ID);
 
         let employment = &employments[1];
 
-        assert_eq!(employment.company.name, "AMD");
-        assert_eq!(employment.manager.clone().unwrap().name, "Dave Null");
-        assert_eq!(employment.hourly_wage, 200.0);
+        assert_eq!(employment.company_id, company_id);
+        assert_eq!(employment.manager_id, test_constants::USER0_ID);
         assert_eq!(employment.user_id, test_constants::USER2_ID);
 
         employment_repo.disconnect().await;

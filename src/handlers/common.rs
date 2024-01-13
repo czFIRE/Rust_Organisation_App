@@ -15,3 +15,11 @@ pub fn extract_path_tuple_ids(ids: (String, String)) -> Result<(Uuid, Uuid), Err
         Uuid::from_str(ids.1.as_str())?,
     ))
 }
+
+pub fn extract_path_triple_ids(ids: (String, String, String)) -> Result<(Uuid, Uuid, Uuid), Error> {
+    Ok((
+        Uuid::from_str(ids.0.as_str())?,
+        Uuid::from_str(ids.1.as_str())?,
+        Uuid::from_str(ids.2.as_str())?,
+    ))
+}
