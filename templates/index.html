@@ -15,6 +15,7 @@
 </head>
 
 <body class="bg-background">
+    {% block topbar %}
     <nav id="topbar" class="grid grid-cols-10 gap-4 bg-foreground1 py-3">
         <h1 class="col-span-2 font-mono text-4xl font-extrabold text-txt ml-5">Orchestrate</h1>
         <div class="col-span-7"></div>
@@ -44,6 +45,7 @@
             </button>
         </div>
     </nav>
+    {% endblock topbar %}
     <div id="content" class="flex flex-col space-y-1 items-center mt-10">
         {% block content %}
         <div id="title">
@@ -56,7 +58,7 @@
             <p class="text-txt text-xl">Already using Orchestrate? <button hx-get="/user" hx-target="#content" class="txt-xl text-txthl">Log in!</button></p>
             <p class="text-txt text-xl">Not yet signed up? <button hx-get="/user" hx-target="#content" class="txt-xl text-txthl">Sign up now!</button></p>
         </div>
-        {% endblock %}
+        {% endblock content %}
     </div>
 </body>
 

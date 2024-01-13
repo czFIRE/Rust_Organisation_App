@@ -4,9 +4,11 @@ use sqlx::{postgres::PgPool, Postgres, Transaction};
 use std::{ops::DerefMut, sync::Arc};
 use uuid::Uuid;
 
+use crate::models::{EmployeeLevel, EmploymentContract};
+
 use super::models::{
     AssociatedCompany, AssociatedCompanyData, AssociatedCompanyExtended, AssociatedCompanyFilter,
-    AssociatedCompanyFlattened, NewAssociatedCompany,
+    AssociatedCompanyFlattened, NewAssociatedCompany, AssociatedCompanyLite,
 };
 
 use crate::models::Association;
@@ -453,5 +455,39 @@ impl AssociatedCompanyRepository {
         }
 
         Ok(())
+    }
+
+    pub async fn get_all_associated_companies_for_event_and_user(&self, event_id: Uuid, user_id: Uuid) -> DbResult<Vec<AssociatedCompanyLite>> {
+        // ToDo: Redis here if we get the time for it.
+        self.get_all_associated_companies_for_event_and_user_db(event_id, user_id).await
+    }
+
+    async fn get_all_associated_companies_for_event_and_user_db(&self, event_id: Uuid, user_id: Uuid) -> DbResult<Vec<AssociatedCompanyLite>> {
+        let executor = self.pool.as_ref();
+
+        let result = sqlx::query_as!(
+            AssociatedCompanyLite,
+            r#"
+            SELECT company.id AS company_id,
+                   company.name AS company_name,
+                   employment.type AS "employment_type!: EmploymentContract",
+                   employment.level AS "employment_level!: EmployeeLevel",
+                   associated_company.event_id AS event_id,
+                   employment.user_id AS user_id
+            FROM associated_company
+            INNER JOIN employment ON employment.company_id = associated_company.company_id
+            INNER JOIN company ON associated_company.company_id = company.id
+            WHERE associated_company.deleted_at IS NULL
+              AND employment.deleted_at IS NULL
+              AND company.deleted_at IS NULL
+              AND associated_company.event_id = $1
+              AND employment.user_id = $2;
+            "#,
+            event_id,
+            user_id,
+        ).fetch_all(executor)
+        .await?;
+
+        Ok(result)
     }
 }

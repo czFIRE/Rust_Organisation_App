@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use crate::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
 use crate::repositories::timesheet::models::TimesheetCreateData;
+use crate::templates::staff::StaffRegisterTemplate;
 use crate::{
     common::DbResult,
     errors::handle_database_error,
@@ -16,12 +17,18 @@ use crate::{
 };
 use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;
+use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::{
     errors::parse_error, repositories::event_staff::event_staff_repo::StaffRepository,
     templates::staff::StaffTemplate,
 };
+
+#[derive(Deserialize)]
+pub struct StaffPanelQuery {
+    pub user_id: String,
+}
 
 #[get("/event/{event_id}/staff")]
 pub async fn get_all_event_staff(
@@ -282,4 +289,100 @@ pub async fn delete_event_staff(
     }
 
     HttpResponse::NoContent().finish()
+}
+
+async fn prepare_staff_registration_panel(
+    user_id: Uuid,
+    event_id: Uuid,
+    associated_repo: web::Data<AssociatedCompanyRepository>,
+) -> HttpResponse {
+    let result = associated_repo.get_all_associated_companies_for_event_and_user(event_id, user_id).await;
+
+    if let Ok(companies) = result {
+        let template = StaffRegisterTemplate {
+            user_id,
+            event_id,
+            companies,
+        };
+
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Ok().content_type("text/html").body(body.expect("Should be valid here."));
+    }
+
+    let error = result.expect_err("Should be an error here.");
+    handle_database_error(error)
+}
+
+/*
+ * This request serves for serving the event staff
+ * panel on the frontend. It's purpose is to check if the user is already staff for the event
+ * and decide on what content will be served based on the
+ * outcome of that decision.
+ * TODO: Currently, the user ID is left as a query. This is
+ * less than ideal. Must figure out how include can be used
+ * in a way that it doesn't force the param as a query.
+ */
+#[get("/event/{event_id}/staff-panel")]
+pub async fn initialize_staff_panel(
+    path: web::Path<String>,
+    params: web::Query<StaffPanelQuery>,
+    event_staff_repo: web::Data<StaffRepository>,
+    associated_repo: web::Data<AssociatedCompanyRepository>,
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(path.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let event_id = id_parse.expect("Should be valid.");
+    println!("Params: {}", params.user_id.clone());
+    let params_parse = Uuid::from_str(&params.user_id);
+    if params_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let user_id = params_parse.expect("Should be valid now.");
+    // let (event_id, user_id) = parsed_ids.expect("Should be okay");
+
+    // Try to retrieve the staff. Every user should only have one staff relationship for a given event.
+    let result = event_staff_repo.read_by_event_and_user_id(event_id, user_id).await;
+
+    // If staff exists, we render the regular staff panel.
+    if let Ok(staff) = result {
+        let template: StaffTemplate = staff.into();
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+        return HttpResponse::Ok()
+            .content_type("text/html")
+            .body(body.expect("Should be valid now."));
+    }
+
+    let error = result.expect_err("Should be error.");
+
+    match error {
+        sqlx::Error::RowNotFound => {
+            // If staff wasn't found, we render a form for staff creation.
+            prepare_staff_registration_panel(user_id, event_id, associated_repo).await
+        }
+        sqlx::Error::Database(err) => {
+            if err.is_check_violation()
+                || err.is_foreign_key_violation()
+                || err.is_unique_violation()
+            {
+                HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST))
+            } else {
+                HttpResponse::InternalServerError()
+                    .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR))
+            }
+        }
+        _ => HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR)),
+    }
 }

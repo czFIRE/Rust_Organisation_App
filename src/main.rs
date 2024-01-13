@@ -15,6 +15,7 @@ use std::io::Result;
 use std::sync::Arc;
 
 use crate::handlers::employment::toggle_employment_edit;
+use crate::handlers::event_staff::initialize_staff_panel;
 use crate::handlers::user::toggle_user_edit;
 use crate::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
 use crate::repositories::comment::comment_repo::CommentRepository;
@@ -170,6 +171,7 @@ async fn main() -> Result<()> {
             .service(update_event_staff)
             .service(delete_all_rejected_event_staff)
             .service(delete_event_staff)
+            .service(initialize_staff_panel)
             .service(get_all_associated_companies)
             .service(get_all_associated_companies_per_event_and_user)
             .service(create_associated_company)

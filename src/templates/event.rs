@@ -13,7 +13,7 @@ pub struct EventTemplate {
     pub avatar_url: String,
     pub name: String,
     pub description: String,
-    pub website: String,
+    pub website: Option<String>,
     pub accepts_staff: bool,
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
@@ -30,7 +30,7 @@ impl From<Event> for EventTemplate {
             description: event
                 .description
                 .unwrap_or("No description set.".to_string()),
-            website: event.website.unwrap_or("No website set.".to_string()),
+            website: event.website,
             accepts_staff: event.accepts_staff,
             start_date: event.start_date,
             end_date: event.end_date,

@@ -1,5 +1,12 @@
-<div id="employment" class="flex flex-col space-y-10 items-center w-max">
-    <p class="font-mono text-xl text-pnd">Change only values you wish to change! Leave others untouched.</p>
+<div id="employment" 
+     class="flex
+            flex-col
+            space-y-10
+            items-center
+            w-max">
+    <p class="font-mono
+              text-xl
+              text-pnd">Change only values you wish to change! Leave others untouched.</p>
 
     <!-- TODO: Consider returning to the editor instead. -->
     <form hx-patch="/user/{{ user_id }}/employment/{{ company_id }}" 
