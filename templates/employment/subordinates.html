@@ -1,32 +1,73 @@
-<div id="subordinates" class="flex flex-col space-y-5 items-center">
+<div id="subordinates" 
+     class="flex
+            flex-col
+            space-y-5
+            items-center">
     <div id="title">
-        <h2 class="font-mono text-2xl font-extrabold text-txthl">Subordinates</h2>
+        <h2 class="font-mono
+                   text-2xl
+                   font-extrabold
+                   text-txthl">Subordinates</h2>
     </div>
     {% for subordinate in subordinates %}
-    <div class="flex flex-row space-x-5 pr-10 items-start w-max bg-foreground1">
-        <div class="bg-foreground1 w-24 h-24 rounded-md">
+    <div class="flex
+                flex-row
+                space-x-5
+                pr-10
+                items-start
+                w-max
+                bg-foreground1">
+        <div class="bg-foreground1 
+                    w-24
+                    h-24
+                    rounded-md">
             <img src="{{ subordinate.avatar_url }}" 
-                    class="object-contain rounded-md" 
-                    width="150rem" height="150rem"/>
+                    class="object-contain
+                           rounded-md" />
         </div>
-        <div class="flex flex-col space-y-1 items-start align-middle">
-            <p class="font-mono text-2xl text-txthl font-bold">{{ subordinate.user_name }}</p>
-            <div class="flex flex-row space-x-5 items-start align-middle">
-                <p class="font-mono text-xl text-txt"><b>Type:</b> {{ subordinate.employment_type }}</p>
+        <div class="flex
+                    flex-col
+                    space-y-1
+                    items-start
+                    align-middle">
+            <p class="font-mono
+                      text-2xl
+                      text-txthl
+                      font-bold">{{ subordinate.user_name }}</p>
+            <div class="flex
+                        flex-row
+                        space-x-5
+                        items-start
+                        align-middle">
+                <p class="font-mono
+                          text-xl
+                          text-txt"><b>Type:</b> {{ subordinate.employment_type }}</p>
                 <button hx-get="/user/{{ subordinate.user_id }}/employment/{{ subordinate.company_id }}/mode/{{ user_id }}" hx-target="#content" hx-swap="innerHTML">
-                    <p class="font-mono text-xl text-txthl">Edit Employment</p>
+                    <p class="font-mono
+                              text-xl
+                              text-txthl">Edit Employment</p>
                 </button>
             </div>
-            <div class="flex flex-row space-x-2 items-start align-middle">
-                <svg class="w-6 h-6 text-txt"
+            <div class="flex
+                        flex-row
+                        space-x-2
+                        items-start
+                        align-middle">
+                <svg class="w-6
+                            h-6
+                            text-txt"
                     xmlns="http://www.w3.org/2000/svg" 
                     fill="none" 
                     viewBox="0 0 24 24" 
                     stroke-width="1.5" 
                     stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
+                    <path stroke-linecap="round"
+                          stroke-linejoin="round"
+                          d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
                 </svg>
-                <p class="font-mono text-xl text-txt">{{subordinate.start_date.format("%d.%m.%Y").to_string()}} - {{subordinate.end_date.format("%d.%m.%Y").to_string()}}</p>
+                <p class="font-mono
+                          text-xl
+                          text-txt">{{subordinate.start_date.format("%d.%m.%Y").to_string()}} - {{subordinate.end_date.format("%d.%m.%Y").to_string()}}</p>
             </div>
         </div>
     </div>

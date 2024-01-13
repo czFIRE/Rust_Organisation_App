@@ -76,7 +76,7 @@ impl From<StaffExtended> for StaffTemplate {
 pub struct StaffRegisterTemplate {
     pub user_id: Uuid,
     pub event_id: Uuid,
-    pub companies: Vec<AssociatedCompanyLite>,
+    pub companies: Vec<AssociatedCompanyLite>
 }
 
 #[derive(Template, Deserialize)]

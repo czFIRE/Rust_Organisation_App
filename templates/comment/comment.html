@@ -1,11 +1,59 @@
-{{ id }}
-{{ parent_category_id }}
-{{ author.id }}
-{{ author.name }}
-{{ author.status }}
-{{ author.age }}
-{{ author.gender }}
-{{ author.avatar_url }}
-{{ content }}
-{{ created_at }}
-{{ edited_at }}
+<div id="{{ id }}"
+     class="flex
+            flex-row
+            space-x-3
+            items-start
+            align-middle
+            rounded-md
+            m-2
+            w-10/12">
+    <div id="{{ id }}-img"
+          class="bg-foreground2
+                w-24
+                h-24
+                rounded-md">
+        <img src="{{ author.avatar_url }}"
+             class="object-contain
+                    rounded-md" />
+    </div>
+    <div id="{{ id }}-content"
+         class="flex
+                flex-col
+                items-start
+                w-10/12
+                h-min-24
+                space-y-1
+                p-2
+                rounded-sm
+                bg-foreground2
+                text-wrap">
+        <div class="flex
+                    flex-row
+                    items-start
+                    p-1
+                    space-x-5">
+            <!-- TODO: Make a call that retrieves a read-only user. -->
+            <h4 class="font-mono
+                       text-xl
+                       font-bold
+                     text-txthl">{{ author.name }}</h4>
+            <p class="font-mono
+                      text-lg
+                    text-txt">{{ created_at.format("%d.%m.%Y %H:%M:%S").to_string() }}</p>
+            {% if created_at < edited_at -%}
+            <p class="font-mono
+                      italic
+                    text-txt">(edited)</p>
+            {%- endif %}
+        </div>
+        <div class="flex
+                    flex-row
+                    items-start
+                    p-2
+                    space-x-5">
+            <p class="font-mono
+                      text-lg
+                    text-txt">{{ content }}</p>
+        </div>
+    </div>
+</div>
