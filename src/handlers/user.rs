@@ -8,6 +8,7 @@ use crate::{
 use actix_web::{delete, get, http, patch, post, put, web, HttpResponse};
 use askama::Template;
 use chrono::Utc;
+use regex::Regex;
 use uuid::Uuid;
 
 use crate::repositories::user::user_repo::UserRepository;
@@ -105,15 +106,25 @@ pub async fn toggle_user_edit(
     handle_database_error(result.expect_err("Should be error."))
 }
 
+fn validate_new_user(new_user: NewUser) -> bool {
+    if new_user.name.is_empty()
+        || new_user.email.is_empty()
+        || new_user.birth >= Utc::now().date_naive()
+    {
+        return false;
+    }
+
+    let email_regex = Regex::new(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").expect("Should be valid.");
+    let email_captures = email_regex.captures(new_user.email.as_str());
+    return email_captures.is_some();
+}
+
 #[post("/user")]
 pub async fn create_user(
     new_user: web::Json<NewUser>,
     user_repo: web::Data<UserRepository>,
 ) -> HttpResponse {
-    if new_user.name.is_empty()
-        || new_user.email.is_empty()
-        || new_user.birth >= Utc::now().date_naive()
-    {
+    if !validate_new_user(new_user.clone()) {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
     let result = user_repo.create(new_user.into_inner()).await;
@@ -137,15 +148,30 @@ pub async fn create_user(
     handle_database_error(result.expect_err("Should be error."))
 }
 
-fn is_data_invalid(user_data: UserData) -> bool {
-    (user_data.name.is_none()
+fn validate_edit_data(user_data: UserData) -> bool {
+    if user_data.name.is_none()
         && user_data.email.is_none()
         && user_data.birth.is_none()
         && user_data.avatar_url.is_none()
-        && user_data.role.is_none())
-        || (user_data.name.is_some() && user_data.name.unwrap().is_empty())
-        || (user_data.email.is_some() && user_data.email.unwrap().is_empty())
-        || (user_data.avatar_url.is_some() && user_data.avatar_url.unwrap().is_empty())
+        && user_data.role.is_none()
+    {
+        return false;
+    }
+
+    if user_data.name.is_some && user_data.name.unwrap().is_empty() {
+        return false;
+    }
+
+    if user_data.email.is_some() {
+        let email_regex =
+            Regex::new(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").expect("Should be valid.");
+        let email_captures = email_regex.captures(new_user.email.as_str());
+        if email_captures.is_none() {
+            return false;
+        }
+    }
+
+    (user_data.avatar_url.is_some() && user_data.avatar_url.unwrap().is_empty())
         || (user_data.birth.is_some() && user_data.birth.unwrap() >= Utc::now().date_naive())
 }
 
@@ -155,7 +181,7 @@ pub async fn update_user(
     user_data: web::Json<UserData>,
     user_repo: web::Data<UserRepository>,
 ) -> HttpResponse {
-    if is_data_invalid(user_data.clone()) {
+    if validate_edit_data(user_data.clone()) {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
