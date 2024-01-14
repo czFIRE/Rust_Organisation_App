@@ -327,7 +327,7 @@ impl EmploymentRepository {
         .fetch_all(executor)
         .await?;
 
-        Ok(employment.into_iter().map(|e| e.into()).collect())
+        Ok(employment)
     }
 
     pub async fn update(

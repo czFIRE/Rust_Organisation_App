@@ -106,6 +106,12 @@ pub async fn toggle_user_edit(
     handle_database_error(result.expect_err("Should be error."))
 }
 
+fn check_email_validity(email: String) -> bool {
+    let email_regex = Regex::new(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").expect("Should be valid.");
+    let email_captures = email_regex.captures(email.as_str());
+    email_captures.is_some()
+}
+
 fn validate_new_user(new_user: NewUser) -> bool {
     if new_user.name.is_empty()
         || new_user.email.is_empty()
@@ -114,9 +120,7 @@ fn validate_new_user(new_user: NewUser) -> bool {
         return false;
     }
 
-    let email_regex = Regex::new(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").expect("Should be valid.");
-    let email_captures = email_regex.captures(new_user.email.as_str());
-    return email_captures.is_some();
+    check_email_validity(new_user.email)
 }
 
 #[post("/user")]
@@ -158,21 +162,19 @@ fn validate_edit_data(user_data: UserData) -> bool {
         return false;
     }
 
-    if user_data.name.is_some && user_data.name.unwrap().is_empty() {
+    if user_data.name.is_some() && user_data.name.unwrap().is_empty() {
         return false;
     }
 
-    if user_data.email.is_some() {
-        let email_regex =
-            Regex::new(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").expect("Should be valid.");
-        let email_captures = email_regex.captures(new_user.email.as_str());
-        if email_captures.is_none() {
-            return false;
-        }
+    if user_data.email.is_some() && !check_email_validity(user_data.email.clone().unwrap()) {
+        return false;
     }
 
-    (user_data.avatar_url.is_some() && user_data.avatar_url.unwrap().is_empty())
-        || (user_data.birth.is_some() && user_data.birth.unwrap() >= Utc::now().date_naive())
+    if user_data.avatar_url.is_some() && user_data.avatar_url.unwrap().is_empty() {
+        return false;
+    }
+
+    !(user_data.birth.is_some() && user_data.birth.unwrap() >= Utc::now().date_naive())
 }
 
 #[patch("/user/{user_id}")]
@@ -181,7 +183,7 @@ pub async fn update_user(
     user_data: web::Json<UserData>,
     user_repo: web::Data<UserRepository>,
 ) -> HttpResponse {
-    if validate_edit_data(user_data.clone()) {
+    if !validate_edit_data(user_data.clone()) {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 

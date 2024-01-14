@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use actix_web::{delete, get, http, patch, post, put, web, HttpResponse};
 use askama::Template;
+use regex::Regex;
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -127,10 +128,21 @@ pub async fn get_company(
     handle_database_error(result.expect_err("Should be error."))
 }
 
-fn is_creation_data_invalid(data: NewCompanyData) -> bool {
-    data.name.is_empty()
-        || (data.description.is_some() && data.description.unwrap().is_empty())
-        || (data.website.is_some() && data.website.unwrap().is_empty())
+fn check_email_validity(email: String) -> bool {
+    let email_regex = Regex::new(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").expect("Should be valid.");
+    let email_captures = email_regex.captures(email.as_str());
+    email_captures.is_some()
+}
+
+fn check_phone_validity(phone: String) -> bool {
+    let phone_regex = Regex::new(r"^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$")
+        .expect("Should be valid.");
+    let phone_captures = phone_regex.captures(phone.as_str());
+    phone_captures.is_some()
+}
+
+fn validate_creation_data(data: NewCompanyData) -> bool {
+    if data.name.is_empty()
         || data.phone.is_empty()
         || data.email.is_empty()
         || data.crn.is_empty()
@@ -140,7 +152,21 @@ fn is_creation_data_invalid(data: NewCompanyData) -> bool {
         || data.city.is_empty()
         || data.postal_code.is_empty()
         || data.street.is_empty()
-        || data.street.is_empty()
+    {
+        return false;
+    }
+
+    if (data.description.is_some() && data.description.unwrap().is_empty())
+        || (data.website.is_some() && data.website.unwrap().is_empty())
+    {
+        return false;
+    }
+
+    if !check_email_validity(data.email) {
+        return false;
+    }
+
+    check_phone_validity(data.phone)
 }
 
 #[post("/company")]
@@ -149,7 +175,7 @@ pub async fn create_company(
     company_repo: web::Data<CompanyRepository>,
 ) -> HttpResponse {
     let data = new_company.into_inner();
-    if is_creation_data_invalid(data.clone()) {
+    if !validate_creation_data(data.clone()) {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
@@ -192,9 +218,8 @@ pub async fn create_company(
     handle_database_error(result.expect_err("Should be error."))
 }
 
-// TODO: This is rather ugly. Might rewrite if there is time left at the end. :copium:
-fn is_update_data_empty(company_data: CompanyUpdateData) -> bool {
-    (company_data.name.is_none()
+fn is_data_empty(company_data: &CompanyUpdateData) -> bool {
+    company_data.name.is_none()
         && company_data.description.is_none()
         && company_data.website.is_none()
         && company_data.crn.is_none()
@@ -206,20 +231,49 @@ fn is_update_data_empty(company_data: CompanyUpdateData) -> bool {
         && company_data.number.is_none()
         && company_data.postal_code.is_none()
         && company_data.phone.is_none()
-        && company_data.email.is_none())
-        || (company_data.name.is_some() && company_data.name.unwrap().is_empty())
-        || (company_data.description.is_some() && company_data.description.unwrap().is_empty())
-        || (company_data.website.is_some() && company_data.website.unwrap().is_empty())
-        || (company_data.crn.is_some() && company_data.crn.unwrap().is_empty())
-        || (company_data.vatin.is_some() && company_data.vatin.unwrap().is_empty())
-        || (company_data.country.is_some() && company_data.country.unwrap().is_empty())
-        || (company_data.region.is_some() && company_data.region.unwrap().is_empty())
-        || (company_data.city.is_some() && company_data.city.unwrap().is_empty())
-        || (company_data.street.is_some() && company_data.street.unwrap().is_empty())
-        || (company_data.number.is_some() && company_data.number.unwrap().is_empty())
-        || (company_data.postal_code.is_some() && company_data.postal_code.unwrap().is_empty())
-        || (company_data.phone.is_some() && company_data.phone.unwrap().is_empty())
-        || (company_data.email.is_some() && company_data.email.unwrap().is_empty())
+        && company_data.email.is_none()
+}
+
+/*
+ * On the semantics of 'formatless'. Some strings here could definitely
+ * have some format imposed upon them, but we ultimately decided that it may
+ * be wiser to leave this as it is and not bother with restricting format of
+ * things like CRN and VATIN.
+ * Similarly, postal codes could vary for different locations.
+ */
+fn any_formatless_string_empty(company_data: &CompanyUpdateData) -> bool {
+    (company_data.name.is_some() && company_data.name.as_ref().unwrap().is_empty())
+        || (company_data.description.is_some()
+            && company_data.description.as_ref().unwrap().is_empty())
+        || (company_data.website.is_some() && company_data.website.as_ref().unwrap().is_empty())
+        || (company_data.crn.is_some() && company_data.crn.as_ref().unwrap().is_empty())
+        || (company_data.vatin.is_some() && company_data.vatin.as_ref().unwrap().is_empty())
+        || (company_data.country.is_some() && company_data.country.as_ref().unwrap().is_empty())
+        || (company_data.region.is_some() && company_data.region.as_ref().unwrap().is_empty())
+        || (company_data.city.is_some() && company_data.city.as_ref().unwrap().is_empty())
+        || (company_data.street.is_some() && company_data.street.as_ref().unwrap().is_empty())
+        || (company_data.number.is_some() && company_data.number.as_ref().unwrap().is_empty())
+        || (company_data.postal_code.is_some()
+            && company_data.postal_code.as_ref().unwrap().is_empty())
+}
+
+fn validate_update_data(company_data: CompanyUpdateData) -> bool {
+    if is_data_empty(&company_data) {
+        return false;
+    }
+
+    if any_formatless_string_empty(&company_data) {
+        return false;
+    }
+
+    if company_data.email.is_some() && !check_email_validity(company_data.email.unwrap()) {
+        return false;
+    }
+
+    if company_data.phone.is_some() && !check_phone_validity(company_data.phone.unwrap()) {
+        return false;
+    }
+    true
 }
 
 #[patch("/company/{company_id}")]
@@ -230,7 +284,7 @@ pub async fn update_company(
 ) -> HttpResponse {
     let data = company_data.into_inner();
 
-    if is_update_data_empty(data.clone()) {
+    if !validate_update_data(data.clone()) {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 

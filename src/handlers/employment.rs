@@ -272,13 +272,13 @@ pub async fn update_employment(
         let current = current_employment.expect("Should be valid now.");
 
         if employment_data.start_date.is_some()
-            && employment_data.start_date.clone().unwrap() > current.end_date
+            && employment_data.start_date.unwrap() > current.end_date
         {
             return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
         }
 
         if employment_data.end_date.is_some()
-            && employment_data.end_date.clone().unwrap() < current.start_date
+            && employment_data.end_date.unwrap() < current.start_date
         {
             return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
         }
