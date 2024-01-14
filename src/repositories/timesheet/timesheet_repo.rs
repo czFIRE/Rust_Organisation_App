@@ -11,6 +11,8 @@ use std::ops::DerefMut;
 use std::sync::Arc;
 use uuid::Uuid;
 
+use super::models::WorkdayUpdateData;
+
 #[derive(Clone)]
 pub struct TimesheetRepository {
     pub pool: Arc<PgPool>,
@@ -337,6 +339,74 @@ impl TimesheetRepository {
             && data.status.is_none()
             && data.manager_note.is_none()
             && data.workdays.is_none()
+    }
+
+    /* Methods for workday are kept in timesheet_repo because
+     * workdays are semantically bound to timesheets.
+     */
+    pub async fn read_one_workday(&self, timesheet_id: Uuid, date: NaiveDate) -> DbResult<Workday> {
+        let executor = self.pool.as_ref();
+
+        let workday = sqlx::query_as!(
+            Workday,
+            r#"
+            SELECT timesheet_id,
+                   date,
+                   total_hours,
+                   comment,
+                   is_editable,
+                   created_at,
+                   edited_at
+            FROM workday
+            WHERE timesheet_id = $1
+              AND date = $2
+              AND deleted_at IS NULL
+            "#,
+            timesheet_id,
+            date,
+        )
+        .fetch_one(executor)
+        .await?;
+
+        Ok(workday)
+    }
+
+    pub async fn update_workday(
+        &self,
+        timesheet_id: Uuid,
+        date: NaiveDate,
+        data: WorkdayUpdateData,
+    ) -> DbResult<Workday> {
+        let executor = self.pool.as_ref();
+
+        let workday = sqlx::query_as!(
+            Workday,
+            r#"
+            UPDATE workday
+            SET total_hours = COALESCE($1, total_hours),
+                comment = COALESCE($2, comment),
+                is_editable = COALESCE($3, is_editable),
+                edited_at = NOW()
+            WHERE timesheet_id = $4
+              AND date = $5
+              AND deleted_at IS NULL
+            RETURNING timesheet_id,
+                      date,
+                      total_hours,
+                      comment,
+                      is_editable,
+                      created_at,
+                      edited_at;"#,
+            data.total_hours,
+            data.comment,
+            data.is_editable,
+            timesheet_id,
+            date
+        )
+        .fetch_one(executor)
+        .await?;
+
+        Ok(workday)
     }
 
     pub async fn update(

@@ -1,0 +1,83 @@
+<div id="workday-{{ date }}"
+     class="flex
+            flex-row
+            w-10/12
+            items-start
+            align-middle
+            rounded-md
+            p-2
+            text-wrap
+            overflow-hidden
+          bg-foreground2">
+    <form hx-patch="/timesheet/{{ timesheet_id }}/day/{{ date }}"
+          hx-swap="outerHTML"
+          hx-target="#workday-{{ date }}"
+          hx-ext="json-enc"
+          hx-confirm="Are you sure you want to update this workday?"
+          class="flex
+                 flex-row
+                 w-full
+                 items-start
+                 space-x-12
+                 text-wrap
+                 overflow-hidden">
+        <p class="font-mono
+                text-txt
+                  font-bold
+                  text-lg">{{ date.format("%d.%m.%Y").to_string() }}</p>
+        <div class="flex
+                    flex-row
+                    space-x-1">
+            <label for="total_hours"
+                   class="font-mono
+                        text-txt
+                          text-lg">Hours:</label>
+            <input type="number"
+                   required
+                   id="total_hours"
+                   name="total_hours"
+                   min="0"
+                   max="24"
+                   class="font-mono
+                          text-lg
+                          text-txt
+                          bg-foreground1
+                          border-gray-800"
+                   value="{{ total_hours }}">
+        </div>
+        <div class="flex
+                    flex-row
+                    space-x-1">
+            <label for="total_hours"
+                   class="font-mono
+                        text-txt
+                          text-lg">Comment:</label>
+            <input type="text"
+                   id="comment"
+                   name="comment"
+                   class="font-mono
+                          text-lg
+                        text-txt
+                        bg-foreground1
+                        border-gray-800"
+                   value="{{ comment.clone().unwrap_or("".to_string()) }}">
+        </div>
+        <input type="hidden"
+               id="timesheet_id"
+               name="timesheet_id"
+               value="{{ timesheet_id }}">
+        <input type="hidden"
+               id="date"
+               name="date"
+               value="{{ date }}">
+        <button class="font-mono
+                       text-lg
+                     text-txthl">Save</button>
+    </form>
+    <button hx-get="/timesheet/{{ timesheet_id }}/day/{{ date }}"
+            hx-swap="outerHTML"
+            hx-target="#workday-{{ date }}"
+            class="font-mono
+                   text-lg
+                   text-txthl">Cancel</button>
+</div>

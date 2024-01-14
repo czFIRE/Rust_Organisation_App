@@ -1,4 +1,4 @@
-use crate::repositories::timesheet::models::TimesheetWithEvent;
+use crate::repositories::timesheet::models::{TimesheetWithEvent, Workday};
 use askama::Template;
 use chrono::{NaiveDate, NaiveDateTime};
 use serde::Deserialize;
@@ -13,10 +13,46 @@ pub struct WorkdayTemplate {
     pub timesheet_id: Uuid,
     pub date: NaiveDate,
     pub total_hours: f32,
-    pub comment: String,
+    pub comment: Option<String>,
     pub is_editable: bool,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
+}
+
+impl From<Workday> for WorkdayTemplate {
+    fn from(workday: Workday) -> Self {
+        WorkdayTemplate {
+            timesheet_id: workday.timesheet_id,
+            date: workday.date,
+            total_hours: workday.total_hours,
+            comment: workday.comment,
+            is_editable: workday.is_editable,
+            created_at: workday.created_at,
+            edited_at: workday.edited_at,
+        }
+    }
+}
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "employment/timesheet/workday-edit.html")]
+pub struct WorkdayEditTemplate {
+    pub timesheet_id: Uuid,
+    pub date: NaiveDate,
+    pub total_hours: f32,
+    pub comment: Option<String>,
+    pub is_editable: bool,
+}
+
+impl From<Workday> for WorkdayEditTemplate {
+    fn from(workday: Workday) -> Self {
+        WorkdayEditTemplate {
+            timesheet_id: workday.timesheet_id,
+            date: workday.date,
+            total_hours: workday.total_hours,
+            comment: workday.comment,
+            is_editable: workday.is_editable,
+        }
+    }
 }
 
 #[derive(Template, Debug, Deserialize)]
@@ -35,7 +71,7 @@ pub struct TimesheetTemplate {
     pub calculated_wage: u128, // Mind this field: It isn't in the DB and needs to be calculated. This is in CZK.
     pub is_editable: bool,
     pub status: ApprovalStatus,
-    pub manager_note: String,
+    pub manager_note: Option<String>,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
 }
@@ -49,7 +85,7 @@ impl From<TimesheetWithWorkdays> for TimesheetTemplate {
                 timesheet_id: workday.timesheet_id,
                 date: workday.date,
                 total_hours: workday.total_hours,
-                comment: workday.comment.unwrap_or("No comment.".to_string()),
+                comment: workday.comment,
                 is_editable: workday.is_editable,
                 created_at: workday.created_at,
                 edited_at: workday.edited_at,
@@ -70,10 +106,7 @@ impl From<TimesheetWithWorkdays> for TimesheetTemplate {
             calculated_wage: 0,
             is_editable: full_timesheet.timesheet.is_editable,
             status: full_timesheet.timesheet.approval_status,
-            manager_note: full_timesheet
-                .timesheet
-                .manager_note
-                .unwrap_or("No note.".to_string()),
+            manager_note: full_timesheet.timesheet.manager_note,
             created_at: full_timesheet.timesheet.created_at,
             edited_at: full_timesheet.timesheet.edited_at,
         }

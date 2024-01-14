@@ -17,6 +17,9 @@ use std::sync::Arc;
 use crate::handlers::employment::toggle_employment_edit;
 use crate::handlers::event::toggle_event_edit_mode;
 use crate::handlers::event_staff::initialize_staff_panel;
+use crate::handlers::timesheet::get_work_day;
+use crate::handlers::timesheet::toggle_work_day_edit_mode;
+use crate::handlers::timesheet::update_work_day;
 use crate::handlers::user::toggle_user_edit;
 use crate::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
 use crate::repositories::comment::comment_repo::CommentRepository;
@@ -190,6 +193,9 @@ async fn main() -> Result<()> {
             .service(create_timesheet)
             .service(update_timesheet)
             .service(reset_timesheet_data)
+            .service(toggle_work_day_edit_mode)
+            .service(update_work_day)
+            .service(get_work_day)
             // Temporary
             .service(get_users)
             // For serving css

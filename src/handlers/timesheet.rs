@@ -2,16 +2,21 @@ use std::str::FromStr;
 
 use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;
+use chrono::NaiveDate;
 use uuid::Uuid;
 
 use crate::{
     errors::{handle_database_error, parse_error},
     handlers::common::extract_path_tuple_ids,
     repositories::timesheet::{
-        models::{TimesheetCreateData, TimesheetReadAllData, TimesheetUpdateData},
+        models::{
+            TimesheetCreateData, TimesheetReadAllData, TimesheetUpdateData, WorkdayUpdateData,
+        },
         timesheet_repo::TimesheetRepository,
     },
-    templates::timesheet::{TimesheetTemplate, TimesheetsTemplate},
+    templates::timesheet::{
+        TimesheetTemplate, TimesheetsTemplate, WorkdayEditTemplate, WorkdayTemplate,
+    },
 };
 
 #[get("/user/{user_id}/employment/{company_id}/sheet")]
@@ -174,7 +179,7 @@ pub async fn update_timesheet(
 /*
 * Reset every workday for a corresponding timesheet, as well as worked_hours and comments in the timesheet record.
 */
-#[delete("/timesheet/{timesheet_id}/workdays")]
+#[delete("/timesheet/{timesheet_id}/days")]
 pub async fn reset_timesheet_data(
     timesheet_id: web::Path<String>,
     timesheet_repo: web::Data<TimesheetRepository>,
@@ -188,6 +193,111 @@ pub async fn reset_timesheet_data(
     let result = timesheet_repo.reset_timesheet(parsed_id).await;
     if let Ok(full_timesheet) = result {
         let template: TimesheetTemplate = full_timesheet.into();
+
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Ok()
+            .content_type("text/html")
+            .body(body.expect("Should be valid now."));
+    }
+
+    handle_database_error(result.expect_err("Should be error."))
+}
+
+#[patch("/timesheet/{timesheet_id}/day/{date}")]
+pub async fn update_work_day(
+    path: web::Path<(String, String)>,
+    data: web::Json<WorkdayUpdateData>,
+    timesheet_repo: web::Data<TimesheetRepository>,
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(path.0.as_str());
+    let date_parse = NaiveDate::parse_from_str(path.1.as_str(), "%Y-%m-%d");
+
+    if id_parse.is_err() || date_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let timesheet_id = id_parse.expect("Should be valid");
+    let date = date_parse.expect("Should be valid");
+
+    let result = timesheet_repo
+        .update_workday(timesheet_id, date, data.into_inner())
+        .await;
+
+    if let Ok(workday) = result {
+        let template: WorkdayTemplate = workday.into();
+
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Ok()
+            .content_type("text/html")
+            .body(body.expect("Should be valid now."));
+    }
+
+    handle_database_error(result.expect_err("Should be error."))
+}
+
+#[get("/timesheet/{timesheet_id}/day/{date}/edit-mode")]
+pub async fn toggle_work_day_edit_mode(
+    path: web::Path<(String, String)>,
+    timesheet_repo: web::Data<TimesheetRepository>,
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(path.0.as_str());
+    let date_parse = NaiveDate::parse_from_str(path.1.as_str(), "%Y-%m-%d");
+
+    if id_parse.is_err() || date_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let timesheet_id = id_parse.expect("Should be valid");
+    let date = date_parse.expect("Should be valid");
+
+    let result = timesheet_repo.read_one_workday(timesheet_id, date).await;
+
+    if let Ok(workday) = result {
+        let template: WorkdayEditTemplate = workday.into();
+
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Ok()
+            .content_type("text/html")
+            .body(body.expect("Should be valid now."));
+    }
+
+    handle_database_error(result.expect_err("Should be error."))
+}
+
+#[get("/timesheet/{timesheet_id}/day/{date}")]
+pub async fn get_work_day(
+    path: web::Path<(String, String)>,
+    timesheet_repo: web::Data<TimesheetRepository>,
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(path.0.as_str());
+    let date_parse = NaiveDate::parse_from_str(path.1.as_str(), "%Y-%m-%d");
+
+    if id_parse.is_err() || date_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let timesheet_id = id_parse.expect("Should be valid");
+    let date = date_parse.expect("Should be valid");
+
+    let result = timesheet_repo.read_one_workday(timesheet_id, date).await;
+
+    if let Ok(workday) = result {
+        let template: WorkdayTemplate = workday.into();
 
         let body = template.render();
         if body.is_err() {
