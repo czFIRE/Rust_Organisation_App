@@ -4,7 +4,7 @@ use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
 
 use crate::{
-    models::{Association, EmploymentContract, EmployeeLevel},
+    models::{Association, EmployeeLevel, EmploymentContract},
     repositories::{company::models::Company, event::models::Event},
 };
 

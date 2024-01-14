@@ -58,7 +58,6 @@ pub struct EmploymentLite {
     pub end_date: NaiveDate,
 }
 
-
 impl From<EmploymentExtended> for EmploymentLite {
     fn from(employment: EmploymentExtended) -> Self {
         EmploymentLite {
@@ -119,5 +118,5 @@ pub struct EmploymentEditTemplate {
 #[template(path = "employment/subordinates.html")]
 pub struct SubordinatesTemplate {
     pub user_id: Uuid,
-    pub subordinates: Vec<Subordinate>
+    pub subordinates: Vec<Subordinate>,
 }

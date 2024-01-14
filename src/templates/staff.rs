@@ -1,4 +1,7 @@
-use crate::repositories::{event_staff::models::StaffLite, user::models::User, associated_company::models::AssociatedCompanyLite};
+use crate::repositories::{
+    associated_company::models::AssociatedCompanyLite, event_staff::models::StaffLite,
+    user::models::User,
+};
 use askama::Template;
 use chrono::NaiveDateTime;
 use serde::Deserialize;
@@ -76,7 +79,7 @@ impl From<StaffExtended> for StaffTemplate {
 pub struct StaffRegisterTemplate {
     pub user_id: Uuid,
     pub event_id: Uuid,
-    pub companies: Vec<AssociatedCompanyLite>
+    pub companies: Vec<AssociatedCompanyLite>,
 }
 
 #[derive(Template, Deserialize)]

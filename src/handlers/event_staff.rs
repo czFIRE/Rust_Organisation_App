@@ -296,7 +296,9 @@ async fn prepare_staff_registration_panel(
     event_id: Uuid,
     associated_repo: web::Data<AssociatedCompanyRepository>,
 ) -> HttpResponse {
-    let result = associated_repo.get_all_associated_companies_for_event_and_user(event_id, user_id).await;
+    let result = associated_repo
+        .get_all_associated_companies_for_event_and_user(event_id, user_id)
+        .await;
 
     if let Ok(companies) = result {
         let template = StaffRegisterTemplate {
@@ -307,10 +309,13 @@ async fn prepare_staff_registration_panel(
 
         let body = template.render();
         if body.is_err() {
-            return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
 
-        return HttpResponse::Ok().content_type("text/html").body(body.expect("Should be valid here."));
+        return HttpResponse::Ok()
+            .content_type("text/html")
+            .body(body.expect("Should be valid here."));
     }
 
     let error = result.expect_err("Should be an error here.");
@@ -349,7 +354,9 @@ pub async fn initialize_staff_panel(
     // let (event_id, user_id) = parsed_ids.expect("Should be okay");
 
     // Try to retrieve the staff. Every user should only have one staff relationship for a given event.
-    let result = event_staff_repo.read_by_event_and_user_id(event_id, user_id).await;
+    let result = event_staff_repo
+        .read_by_event_and_user_id(event_id, user_id)
+        .await;
 
     // If staff exists, we render the regular staff panel.
     if let Ok(staff) = result {

@@ -69,7 +69,6 @@ impl From<UserLite> for UserLiteTemplate {
     }
 }
 
-
 impl From<User> for UserLiteTemplate {
     fn from(user: User) -> UserLiteTemplate {
         UserLiteTemplate {

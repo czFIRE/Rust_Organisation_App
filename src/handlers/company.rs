@@ -12,7 +12,7 @@ use crate::{
         company_repo::CompanyRepository,
         models::{AddressData, AddressUpdateData, CompanyData, CompanyFilter, NewCompany},
     },
-    templates::company::{CompaniesTemplate, CompanyTemplate, CompanyLite},
+    templates::company::{CompaniesTemplate, CompanyLite, CompanyTemplate},
 };
 
 #[derive(Deserialize, Clone)]

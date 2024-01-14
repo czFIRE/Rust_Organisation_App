@@ -124,8 +124,11 @@ impl StaffRepository {
         Ok(staff.into())
     }
 
-
-    pub async fn read_by_event_and_user_id(&self, event_id: Uuid, user_id: Uuid) -> DbResult<StaffExtended> {
+    pub async fn read_by_event_and_user_id(
+        &self,
+        event_id: Uuid,
+        user_id: Uuid,
+    ) -> DbResult<StaffExtended> {
         // For redis in case we manage to implement it in time. Or in the future.
         self.read_by_event_and_user_id_db(event_id, user_id).await
     }
@@ -133,8 +136,12 @@ impl StaffRepository {
     /* This call is very similar to the previous calls.
      * But the previous calls only use user_id, this approaches
      * retrieving staff without knowledge of staff id.
-    */ 
-    async fn read_by_event_and_user_id_db(&self, event_id: Uuid, user_id: Uuid) -> DbResult<StaffExtended> {
+     */
+    async fn read_by_event_and_user_id_db(
+        &self,
+        event_id: Uuid,
+        user_id: Uuid,
+    ) -> DbResult<StaffExtended> {
         let executor = self.pool.as_ref();
 
         let staff: StaffUserCompanyFlattened = sqlx::query_as!(

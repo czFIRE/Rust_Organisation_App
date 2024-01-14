@@ -6,11 +6,16 @@ use uuid::Uuid;
 
 use crate::{
     errors::{handle_database_error, parse_error},
-    repositories::{event::{
-        event_repo::EventRepository,
-        models::{EventData, EventFilter, NewEvent},
-    }, event_staff::event_staff_repo::StaffRepository},
-    templates::event::{EventTemplate, EventsTemplate, EventLite, EventEditTemplate}, handlers::common::extract_path_tuple_ids, models::EventRole,
+    handlers::common::extract_path_tuple_ids,
+    models::EventRole,
+    repositories::{
+        event::{
+            event_repo::EventRepository,
+            models::{EventData, EventFilter, NewEvent},
+        },
+        event_staff::event_staff_repo::StaffRepository,
+    },
+    templates::event::{EventEditTemplate, EventLite, EventTemplate, EventsTemplate},
 };
 
 #[get("/event")]
@@ -29,8 +34,7 @@ pub async fn get_events(
     let result = event_repo.read_all(query_params).await;
 
     if let Ok(events) = result {
-        let lite_events: Vec<EventLite> =
-            events.into_iter().map(|event| event.into()).collect();
+        let lite_events: Vec<EventLite> = events.into_iter().map(|event| event.into()).collect();
 
         let template = EventsTemplate {
             events: lite_events,
@@ -208,7 +212,8 @@ pub async fn toggle_event_edit_mode(
 
         let body = template.render();
         if body.is_err() {
-            return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
 
         return HttpResponse::Ok().body(body.expect("Should be valid now."));

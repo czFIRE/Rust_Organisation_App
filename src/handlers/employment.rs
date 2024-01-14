@@ -2,9 +2,12 @@ use std::str::FromStr;
 
 use crate::{
     errors::handle_database_error,
-    handlers::common::{extract_path_tuple_ids, extract_path_triple_ids},
+    handlers::common::{extract_path_triple_ids, extract_path_tuple_ids},
+    models::{EmployeeLevel, EmploymentContract},
     repositories::employment::models::{EmploymentData, NewEmployment},
-    templates::employment::{EmploymentTemplate, EmploymentLite, SubordinatesTemplate, EmploymentEditTemplate}, models::{EmploymentContract, EmployeeLevel},
+    templates::employment::{
+        EmploymentEditTemplate, EmploymentLite, EmploymentTemplate, SubordinatesTemplate,
+    },
 };
 use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;
@@ -196,7 +199,9 @@ pub async fn toggle_employment_edit(
     let result = employment_repo.read_one(user_id, company_id).await;
     if let Ok(employment) = result {
         // Only the direct manager may edit an employee.
-        if employment.manager.is_none() || employment.manager.is_some() && employment.manager.unwrap().id != editor_id {
+        if employment.manager.is_none()
+            || employment.manager.is_some() && employment.manager.unwrap().id != editor_id
+        {
             return HttpResponse::Forbidden().body(parse_error(http::StatusCode::FORBIDDEN));
         }
         let template: EmploymentEditTemplate = EmploymentEditTemplate {
@@ -208,7 +213,7 @@ pub async fn toggle_employment_edit(
             level: employment.level,
             description: employment.description,
             start_date: employment.start_date,
-            end_date: employment.end_date
+            end_date: employment.end_date,
         };
 
         let body = template.render();
@@ -217,7 +222,9 @@ pub async fn toggle_employment_edit(
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
 
-        return HttpResponse::Ok().content_type("text/html").body(body.expect("Should be valid now."));
+        return HttpResponse::Ok()
+            .content_type("text/html")
+            .body(body.expect("Should be valid now."));
     }
 
     handle_database_error(result.expect_err("Should be error."))
@@ -232,7 +239,9 @@ fn is_data_invalid(data: EmploymentUpdateData) -> bool {
         && data.description.is_none()
         && data.employment_type.is_none()
         && data.level.is_none()
-        || (data.start_date.is_some() && data.end_date.is_some() && data.start_date.unwrap() > data.end_date.unwrap())
+        || (data.start_date.is_some()
+            && data.end_date.is_some()
+            && data.start_date.unwrap() > data.end_date.unwrap())
 }
 
 #[patch("/user/{user_id}/employment/{company_id}")]
@@ -262,11 +271,15 @@ pub async fn update_employment(
 
         let current = current_employment.expect("Should be valid now.");
 
-        if employment_data.start_date.is_some() && employment_data.start_date.clone().unwrap() > current.end_date {
+        if employment_data.start_date.is_some()
+            && employment_data.start_date.clone().unwrap() > current.end_date
+        {
             return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
         }
 
-        if employment_data.end_date.is_some() && employment_data.end_date.clone().unwrap() < current.start_date {
+        if employment_data.end_date.is_some()
+            && employment_data.end_date.clone().unwrap() < current.start_date
+        {
             return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
         }
     }
@@ -282,9 +295,7 @@ pub async fn update_employment(
         level: employment_data.level.clone(),
     };
 
-    let result = employment_repo
-        .update(user_id, company_id, data)
-        .await;
+    let result = employment_repo.update(user_id, company_id, data).await;
 
     if let Err(error) = result {
         return handle_database_error(error);
@@ -292,7 +303,13 @@ pub async fn update_employment(
 
     // This isn't very pleasant, but it is what it is. Maybe fix later.
     // Editor id because we don't want to render the employee's view.
-    get_full_employment(employment_data.editor_id, company_id, employment_repo, false).await
+    get_full_employment(
+        employment_data.editor_id,
+        company_id,
+        employment_repo,
+        false,
+    )
+    .await
 }
 
 #[delete("/user/{user_id}/employment/{company_id}")]

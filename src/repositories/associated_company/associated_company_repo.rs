@@ -8,7 +8,7 @@ use crate::models::{EmployeeLevel, EmploymentContract};
 
 use super::models::{
     AssociatedCompany, AssociatedCompanyData, AssociatedCompanyExtended, AssociatedCompanyFilter,
-    AssociatedCompanyFlattened, NewAssociatedCompany, AssociatedCompanyLite,
+    AssociatedCompanyFlattened, AssociatedCompanyLite, NewAssociatedCompany,
 };
 
 use crate::models::Association;
@@ -457,12 +457,21 @@ impl AssociatedCompanyRepository {
         Ok(())
     }
 
-    pub async fn get_all_associated_companies_for_event_and_user(&self, event_id: Uuid, user_id: Uuid) -> DbResult<Vec<AssociatedCompanyLite>> {
+    pub async fn get_all_associated_companies_for_event_and_user(
+        &self,
+        event_id: Uuid,
+        user_id: Uuid,
+    ) -> DbResult<Vec<AssociatedCompanyLite>> {
         // ToDo: Redis here if we get the time for it.
-        self.get_all_associated_companies_for_event_and_user_db(event_id, user_id).await
+        self.get_all_associated_companies_for_event_and_user_db(event_id, user_id)
+            .await
     }
 
-    async fn get_all_associated_companies_for_event_and_user_db(&self, event_id: Uuid, user_id: Uuid) -> DbResult<Vec<AssociatedCompanyLite>> {
+    async fn get_all_associated_companies_for_event_and_user_db(
+        &self,
+        event_id: Uuid,
+        user_id: Uuid,
+    ) -> DbResult<Vec<AssociatedCompanyLite>> {
         let executor = self.pool.as_ref();
 
         let result = sqlx::query_as!(
@@ -485,7 +494,8 @@ impl AssociatedCompanyRepository {
             "#,
             event_id,
             user_id,
-        ).fetch_all(executor)
+        )
+        .fetch_all(executor)
         .await?;
 
         Ok(result)

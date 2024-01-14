@@ -71,7 +71,6 @@ pub struct EventsTemplate {
     pub events: Vec<EventLite>,
 }
 
-
 #[derive(Template, Debug)]
 #[template(path = "event/event-edit.html")]
 pub struct EventEditTemplate {
