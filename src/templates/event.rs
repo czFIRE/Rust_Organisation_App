@@ -6,6 +6,8 @@ use uuid::Uuid;
 
 use crate::repositories::event::models::Event;
 
+use super::staff::StaffTemplate;
+
 #[derive(Template, Debug, Deserialize)]
 #[template(path = "event/event.html")]
 pub struct EventTemplate {
@@ -13,7 +15,7 @@ pub struct EventTemplate {
     pub avatar_url: String,
     pub name: String,
     pub description: String,
-    pub website: Option<String>,
+    pub website: String,
     pub accepts_staff: bool,
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
@@ -30,7 +32,7 @@ impl From<Event> for EventTemplate {
             description: event
                 .description
                 .unwrap_or("No description set.".to_string()),
-            website: event.website,
+            website: event.website.unwrap_or("No website".to_string()),
             accepts_staff: event.accepts_staff,
             start_date: event.start_date,
             end_date: event.end_date,
@@ -67,4 +69,12 @@ impl From<Event> for EventLite {
 #[template(path = "event/events.html")]
 pub struct EventsTemplate {
     pub events: Vec<EventLite>,
+}
+
+
+#[derive(Template, Debug)]
+#[template(path = "event/event-edit.html")]
+pub struct EventEditTemplate {
+    pub event: EventTemplate,
+    pub editor: StaffTemplate,
 }

@@ -116,8 +116,8 @@
                                 bg-foreground1
                                 p-3
                                 rounded-md">Open Staff Panel</button>
-                {% if website.is_some() -%}
-                <a href="{{ website.as_ref().unwrap() }}">
+                {% if website != "No website".to_string() -%}
+                <a href="{{ website }}">
                     <div class="flex
                                 flex-row
                                 space-x-2">

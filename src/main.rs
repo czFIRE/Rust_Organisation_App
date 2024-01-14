@@ -15,6 +15,7 @@ use std::io::Result;
 use std::sync::Arc;
 
 use crate::handlers::employment::toggle_employment_edit;
+use crate::handlers::event::toggle_event_edit_mode;
 use crate::handlers::event_staff::initialize_staff_panel;
 use crate::handlers::user::toggle_user_edit;
 use crate::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
@@ -147,6 +148,7 @@ async fn main() -> Result<()> {
             .service(get_event_avatar)
             .service(upload_event_avatar)
             .service(remove_event_avatar)
+            .service(toggle_event_edit_mode)
             .service(get_employment)
             .service(get_employments_per_user)
             .service(get_subordinates)

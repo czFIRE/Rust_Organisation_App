@@ -6,11 +6,11 @@ use uuid::Uuid;
 
 use crate::{
     errors::{handle_database_error, parse_error},
-    repositories::event::{
+    repositories::{event::{
         event_repo::EventRepository,
         models::{EventData, EventFilter, NewEvent},
-    },
-    templates::event::{EventTemplate, EventsTemplate, EventLite},
+    }, event_staff::event_staff_repo::StaffRepository},
+    templates::event::{EventTemplate, EventsTemplate, EventLite, EventEditTemplate}, handlers::common::extract_path_tuple_ids, models::EventRole,
 };
 
 #[get("/event")]
@@ -176,6 +176,44 @@ pub async fn delete_event(
     }
 
     HttpResponse::NoContent().finish()
+}
+
+#[get("/event/{event_id}/mode/{staff_id}")]
+pub async fn toggle_event_edit_mode(
+    path: web::Path<(String, String)>,
+    event_repo: web::Data<EventRepository>,
+    staff_repo: web::Data<StaffRepository>,
+) -> HttpResponse {
+    let parsed_ids = extract_path_tuple_ids(path.into_inner());
+    if parsed_ids.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let (event_id, staff_id) = parsed_ids.unwrap();
+    let staff_res = staff_repo.read_one(staff_id).await;
+    if staff_res.is_err() {
+        return handle_database_error(staff_res.expect_err("Should be an error."));
+    }
+    let staff = staff_res.expect("Should be valid.");
+    // Check if the staffer is an organizer for this event.
+    if staff.role != EventRole::Organizer || staff.event_id != event_id {
+        return HttpResponse::Forbidden().body(parse_error(http::StatusCode::FORBIDDEN));
+    }
+    let result = event_repo.read_one(event_id).await;
+    if let Ok(event) = result {
+        let template = EventEditTemplate {
+            event: event.into(),
+            editor: staff.into(),
+        };
+
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Ok().body(body.expect("Should be valid now."));
+    }
+    handle_database_error(result.expect_err("Should be an error."))
 }
 
 //TODO: Once file store/load is done.

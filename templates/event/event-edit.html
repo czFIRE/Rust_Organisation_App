@@ -1,0 +1,110 @@
+<div id="event"
+     class="flex
+            flex-col
+            space-y-10
+            items-center
+            w-full">
+    <form hx-patch="/event/{{ event.id }}"
+          hx-swap="innerHTML"
+          hx-target="#content"
+          hx-ext="json-enc"
+          hx-confirm="Are you sure you want to make these changes to the event?"
+          class="flex
+                 flex-col
+                 space-y-3
+                 align-middle
+                 items-center">
+        <div class="flex
+                    flex-row
+                    space-x-3">
+            <label for="name"
+                   class="font-mono
+                          text-xl
+                          text-txt">Name:</label>
+            <input id="name"
+                   name="name"
+                   class="font-mono
+                          text-xl
+                          text-txt
+                          bg-foreground1"
+                   value="{{ event.name }}">
+        </div>
+        <div class="flex
+                    flex-row
+                    space-x-3">
+            <label for="website"
+                   class="font-mono
+                          text-xl
+                        text-txt">Website:</label>
+            <input id="website"
+                   name="website"
+                   class="font-mono
+                          text-xl
+                        text-txt
+                        bg-foreground1"
+                   value="{{ event.website }}">
+        </div>
+        <div class="flex
+                    flex-row
+                    space-x-3">
+            <label for="start_date"
+                   class="font-mono
+                          text-xl
+                        text-txt">Start Date:</label>
+            <input id="start_date"
+                   name="start_date"
+                   class="font-mono
+                          text-xl
+                        text-txt
+                        bg-foreground1"
+                   type="date"
+                   value="{{ event.start_date }}">
+        </div>
+        <div class="flex
+                    flex-row
+                    space-x-3">
+            <label for="end"
+                   class="font-mono
+                          text-xl
+                        text-txt">End Date:</label>
+            <input id="end_date"
+                   name="end_date"
+                   class="font-mono
+                          text-xl
+                        text-txt
+                        bg-foreground1"
+                   type="date"
+                   value="{{ event.end_date }}">
+        </div>
+        <div class="flex
+                    flex-row
+                    space-x-3
+                    w-10/12">
+            <label for="description"
+                   class="font-mono
+                          text-xl
+                        text-txt">Description:</label>
+            <input id="description"
+                   name="description"
+                   class="font-mono
+                          text-xl
+                        text-txt
+                          w-full
+                          h-96
+                          text-wrap
+                          overflow-y-scroll
+                        bg-foreground1"
+                   value="{{ event.description }}">
+        </div>
+        <button type="submit"
+                class="font-mono
+                       text-xl
+                     text-txthl">Submit Changes</button>
+    </form>
+    <button hx-get="/event/{{ event.id }}"
+            hx-swap="innerHTML"
+            hx-target="#content"
+            class="font-mono
+                   text-xl
+                   text-txthl">Cancel</button>
+</div>

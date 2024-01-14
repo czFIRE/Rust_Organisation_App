@@ -1,16 +1,118 @@
 <div id="staff-panel"
      class="flex
             flex-col
-            space-y-4
+            space-y-10
             items-center">
     {% if status != AcceptanceStatus::Accepted -%}
     <h2 class="font-mono
                text-4xl
-               text-txthl">Registration Status</h2>
+               text-txthl
+               font-bold">Registration Status</h2>
+
+        {% if status == AcceptanceStatus::Pending -%}
+        <p class="font-mono
+                text-xl
+                text-pnd">Your application is still under review. Check back later.</p>
+        {%- else -%}
+        <p class="font-mono
+                text-xl
+                text-rej">Your application to work on this event was rejected.</p>
+        {%- endif %}
+        <button hx-get="/event/{{ event_id }}"
+                hx-swap="innerHTML"
+                hx-target="#content"
+                class="bg-foreground1
+                        font-mono
+                        text-txthl
+                        text-xl
+                        p-3">Back
+        </button>
     {%- else -%}
     <h2 class="font-mono
                text-4xl
                text-txthl">Staff Panel</h2>
+    <div id="staff-info"
+         class="flex
+                flex-col
+                space-y-2
+                items-center
+                justify-items-center
+                w-full">
+        <p class="font-mono
+                  text-xl
+                text-txt">You are working on this event under {{ company.name }}. Your current role on the event is {{ role }}.</p>
+        <div id="staff-actions"
+             class="flex
+                    flex-row
+                    flex-wrap
+                    justify-evenly
+                    space-x-5
+                    space-y-5
+                    place-content-center
+                    w-1/2">
+            <button hx-get="/event/{{ event_id }}/task"
+                    hx-swap="innerHTML"
+                    hx-target="#content"
+                    class="bg-foreground1
+                            font-mono
+                            text-txthl
+                            text-xl
+                            p-3">View Tasks
+            </button>
+            <button hx-get="/user/{{ user.id }}/employment/{{ company.id }}"
+                    hx-swap="innerHTML"
+                    hx-target="#content"
+                    class="bg-foreground1
+                            font-mono
+                            text-txthl
+                            text-xl
+                            p-3">Access Related Employment
+            </button>
+            <button hx-get="/company/{{ company.id }}"
+                    hx-swap="innerHTML"
+                    hx-target="#content"
+                    class="bg-foreground1
+                            font-mono
+                            text-txthl
+                            text-xl
+                            p-3">Access Your Company
+            </button>
+            <!-- TODO: Consider if it isn't better to remove staff_id from the call -->
+            <button hx-get="/event/{{ event_id }}/mode/{{ id }}"
+                    hx-swap="innerHTML"
+                    hx-target="#content"
+                    class="bg-foreground1
+                            font-mono
+                            text-txthl
+                            text-xl
+                            p-3">Edit Event
+            </button>
+            <!-- TODO: Api call for toggling review mode -->
+            <button hx-get="/event/{{ event_id }}/staff/manage"
+                    hx-swap="innerHTML"
+                    hx-target="#content"
+                    class="bg-foreground1
+                            font-mono
+                            text-txthl
+                            text-xl
+                            p-3">Manage Staff
+            </button>
+            <!-- TODO: Api call for toggling review mode -->
+            <button hx-delete="/event/{{ event_id }}"
+                    hx-swap="innerHTML"
+                    hx-target="#content"
+                    hx-confirm="Are you sure you want to permanently delete the event?"
+                    class="bg-foreground1
+                            font-mono
+                            text-rej
+                            text-xl
+                            p-3">Delete Event
+            </button>
+        </div>
+    </div>
+
+    </div>
+
     <div id="comments"
          class="flex
                 flex-col
