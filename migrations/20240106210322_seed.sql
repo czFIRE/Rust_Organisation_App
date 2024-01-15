@@ -23,6 +23,7 @@ DECLARE
   event0_id UUID := 'b71fd7ce-c891-410a-9bb4-70fc5c7748f8';
   event1_id UUID := '3f152d12-0bbd-429a-a9c5-28967d6370cc';
   event2_id UUID := '3f152dad-0bbd-4e9a-aec5-2a567d6370cc';
+  event3_id UUID := '2321154f-8c57-4ee2-9493-c9243ae7426a';
 
   timesheet0_id UUID := 'd47e8141-a77e-4d55-a2d5-4a77de24b6d0';
   timesheet1_id UUID := '0f0f0ff5-0073-47cc-bd1f-540a04fee9ea';
@@ -35,6 +36,7 @@ DECLARE
   event_staff2_id UUID := 'aa7f3d0e-ab48-473b-ac69-b84cb74f34f7';
   event_staff3_id UUID := 'ae228dfb-7265-4059-98c4-c4a1e6233cf4';
   event_staff4_id UUID := '31020fa2-7a24-4d8f-927b-98e26d2929b0';
+  event_staff5_id UUID := 'e1b266b8-607f-46d0-9027-2a2d28637f15';
 
   task0_id UUID := '7ae0c017-fe31-4aac-b767-100d18a8877b';
   task1_id UUID := 'bd9b422d-33c1-42a2-88bf-a56ce6cc55a6';
@@ -273,6 +275,19 @@ BEGIN
         '2024-01-01', '2024-01-03', 'beep_boop_2024.png',
         '2023-06-06 06:06:6.66', '2023-06-06 16:26:6.66');
 
+    INSERT INTO event
+        (id, name,
+		description,
+        website, accepts_staff,
+        start_date, end_date, avatar_url,
+        created_at, edited_at)
+        VALUES
+        (event3_id, 'Elvis revival',
+        'A rock-n-roll event possibly ended with arrival of the king',
+        'https://elvisforever.org', true,
+        '1969-07-28', '1969-08-18', 'elvis_revival.png',
+        '2023-09-01 09:06', '2023-09-01 09:06');
+
 --------------------------------------------------------------------------------
 
     INSERT INTO associated_company
@@ -295,6 +310,13 @@ BEGIN
         VALUES
         (company1_id, event1_id, 'other',
         '2023-12-12 07:38', '2023-12-12 07:38');
+
+    INSERT INTO associated_company
+        (company_id, event_id, type,
+        created_at, edited_at)
+        VALUES
+        (company1_id, event3_id, 'organizer',
+        '2023-09-02 12:38', '2023-12-01 15:32');
 
     INSERT INTO associated_company
         (company_id, event_id, type,
@@ -352,6 +374,17 @@ BEGIN
         false, 'pending', NULL,
         '2024-01-03 18:26', '2024-01-03 18:29');
 
+    INSERT INTO timesheet
+        (id, user_id, company_id, event_id,
+        start_date, end_date, total_hours,
+        is_editable, status, manager_note,
+        created_at, edited_at)
+        VALUES
+        (timesheet3_id, user1_id, company1_id, event3_id,
+        '1969-07-28', '1969-08-18', 68,
+        false, 'accepted', 'Outstanding performance. As always.',
+        '2023-11-05 11:39', '2023-11-05 11:39');
+
 --------------------------------------------------------------------------------
 
     INSERT INTO workday
@@ -403,6 +436,48 @@ BEGIN
         (timesheet2_id, '2024-01-02', 7, '', false,
         '2024-01-02 20:10', '2024-01-02 21:12');
 
+    INSERT INTO workday
+        (timesheet_id, date, total_hours, comment, is_editable,
+        created_at, edited_at)
+        VALUES
+        (timesheet3_id, '1969-07-28', 11.5, '', true,
+        '1969-07-28 23:00', '1969-07-28 23:00');
+
+    INSERT INTO workday
+        (timesheet_id, date, total_hours, comment, is_editable,
+        created_at, edited_at)
+        VALUES
+        (timesheet3_id, '1969-07-30', 11.5, '', true,
+        '1969-07-30 23:00', '1969-07-30 23:00');
+
+    INSERT INTO workday
+        (timesheet_id, date, total_hours, comment, is_editable,
+        created_at, edited_at)
+        VALUES
+        (timesheet3_id, '1969-08-10', 14, '', true,
+        '1969-08-10 23:00', '1969-08-10 23:00');
+
+    INSERT INTO workday
+        (timesheet_id, date, total_hours, comment, is_editable,
+        created_at, edited_at)
+        VALUES
+        (timesheet3_id, '1969-08-11', 12, '', true,
+        '1969-08-11 23:00', '1969-08-11 23:00');
+
+    INSERT INTO workday
+        (timesheet_id, date, total_hours, comment, is_editable,
+        created_at, edited_at)
+        VALUES
+        (timesheet3_id, '1969-08-12', 12, '', true,
+        '1969-08-12 23:00', '1969-08-12 23:00');
+
+    INSERT INTO workday
+        (timesheet_id, date, total_hours, comment, is_editable,
+        created_at, edited_at)
+        VALUES
+        (timesheet3_id, '1969-08-13', 14, '', true,
+        '1969-08-13 23:00', '1969-08-13 23:00');
+
 --------------------------------------------------------------------------------
 
     INSERT INTO event_staff
@@ -449,6 +524,15 @@ BEGIN
         (event_staff4_id, user5_id, company1_id, event1_id,
         event_staff2_id, 'staff', 'accepted',
         '2024-01-01 11:45', '2024-01-01 11:45');
+
+    INSERT INTO event_staff
+        (id, user_id, company_id, event_id,
+        decided_by, role, status,
+        created_at, edited_at)
+        VALUES
+        (event_staff5_id, user1_id, company1_id, event3_id,
+        event_staff5_id, 'organizer', 'accepted',
+        '2023-09-03 12:38', '2023-09-03 12:38');
 
 --------------------------------------------------------------------------------
 
