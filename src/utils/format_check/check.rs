@@ -1,3 +1,5 @@
+use regex::Regex;
+
 pub fn check_email_validity(email: String) -> bool {
     let email_regex = Regex::new(r"^[a-zA-Z0-9. _-]+@[a-zA-Z0-9. -]+\. [a-zA-Z]{2,4}$")
         .expect("Should be valid.");
