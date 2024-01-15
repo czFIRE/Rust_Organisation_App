@@ -1,8 +1,13 @@
 <div id="users">
     {% for user in users %}
     <div class="flex flex-row">
-        <p class="text-txt">{{user.name}} </p>
-        <button hx-get="/user/{{user.id}}" hx-swap="outerHTML" hx-target="#users" class="text-txthl">Log in!</a>
+        <p class="text-txt
+                    text-xl">{{user.name}} </p>
+        <button hx-get="/user/{{user.id}}"
+                hx-swap="outerHTML" 
+                hx-target="#users"
+                class="text-txthl
+                         text-xl">Log in!</a>
     </div>
     {% endfor %}
 </div>

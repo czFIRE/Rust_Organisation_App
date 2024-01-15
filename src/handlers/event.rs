@@ -162,6 +162,24 @@ pub async fn update_event(
     handle_database_error(result.expect_err("Should be error."))
 }
 
+#[patch("/event/{event_id}/acceptance")]
+pub async fn switch_event_accepts_staff(
+    event_id: web::Path<String>,
+    event_repo: web::Data<EventRepository>,
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(event_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let parsed_id = id_parse.expect("Should be valid.");
+    let result = event_repo.switch_accepts_staff(parsed_id).await;
+    if result.is_ok() {
+        return HttpResponse::NoContent().finish();
+    }
+    handle_database_error(result.expect_err("Should be error."))
+}
+
 #[delete("/event/{event_id}")]
 pub async fn delete_event(
     event_id: web::Path<String>,

@@ -124,7 +124,6 @@ impl EventRepository {
         Ok(events)
     }
 
-    //TODO: This should probably be in timesheet.
     pub async fn update_timesheet_range_for_event(
         &self,
         event_id: Uuid,
@@ -209,7 +208,7 @@ impl EventRepository {
             && data.end_date.is_none()
             && data.avatar_url.is_none()
         {
-            return Err(sqlx::Error::RowNotFound);
+            return Err(sqlx::Error::TypeNotFound { type_name: "User Error".to_string() });
         }
 
         let mut tx = self.pool.begin().await?;
@@ -222,7 +221,7 @@ impl EventRepository {
                 website = COALESCE($3, website), 
                 start_date = COALESCE($4, start_date), 
                 end_date = COALESCE($5, end_date), 
-                avatar_url = COALESCE($6, avatar_url), 
+                avatar_url = COALESCE($6, avatar_url),
                 edited_at = NOW() 
                 WHERE id = $7
                   AND deleted_at IS NULL 
@@ -268,6 +267,33 @@ impl EventRepository {
         }
 
         Ok(result_event)
+    }
+
+    pub async fn switch_accepts_staff(&self, event_id: Uuid) -> DbResult<()> {
+        let executor = self.pool.as_ref();
+        
+        let _ = sqlx::query_as!(
+            Event,
+            r#"UPDATE event
+               SET accepts_staff = NOT accepts_staff,
+                   edited_at = NOW()
+               WHERE id = $1
+                 AND deleted_at IS NULL
+               RETURNING id, 
+                         name, 
+                         description, 
+                         website, 
+                         accepts_staff, 
+                         start_date, 
+                         end_date, 
+                         avatar_url, 
+                         created_at, 
+                         edited_at, 
+                         deleted_at;"#,
+            event_id,
+        ).fetch_one(executor).await?;
+
+        Ok(())
     }
 
     pub async fn delete(&self, event_id: Uuid) -> DbResult<()> {

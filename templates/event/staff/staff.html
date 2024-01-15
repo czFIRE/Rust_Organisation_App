@@ -78,6 +78,22 @@
                             p-3">Access Your Company
             </button>
             {% if role == EventRole::Organizer %}
+            <button hx-get="/event/{{ event_id }}/staff/{{ id }}/management"
+                    hx-swap="innerHTML"
+                    hx-target="#content"
+                    class="bg-foreground1
+                            font-mono
+                            text-txthl
+                            text-xl
+                            p-3">Manage Staff
+            </button>
+            <button hx-patch="/event/{{ event_id}}/acceptance"
+                    hx-swap="none"
+                    class="bg-foreground1
+                           font-mono
+                         text-txthl
+                           text-xl
+                           p-3">Toggle New Staff Requests</button>
             <!-- TODO: Consider if it isn't better to remove staff_id from the call -->
             <button hx-get="/event/{{ event_id }}/mode/{{ id }}"
                     hx-swap="innerHTML"
@@ -87,15 +103,6 @@
                             text-txthl
                             text-xl
                             p-3">Edit Event
-            </button>
-            <button hx-get="/event/{{ event_id }}/staff/{{ id }}/management"
-                    hx-swap="innerHTML"
-                    hx-target="#content"
-                    class="bg-foreground1
-                            font-mono
-                            text-txthl
-                            text-xl
-                            p-3">Manage Staff
             </button>
             <!-- TODO: Api call for toggling review mode -->
             <button hx-delete="/event/{{ event_id }}"

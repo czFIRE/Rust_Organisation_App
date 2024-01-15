@@ -268,27 +268,27 @@ pub async fn delete_all_rejected_event_staff(
         return handle_database_error(error);
     }
 
-    HttpResponse::NoContent().finish()
+    read_all_event_staff(parsed_id, StaffFilter { limit: None, offset: None }, event_staff_repo).await
 }
 
-#[delete("/event/staff/{staff_id}")]
+#[delete("/event/{event_id}/staff/{staff_id}")]
 pub async fn delete_event_staff(
-    staff_id: web::Path<String>,
+    path: web::Path<(String, String)>,
     event_staff_repo: web::Data<StaffRepository>,
 ) -> HttpResponse {
-    let id_parse = Uuid::from_str(staff_id.into_inner().as_str());
-    if id_parse.is_err() {
+    let parsed_ids = extract_path_tuple_ids(path.into_inner());
+    if parsed_ids.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
-    let parsed_id = id_parse.expect("Should be valid.");
-    let result = event_staff_repo.delete(parsed_id).await;
+    let (event_id, staff_id) = parsed_ids.unwrap();
+    let result = event_staff_repo.delete(staff_id).await;
 
     if let Err(error) = result {
         return handle_database_error(error);
     }
 
-    HttpResponse::NoContent().finish()
+    read_all_event_staff(event_id, StaffFilter { limit: None, offset: None }, event_staff_repo).await
 }
 
 async fn prepare_staff_registration_panel(
