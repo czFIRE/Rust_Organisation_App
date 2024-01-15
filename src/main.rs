@@ -4,6 +4,7 @@ mod handlers;
 mod models;
 mod repositories;
 mod templates;
+mod utils;
 
 use actix_files::Files as ActixFiles;
 use actix_web::{middleware::Logger, App, HttpServer};

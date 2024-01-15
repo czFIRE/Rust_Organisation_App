@@ -3,12 +3,11 @@ use std::str::FromStr;
 use crate::{
     errors::{handle_database_error, parse_error},
     repositories::user::models::{NewUser, UserData},
-    templates::user::{UserEditTemplate, UserLiteTemplate, UserTemplate, UsersTemplate},
+    templates::user::{UserEditTemplate, UserLiteTemplate, UserTemplate, UsersTemplate}, utils::format_check::check::check_email_validity,
 };
 use actix_web::{delete, get, http, patch, post, put, web, HttpResponse};
 use askama::Template;
 use chrono::Utc;
-use regex::Regex;
 use uuid::Uuid;
 
 use crate::repositories::user::user_repo::UserRepository;
@@ -104,12 +103,6 @@ pub async fn toggle_user_edit(
     }
 
     handle_database_error(result.expect_err("Should be error."))
-}
-
-fn check_email_validity(email: String) -> bool {
-    let email_regex = Regex::new(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$").expect("Should be valid.");
-    let email_captures = email_regex.captures(email.as_str());
-    email_captures.is_some()
 }
 
 fn validate_new_user(new_user: NewUser) -> bool {
