@@ -11,13 +11,15 @@ use std::ops::DerefMut;
 use std::sync::Arc;
 use uuid::Uuid;
 
-/// Reads all workdays of a specific timesheet.
-async fn read_all_timesheet_workdays_db_using_tx(
+/// Reads workdays of a specific timesheet that match a requested date range.
+async fn read_some_timesheet_workdays_db_using_tx(
     tx: &mut Transaction<'_, sqlx::Postgres>,
-    timesheet: &TimesheetWithEvent)
+    timesheet_id: Uuid,
+    date_from: NaiveDate,
+    date_to: NaiveDate)
     -> DbResult<Vec<Workday>> {
 
-    let workdays = sqlx::query_as!(
+    sqlx::query_as!(
         Workday,
         r#"
         SELECT timesheet_id,
@@ -32,14 +34,30 @@ async fn read_all_timesheet_workdays_db_using_tx(
           AND date >= $2
           AND date <= $3;
         "#,
+        timesheet_id,
+        date_from,
+        date_to,
+    )
+    .fetch_all(tx.deref_mut())
+        .await
+}
+
+/// Reads all workdays of a specific timesheet.
+async fn read_all_timesheet_workdays_db_using_tx(
+    tx: &mut Transaction<'_, sqlx::Postgres>,
+    timesheet: &TimesheetWithEvent)
+    -> DbResult<Vec<Workday>> {
+
+    //
+    // Pass timesheet's start and end date respectively
+    // in order to get all its workdays.
+    //
+    read_some_timesheet_workdays_db_using_tx(
+        tx,
         timesheet.id,
         timesheet.start_date,
         timesheet.end_date,
-    )
-    .fetch_all(tx.deref_mut())
-        .await?;
-
-    Ok(workdays)
+    ).await
 }
 
 
@@ -537,5 +555,115 @@ impl TimesheetRepository {
         };
 
         Ok(edited_data)
+    }
+
+    pub async fn read_all_with_date_from_to_per_employment(
+        &self,
+        user_id: Uuid,
+        company_id: Uuid,
+        date_from: NaiveDate,
+        date_to: NaiveDate,
+        omit_workdays_outside_of_date_range: bool,
+    ) -> DbResult<Vec<TimesheetWithWorkdays>> {
+        // This is for redis.
+
+        self.read_all_with_date_from_to_per_employment_db(
+            user_id, company_id,
+            date_from, date_to,
+            omit_workdays_outside_of_date_range,
+        ).await
+    }
+
+    ///
+    /// Reads all timesheets of specific employee (along with their workdays)
+    /// that at least partially fall into a requested date range.
+    ///
+    pub async fn read_all_with_date_from_to_per_employment_db(
+        &self,
+        user_id: Uuid,
+        company_id: Uuid,
+        date_from: NaiveDate,
+        date_to: NaiveDate,
+        omit_workdays_outside_of_date_range: bool,
+    ) -> DbResult<Vec<TimesheetWithWorkdays>> {
+
+        if date_from > date_to {
+            //
+            // todo later: Return a meaningful error type, sqlx::error::Error
+            //             does not seem to contain one.
+            //
+            return Err(sqlx::Error::RowNotFound);
+        }
+
+        let mut tx = self.pool.begin().await?;
+
+        // Get all timesheets which match a required date range.
+        let timesheets = sqlx::query_as!(
+            TimesheetWithEvent,
+            r#"
+            SELECT timesheet.id,
+                   timesheet.start_date,
+                   timesheet.end_date,
+                   total_hours,
+                   is_editable,
+                   status AS "approval_status!: ApprovalStatus",
+                   manager_note AS "manager_note?",
+                   user_id,
+                   company_id,
+                   event_id,
+                   event.avatar_url AS event_avatar_url,
+                   event.name AS event_name,
+                   timesheet.created_at,
+                   timesheet.edited_at
+            FROM timesheet
+             JOIN event ON timesheet.event_id = event.id
+            WHERE user_id = $1
+              AND company_id = $2
+              AND timesheet.start_date <= $3
+              AND timesheet.end_date >= $4
+              AND timesheet.deleted_at IS NULL;
+            "#,
+            user_id,
+            company_id,
+            date_to,
+            date_from,
+        )
+        .fetch_all(tx.deref_mut())
+        .await?;
+
+        let mut timesheets_with_workdays = vec![];
+
+        if timesheets.is_empty() {
+            return Ok(timesheets_with_workdays);
+        }
+
+        // Iterate each timesheet and attach its workdays.
+        for timesheet in timesheets.iter() {
+            let workdays = match omit_workdays_outside_of_date_range {
+                true => {
+                    read_some_timesheet_workdays_db_using_tx(
+                        &mut tx, timesheet.id,
+                        date_from, date_to)
+                        .await?
+
+                },
+                false => {
+                    read_all_timesheet_workdays_db_using_tx(
+                        &mut tx, &timesheet.clone())
+                        .await?
+                }
+            };
+
+            timesheets_with_workdays.push(
+                TimesheetWithWorkdays{
+                    timesheet: timesheet.clone(),
+                    workdays,
+                }
+            );
+        }
+
+        tx.commit().await?;
+
+        Ok(timesheets_with_workdays)
     }
 }

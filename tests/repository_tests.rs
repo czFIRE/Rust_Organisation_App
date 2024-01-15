@@ -3538,4 +3538,99 @@ mod timesheet_repo_tests {
                 .expect_err("Should not succeed.");
         }
     }
+
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn read_all_with_date_from_to_per_employment(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
+
+        let timesheet_repo = TimesheetRepository::new(arc_pool);
+
+        {
+            let user_id = USER1_ID;
+            let company_id = COMPANY1_ID;
+
+            //
+            // Check 1 timesheet is returned
+            // and it has only **2 workays** (as we request
+            // to omit workdays that are outside of `date range`).
+            //
+            {
+                let result = timesheet_repo
+                    .read_all_with_date_from_to_per_employment(
+                        user_id, company_id,
+                        NaiveDate::from_ymd_opt(1969, 7, 28).unwrap(),
+                        NaiveDate::from_ymd_opt(1969, 7, 31).unwrap(),
+                        true)
+                    .await
+                    .expect("Should succeed");
+                assert_eq!(result.len(), 1);
+                assert_eq!(result[0].workdays.len(), 2);
+            }
+
+            //
+            // Check 1 timesheet is returned
+            // and it has all its workdays (as we request
+            // to include workdays that are outside of `date range`).
+            //
+            {
+                let result = timesheet_repo
+                    .read_all_with_date_from_to_per_employment(
+                        user_id, company_id,
+                        NaiveDate::from_ymd_opt(1969, 7, 28).unwrap(),
+                        NaiveDate::from_ymd_opt(1969, 7, 31).unwrap(),
+                        false)
+                    .await
+                    .expect("Should succeed");
+                assert_eq!(result.len(), 1);
+                assert_eq!(result[0].workdays.len(), 6);
+            }
+
+            // check two timesheets are returned
+            {
+                let result = timesheet_repo
+                    .read_all_with_date_from_to_per_employment(
+                        user_id, company_id,
+                        NaiveDate::from_ymd_opt(1969, 7, 28).unwrap(),
+                        NaiveDate::from_ymd_opt(1969, 8, 30).unwrap(),
+                        true)
+                    .await
+                    .expect("Should succeed");
+                assert_eq!(result.len(), 2);
+                assert_eq!(result[0].workdays.len(), 3);
+                assert_eq!(result[1].workdays.len(), 6);
+            }
+
+            // check date range yielding nothing
+            {
+                let result = timesheet_repo
+                    .read_all_with_date_from_to_per_employment(
+                        user_id, company_id,
+                        NaiveDate::from_ymd_opt(1969, 8, 26).unwrap(),
+                        NaiveDate::from_ymd_opt(1969, 9, 10).unwrap(),
+                        false)
+                    .await
+                    .expect("Should succeed");
+                assert_eq!(result.len(), 0);
+            }
+        }
+
+        //
+        // Check no timesheet is returned when we request a date range
+        // that's outside of employee's work window.
+        //
+        {
+            let user_id = USER2_ID;
+            let company_id = COMPANY1_ID;
+
+            let result = timesheet_repo
+                .read_all_with_date_from_to_per_employment(
+                    user_id, company_id,
+                    NaiveDate::from_ymd_opt(1969, 9, 1).unwrap(),
+                    NaiveDate::from_ymd_opt(2020, 12, 31).unwrap(),
+                    true)
+                .await
+                .expect("Should succeed");
+            assert_eq!(result.len(), 0);
+        }
+    }
 }
