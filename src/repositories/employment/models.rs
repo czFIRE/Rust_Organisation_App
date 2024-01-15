@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::{
     models::{EmployeeLevel, EmploymentContract, Gender, UserRole, UserStatus},
-    repositories::{company::models::Company, user::models::User},
+    repositories::{company::models::Company, user::models::User}, utils::deserialize_str_float::deserialize_float::de_f64_from_string,
 };
 
 #[derive(Debug, Deserialize, Clone)]
@@ -13,6 +13,7 @@ pub struct NewEmployment {
     pub user_id: Uuid,
     pub company_id: Uuid,
     pub manager_id: Option<Uuid>,
+    #[serde(deserialize_with = "de_f64_from_string")]
     pub hourly_wage: f64,
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,

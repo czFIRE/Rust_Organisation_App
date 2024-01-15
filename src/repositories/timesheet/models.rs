@@ -1,4 +1,4 @@
-use crate::{common::de_opt_from_string, models::ApprovalStatus};
+use crate::{models::ApprovalStatus, utils::deserialize_str_float::deserialize_float::de_f32_from_opt_string};
 use chrono::{NaiveDate, NaiveDateTime};
 use serde::Deserialize;
 use sqlx::prelude::FromRow;
@@ -48,7 +48,7 @@ pub struct TimeRange {
 pub struct WorkdayUpdateData {
     pub timesheet_id: Uuid,
     pub date: NaiveDate,
-    #[serde(deserialize_with = "de_opt_from_string")]
+    #[serde(deserialize_with = "de_f32_from_opt_string")]
     pub total_hours: Option<f32>,
     pub comment: Option<String>,
     pub is_editable: Option<bool>,
@@ -58,6 +58,7 @@ pub struct WorkdayUpdateData {
 pub struct TimesheetUpdateData {
     pub start_date: Option<NaiveDate>,
     pub end_date: Option<NaiveDate>,
+    #[serde(deserialize_with = "de_f32_from_opt_string")]
     pub total_hours: Option<f32>,
     pub is_editable: Option<bool>,
     pub status: Option<ApprovalStatus>,

@@ -2,9 +2,12 @@
      class="flex
             flex-col
             space-y-5
-            items-center">
+            items-center
+            w-full
+            p-5
+            bg-foreground1">
     <div id="title">
-        <h2 class="font-mono
+        <h3 class="font-mono
                    text-2xl
                    font-extrabold
                    text-txthl">Subordinates</h2>
@@ -16,8 +19,8 @@
                 pr-10
                 items-start
                 w-max
-                bg-foreground1">
-        <div class="bg-foreground1 
+                bg-foreground2">
+        <div class="bg-foreground2 
                     w-24
                     h-24
                     rounded-md">
@@ -30,8 +33,8 @@
                     space-y-1
                     items-start
                     align-middle">
-            <p class="font-mono
-                      text-2xl
+            <h4 class="font-mono
+                      text-xl
                       text-txthl
                       font-bold">{{ subordinate.user_name }}</p>
             <div class="flex
@@ -40,13 +43,14 @@
                         items-start
                         align-middle">
                 <p class="font-mono
-                          text-xl
+                          text-lg
                           text-txt"><b>Type:</b> {{ subordinate.employment_type }}</p>
-                <button hx-get="/user/{{ subordinate.user_id }}/employment/{{ subordinate.company_id }}/mode/{{ user_id }}" hx-target="#content" hx-swap="innerHTML">
-                    <p class="font-mono
-                              text-xl
-                              text-txthl">Edit Employment</p>
-                </button>
+                <button hx-get="/user/{{ subordinate.user_id }}/employment/{{ subordinate.company_id }}/mode/{{ user_id }}"
+                        hx-target="#content"
+                        hx-swap="innerHTML"
+                        class="font-mono
+                               text-lg
+                             text-txthl">Edit Employment</button>
             </div>
             <div class="flex
                         flex-row
@@ -66,7 +70,7 @@
                           d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z" />
                 </svg>
                 <p class="font-mono
-                          text-xl
+                          text-lg
                           text-txt">{{subordinate.start_date.format("%d.%m.%Y").to_string()}} - {{subordinate.end_date.format("%d.%m.%Y").to_string()}}</p>
             </div>
         </div>

@@ -7,7 +7,7 @@ use crate::{
     repositories::employment::models::{EmploymentData, NewEmployment},
     templates::employment::{
         EmploymentEditTemplate, EmploymentLite, EmploymentTemplate, SubordinatesTemplate,
-    },
+    }, utils::deserialize_str_float::deserialize_float::de_f64_from_opt_string,
 };
 use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;
@@ -25,6 +25,7 @@ use crate::{
 pub struct EmploymentUpdateData {
     pub editor_id: Uuid,
     pub manager_id: Option<Uuid>,
+    #[serde(deserialize_with = "de_f64_from_opt_string")]
     pub hourly_wage: Option<f64>,
     pub start_date: Option<NaiveDate>,
     pub end_date: Option<NaiveDate>,
@@ -253,7 +254,15 @@ pub async fn update_employment(
     if is_data_invalid(employment_data.clone()) {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
-
+    if employment_data.hourly_wage.is_some() {
+        println!("----------------------");
+        println!("NEW PAY: {}", employment_data.hourly_wage.unwrap());
+        println!("----------------------");
+    } else {
+        println!("----------------------");
+        println!("NEW PAY IS NONE");
+        println!("----------------------");
+    }
     let parsed_ids = extract_path_tuple_ids(path.into_inner());
     if parsed_ids.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
@@ -286,8 +295,7 @@ pub async fn update_employment(
 
     let data = EmploymentData {
         manager_id: employment_data.manager_id,
-        hourly_wage: None,
-        // hourly_wage: employment_data.hourly_wage.into(),
+        hourly_wage: employment_data.hourly_wage,
         start_date: employment_data.start_date,
         end_date: employment_data.end_date,
         description: employment_data.description.clone(),
