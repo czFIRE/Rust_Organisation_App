@@ -7,7 +7,8 @@ use crate::{
     repositories::employment::models::{EmploymentData, NewEmployment},
     templates::employment::{
         EmploymentEditTemplate, EmploymentLite, EmploymentTemplate, SubordinatesTemplate,
-    }, utils::deserialize_str_float::deserialize_float::de_f64_from_opt_string,
+    },
+    utils::deserialize_str_float::deserialize_float::de_f64_from_opt_string,
 };
 use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;

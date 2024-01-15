@@ -1,4 +1,6 @@
-use crate::{models::ApprovalStatus, utils::deserialize_str_float::deserialize_float::de_f32_from_opt_string};
+use crate::{
+    models::ApprovalStatus, utils::deserialize_str_float::deserialize_float::de_f32_from_opt_string,
+};
 use chrono::{NaiveDate, NaiveDateTime};
 use serde::Deserialize;
 use sqlx::prelude::FromRow;

@@ -5,7 +5,8 @@ use uuid::Uuid;
 
 use crate::{
     models::{EmployeeLevel, EmploymentContract, Gender, UserRole, UserStatus},
-    repositories::{company::models::Company, user::models::User}, utils::deserialize_str_float::deserialize_float::de_f64_from_string,
+    repositories::{company::models::Company, user::models::User},
+    utils::deserialize_str_float::deserialize_float::de_f64_from_string,
 };
 
 #[derive(Debug, Deserialize, Clone)]
