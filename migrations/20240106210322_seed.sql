@@ -19,6 +19,10 @@ DECLARE
   user3_id UUID := '51a01dbf-dcd5-43a0-809c-94ed8e61d420';
   user4_id UUID := '30eff81e-a8d9-4ddc-b92e-e4b58e145920';
   user5_id UUID := 'ced9f31c-8662-4812-9005-b8ae85d3b951';
+  user6_id UUID := '4a799b2c-3b5f-41ec-a6e3-442cef915051';
+  user7_id UUID := 'ac6ca4f1-0654-4815-b3b3-2fe7c50c173c';
+  user8_id UUID := '68d792bb-6c78-4cd5-94c5-8db6f162b586';
+  user9_id UUID := '8a4e01c6-a7f7-48dd-be76-f4816a21b888';
 
   event0_id UUID := 'b71fd7ce-c891-410a-9bb4-70fc5c7748f8';
   event1_id UUID := '3f152d12-0bbd-429a-a9c5-28967d6370cc';
@@ -169,6 +173,30 @@ BEGIN
         (user5_id, 'Alan Papalochus', 'alan@pap.cz', '1968-08-01', 'alan.jpg',
         'male', 'user', 'available',
         '2024-01-01 10:33', '2024-01-01 10:33');
+    
+    INSERT INTO user_record 
+	    (id, name, email, birth, 
+	     gender, role, status) 
+    VALUES (user6_id, 'James Bean', 'jamesbean176@snailmail.com',
+            '1999-07-02', 'male', 'user', 'available');
+
+    INSERT INTO user_record 
+        (id, name, email, birth, 
+        gender, role, status) 
+    VALUES (user7_id, 'Rick Grimes', 'python@cowboy.com',
+            '1987-05-06', 'male', 'user', 'available');
+
+    INSERT INTO user_record 
+        (id, name, email, birth, 
+        gender, role, status) 
+    VALUES (user8_id, 'Ferris McRustacean', 'crab@rave.com',
+            '2015-05-15', 'other', 'user', 'available');
+
+    INSERT INTO user_record 
+        (id, name, email, birth, 
+        gender, role, status) 
+    VALUES (user9_id, 'Borra Checker', 'cannot@borrow.var',
+            '2015-05-15', 'female', 'admin', 'available');
 
 --------------------------------------------------------------------------------
 
@@ -224,7 +252,7 @@ BEGIN
         VALUES
         (user3_id, company2_id, NULL, 150,
         '2023-01-01', '2025-01-01', '-',
-        'dpp', 'basic',
+        'dpp', 'company_administrator',
         '2022-12-29 12:38', '2023-12-10 14:52');
 
     INSERT INTO employment
@@ -238,6 +266,48 @@ BEGIN
         'dpc', 'basic',
         '2023-12-30 11:38', '2023-12-31 14:52');
 
+    INSERT INTO employment 
+        (user_id, company_id, manager_id, hourly_wage,
+        start_date, end_date, description, type, level)
+        VALUES (user6_id, company0_id, user0_id, 250.0,
+            '2020-01-01', '9999-12-31', 'Concert catering evaluator',
+            'hpp', 'basic');
+        
+    INSERT INTO employment 
+        (user_id, company_id, manager_id, hourly_wage,
+        start_date, end_date, description, type, level)
+        VALUES (user7_id, company0_id, user0_id, 500,
+            '2010-10-31', '9999-12-31', 'Head of Security',
+            'hpp', 'manager');
+        
+    INSERT INTO employment 
+        (user_id, company_id, manager_id, hourly_wage,
+        start_date, end_date, description, type, level)
+        VALUES (user8_id, company0_id, user0_id, 200,
+            '2024-01-01', '2025-12-31', 'Crab Herder',
+            'dpp', 'basic');
+        
+    INSERT INTO employment 
+        (user_id, company_id, manager_id, hourly_wage,
+        start_date, end_date, description, type, level)
+    VALUES (user8_id, company1_id, user0_id, 200,
+	    '2024-01-01', '2025-12-31', 'RAII Ambassador',
+	    'dpp', 'basic');
+
+    INSERT INTO employment 
+        (user_id, company_id, manager_id, hourly_wage,
+        start_date, end_date, description, type, level)
+        VALUES (user9_id, company0_id, user0_id, 200,
+            '2020-02-01', '2024-12-31', 'Equipment Loan Supervisor',
+            'dpc', 'basic');
+
+    INSERT INTO employment 
+        (user_id, company_id, manager_id, hourly_wage,
+        start_date, end_date, description, type, level)
+    VALUES (user8_id, company2_id, user3_id, 800,
+        '2019-01-01', '9999-12-31', 'Head of Rave Tech Research',
+        'hpp', 'manager');
+        
 --------------------------------------------------------------------------------
 
     INSERT INTO event
