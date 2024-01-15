@@ -1,0 +1,75 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT company.id AS company_id,\n                   company.name AS company_name,\n                   employment.type AS \"employment_type!: EmploymentContract\",\n                   employment.level AS \"employment_level!: EmployeeLevel\",\n                   associated_company.event_id AS event_id,\n                   employment.user_id AS user_id\n            FROM associated_company\n            INNER JOIN employment ON employment.company_id = associated_company.company_id\n            INNER JOIN company ON associated_company.company_id = company.id\n            WHERE associated_company.deleted_at IS NULL\n              AND employment.deleted_at IS NULL\n              AND company.deleted_at IS NULL\n              AND associated_company.event_id = $1\n              AND employment.user_id = $2;\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "company_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "company_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "employment_type!: EmploymentContract",
+        "type_info": {
+          "Custom": {
+            "name": "employment_contract",
+            "kind": {
+              "Enum": [
+                "dpp",
+                "dpc",
+                "hpp"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "employment_level!: EmployeeLevel",
+        "type_info": {
+          "Custom": {
+            "name": "employee_level",
+            "kind": {
+              "Enum": [
+                "basic",
+                "manager",
+                "company_administrator"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "event_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 5,
+        "name": "user_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "d9204d8d6cd94d81780bf28473b4a26ac4dd50f4a08104a8ab6e382845ddc859"
+}

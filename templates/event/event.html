@@ -105,10 +105,11 @@
                     </p>
                     {%- endif %}
                 </div>
-                <!-- The usage of hx-include here feels a litte hacky, to be frank. -->
-                <button hx-get="/event/{{ id }}/staff-panel"
-                        hx-include="#user_id"
+                <!-- We can use -some- javascript, right??????? -->
+                <button hx-get="/event/{{ id }}/staff-panel/{user_id}"
+                        hx-vals='js:{"user_id": document.getElementById("user_id").value}'
                         hx-swap="innerHTML"
+                        hx-ext="path-params"
                         hx-target="#content"
                         class="font-mono
                                 text-lg

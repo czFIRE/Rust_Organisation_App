@@ -56,6 +56,18 @@ pub struct StaffLite {
     pub role: EventRole,
 }
 
+impl From<StaffExtended> for StaffLite {
+    fn from(value: StaffExtended) -> Self {
+        StaffLite {
+            id: value.id,
+            user: value.user,
+            company: value.company,
+            event_id: value.event_id,
+            role: value.role,
+        }
+    }
+}
+
 #[derive(Debug, Deserialize, Clone)]
 pub struct StaffData {
     pub role: Option<EventRole>,

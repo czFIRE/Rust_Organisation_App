@@ -85,14 +85,29 @@ pub async fn create_event_comment(
     };
 
     let result = comment_repo.create(data).await;
-    if let Ok(comment) = result {
-        let template: CommentTemplate = comment.into();
+    if result.is_err() {
+        return handle_database_error(result.expect_err("Should be an error here."));
+    }
+
+    let comments_result = comment_repo
+        .read_all_per_event(
+            parsed_id,
+            CommentFilter {
+                limit: None,
+                offset: None,
+            },
+        )
+        .await;
+    if let Ok(comment) = comments_result {
+        let comments: Vec<CommentTemplate> =
+            comment.into_iter().map(|comment| comment.into()).collect();
+        let template = CommentsTemplate { comments };
         let body = template.render();
         if body.is_err() {
             return HttpResponse::InternalServerError()
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
-        return HttpResponse::Created()
+        return HttpResponse::Ok()
             .content_type("text/html")
             .body(body.expect("Should be valid now."));
     }

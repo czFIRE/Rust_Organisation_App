@@ -1,0 +1,12 @@
+<script>
+    document.getElementById('misc_info').value = '{{ requester.id }}';
+</script>
+
+<div id="staff-members"
+     hx-trigger="load"
+     hx-swap="innerHTML"
+     hx-get="/event/{{requester.event_id}}/staff">
+
+</div>
+
+{{ requester.id }}

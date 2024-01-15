@@ -119,3 +119,9 @@ impl From<AssignedStaffExtended> for AssignedStaffTemplate {
 pub struct AllAssignedStaffTemplate {
     pub staff: Vec<AssignedStaffTemplate>,
 }
+
+#[derive(Template, Deserialize)]
+#[template(path = "event/staff/staff-management.html")]
+pub struct EventStaffManagementTemplate {
+    pub requester: StaffLite,
+}

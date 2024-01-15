@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT \n                id, \n                name, \n                email, \n                birth, \n                avatar_url, \n                gender AS \"gender!: Gender\", \n                role AS \"role!: UserRole\", \n                status AS \"status!: UserStatus\", \n                created_at, \n                edited_at, \n                deleted_at \n            FROM \n                user_record \n            ",
+  "query": "SELECT \n                id, \n                name, \n                email, \n                birth, \n                avatar_url, \n                gender AS \"gender!: Gender\", \n                role AS \"role!: UserRole\", \n                status AS \"status!: UserStatus\", \n                created_at, \n                edited_at, \n                deleted_at \n            FROM \n                user_record\n            WHERE\n                deleted_at IS NULL\n            ",
   "describe": {
     "columns": [
       {
@@ -107,5 +107,5 @@
       true
     ]
   },
-  "hash": "90d1cba343d8dfb9797c62980f43b1b094b52a8c970bb160c139d1bf2bd15e57"
+  "hash": "c3909fb8b34aca97f2c6bb98ca844420e78a13094245fa63e35f3c9666217eac"
 }

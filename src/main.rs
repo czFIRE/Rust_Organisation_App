@@ -16,6 +16,7 @@ use std::sync::Arc;
 
 use crate::handlers::employment::toggle_employment_edit;
 use crate::handlers::event::toggle_event_edit_mode;
+use crate::handlers::event_staff::initialize_staff_management_panel;
 use crate::handlers::event_staff::initialize_staff_panel;
 use crate::handlers::timesheet::get_work_day;
 use crate::handlers::timesheet::toggle_work_day_edit_mode;
@@ -177,6 +178,7 @@ async fn main() -> Result<()> {
             .service(delete_all_rejected_event_staff)
             .service(delete_event_staff)
             .service(initialize_staff_panel)
+            .service(initialize_staff_management_panel)
             .service(get_all_associated_companies)
             .service(get_all_associated_companies_per_event_and_user)
             .service(create_associated_company)

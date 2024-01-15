@@ -54,10 +54,14 @@
     </div>
 </div>
 
-<nav id="topbar" hx-swap-oob="true" class="grid grid-cols-10 gap-4 bg-foreground1 py-3">
+<nav id="topbar"
+     hx-swap-oob="true" 
+     class="grid grid-cols-10 gap-4 bg-foreground1 py-3">
     <h1 class="col-span-2 font-mono text-4xl font-extrabold text-txt ml-5">Orchestrate</h1>
     <div class="col-span-4"></div>
     <div class="space-x-5 col-span-4 flex flex-row items-end align-middle">
+        <input class="hidden" id="user_id" name="user_id" value="{{ id }}">
+        <input class="hidden" id="misc_info" name="misc_info" value="">
         <button hx-get="/event" hx-target="#content">
             <p class="font-mono text-xl text-txthl">Events</p>
         </button>
@@ -70,6 +74,5 @@
         <button hx-get="/user/{{ id }}" hx-target="#content">
             <p class="font-mono text-xl text-txthl">My Account</p>
         </button>
-        <input class="hidden" id="user_id" name="user_id" value="{{ id }}">
     </div>
 </nav>
