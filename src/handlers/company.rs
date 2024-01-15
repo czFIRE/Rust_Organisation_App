@@ -12,7 +12,8 @@ use crate::{
         company_repo::CompanyRepository,
         models::{AddressData, AddressUpdateData, CompanyData, CompanyFilter, NewCompany},
     },
-    templates::company::{CompaniesTemplate, CompanyLite, CompanyTemplate}, utils::format_check::check::{check_email_validity, check_phone_validity},
+    templates::company::{CompaniesTemplate, CompanyLite, CompanyTemplate},
+    utils::format_check::check::{check_email_validity, check_phone_validity},
 };
 
 #[derive(Deserialize, Clone)]

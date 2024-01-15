@@ -3,7 +3,8 @@ use std::str::FromStr;
 use crate::{
     errors::{handle_database_error, parse_error},
     repositories::user::models::{NewUser, UserData},
-    templates::user::{UserEditTemplate, UserLiteTemplate, UserTemplate, UsersTemplate}, utils::format_check::check::check_email_validity,
+    templates::user::{UserEditTemplate, UserLiteTemplate, UserTemplate, UsersTemplate},
+    utils::format_check::check::check_email_validity,
 };
 use actix_web::{delete, get, http, patch, post, put, web, HttpResponse};
 use askama::Template;

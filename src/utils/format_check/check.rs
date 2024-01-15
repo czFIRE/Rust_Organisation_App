@@ -1,5 +1,6 @@
 pub fn check_email_validity(email: String) -> bool {
-    let email_regex = Regex::new(r"^[a-zA-Z0-9. _-]+@[a-zA-Z0-9. -]+\. [a-zA-Z]{2,4}$").expect("Should be valid.");
+    let email_regex = Regex::new(r"^[a-zA-Z0-9. _-]+@[a-zA-Z0-9. -]+\. [a-zA-Z]{2,4}$")
+        .expect("Should be valid.");
     let email_captures = email_regex.captures(email.as_str());
     email_captures.is_some()
 }
