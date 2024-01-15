@@ -6,7 +6,7 @@ DO $$
 -- Note: We could also generate UUID values automatically using
 --       `DEFAULT` constraint and then assign UUID to a variable with the use
 --       of `RETURNING id into <variable>`, but this is more convenient
---       as UUIDs will stay same after each execution of this SQL scriopt.
+--       as UUIDs will stay same after each execution of this SQL script.
 --
 DECLARE
   company0_id UUID := 'b5188eda-528d-48d4-8cee-498e0971f9f5';
@@ -21,7 +21,7 @@ DECLARE
   user5_id UUID := 'ced9f31c-8662-4812-9005-b8ae85d3b951';
 
   event0_id UUID := 'b71fd7ce-c891-410a-9bb4-70fc5c7748f8';
-  event1_id UUID :='3f152d12-0bbd-429a-a9c5-28967d6370cc';
+  event1_id UUID := '3f152d12-0bbd-429a-a9c5-28967d6370cc';
 
   timesheet0_id UUID := 'd47e8141-a77e-4d55-a2d5-4a77de24b6d0';
   timesheet1_id UUID := '0f0f0ff5-0073-47cc-bd1f-540a04fee9ea';
