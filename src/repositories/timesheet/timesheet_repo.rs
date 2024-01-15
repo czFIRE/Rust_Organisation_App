@@ -11,6 +11,38 @@ use std::ops::DerefMut;
 use std::sync::Arc;
 use uuid::Uuid;
 
+/// Reads all workdays of a specific timesheet.
+async fn read_all_timesheet_workdays_db_using_tx(
+    tx: &mut Transaction<'_, sqlx::Postgres>,
+    timesheet: &TimesheetWithEvent)
+    -> DbResult<Vec<Workday>> {
+
+    let workdays = sqlx::query_as!(
+        Workday,
+        r#"
+        SELECT timesheet_id,
+               date,
+               total_hours,
+               comment AS "comment?",
+               is_editable,
+               created_at,
+               edited_at
+        FROM workday
+        WHERE timesheet_id = $1
+          AND date >= $2
+          AND date <= $3;
+        "#,
+        timesheet.id,
+        timesheet.start_date,
+        timesheet.end_date,
+    )
+    .fetch_all(tx.deref_mut())
+        .await?;
+
+    Ok(workdays)
+}
+
+
 #[derive(Clone)]
 pub struct TimesheetRepository {
     pub pool: Arc<PgPool>,
@@ -162,25 +194,8 @@ impl TimesheetRepository {
 
         let sheet_clone = timesheet.clone().unwrap();
 
-        let workdays = sqlx::query_as!(
-            Workday,
-            r#"SELECT timesheet_id,
-                    date, 
-                    total_hours, 
-                    comment AS "comment?", 
-                    is_editable,
-                    created_at,
-                    edited_at 
-            FROM workday 
-            WHERE timesheet_id = $1
-              AND date >= $2
-              AND date <= $3;"#,
-            timesheet_id,
-            sheet_clone.start_date,
-            sheet_clone.end_date,
-        )
-        .fetch_all(tx.deref_mut())
-        .await?;
+        let workdays = read_all_timesheet_workdays_db_using_tx(
+            &mut tx, &sheet_clone).await?;
 
         let result = TimesheetWithWorkdays {
             timesheet: timesheet.expect("Should be valid here."),
