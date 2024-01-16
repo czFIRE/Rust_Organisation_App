@@ -3634,3 +3634,59 @@ mod timesheet_repo_tests {
         }
     }
 }
+
+#[cfg(test)]
+mod wage_preset_repo_tests {
+    use std::sync::Arc;
+
+    use chrono::NaiveDate;
+    use organization::{
+        common::DbResult,
+        repositories::{
+            wage_preset::{
+                wage_preset_repo::WagePresetRepository,
+                models::WagePreset,
+            },
+            repository::DbRepository,
+        },
+    };
+    use sqlx::PgPool;
+
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn read_one(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut wage_preset_repo = WagePresetRepository::new(arc_pool);
+
+        {
+            let name = "cz_2024-01-01".to_string();
+
+            let preset = wage_preset_repo
+                .read_one(&name)
+                .await
+                .expect("Should succeed");
+            assert_eq!(preset.currency, "CZK");
+        }
+
+        wage_preset_repo.disconnect().await;
+
+        Ok(())
+    }
+
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn read_all(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut wage_preset_repo = WagePresetRepository::new(arc_pool);
+
+        let presets = wage_preset_repo
+            .read_all()
+            .await
+            .expect("Should succeed");
+        assert_eq!(presets.len(), 1);
+
+        wage_preset_repo.disconnect().await;
+
+        Ok(())
+    }
+}

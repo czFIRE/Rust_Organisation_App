@@ -277,7 +277,7 @@ BEGIN
 
     INSERT INTO event
         (id, name,
-		description,
+        description,
         website, accepts_staff,
         start_date, end_date, avatar_url,
         created_at, edited_at)
@@ -607,6 +607,37 @@ BEGIN
         (comment2_id, event1_id, NULL, user2_id,
         'This gets organized for the 3rd time ;)',
         '2023-05-03 10:00', '2023-05-03 10:05');
+
+--------------------------------------------------------------------------------
+
+    INSERT INTO wage_preset
+        (name,
+        valid_from,
+        description,
+        currency,
+        monthly_dpp_employee_no_tax_limit,
+        monthly_dpp_employer_no_tax_limit,
+        monthly_dpc_employee_no_tax_limit,
+        monthly_dpc_employer_no_tax_limit,
+        health_insurance_employee_tax_pct, social_insurance_employee_tax_pct,
+        health_insurance_employer_tax_pct, social_insurance_employer_tax_pct,
+        min_hourly_wage,
+        min_monthly_hpp_salary,
+        created_at, edited_at)
+    VALUES
+        ('cz_2024-01-01',
+        '2024-01-01',
+        'A wage params valid for Czech republic starting from 2024/01/01',
+        'CZK',
+        10000,
+        10000,
+         4000,
+         4000,
+         4.5, 6.5,
+         24.8, 9.0,
+         118.13,
+         18900,
+        '2023-12-16 14:00', '2023-12-17 10:05');
 
 --------------------------------------------------------------------------------
 

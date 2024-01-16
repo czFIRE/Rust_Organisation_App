@@ -9,3 +9,4 @@ pub mod repository;
 pub mod task;
 pub mod timesheet;
 pub mod user;
+pub mod wage_preset;
