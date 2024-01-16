@@ -15,6 +15,9 @@ use std::io::Result;
 
 use std::sync::Arc;
 
+use crate::handlers::comment::get_comment;
+use crate::handlers::comment::open_comment_update_mode;
+use crate::handlers::comment::open_event_comments_for_user;
 use crate::handlers::company::get_company_edit_mode;
 use crate::handlers::employment::toggle_employment_create;
 use crate::handlers::employment::toggle_employment_edit;
@@ -54,8 +57,8 @@ use crate::handlers::{
         get_all_associated_companies_per_event_and_user, update_associated_company,
     },
     comment::{
-        create_event_comment, create_task_comment, delete_comment, get_all_event_comments,
-        get_all_task_comments, update_comment,
+        create_event_comment, create_task_comment, delete_comment, get_all_task_comments, 
+        update_comment,
     },
     company::{
         create_company, delete_company, get_all_companies, get_company, get_company_avatar,
@@ -195,10 +198,12 @@ async fn main() -> Result<()> {
             .service(create_associated_company)
             .service(update_associated_company)
             .service(delete_associated_company)
-            .service(get_all_event_comments)
+            .service(open_event_comments_for_user)
             .service(create_event_comment)
             .service(get_all_task_comments)
             .service(create_task_comment)
+            .service(open_comment_update_mode)
+            .service(get_comment)
             .service(update_comment)
             .service(delete_comment)
             .service(get_all_timesheets_for_employment)

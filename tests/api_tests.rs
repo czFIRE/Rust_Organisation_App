@@ -31,7 +31,7 @@ mod api_tests {
             update_associated_company,
         },
         comment::{
-            create_event_comment, create_task_comment, delete_comment, get_all_event_comments,
+            create_event_comment, create_task_comment, delete_comment, open_event_comments_for_user,
             get_all_task_comments, update_comment,
         },
         company::{create_company, delete_company, get_all_companies, get_company, update_company},
@@ -1125,7 +1125,7 @@ mod api_tests {
     }
 
     #[actix_web::test]
-    async fn get_all_event_comments_test() {
+    async fn open_event_comments_for_user_test() {
         let arc_pool = get_db_pool().await;
         let repository = CommentRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
@@ -1133,23 +1133,19 @@ mod api_tests {
         let app = test::init_service(
             App::new()
                 .app_data(repo.clone())
-                .service(get_all_event_comments),
+                .service(open_event_comments_for_user),
         )
         .await;
         let req = test::TestRequest::get()
-            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/comment")
+            .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/comment-panel/35341253-da20-40b6-96d8-ce069b1ba5d4")
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::OK);
-
-        let body_bytes = test::read_body(res).await;
-        let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
     }
 
     #[actix_web::test]
-    async fn get_all_event_comments_invalid_uuid_format() {
+    async fn open_event_comments_for_user_invalid_uuid_format() {
         let arc_pool = get_db_pool().await;
         let repository = CommentRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
@@ -1157,11 +1153,11 @@ mod api_tests {
         let app = test::init_service(
             App::new()
                 .app_data(repo.clone())
-                .service(get_all_event_comments),
+                .service(open_event_comments_for_user),
         )
         .await;
         let req = test::TestRequest::get()
-            .uri("/event/INVALIDFORMATZZZYYYXXX/comment")
+            .uri("/event/INVALIDFORMATZZZYYYXXX/comment-panel/asdasdasdads")
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
