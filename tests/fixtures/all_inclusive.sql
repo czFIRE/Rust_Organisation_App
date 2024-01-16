@@ -299,7 +299,7 @@ BEGIN
         is_editable, status, manager_note,
         created_at, edited_at)
         VALUES
-        (timesheet0_id, user2_id, company1_id, event1_id,
+        (timesheet0_id, user2_id, company1_id, event0_id,
         '1969-08-15', '1969-08-16', 22,
         true, 'not_requested', NULL,
         '1969-08-15 18:26', '1969-08-16 20:00');

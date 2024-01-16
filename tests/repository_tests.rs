@@ -3207,8 +3207,8 @@ mod timesheet_repo_tests {
     use sqlx::PgPool;
 
     use crate::test_constants::{
-        COMPANY1_ID, COMPANY2_ID, EVENT1_ID, TIMESHEET0_ID, TIMESHEET1_ID, TIMESHEET4_ID, USER1_ID,
-        USER2_ID,
+        COMPANY1_ID, COMPANY2_ID, EVENT0_ID, TIMESHEET0_ID, TIMESHEET1_ID,
+        TIMESHEET4_ID, USER1_ID, USER2_ID,
     };
     #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
     async fn create(pool: PgPool) {
@@ -3219,7 +3219,7 @@ mod timesheet_repo_tests {
         {
             let user_id = USER1_ID;
             let company_id = COMPANY1_ID;
-            let event_id = EVENT1_ID;
+            let event_id = EVENT0_ID;
             let start_date = NaiveDate::from_ymd_opt(1969, 8, 15).unwrap();
             let end_date = NaiveDate::from_ymd_opt(1969, 08, 18).unwrap();
             let data = TimesheetCreateData {
@@ -3254,7 +3254,7 @@ mod timesheet_repo_tests {
             let sheet_id = TIMESHEET0_ID;
             let user_id = USER2_ID;
             let company_id = COMPANY1_ID;
-            let event_id = EVENT1_ID;
+            let event_id = EVENT0_ID;
 
             let result = timesheet_repo
                 ._read_one(sheet_id)
@@ -3341,7 +3341,7 @@ mod timesheet_repo_tests {
             let sheet_id = TIMESHEET0_ID;
             let user_id = USER2_ID;
             let company_id = COMPANY1_ID;
-            let event_id = EVENT1_ID;
+            let event_id = EVENT0_ID;
 
             let result = timesheet_repo
                 ._read_one(sheet_id)
@@ -3392,7 +3392,7 @@ mod timesheet_repo_tests {
             let sheet_id = TIMESHEET0_ID;
             let user_id = USER2_ID;
             let company_id = COMPANY1_ID;
-            let event_id = EVENT1_ID;
+            let event_id = EVENT0_ID;
 
             let result = timesheet_repo
                 ._read_one(sheet_id)
@@ -3454,7 +3454,7 @@ mod timesheet_repo_tests {
             let sheet_id = TIMESHEET0_ID;
             let user_id = USER2_ID;
             let company_id = COMPANY1_ID;
-            let event_id = EVENT1_ID;
+            let event_id = EVENT0_ID;
 
             let result = timesheet_repo
                 ._read_one(sheet_id)
