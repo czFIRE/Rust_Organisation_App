@@ -60,6 +60,7 @@
                    name="hourly_wage"
                    required
                    type="number"
+                   min="0"
                    step="0.01"
                    class="font-mono
                           text-lg
@@ -152,7 +153,7 @@
                     class="font-mono
                            text-lg
                          text-txt
-                         from-foreground2">
+                         bg-foreground2">
                 <option value="Basic">Basic</option>
                 <option value="Manager">Manager</option>
                 {% if creator_level == EmployeeLevel::CompanyAdministrator %}
@@ -223,4 +224,5 @@
     <div id="user-results">
 
     </div>
+    <button hx-get=""></button>
 </div>

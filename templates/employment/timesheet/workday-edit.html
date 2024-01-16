@@ -38,6 +38,7 @@
                    name="total_hours"
                    min="0"
                    max="24"
+                   step="0.1"
                    class="font-mono
                           text-lg
                           text-txt
@@ -60,7 +61,7 @@
                         text-txt
                         bg-foreground1
                         border-gray-800"
-                   value="{{ comment.clone().unwrap_or("".to_string()) }}">
+                   value='{{ comment.clone().unwrap_or("".to_string()) }}'>
         </div>
         <input type="hidden"
                id="timesheet_id"

@@ -159,7 +159,8 @@
       {% if level != EmployeeLevel::Basic -%}
           <!-- When this gets loaded, it immediately fetches all subordinates. -->
           <div hx-get="/user/{{ user_id }}/employment/{{ company.id }}/subordinates"
-              hx-trigger="load"></div>
+               hx-trigger="load"
+               class="w-full"></div>
       {%- endif %}
     {% endif %}
 </div>

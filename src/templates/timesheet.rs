@@ -113,9 +113,8 @@ impl From<TimesheetWithWorkdays> for TimesheetTemplate {
     }
 }
 
-#[derive(Template, Debug, Deserialize)]
-#[template(path = "employment/timesheet/timesheet-lite.html")]
-pub struct TimesheetLiteTemplate {
+#[derive(Debug, Deserialize)]
+pub struct TimesheetLite {
     pub id: Uuid,
     pub user_id: Uuid,
     pub company_id: Uuid,
@@ -131,9 +130,9 @@ pub struct TimesheetLiteTemplate {
     pub edited_at: NaiveDateTime,
 }
 
-impl From<TimesheetWithEvent> for TimesheetLiteTemplate {
+impl From<TimesheetWithEvent> for TimesheetLite {
     fn from(timesheet: TimesheetWithEvent) -> Self {
-        TimesheetLiteTemplate {
+        TimesheetLite {
             id: timesheet.id,
             user_id: timesheet.user_id,
             company_id: timesheet.company_id,
@@ -154,5 +153,5 @@ impl From<TimesheetWithEvent> for TimesheetLiteTemplate {
 #[derive(Template, Debug, Deserialize)]
 #[template(path = "employment/timesheet/timesheets.html")]
 pub struct TimesheetsTemplate {
-    pub timesheets: Vec<TimesheetLiteTemplate>,
+    pub timesheets: Vec<TimesheetLite>,
 }
