@@ -7,12 +7,12 @@ use uuid::Uuid;
 
 use crate::{
     errors::{handle_database_error, parse_error},
-    models::TaskPriority,
-    repositories::task::{
+    models::{TaskPriority, EventRole},
+    repositories::{task::{
         models::{NewTask, TaskData, TaskFilter},
         task_repo::TaskRepository,
-    },
-    templates::task::{TaskTemplate, TasksTemplate},
+    }, event_staff::event_staff_repo::StaffRepository},
+    templates::task::{TaskTemplate, TasksTemplate, TaskPanelTemplate, EventTask, TaskCreationTemplate},
 };
 
 #[derive(Deserialize)]
@@ -45,7 +45,7 @@ pub async fn get_event_tasks(
         .await;
 
     if let Ok(tasks) = result {
-        let task_vector: Vec<TaskTemplate> = tasks.into_iter().map(|task| task.into()).collect();
+        let task_vector: Vec<EventTask> = tasks.into_iter().map(|task| task.into()).collect();
         let template = TasksTemplate { tasks: task_vector };
         let body = template.render();
         if body.is_err() {
@@ -184,4 +184,70 @@ pub async fn delete_task(
     }
 
     HttpResponse::NoContent().finish()
+}
+
+/* It's difficult to decide whether this should be in event-staff
+ * or event_task. Ultimately it's an operation that bridges staff
+ * interaction with tasks, so we put it here.
+ */
+#[get("/event/staff/{staff_id}/tasks-panel")]
+pub async fn open_tasks_panel(
+    staff_id: web::Path<String>,
+    staff_repo: web::Data<StaffRepository>,
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(staff_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+    let parsed_id = id_parse.expect("Should be valid.");
+
+    let staff_res = staff_repo.read_one(parsed_id).await;
+    if staff_res.is_err() {
+        return handle_database_error(staff_res.expect_err("Should be an error."));
+    }
+
+    let template = TaskPanelTemplate {
+        requester: staff_res.expect("Should be valid.").into(),
+    };
+
+    let body = template.render();
+    if body.is_err() {
+        return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+    }
+
+    HttpResponse::Ok().body(body.expect("Should be valid."))
+}
+
+#[get("/event/staff/{staff_id}/task-creation")]
+pub async fn open_task_creation_panel(
+    staff_id: web::Path<String>,
+    staff_repo: web::Data<StaffRepository>
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(staff_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+    let parsed_id = id_parse.expect("Should be valid.");
+
+    let staff_res = staff_repo.read_one(parsed_id).await;
+    if staff_res.is_err() {
+        return handle_database_error(staff_res.expect_err("Should be an error."));
+    }
+
+    let staff = staff_res.expect("Should be valid.");
+    if staff.role != EventRole::Organizer {
+        return HttpResponse::Forbidden().body(parse_error(http::StatusCode::FORBIDDEN));
+    }
+
+    let template = TaskCreationTemplate {
+        creator_id: staff.id,
+        event_id: staff.event_id,
+    };
+
+    let body = template.render();
+    if body.is_err() {
+        return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+    }
+
+    HttpResponse::Ok().body(body.expect("Should be valid here"))
 }

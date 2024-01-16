@@ -50,15 +50,14 @@
                     space-y-5
                     place-content-center
                     w-1/2">
-            <button hx-get="/event/{{ event_id }}/task"
+            <button hx-get="/event/staff/{{ id }}/tasks-panel"
                     hx-swap="innerHTML"
                     hx-target="#content"
                     class="bg-foreground1
                             font-mono
                             text-txthl
                             text-xl
-                            p-3">View Tasks
-            </button>
+                            p-3">View Tasks</button>
             <button hx-get="/user/{{ user.id }}/employment/{{ company.id }}"
                     hx-swap="innerHTML"
                     hx-target="#content"

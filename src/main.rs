@@ -26,6 +26,8 @@ use crate::handlers::event::toggle_event_creation_mode;
 use crate::handlers::event::toggle_event_edit_mode;
 use crate::handlers::event_staff::initialize_staff_management_panel;
 use crate::handlers::event_staff::initialize_staff_panel;
+use crate::handlers::event_task::open_tasks_panel;
+use crate::handlers::event_task::open_task_creation_panel;
 use crate::handlers::timesheet::get_work_day;
 use crate::handlers::timesheet::toggle_work_day_edit_mode;
 use crate::handlers::timesheet::update_work_day;
@@ -180,6 +182,8 @@ async fn main() -> Result<()> {
             .service(update_assigned_staff)
             .service(delete_all_rejected_assigned_staff)
             .service(delete_assigned_staff)
+            .service(open_tasks_panel)
+            .service(open_task_creation_panel)
             .service(get_event_tasks)
             .service(get_event_task)
             .service(create_task)

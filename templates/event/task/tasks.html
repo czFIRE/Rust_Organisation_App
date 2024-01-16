@@ -5,8 +5,8 @@
             p-10
             items-center
             w-full">
-    <h2 class="font-mono
-               text-4xl
+    <h3 class="font-mono
+               text-2xl
                text-txthl
                font-bold">Tasks</h2>
 
@@ -21,10 +21,10 @@
                    flex-col
                    rounded-md
                  bg-foreground1
-                   space-y-2
+                   space-y-1
                    text-start
                    text-wrap
-                   p-5
+                   p-2
                    w-full">
             <div class="grid
                         grid-cols-3
@@ -36,17 +36,17 @@
                            text-xl
                          text-txthl">{% if task.finished_at.is_some() %}COMPLETED - {% endif %}{{ task.title }}</h3>
                 {% match task.priority %}
-                    {% when Low %}
+                    {% when TaskPriority::Low %}
                     <p class="justify-self-end
                             font-mono
                             text-lg
                             text-acc">Low Priority Task</p>
-                    {% when Medium %}
+                    {% when TaskPriority::Medium %}
                     <p class="justify-self-end
                             font-mono
                             text-lg
                             text-pnd">Medium Priority Task</p>
-                    {% when High %}
+                    {% when TaskPriority::High %}
                     <p class="justify-self-end
                             font-mono
                             text-lg
@@ -56,20 +56,25 @@
             <p class="font-mono
                       text-lg
                       text-txt">{{ task.description }}</p>
-            <p class="font-mono
-                      text-lg
-                      text-txt"><b>Created By:</b> {{ task.creator.name }}</p>
-            {% if task.accepts_staff -%}
-                <p class="justify-self-end
-                          font-mono
-                          text-lg
-                        text-acc">Accepting Staff</p>
-            {%- else -%}
-                <p class="justify-self-end
-                          font-mono
-                          text-lg
-                        text-rej">Not Accepting Staff</p>
-            {%- endif %}
+            <div class="grid
+                        grid-cols-3
+                        w-full">
+              <p class="font-mono
+                        text-lg
+                        col-span-2
+                        text-txt"><b>Created By:</b> {{ task.creator.name }}</p>
+              {% if task.accepts_staff -%}
+                  <p class="justify-self-end
+                            font-mono
+                            text-lg
+                          text-acc">Accepting Staff</p>
+              {%- else -%}
+                  <p class="justify-self-end
+                            font-mono
+                            text-lg
+                          text-rej">Not Accepting Staff</p>
+              {%- endif %}
+            </div>
         </div>
     </button>
     {% endfor %}

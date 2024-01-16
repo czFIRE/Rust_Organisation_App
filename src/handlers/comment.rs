@@ -5,7 +5,7 @@ use crate::{
     repositories::{comment::models::{CommentData, NewComment}, event_staff::event_staff_repo::StaffRepository},
     templates::comment::{SingleComment, EventCommentsContainerTemplate, CommentTemplate, CommentUpdateModeTemplate}, handlers::common::extract_path_tuple_ids,
 };
-use actix_web::{delete, get, http, post, put, web, HttpResponse, patch};
+use actix_web::{delete, get, http, post, web, HttpResponse, patch};
 use askama::Template;
 use serde::Deserialize;
 use uuid::Uuid;

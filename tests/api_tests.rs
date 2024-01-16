@@ -44,7 +44,7 @@ mod api_tests {
             create_event_staff, delete_event_staff, get_all_event_staff, get_event_staff,
             update_event_staff,
         },
-        event_task::{create_task, delete_task, get_event_task, get_event_tasks, update_task},
+        event_task::{create_task, delete_task, get_event_task, open_task_panel, update_task},
         index::index,
         timesheet::{
             create_timesheet, get_all_timesheets_for_employment, get_timesheet, update_timesheet,
@@ -893,7 +893,7 @@ mod api_tests {
         let repo = web::Data::new(repository);
 
         let app =
-            test::init_service(App::new().app_data(repo.clone()).service(get_event_tasks)).await;
+            test::init_service(App::new().app_data(repo.clone()).service(open_task_panel)).await;
 
         let req = test::TestRequest::get()
             .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/task")
@@ -914,7 +914,7 @@ mod api_tests {
         let repo = web::Data::new(repository);
 
         let app =
-            test::init_service(App::new().app_data(repo.clone()).service(get_event_tasks)).await;
+            test::init_service(App::new().app_data(repo.clone()).service(open_task_panel)).await;
 
         let req = test::TestRequest::get()
             .uri("/event/bzz-tasks-boi-they-sure-are-difficult-are-they-notzz-z-z-z-zzz/task")
