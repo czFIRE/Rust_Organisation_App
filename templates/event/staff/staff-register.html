@@ -32,17 +32,23 @@
         <fieldset>
             <legend class="font-mono
                         text-pnd
-                        text-lg">Select the company you are signing up from:</legend>
+                        text-xl">Select the company you are signing up from:</legend>
             {% for company in companies %}
-            <div>
-                <label class="font-mono
-                            text-txt
-                            text-lg"
-                        for="{{ company.company_id }}">{{ company.company_name }} - {{ company.employment_level }}, {{ company.employment_type}} </label>
+            <div class="flex
+                        flex-row
+                        space-x-2
+                        bg-foreground1
+                        rounded-md
+                        m-2
+                        p-2">
                 <input type="radio"
                         id="{{ company.company_id }}"
                         name="company_id"
                         value="{{ company.company_id }}">
+                <label class="font-mono
+                            text-txt
+                            text-lg"
+                        for="{{ company.company_id }}">{{ company.company_name }} - {{ company.employment_level }}, {{ company.employment_type}} </label>
             </div>
             {% endfor %}
         </fieldset>
