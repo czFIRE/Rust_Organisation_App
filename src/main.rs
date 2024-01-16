@@ -16,6 +16,7 @@ use std::io::Result;
 use std::sync::Arc;
 
 use crate::handlers::company::get_company_edit_mode;
+use crate::handlers::employment::toggle_employment_create;
 use crate::handlers::employment::toggle_employment_edit;
 use crate::handlers::event::switch_event_accepts_staff;
 use crate::handlers::event::toggle_event_creation_mode;
@@ -25,6 +26,7 @@ use crate::handlers::event_staff::initialize_staff_panel;
 use crate::handlers::timesheet::get_work_day;
 use crate::handlers::timesheet::toggle_work_day_edit_mode;
 use crate::handlers::timesheet::update_work_day;
+use crate::handlers::user::get_users;
 use crate::handlers::user::toggle_user_edit;
 use crate::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
 use crate::repositories::comment::comment_repo::CommentRepository;
@@ -133,6 +135,7 @@ async fn main() -> Result<()> {
             .wrap(Logger::new("%a %{User-Agent}i"))
             .service(index)
             .service(get_user)
+            .service(get_users)
             .service(toggle_user_edit)
             .service(create_user)
             .service(update_user)
@@ -167,6 +170,7 @@ async fn main() -> Result<()> {
             .service(update_employment)
             .service(delete_employment)
             .service(toggle_employment_edit)
+            .service(toggle_employment_create)
             .service(get_all_assigned_staff)
             .service(get_assigned_staff)
             .service(create_assigned_staff)

@@ -44,7 +44,7 @@ pub mod user_repo_tests {
         repositories::{
             repository::DbRepository,
             user::{
-                models::{NewUser, UserData},
+                models::{NewUser, UserData, UsersQuery},
                 user_repo::UserRepository,
             },
         },
@@ -129,7 +129,7 @@ pub mod user_repo_tests {
 
         {
             let users = user_repo
-                ._read_all()
+                ._read_all(UsersQuery { name: None, email: None })
                 .await
                 .expect("Read all should succeed");
 
@@ -818,7 +818,7 @@ pub mod event_repo_tests {
     use sqlx::PgPool;
     use uuid::uuid;
 
-    use crate::test_constants;
+    use crate::test_constants::{self, COMPANY0_ID, USER0_ID};
 
     #[sqlx::test(fixtures("events"), migrations = "migrations/no_seed")]
     async fn create(pool: PgPool) -> DbResult<()> {
@@ -827,6 +827,8 @@ pub mod event_repo_tests {
         let mut event_repo = EventRepository::new(arc_pool);
 
         let new_event_data = NewEvent {
+            company_id: COMPANY0_ID,
+            creator_id: USER0_ID,
             name: "Test Event".to_string(),
             description: Some("Test Description".to_string()),
             website: Some("test.com".to_string()),

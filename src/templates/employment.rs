@@ -1,5 +1,5 @@
 use askama::Template;
-use chrono::{NaiveDate, NaiveDateTime};
+use chrono::{Utc, NaiveDate, NaiveDateTime};
 use serde::Deserialize;
 use sqlx::types::uuid;
 use uuid::Uuid;
@@ -89,8 +89,6 @@ impl From<EmploymentExtended> for EmploymentLiteTemplate {
             start_date: employment.start_date,
             end_date: employment.end_date,
         }
-
-        // EmploymentLiteTemplate { employment }
     }
 }
 
@@ -119,4 +117,12 @@ pub struct EmploymentEditTemplate {
 pub struct SubordinatesTemplate {
     pub user_id: Uuid,
     pub subordinates: Vec<Subordinate>,
+}
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "employment/employment-create.html")]
+pub struct EmploymentCreateTemplate {
+    pub company_id: Uuid,
+    pub creator_id: Uuid,
+    pub creator_level: EmployeeLevel,
 }

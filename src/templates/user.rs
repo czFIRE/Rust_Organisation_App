@@ -101,3 +101,25 @@ pub struct UserEditTemplate {
     pub birth: NaiveDate,
     pub gender: Gender,
 }
+
+pub struct UserInfo {
+    pub id: Uuid,
+    pub name: String,
+    pub email: String
+}
+
+impl From<User> for UserInfo {
+    fn from(value: User) -> Self {
+        UserInfo {
+            id: value.id,
+            name: value.name,
+            email: value.email,
+        }
+    }
+}
+
+#[derive(Template)]
+#[template(path = "user/user-info.html")]
+pub struct UserInfoTemplate {
+    pub user_info_vec: Vec<UserInfo>,
+}

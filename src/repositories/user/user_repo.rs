@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::models::{Gender, UserRole, UserStatus};
 
-use super::models::{NewUser, User, UserData};
+use super::models::{NewUser, User, UserData, UsersQuery};
 
 use async_trait::async_trait;
 
@@ -104,16 +104,17 @@ impl UserRepository {
         Ok(user)
     }
 
-    pub async fn _read_all(&self) -> DbResult<Vec<User>> {
+    pub async fn _read_all(&self, filter: UsersQuery) -> DbResult<Vec<User>> {
         // TODO: Redis here
 
-        self._read_all_db().await
+        self._read_all_db(filter).await
     }
 
-    async fn _read_all_db(&self) -> DbResult<Vec<User>> {
+    //ToDo: Use wildcard???
+    async fn _read_all_db(&self, filter: UsersQuery) -> DbResult<Vec<User>> {
         let executor = self.pool.as_ref();
 
-        let user: Vec<User> = sqlx::query_as!(
+        let users: Vec<User> = sqlx::query_as!(
             User,
             r#"SELECT 
                 id, 
@@ -129,14 +130,17 @@ impl UserRepository {
                 deleted_at 
             FROM 
                 user_record
-            WHERE
-                deleted_at IS NULL
+            WHERE deleted_at IS NULL
+              AND name = COALESCE($1, name)
+              AND email = COALESCE($2, email)
             "#,
+            filter.name,
+            filter.email
         )
         .fetch_all(executor)
         .await?;
 
-        Ok(user)
+        Ok(users)
     }
 
     // Update a user in the DB.

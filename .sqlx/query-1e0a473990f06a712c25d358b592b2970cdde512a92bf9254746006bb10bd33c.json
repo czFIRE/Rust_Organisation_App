@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT \n                id, \n                name, \n                email, \n                birth, \n                avatar_url, \n                gender AS \"gender!: Gender\", \n                role AS \"role!: UserRole\", \n                status AS \"status!: UserStatus\", \n                created_at, \n                edited_at, \n                deleted_at \n            FROM \n                user_record\n            WHERE\n                deleted_at IS NULL\n            ",
+  "query": "SELECT \n                id, \n                name, \n                email, \n                birth, \n                avatar_url, \n                gender AS \"gender!: Gender\", \n                role AS \"role!: UserRole\", \n                status AS \"status!: UserStatus\", \n                created_at, \n                edited_at, \n                deleted_at \n            FROM \n                user_record\n            WHERE deleted_at IS NULL\n              AND name = COALESCE($1, name)\n              AND email = COALESCE($2, email)\n            ",
   "describe": {
     "columns": [
       {
@@ -91,7 +91,10 @@
       }
     ],
     "parameters": {
-      "Left": []
+      "Left": [
+        "Varchar",
+        "Varchar"
+      ]
     },
     "nullable": [
       false,
@@ -107,5 +110,5 @@
       true
     ]
   },
-  "hash": "c3909fb8b34aca97f2c6bb98ca844420e78a13094245fa63e35f3c9666217eac"
+  "hash": "1e0a473990f06a712c25d358b592b2970cdde512a92bf9254746006bb10bd33c"
 }

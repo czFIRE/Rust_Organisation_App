@@ -112,74 +112,54 @@
             </div>
         </div>
     </div>
-    {% if level == EmployeeLevel::CompanyAdministrator -%}
-        <div id="company-manager-opts"
-             class="flex
-                    flex-row
-                    space-x-6">
-            <button class="rounded-md
-                         bg-foreground1
-                         border-foreground2
-                           border-2
-                           font-mono
-                           text-lg
-                           p-2
-                         text-txthl">Add Employee</button>
-            <button class="rounded-md
-                         bg-foreground1
-                         border-foreground2
-                           border-2
-                           font-mono
-                           text-lg
-                           p-2
-                         text-txthl">Remove Employee</button>
-            <button hx-get="/user/{{ user_id }}/employment/{{ company.id }}/event"
-                    hx-swap="innerHTML"
-                    hx-target="#content"
-                    class="rounded-md
-                         bg-foreground1
-                         border-foreground2
-                           border-2
-                           font-mono
-                           text-lg
-                           p-2
-                         text-txthl">Create Event</button>
-            <button hx-get="/company/{{ company.id }}/mode/{{ user_id }}"
-                    hx-swap="innerHTML"
-                    hx-target="#content"
-                    class="rounded-md
-                         bg-foreground1
-                         border-foreground2
-                           border-2
-                           font-mono
-                           text-lg
-                           p-2
-                         text-txthl">Edit Company</button>
-        </div>
+    {% if start_date <= Utc::now().naive_local().date() && end_date >= Utc::now().naive_local().date() %}
+      {% if level != EmployeeLevel::Basic -%}
+          <div id="company-manager-opts"
+              class="flex
+                      flex-row
+                      space-x-6">
+              <button hx-get="/user/{{ user_id }}/employment/{{ company.id }}/creation-mode"
+                      hx-swap="innerHTML"
+                      hx-target="#content"
+                      class="rounded-md
+                          bg-foreground1
+                          border-foreground2
+                            border-2
+                            font-mono
+                            text-lg
+                            p-2
+                          text-txthl">Add Employee</button>
+          {% if level == EmployeeLevel::CompanyAdministrator %}
+              <button hx-get="/user/{{ user_id }}/employment/{{ company.id }}/event"
+                      hx-swap="innerHTML"
+                      hx-target="#content"
+                      class="rounded-md
+                          bg-foreground1
+                          border-foreground2
+                            border-2
+                            font-mono
+                            text-lg
+                            p-2
+                          text-txthl">Create Event</button>
+              <button hx-get="/company/{{ company.id }}/mode/{{ user_id }}"
+                      hx-swap="innerHTML"
+                      hx-target="#content"
+                      class="rounded-md
+                          bg-foreground1
+                          border-foreground2
+                            border-2
+                            font-mono
+                            text-lg
+                            p-2
+                          text-txthl">Edit Company</button>
+          {% endif %}
+          </div>
+      {%- endif %}
 
-        <div id="company-admin-opts"
-             class="grid 
-                    grid-rows-3
-                    grid-cols-2">
-            <form>
-                <div id="employment-create"
-                    class="flex
-                            flex-col
-                            border-foreground1
-                            border-2,
-                            rounded-md">
-                    <p class="font-mono text-rej text-lg">ToDo!</p>
-                </div>
-            </form>
-        </div>
-    {%- endif %}
-
-    {% if level != EmployeeLevel::Basic -%}
-        <!-- When this gets loaded, it immediately fetches all subordinates. -->
-        <div hx-get="/user/{{ user_id }}/employment/{{ company.id }}/subordinates"
-             hx-trigger="load"></div>
-    {%- endif %}
-    <div>
-
-    </div>
+      {% if level != EmployeeLevel::Basic -%}
+          <!-- When this gets loaded, it immediately fetches all subordinates. -->
+          <div hx-get="/user/{{ user_id }}/employment/{{ company.id }}/subordinates"
+              hx-trigger="load"></div>
+      {%- endif %}
+    {% endif %}
 </div>

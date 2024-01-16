@@ -6,7 +6,7 @@ use crate::{
     models::{EmployeeLevel, EmploymentContract},
     repositories::employment::models::{EmploymentData, NewEmployment},
     templates::employment::{
-        EmploymentEditTemplate, EmploymentLite, EmploymentTemplate, SubordinatesTemplate,
+        EmploymentEditTemplate, EmploymentLite, EmploymentTemplate, SubordinatesTemplate, EmploymentCreateTemplate,
     },
     utils::deserialize_str_float::deserialize_float::de_f64_from_opt_string,
 };
@@ -173,7 +173,6 @@ pub async fn create_employment(
     new_employment: web::Json<NewEmployment>,
     employment_repo: web::Data<EmploymentRepository>,
 ) -> HttpResponse {
-    let user_id = new_employment.user_id;
     let company_id = new_employment.company_id;
 
     let result = employment_repo.create(new_employment.into_inner()).await;
@@ -182,9 +181,15 @@ pub async fn create_employment(
         return handle_database_error(error);
     }
 
-    // This isn't very pleasant, but it is what it is. Maybe fix later.
-    // This is done because the repo doesn't return the necessary data from the function.
-    get_full_employment(user_id, company_id, employment_repo, true).await
+    let employee = result.expect("Should be valid");
+
+    // We don't want to show the manager the employee's view, so we re-render their view.
+    if employee.manager_id.is_some() {
+        return get_full_employment(employee.manager_id.expect("Should be some"), company_id, employment_repo, true).await
+    }
+
+    // This is for the case when the first employee is created. We don't want to redirect the admin to them.
+    HttpResponse::NoContent().finish()
 }
 
 #[get("/user/{user_id}/employment/{company_id}/mode/{editor_id}")]
@@ -216,6 +221,43 @@ pub async fn toggle_employment_edit(
             description: employment.description,
             start_date: employment.start_date,
             end_date: employment.end_date,
+        };
+
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Ok()
+            .content_type("text/html")
+            .body(body.expect("Should be valid now."));
+    }
+
+    handle_database_error(result.expect_err("Should be error."))
+}
+
+#[get("/user/{user_id}/employment/{company_id}/creation-mode")]
+pub async fn toggle_employment_create(
+    path: web::Path<(String, String)>,
+    employment_repo: web::Data<EmploymentRepository>,
+) -> HttpResponse {
+    let parsed_ids = extract_path_tuple_ids(path.into_inner());
+    if parsed_ids.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let (creator_id, company_id) = parsed_ids.unwrap();
+    let result = employment_repo.read_one(creator_id, company_id).await;
+    if let Ok(employment) = result {
+        // Only a manager or a company admin may create new employments
+        if employment.level == EmployeeLevel::Basic {
+            return HttpResponse::Forbidden().body(parse_error(http::StatusCode::FORBIDDEN));
+        }
+        let template: EmploymentCreateTemplate = EmploymentCreateTemplate {
+            company_id,
+            creator_id,
+            creator_level: employment.level,
         };
 
         let body = template.render();
@@ -329,5 +371,5 @@ pub async fn delete_employment(
         return handle_database_error(error);
     }
 
-    HttpResponse::NoContent().finish()
+    HttpResponse::Ok().finish()
 }

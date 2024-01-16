@@ -1,0 +1,30 @@
+<div id="users-info"
+     class="p-3
+            flex
+            flex-col
+            items-center
+            w-10/12">
+    {% if user_info_vec.is_empty() %}
+    <p class="font-mono
+              text-xl
+              text-rej">No users found.</p>
+    {% endif %}
+    {% for user in user_info_vec %}
+    <div class="flex
+                flex-row
+                space-x-5
+                bg-foreground2
+                p-2
+                rounded-md">
+        <p class="font-mono
+                  text-md
+                  text-txt"><b>User ID:</b> {{ user.id }}</p>
+        <p class="font-mono
+                  text-md
+                  text-txt"><b>Name:</b> {{ user.name }}</p>
+        <p class="font-mono
+                  text-md
+                  text-txt"><b>Email:</b> {{ user.email }}</p>
+    </div>
+    {% endfor %}
+</div>
