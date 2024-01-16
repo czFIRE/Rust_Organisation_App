@@ -255,15 +255,6 @@ pub async fn update_employment(
     if is_data_invalid(employment_data.clone()) {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
-    if employment_data.hourly_wage.is_some() {
-        println!("----------------------");
-        println!("NEW PAY: {}", employment_data.hourly_wage.unwrap());
-        println!("----------------------");
-    } else {
-        println!("----------------------");
-        println!("NEW PAY IS NONE");
-        println!("----------------------");
-    }
     let parsed_ids = extract_path_tuple_ids(path.into_inner());
     if parsed_ids.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));

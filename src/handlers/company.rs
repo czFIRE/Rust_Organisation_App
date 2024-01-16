@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use crate::repositories::employment::employment_repo::EmploymentRepository;
 use actix_web::{delete, get, http, patch, post, put, web, HttpResponse};
 use askama::Template;
 use serde::Deserialize;
@@ -7,12 +8,13 @@ use uuid::Uuid;
 
 use crate::{
     errors::{handle_database_error, parse_error},
-    handlers::common::QueryParams,
+    handlers::common::{extract_path_tuple_ids, QueryParams},
+    models::EmployeeLevel,
     repositories::company::{
         company_repo::CompanyRepository,
         models::{AddressData, AddressUpdateData, CompanyData, CompanyFilter, NewCompany},
     },
-    templates::company::{CompaniesTemplate, CompanyLite, CompanyTemplate},
+    templates::company::{CompaniesTemplate, CompanyEditTemplate, CompanyLite, CompanyTemplate},
     utils::format_check::check::{check_email_validity, check_phone_validity},
 };
 
@@ -246,18 +248,22 @@ fn any_formatless_string_empty(company_data: &CompanyUpdateData) -> bool {
 
 fn validate_update_data(company_data: CompanyUpdateData) -> bool {
     if is_data_empty(&company_data) {
+        println!("DATA EMPTY!");
         return false;
     }
 
     if any_formatless_string_empty(&company_data) {
+        println!("ANY FORMATLESS STRING EMPTY!");
         return false;
     }
 
     if company_data.email.is_some() && !check_email_validity(company_data.email.unwrap()) {
+        println!("CHECK EMAIL VALIDITY!");
         return false;
     }
 
     if company_data.phone.is_some() && !check_phone_validity(company_data.phone.unwrap()) {
+        println!("CHECK PHONE VALIDITY!");
         return false;
     }
     true
@@ -342,6 +348,64 @@ pub async fn delete_company(
     }
 
     HttpResponse::NoContent().finish()
+}
+
+#[get("/company/{company_id}/mode/{user_id}")]
+pub async fn get_company_edit_mode(
+    path: web::Path<(String, String)>,
+    company_repo: web::Data<CompanyRepository>,
+    employment_repo: web::Data<EmploymentRepository>,
+) -> HttpResponse {
+    let parsed_ids = extract_path_tuple_ids(path.into_inner());
+    if parsed_ids.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let (company_id, user_id) = parsed_ids.unwrap();
+    let employee_res = employment_repo.read_one(user_id, company_id).await;
+    if employee_res.is_err() {
+        return handle_database_error(employee_res.expect_err("Should be an error."));
+    }
+
+    let employee = employee_res.expect("Should be valid now.");
+
+    if employee.level != EmployeeLevel::CompanyAdministrator {
+        return HttpResponse::Forbidden().body(parse_error(http::StatusCode::FORBIDDEN));
+    }
+
+    let result = company_repo.read_one_extended(company_id).await;
+    if let Ok(company) = result {
+        let template: CompanyEditTemplate = CompanyEditTemplate {
+            id: company.company_id,
+            user_id,
+            name: company.name,
+            description: company.description,
+            phone: company.phone,
+            email: company.email,
+            website: company.website,
+            crn: company.crn,
+            vatin: company.vatin,
+            country: company.country,
+            region: company.region,
+            city: company.city,
+            street: company.street,
+            postal_code: company.postal_code,
+            address_number: company.street_number,
+        };
+
+        let body = template.render();
+
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Ok()
+            .content_type("text/html")
+            .body(body.expect("Should be valid."));
+    }
+
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 //TODO: Once file store/load is done.

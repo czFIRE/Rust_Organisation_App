@@ -130,3 +130,9 @@ pub struct AssociatedCompanyLite {
     pub event_id: Uuid,
     pub user_id: Uuid,
 }
+
+#[derive(Debug, Deserialize, Clone, FromRow)]
+pub struct AssociatedCompanyMinimal {
+    pub company_id: Uuid,
+    pub event_id: Uuid,
+}

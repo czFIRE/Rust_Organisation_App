@@ -133,7 +133,10 @@
                            text-lg
                            p-2
                          text-txthl">Remove Employee</button>
-            <button class="rounded-md
+            <button hx-get="/user/{{ user_id }}/employment/{{ company.id }}/event"
+                    hx-swap="innerHTML"
+                    hx-target="#content"
+                    class="rounded-md
                          bg-foreground1
                          border-foreground2
                            border-2
@@ -141,7 +144,10 @@
                            text-lg
                            p-2
                          text-txthl">Create Event</button>
-            <button class="rounded-md
+            <button hx-get="/company/{{ company.id }}/mode/{{ user_id }}"
+                    hx-swap="innerHTML"
+                    hx-target="#content"
+                    class="rounded-md
                          bg-foreground1
                          border-foreground2
                            border-2

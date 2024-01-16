@@ -7,15 +7,18 @@ use uuid::Uuid;
 use crate::{
     errors::{handle_database_error, parse_error},
     handlers::common::extract_path_tuple_ids,
-    models::EventRole,
+    models::{EmployeeLevel, EventRole},
     repositories::{
+        employment::employment_repo::EmploymentRepository,
         event::{
             event_repo::EventRepository,
             models::{EventData, EventFilter, NewEvent},
         },
         event_staff::event_staff_repo::StaffRepository,
     },
-    templates::event::{EventEditTemplate, EventLite, EventTemplate, EventsTemplate},
+    templates::event::{
+        EventCreateTemplate, EventEditTemplate, EventLite, EventTemplate, EventsTemplate,
+    },
 };
 
 #[get("/event")]
@@ -89,11 +92,24 @@ pub async fn get_event(
 pub async fn create_event(
     new_event: web::Json<NewEvent>,
     event_repo: web::Data<EventRepository>,
+    employment_repo: web::Data<EmploymentRepository>,
 ) -> HttpResponse {
-    if (new_event.website.is_some() && new_event.website.as_ref().unwrap().is_empty())
-        || (new_event.description.is_some() && new_event.description.as_ref().unwrap().is_empty())
-    {
+    if new_event.start_date > new_event.end_date {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let employee_res = employment_repo
+        .read_one(new_event.creator_id, new_event.company_id)
+        .await;
+
+    if employee_res.is_err() {
+        return handle_database_error(employee_res.expect_err("Should be error."));
+    }
+
+    let employee = employee_res.expect("Should be OK");
+
+    if employee.level != EmployeeLevel::CompanyAdministrator {
+        return HttpResponse::Forbidden().body(parse_error(http::StatusCode::FORBIDDEN));
     }
 
     let result = event_repo.create(new_event.into_inner()).await;
@@ -200,7 +216,7 @@ pub async fn delete_event(
     HttpResponse::NoContent().finish()
 }
 
-#[get("/event/{event_id}/mode/{staff_id}")]
+#[get("/event/{event_id}/edit-mode/{staff_id}")]
 pub async fn toggle_event_edit_mode(
     path: web::Path<(String, String)>,
     event_repo: web::Data<EventRepository>,
@@ -237,6 +253,39 @@ pub async fn toggle_event_edit_mode(
         return HttpResponse::Ok().body(body.expect("Should be valid now."));
     }
     handle_database_error(result.expect_err("Should be an error."))
+}
+
+#[get("/user/{user_id}/employment/{company_id}/event")]
+pub async fn toggle_event_creation_mode(
+    path: web::Path<(String, String)>,
+    employment_repo: web::Data<EmploymentRepository>,
+) -> HttpResponse {
+    let parsed_ids = extract_path_tuple_ids(path.into_inner());
+    if parsed_ids.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let (user_id, company_id) = parsed_ids.unwrap();
+    let employment_res = employment_repo.read_one(user_id, company_id).await;
+    if let Ok(employment) = employment_res {
+        if employment.level != EmployeeLevel::CompanyAdministrator {
+            return HttpResponse::Forbidden().body(parse_error(http::StatusCode::FORBIDDEN));
+        }
+
+        let template = EventCreateTemplate {
+            creator_id: employment.user_id,
+            company_id: employment.company.id,
+        };
+
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Ok().body(body.expect("Should be valid now."));
+    }
+    handle_database_error(employment_res.expect_err("Should be an error."))
 }
 
 //TODO: Once file store/load is done.

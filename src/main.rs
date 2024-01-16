@@ -15,8 +15,10 @@ use std::io::Result;
 
 use std::sync::Arc;
 
+use crate::handlers::company::get_company_edit_mode;
 use crate::handlers::employment::toggle_employment_edit;
 use crate::handlers::event::switch_event_accepts_staff;
+use crate::handlers::event::toggle_event_creation_mode;
 use crate::handlers::event::toggle_event_edit_mode;
 use crate::handlers::event_staff::initialize_staff_management_panel;
 use crate::handlers::event_staff::initialize_staff_panel;
@@ -35,7 +37,7 @@ use crate::repositories::task::task_repo::TaskRepository;
 use crate::repositories::timesheet::timesheet_repo::TimesheetRepository;
 use crate::repositories::user::user_repo::UserRepository;
 use crate::{
-    handlers::user::get_users,
+    handlers::user::get_users_login,
     repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository,
 };
 use actix_web::web;
@@ -143,6 +145,7 @@ async fn main() -> Result<()> {
             .service(create_company)
             .service(update_company)
             .service(delete_company)
+            .service(get_company_edit_mode)
             .service(get_company_avatar)
             .service(upload_company_avatar)
             .service(remove_company_avatar)
@@ -155,6 +158,7 @@ async fn main() -> Result<()> {
             .service(upload_event_avatar)
             .service(remove_event_avatar)
             .service(toggle_event_edit_mode)
+            .service(toggle_event_creation_mode)
             .service(switch_event_accepts_staff)
             .service(get_employment)
             .service(get_employments_per_user)
@@ -202,7 +206,7 @@ async fn main() -> Result<()> {
             .service(update_work_day)
             .service(get_work_day)
             // Temporary
-            .service(get_users)
+            .service(get_users_login)
             // For serving css
             .service(ActixFiles::new("/", "./src/static").prefer_utf8(true))
     })

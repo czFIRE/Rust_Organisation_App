@@ -212,6 +212,58 @@
                             <p class="font-mono
                                       text-lg
                                     text-txt"><b>Role:</b> {{ staff_member.role }}</p>
+                            <form hx-patch="/event/{{ staff_member.event_id }}/staff/{{ staff_member.id}}"
+                                  hx-ext="json-enc"
+                                  hx-swap="innerHTML"
+                                  hx-target="#staff-members"
+                                  hx-confirm="Are you sure you want to change this staff member's role?">
+                                  {% if staff_member.role == EventRole::Staff %}
+                                    <input type="hidden"
+                                           class="hidden"
+                                           name="role"
+                                           id="role"
+                                           value="Organizer">
+                                    <button type="submit"
+                                            title="Promote">
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                             fill="none"
+                                             viewBox="0 0 24 24"
+                                             stroke-width="1.5"
+                                             stroke="currentColor"
+                                             class="w-6
+                                                    h-6
+                                                    text-txthl">
+                                            <path stroke-linecap="round"
+                                                  stroke-linejoin="round"
+                                                  d="m4.5 18.75 7.5-7.5 7.5 7.5" />
+                                            <path stroke-linecap="round"
+                                                  stroke-linejoin="round"
+                                                  d="m4.5 12.75 7.5-7.5 7.5 7.5" />
+                                        </svg>                                      
+                                    </button>
+                                  {% else %}
+                                    <input type="hidden"
+                                           class="hidden"
+                                           name="role"
+                                           id="role"
+                                           value="Staff">
+                                    <button type="submit"
+                                            title="Demote">
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                             fill="none"
+                                             viewBox="0 0 24 24"
+                                             stroke-width="1.5"
+                                             stroke="currentColor"
+                                             class="w-6
+                                                    h-6
+                                                    text-txthl">
+                                            <path stroke-linecap="round"
+                                                  stroke-linejoin="round"
+                                                  d="m4.5 5.25 7.5 7.5 7.5-7.5m-15 6 7.5 7.5 7.5-7.5" />
+                                        </svg>                                                                       
+                                    </button>
+                                  {% endif %}
+                            </form>
                         </div>
                    </div>
                </div>

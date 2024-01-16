@@ -13,6 +13,7 @@ use uuid::Uuid;
 
 use crate::repositories::user::user_repo::UserRepository;
 
+#[get("/user")]
 #[get("/user/{user_id}")]
 pub async fn get_user(
     user_id: web::Path<String>,
@@ -45,8 +46,8 @@ pub async fn get_user(
 }
 
 // Temporary workaround to the lack of auth.
-#[get("/user")]
-pub async fn get_users(user_repo: web::Data<UserRepository>) -> HttpResponse {
+#[get("/user/auth")]
+pub async fn get_users_login(user_repo: web::Data<UserRepository>) -> HttpResponse {
     let result = user_repo._read_all().await;
 
     if let Ok(users) = result {

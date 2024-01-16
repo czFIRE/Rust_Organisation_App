@@ -77,3 +77,10 @@ pub struct EventEditTemplate {
     pub event: EventTemplate,
     pub editor: StaffTemplate,
 }
+
+#[derive(Template, Debug)]
+#[template(path = "event/event-create.html")]
+pub struct EventCreateTemplate {
+    pub creator_id: Uuid,
+    pub company_id: Uuid,
+}

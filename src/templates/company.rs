@@ -68,6 +68,26 @@ impl From<CompanyExtended> for CompanyTemplate {
     }
 }
 
+#[derive(Template, Deserialize)]
+#[template(path = "company/company-edit.html")]
+pub struct CompanyEditTemplate {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub name: String,
+    pub description: Option<String>,
+    pub phone: String,
+    pub email: String,
+    pub website: Option<String>,
+    pub crn: String,
+    pub vatin: String,
+    pub country: String,
+    pub region: String,
+    pub city: String,
+    pub street: String,
+    pub postal_code: String,
+    pub address_number: String,
+}
+
 #[derive(Debug, Deserialize)]
 pub struct CompanyLite {
     pub id: Uuid,

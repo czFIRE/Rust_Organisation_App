@@ -18,18 +18,33 @@
 <div id="actions"
      class="flex
             flex-row
+            justify-between
             items-center
             space-x-10
             p-3
-            w-full
+            m-3
+            w-9/12
+            rounded-md
             bg-foreground1">
     <button hx-delete="/event/{{ requester.event_id }}/staff"
             hx-swap="innerHTML"
             hx-target="#staff-members"
             hx-confirm="Delete all rejected staff?"
-            class="bg-foreground2
+            class="p-2
+                   rounded-md
+                 bg-foreground2
                    font-mono
                    text-txthl
-                   text-lg">Delete All Rejected
+                   text-lg">Delete Rejected
+    </button>
+    <button hx-get="/event/{{ requester.event_id }}/staff-panel/{{ requester.user.id }}"
+            hx-swap="innerHTML"
+            hx-target="#content"
+            class="p-2
+                   rounded-md
+                 bg-foreground2
+                   font-mono
+                   text-txthl
+                   text-lg">Go Back
     </button>
 </div>

@@ -1,6 +1,11 @@
 use crate::{
     common::DbResult,
-    repositories::timesheet::models::{TimeRange, TimesheetStructureData},
+    models::{Association, EventRole},
+    repositories::{
+        associated_company::models::AssociatedCompanyMinimal,
+        event_staff::models::StaffInfo,
+        timesheet::models::{TimeRange, TimesheetStructureData},
+    },
 };
 use async_trait::async_trait;
 use chrono::{DateTime, Datelike, TimeZone, Utc};
@@ -31,7 +36,8 @@ impl crate::repositories::repository::DbRepository for EventRepository {
 
 impl EventRepository {
     pub async fn create(&self, data: NewEvent) -> DbResult<Event> {
-        let executor = self.pool.as_ref();
+        let mut tx = self.pool.begin().await?;
+        // let executor = self.pool.as_ref();
 
         let new_event: Event = sqlx::query_as!(
             Event,
@@ -56,8 +62,43 @@ impl EventRepository {
             data.start_date,
             data.end_date,
         )
-        .fetch_one(executor)
+        .fetch_one(tx.deref_mut())
         .await?;
+
+        let _: AssociatedCompanyMinimal = sqlx::query_as!(
+            AssociatedCompanyMinimal,
+            r#"
+            INSERT INTO associated_company
+                (company_id, event_id, type)
+            VALUES ($1, $2, $3)
+            RETURNING company_id,
+                      event_id;
+            "#,
+            data.company_id,
+            new_event.id,
+            Association::Organizer as Association,
+        )
+        .fetch_one(tx.deref_mut())
+        .await?;
+
+        let _: StaffInfo = sqlx::query_as!(
+            StaffInfo,
+            r#"
+            INSERT INTO event_staff
+                ( user_id, company_id, event_id, role )
+            VALUES
+                ( $1, $2, $3, $4 )
+            RETURNING id;
+            "#,
+            data.creator_id,
+            data.company_id,
+            new_event.id,
+            EventRole::Organizer as EventRole,
+        )
+        .fetch_one(tx.deref_mut())
+        .await?;
+
+        tx.commit().await?;
 
         Ok(new_event)
     }
@@ -208,7 +249,9 @@ impl EventRepository {
             && data.end_date.is_none()
             && data.avatar_url.is_none()
         {
-            return Err(sqlx::Error::TypeNotFound { type_name: "User Error".to_string() });
+            return Err(sqlx::Error::TypeNotFound {
+                type_name: "User Error".to_string(),
+            });
         }
 
         let mut tx = self.pool.begin().await?;
@@ -271,7 +314,7 @@ impl EventRepository {
 
     pub async fn switch_accepts_staff(&self, event_id: Uuid) -> DbResult<()> {
         let executor = self.pool.as_ref();
-        
+
         let _ = sqlx::query_as!(
             Event,
             r#"UPDATE event
@@ -291,7 +334,9 @@ impl EventRepository {
                          edited_at, 
                          deleted_at;"#,
             event_id,
-        ).fetch_one(executor).await?;
+        )
+        .fetch_one(executor)
+        .await?;
 
         Ok(())
     }

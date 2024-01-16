@@ -4,6 +4,9 @@
             space-y-10
             items-center
             w-full">
+       <h2 class="font-mono
+                  text-4xl
+                  text-txthl">Edit Event</h2>
        <form hx-patch="/event/{{ event.id }}"
              hx-swap="innerHTML"
              hx-target="#content"
@@ -101,7 +104,7 @@
                             text-xl
                             text-txthl">Submit Changes</button>
        </form>
-       <button hx-get="/event/{{ event.id }}"
+       <button hx-get="/event/{{ editor.event_id }}/staff-panel/{{ editor.user.id }}"
                hx-swap="innerHTML"
                hx-target="#content"
                class="font-mono

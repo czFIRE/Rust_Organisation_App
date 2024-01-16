@@ -268,7 +268,15 @@ pub async fn delete_all_rejected_event_staff(
         return handle_database_error(error);
     }
 
-    read_all_event_staff(parsed_id, StaffFilter { limit: None, offset: None }, event_staff_repo).await
+    read_all_event_staff(
+        parsed_id,
+        StaffFilter {
+            limit: None,
+            offset: None,
+        },
+        event_staff_repo,
+    )
+    .await
 }
 
 #[delete("/event/{event_id}/staff/{staff_id}")]
@@ -288,7 +296,15 @@ pub async fn delete_event_staff(
         return handle_database_error(error);
     }
 
-    read_all_event_staff(event_id, StaffFilter { limit: None, offset: None }, event_staff_repo).await
+    read_all_event_staff(
+        event_id,
+        StaffFilter {
+            limit: None,
+            offset: None,
+        },
+        event_staff_repo,
+    )
+    .await
 }
 
 async fn prepare_staff_registration_panel(
