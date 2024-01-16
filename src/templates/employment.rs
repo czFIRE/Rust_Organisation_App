@@ -71,28 +71,6 @@ impl From<EmploymentExtended> for EmploymentLite {
 }
 
 #[derive(Template, Debug, Deserialize)]
-#[template(path = "employment/employment-lite.html")]
-pub struct EmploymentLiteTemplate {
-    pub user_id: Uuid,
-    pub company: CompanyLite,
-    pub employment_type: EmploymentContract,
-    pub start_date: NaiveDate,
-    pub end_date: NaiveDate,
-}
-
-impl From<EmploymentExtended> for EmploymentLiteTemplate {
-    fn from(employment: EmploymentExtended) -> Self {
-        EmploymentLiteTemplate {
-            user_id: employment.user_id,
-            company: employment.company.into(),
-            employment_type: employment.employment_type,
-            start_date: employment.start_date,
-            end_date: employment.end_date,
-        }
-    }
-}
-
-#[derive(Template, Debug, Deserialize)]
 #[template(path = "employment/employments.html")]
 pub struct EmploymentsTemplate {
     pub employments: Vec<EmploymentLite>,

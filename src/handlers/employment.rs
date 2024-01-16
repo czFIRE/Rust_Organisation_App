@@ -279,7 +279,6 @@ fn is_data_invalid(data: EmploymentUpdateData) -> bool {
         && (data.hourly_wage.is_none() || data.hourly_wage.unwrap() <= 0.0) // This should likely check against minimum wage instead.
         && data.start_date.is_none()
         && data.end_date.is_none()
-        // Not checking for emptiness of description as it should be okay to set the description to be empty.
         && data.description.is_none()
         && data.employment_type.is_none()
         && data.level.is_none()

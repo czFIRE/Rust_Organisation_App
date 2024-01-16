@@ -1,14 +1,17 @@
 <div id="employment" 
      class="flex
             flex-col
-            space-y-10
+            space-y-4
             items-center
             w-max">
+    <h2 class="font-mono
+               font-bold
+               text-2xl
+               text-txthl">Employee Editing</h2>
     <p class="font-mono
               text-xl
               text-pnd">Change only values you wish to change! Leave others untouched.</p>
 
-    <!-- TODO: Consider returning to the editor instead. -->
     <form hx-patch="/user/{{ user_id }}/employment/{{ company_id }}" 
           hx-swap="innerHTML"
           hx-target="#content"
@@ -17,7 +20,6 @@
           id="user-edit"
           class="flex
                  flex-col
-                 items-center
                  align-middle
                  space-y-2">
         <input type="hidden" id="editor_id" name="editor_id" value="{{ editor_id }}">
@@ -32,7 +34,7 @@
                    min="0"
                    step="0.01"
                    class="font-mono
-                          text-xl
+                          text-lg
                           text-txt
                           bg-foreground1"
                    value="{{ hourly_wage }}">
@@ -47,7 +49,7 @@
                    name="start_date"
                    type="date"
                    class="font-mono
-                          text-xl
+                          text-lg
                           text-txt
                           bg-foreground1"
                    value="{{ start_date }}">
@@ -62,77 +64,77 @@
                    name="end_date"
                    type="date"
                    class="font-mono
-                          text-xl
+                          text-lg
                           text-txt
                           bg-foreground1"
                    value="{{ end_date }}">
         </div>
-        {% if description.is_some() -%}
-            <div class="flex
-                        flex-col">
-                <label for="description"
-                       class="font-mono
-                              text-xl
-                              text-txt">Description</label>
-                <input id="description"
-                       name="description"
-                       type="text"
-                       class="font-mono
-                          text-xl
-                          text-txt
-                          bg-foreground1"
-                       value="{{ description.as_ref().unwrap() }}">
-            </div>
-        {%- endif %}
+       <div class="flex
+                     flex-col">
+              <label for="description"
+                     class="font-mono
+                            text-xl
+                            text-txt">Description</label>
+              <input id="description"
+                     name="description"
+                     type="text"
+                     class="font-mono
+                     text-lg
+                     text-txt
+                     bg-foreground1"
+                     value='{{ description.clone().unwrap_or("".to_string()) }}''>
+       </div>
         <div class="flex flex-col">
-            <datalist id="employment-type-list">
-                <option value="Hpp" />
-                <option value="Dpp" />
-                <option value="Dpc" />
-            </datalist>
             <label for="employment_type"
                    class="font-mono
                           text-xl
                         text-txt">Employment Type</label>
-            <input id="employment_type"
-                   name="employment_type"
-                   type="employment-type-list"
-                   class="font-mono
-                          text-xl
-                          text-txt
-                          bg-foreground1"
-                   value="{{ employment_type }}">
+            <select id="employment_type"
+                    name="employment_type"
+                    value="{{ employment_type }}"
+                    class="font-mono
+                           text-lg
+                           text-txt
+                           bg-foreground1">
+              <option value="Hpp">Hpp</option>
+              <option value="Dpp">Dpp</option>
+              <option value="Dpc">Dpc</option>
+            </select>
         </div>
         <div class="flex flex-col">
-            <datalist id="level-list">
-                <option value="Basic" />
-                <option value="Manager" />
-                <option value="Company Administrator" />
-            </datalist>
             <label for="level"
                    class="font-mono
                           text-xl
                           text-txt">Employee Level</label>
-            <input id="level"
-                   name="level"
-                   type="level-list"
-                   class="font-mono
-                          text-xl
-                          text-txt
-                          bg-foreground1"
-                   value="{{ level }}">
+            <select id="employment_type"
+                    name="employment_type"
+                    value="{{ level }}"
+                    class="font-mono
+                           text-lg
+                         text-txt
+                         bg-foreground1">
+                    <option value="Basic">Basic</option>
+                    <option value="Manager">Manager</option>
+                    <option value="Company Administrator">Company Administrator</option>
+              </select>
         </div>
 
         <button type="submit"
                 class="font-mono
-                        text-lg
-                        text-txthl">Save Changes</button>
+                        text-xl
+                        text-txthl
+                        bg-foreground1
+                        rounded-md
+                        p-2">Save Changes</button>
     </form>
     <!-- Return to the editor's page, not the user's page. -->
     <button hx-get="/user/{{ editor_id }}/employment/{{ company_id }}"
             hx-swap="innerHTML"
             hx-target="#content"
             class="font-mono
-                   text-lg
-                   text-txthl">Cancel</button>
+                   text-xl
+                   text-txthl
+                   bg-foreground1
+                   rounded-md
+                   p-2">Cancel</button>
 </div>
