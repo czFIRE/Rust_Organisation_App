@@ -9,10 +9,10 @@ use crate::{
     errors::{handle_database_error, parse_error},
     models::{TaskPriority, EventRole},
     repositories::{task::{
-        models::{NewTask, TaskData, TaskFilter},
+        models::{NewTask, TaskData, TaskFilter, TaskExtended},
         task_repo::TaskRepository,
-    }, event_staff::event_staff_repo::StaffRepository},
-    templates::task::{TaskTemplate, TasksTemplate, TaskPanelTemplate, EventTask, TaskCreationTemplate},
+    }, event_staff::event_staff_repo::StaffRepository, assigned_staff::assigned_staff_repo::AssignedStaffRepository},
+    templates::task::{TaskTemplate, TasksTemplate, TasksPanelTemplate, EventTask, TaskCreationTemplate, TaskPanelTemplate}, handlers::common::extract_path_tuple_ids,
 };
 
 #[derive(Deserialize)]
@@ -91,6 +91,7 @@ pub async fn create_task(
     event_id: web::Path<String>,
     new_task: web::Json<NewEventTaskData>,
     task_repo: web::Data<TaskRepository>,
+    assigned_repo: web::Data<AssignedStaffRepository>,
 ) -> HttpResponse {
     let id_parse = Uuid::from_str(event_id.into_inner().as_str());
     if id_parse.is_err() {
@@ -113,15 +114,7 @@ pub async fn create_task(
     };
     let result = task_repo.create(data).await;
     if let Ok(task) = result {
-        let template: TaskTemplate = task.into();
-        let body = template.render();
-        if body.is_err() {
-            return HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
-        }
-        return HttpResponse::Created()
-            .content_type("text/html")
-            .body(body.expect("Should be valid now."));
+        return open_task_panel(task.creator_id, task, assigned_repo).await;
     }
 
     handle_database_error(result.expect_err("Should be error."))
@@ -206,7 +199,7 @@ pub async fn open_tasks_panel(
         return handle_database_error(staff_res.expect_err("Should be an error."));
     }
 
-    let template = TaskPanelTemplate {
+    let template = TasksPanelTemplate {
         requester: staff_res.expect("Should be valid.").into(),
     };
 
@@ -250,4 +243,65 @@ pub async fn open_task_creation_panel(
     }
 
     HttpResponse::Ok().body(body.expect("Should be valid here"))
+}
+
+async fn open_task_panel(
+    staff_id: Uuid, 
+    task: TaskExtended,
+    assigned_repo: web::Data<AssignedStaffRepository>
+) -> HttpResponse {
+    let result = assigned_repo.read_one(task.task_id, staff_id).await;
+    if result.is_err() {
+        let error = result.expect_err("Should be an error.");
+        return match error {
+            sqlx::Error::RowNotFound => {
+                let template = TaskPanelTemplate {
+                    requester_id: staff_id,
+                    assigned_staff: None,
+                    task: task.into(),
+                };
+                let body = template.render();
+                if body.is_err() {
+                    return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+                }
+                HttpResponse::Ok().body(body.expect("Should be valid."))
+            },
+            _ => handle_database_error(error)
+        }
+    }
+
+    let template = TaskPanelTemplate {
+        requester_id: staff_id,
+        assigned_staff: Some(result.expect("Should be valid").into()),
+        task: task.into(),
+    };
+
+    let body = template.render();
+    if body.is_err() {
+        return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+    }
+
+    return HttpResponse::Ok().body(body.expect("Should be valid."))
+}
+
+#[get("/event/staff/{staff_id}/task/{task_id}")]
+pub async fn open_single_task_panel(
+    path: web::Path<(String, String)>,
+    task_repo: web::Data<TaskRepository>,
+    assigned_repo: web::Data<AssignedStaffRepository>,
+) -> HttpResponse {
+    let parsed_ids = extract_path_tuple_ids(path.into_inner());
+    if parsed_ids.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let (staff_id, task_id) = parsed_ids.unwrap();
+
+    let result = task_repo.read_one(task_id).await;
+    if result.is_err() {
+        return handle_database_error(result.expect_err("Should be an error."));
+    }
+
+    let task = result.expect("Should be okay now.");
+    open_task_panel(staff_id, task, assigned_repo).await
 }

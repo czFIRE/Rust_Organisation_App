@@ -2,8 +2,8 @@ use std::str::FromStr;
 
 use crate::{
     errors::handle_database_error,
-    repositories::{comment::models::{CommentData, NewComment}, event_staff::event_staff_repo::StaffRepository},
-    templates::comment::{SingleComment, EventCommentsContainerTemplate, CommentTemplate, CommentUpdateModeTemplate}, handlers::common::extract_path_tuple_ids,
+    repositories::{comment::models::{CommentData, NewComment}, event_staff::event_staff_repo::StaffRepository, assigned_staff::assigned_staff_repo::AssignedStaffRepository},
+    templates::comment::{SingleComment, EventCommentsContainerTemplate, CommentTemplate, CommentUpdateModeTemplate, TaskCommentsContainerTemplate}, handlers::common::extract_path_tuple_ids, models::AcceptanceStatus,
 };
 use actix_web::{delete, get, http, post, web, HttpResponse, patch};
 use askama::Template;
@@ -45,7 +45,7 @@ pub async fn open_event_comments_for_user(
     let staff_res = staff_repo.read_by_event_and_user_id(event_id, user_id).await;
 
     // Not staff -> Can't access comments.
-    if staff_res.is_err() {
+    if staff_res.is_err() || staff_res.expect("Should be valid").status != AcceptanceStatus::Accepted {
         return HttpResponse::Forbidden().body(parse_error(http::StatusCode::FORBIDDEN));
     }
 
@@ -128,11 +128,12 @@ pub async fn create_event_comment(
     handle_database_error(result.expect_err("Should be error."))
 }
 
-#[get("/task/{task_id}/comment")]
-pub async fn get_all_task_comments(
-    task_id: web::Path<String>,
+#[get("/task/{task_id}/comment-panel/{staff_id}")]
+pub async fn open_task_comments_for_user(
+    path: web::Path<(String, String)>,
     query: web::Query<CommentFilter>,
     comment_repo: web::Data<CommentRepository>,
+    assigned_repo: web::Data<AssignedStaffRepository>,
 ) -> HttpResponse {
     if (query.limit.is_some() && query.limit.unwrap() <= 0)
         || (query.offset.is_some() && query.offset.unwrap() <= 0)
@@ -140,27 +141,40 @@ pub async fn get_all_task_comments(
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
-    let id_parse = Uuid::from_str(task_id.into_inner().as_str());
-    if id_parse.is_err() {
+    let parsed_ids = extract_path_tuple_ids(path.into_inner());
+    if parsed_ids.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
-    let parsed_id = id_parse.expect("Should be valid.");
+    let (task_id, staff_id) = parsed_ids.unwrap();
+
+    let staff_res = assigned_repo.read_one(task_id, staff_id).await;
+
+    // Not (accepted) staff on the task -> Can't access comments.
+    if staff_res.is_err() || staff_res.as_ref().expect("Should be valid").status != AcceptanceStatus::Accepted {
+        return HttpResponse::Forbidden().body(parse_error(http::StatusCode::FORBIDDEN));
+    }
+
     let result = comment_repo
-        .read_all_per_task(parsed_id, query.into_inner())
+        .read_all_per_task(task_id, query.into_inner())
         .await;
     if let Ok(comment) = result {
         let comments: Vec<SingleComment> =
             comment.into_iter().map(|comment| comment.into()).collect();
-        let template = CommentsTemplate { comments };
+        let template = TaskCommentsContainerTemplate 
+            {
+                comments,
+                requester_id: staff_res.expect("Should be valid").staff.user.id,
+                task_id
+            };
         let body = template.render();
         if body.is_err() {
             return HttpResponse::InternalServerError()
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
         return HttpResponse::Ok()
-            .content_type("text/html")
-            .body(body.expect("Should be valid now."));
+                .content_type("text/html")
+                .body(body.expect("Should be valid now."));
     }
 
     handle_database_error(result.expect_err("Should be error."))

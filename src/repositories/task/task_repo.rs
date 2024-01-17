@@ -1,4 +1,4 @@
-use crate::{common::DbResult, repositories::task::models::TaskUserFlattened};
+use crate::{common::DbResult, repositories::{task::models::TaskUserFlattened, assigned_staff::models::AssignedStaffData}, models::AcceptanceStatus};
 use async_trait::async_trait;
 use sqlx::{postgres::PgPool, Postgres, Transaction};
 use std::{ops::DerefMut, sync::Arc};
@@ -52,6 +52,25 @@ impl TaskRepository {
             data.title,
             data.description,
             data.priority as TaskPriority,
+        )
+        .fetch_one(tx.deref_mut())
+        .await?;
+
+        let _ = sqlx::query_as!(
+            AssignedStaffData,
+            r#"
+            INSERT INTO assigned_staff 
+                ( task_id, staff_id, decided_by, status )
+            VALUES
+                ( $1, $2, $3, $4)
+            RETURNING
+                decided_by as "decided_by!",
+                status AS "status!: AcceptanceStatus";
+            "#,
+            new_task.id,
+            data.creator_id,
+            data.creator_id,
+            AcceptanceStatus::Accepted as AcceptanceStatus,
         )
         .fetch_one(tx.deref_mut())
         .await?;

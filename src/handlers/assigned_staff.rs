@@ -16,7 +16,7 @@ use crate::{
         },
         event_staff::event_staff_repo::StaffRepository,
     },
-    templates::staff::{AllAssignedStaffTemplate, AssignedStaffTemplate},
+    templates::staff::{AllAssignedStaffTemplate, AssignedStaff, AssignedStaffTemplate},
 };
 
 #[derive(Deserialize)]
@@ -47,7 +47,7 @@ pub async fn get_all_assigned_staff(
         .await;
 
     if let Ok(assigned) = result {
-        let assigned_vec: Vec<AssignedStaffTemplate> = assigned
+        let assigned_vec: Vec<AssignedStaff> = assigned
             .into_iter()
             .map(|assigned_staff| assigned_staff.into())
             .collect();

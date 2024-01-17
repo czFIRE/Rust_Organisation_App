@@ -3,9 +3,10 @@ use chrono::NaiveDateTime;
 use serde::Deserialize;
 use sqlx::types::uuid;
 use uuid::Uuid;
+use crate::templates::staff::AssignedStaff;
 
 use crate::{
-    models::{TaskPriority, EventRole},
+    models::{AcceptanceStatus, TaskPriority, EventRole},
     repositories::{task::models::TaskExtended, user::models::UserLite, event_staff::models::StaffLite},
 };
 
@@ -100,9 +101,17 @@ pub struct TasksTemplate {
 
 
 #[derive(Template, Deserialize)]
+#[template(path = "event/task/tasks-panel.html")]
+pub struct TasksPanelTemplate {
+    pub requester: StaffLite,
+}
+
+#[derive(Template, Deserialize)]
 #[template(path = "event/task/task-panel.html")]
 pub struct TaskPanelTemplate {
-    pub requester: StaffLite,
+    pub requester_id: Uuid,
+    pub assigned_staff: Option<AssignedStaff>,
+    pub task: EventTask,
 }
 
 #[derive(Template, Deserialize)]

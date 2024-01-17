@@ -86,7 +86,7 @@
                                 </svg>
                             </button>
                         </form>
-                        <form hx-patch="/event/{{ staff_member.event_id }}/staff/{{ staff_member.id}}"
+                        <form hx-patch="/event/{{ staff_member.event_id }}/staff/{{ staff_member.id }}"
                               hx-vals='js:{"decided_by": document.getElementById("misc_info").value}''
                               hx-ext="json-enc"
                               hx-swap="innerHTML"

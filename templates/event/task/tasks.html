@@ -11,9 +11,11 @@
                font-bold">Tasks</h2>
 
     {% for task in tasks %}
-    <button hx-get="/event/task/{{ task.id }}"
+    <button hx-get="/event/staff/{staff_id}/task/{{ task.id }}"
+            hx-vals='js:{"staff_id": document.getElementById("misc_info").value}''
             hx-swap="innerHTML"
             hx-target="#content"
+            hx-ext="path-params"
             class="w-7/12
                    m-10">
         <div id="{{ task.id }}"
@@ -53,9 +55,6 @@
                             text-rej">High Priority Task</p>
                 {% endmatch %}
             </div>
-            <p class="font-mono
-                      text-lg
-                      text-txt">{{ task.description }}</p>
             <div class="grid
                         grid-cols-3
                         w-full">

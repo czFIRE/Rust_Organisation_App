@@ -26,6 +26,7 @@ use crate::handlers::event::toggle_event_creation_mode;
 use crate::handlers::event::toggle_event_edit_mode;
 use crate::handlers::event_staff::initialize_staff_management_panel;
 use crate::handlers::event_staff::initialize_staff_panel;
+use crate::handlers::event_task::open_single_task_panel;
 use crate::handlers::event_task::open_tasks_panel;
 use crate::handlers::event_task::open_task_creation_panel;
 use crate::handlers::timesheet::get_work_day;
@@ -59,7 +60,7 @@ use crate::handlers::{
         get_all_associated_companies_per_event_and_user, update_associated_company,
     },
     comment::{
-        create_event_comment, create_task_comment, delete_comment, get_all_task_comments, 
+        create_event_comment, create_task_comment, delete_comment, open_task_comments_for_user, 
         update_comment,
     },
     company::{
@@ -183,6 +184,7 @@ async fn main() -> Result<()> {
             .service(delete_all_rejected_assigned_staff)
             .service(delete_assigned_staff)
             .service(open_tasks_panel)
+            .service(open_single_task_panel)
             .service(open_task_creation_panel)
             .service(get_event_tasks)
             .service(get_event_task)
@@ -204,7 +206,7 @@ async fn main() -> Result<()> {
             .service(delete_associated_company)
             .service(open_event_comments_for_user)
             .service(create_event_comment)
-            .service(get_all_task_comments)
+            .service(open_task_comments_for_user)
             .service(create_task_comment)
             .service(open_comment_update_mode)
             .service(get_comment)

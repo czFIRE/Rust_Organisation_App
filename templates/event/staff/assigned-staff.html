@@ -1,0 +1,30 @@
+{% if assigned_staff.is_some() %}
+    {% let staff = assigned_staff.as_ref().unwrap() %}
+    <div id="task-staff-panel"
+        class="flex
+               flex-col
+               space-y-10
+               items-start
+               bg-foreground1
+               w-full">
+        {% match staff.status %}
+            {% when AcceptanceStatus::Pending %}
+            <p class="font-mono
+                    text-xl
+                    text-pnd">Your application for this task is still under review. Check back later.</p>
+            {% when AcceptanceStatus::Rejected %}
+            <p class="font-mono
+                    text-xl
+                    text-rej">Sorry. Your application to work on this task was rejected.</p>
+            {% when AcceptanceStatus::Accepted %}
+            <p class="font-mono
+                    text-xl
+                    text-acc">You are working on this task.</p>
+            <div id="comments"
+                 hx-get="task/{{ staff.task_id }}/comment-panel/{{ staff.staff.id }}"
+                 hx-trigger="load"
+                 class="w-full">
+            </div>
+        {% endmatch %}
+    </div>
+{% endif %}

@@ -61,3 +61,11 @@ pub struct EventCommentsContainerTemplate {
     pub requester_id: Uuid,
     pub event_id: Uuid,
 }
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "comment/task-comments-container.html")]
+pub struct TaskCommentsContainerTemplate {
+    pub comments: Vec<SingleComment>,
+    pub requester_id: Uuid,
+    pub task_id: Uuid,
+}

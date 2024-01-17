@@ -114,10 +114,35 @@ impl From<AssignedStaffExtended> for AssignedStaffTemplate {
     }
 }
 
+#[derive(Debug, Clone, Deserialize)]
+pub struct AssignedStaff {
+    pub task_id: Uuid,
+    pub staff: StaffLite,
+    pub status: AcceptanceStatus,
+    pub decided_by: Option<Uuid>,
+    pub decided_by_user: Option<User>,
+    pub created_at: NaiveDateTime,
+    pub edited_at: NaiveDateTime,
+}
+
+impl From<AssignedStaffExtended> for AssignedStaff {
+    fn from(value: AssignedStaffExtended) -> Self {
+        AssignedStaff {
+            task_id: value.task_id,
+            staff: value.staff,
+            status: value.status,
+            decided_by: value.decided_by,
+            decided_by_user: value.decided_by_user,
+            created_at: value.created_at,
+            edited_at: value.edited_at,
+        }
+    }
+}
+
 #[derive(Template, Deserialize)]
 #[template(path = "event/staff/all-task-staff.html")]
 pub struct AllAssignedStaffTemplate {
-    pub staff: Vec<AssignedStaffTemplate>,
+    pub staff: Vec<AssignedStaff>,
 }
 
 #[derive(Template, Deserialize)]
