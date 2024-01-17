@@ -32,7 +32,8 @@ async fn read_some_timesheet_workdays_db_using_tx(
         FROM workday
         WHERE timesheet_id = $1
           AND date >= $2
-          AND date <= $3;
+          AND date <= $3
+        ORDER BY date;
         "#,
         timesheet_id,
         date_from,
@@ -451,7 +452,9 @@ impl TimesheetRepository {
                     created_at,
                     edited_at 
             FROM workday 
-            WHERE timesheet_id = $1;"#,
+            WHERE timesheet_id = $1
+            ORDER BY date;
+            "#,
             timesheet_id
         )
         .fetch_all(tx.deref_mut())
