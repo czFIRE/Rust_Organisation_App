@@ -237,7 +237,8 @@ pub async fn open_sheet_submit_page(
 fn is_data_empty(data: TimesheetUpdateData) -> bool {
     data.start_date.is_none()
         && data.end_date.is_none()
-        && data.total_hours.is_none()
+        && (data.total_hours.is_none()
+            || (data.total_hours.is_some() && data.total_hours.unwrap() < 0.0))
         && data.is_editable.is_none()
         && data.status.is_none()
         && (data.manager_note.is_none()
