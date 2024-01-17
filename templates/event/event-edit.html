@@ -1,7 +1,7 @@
 <div id="event"
      class="flex
             flex-col
-            space-y-10
+            space-y-5
             items-center
             w-full">
        <h2 class="font-mono
@@ -14,9 +14,12 @@
              hx-confirm="Are you sure you want to make these changes to the event?"
              class="flex
                     flex-col
+                    p-2
                     space-y-3
                     align-middle
-                    items-center">
+                    items-center
+                    rounded-md
+                    bg-foreground1">
               <div class="flex
                           flex-row
                           space-x-3">
@@ -29,7 +32,7 @@
                      class="font-mono
                             text-xl
                             text-txt
-                            bg-foreground1"
+                            bg-foreground2"
                      value="{{ event.name }}">
               </div>
               <div class="flex
@@ -44,7 +47,7 @@
                      class="font-mono
                             text-xl
                             text-txt
-                            bg-foreground1"
+                            bg-foreground2"
                      value="{{ event.website }}">
               </div>
               <div class="flex
@@ -59,7 +62,7 @@
                      class="font-mono
                             text-xl
                             text-txt
-                            bg-foreground1"
+                            bg-foreground2"
                      type="date"
                      value="{{ event.start_date }}">
               </div>
@@ -75,7 +78,7 @@
                             class="font-mono
                                    text-xl
                                    text-txt
-                                   bg-foreground1"
+                                   bg-foreground2"
                             type="date"
                             value="{{ event.end_date }}">
               </div>
@@ -96,18 +99,47 @@
                                    w-full
                                    text-wrap
                                    overflow-y-scroll
-                                   bg-foreground1"
+                                   bg-foreground2"
                             value="{{ event.description }}">
               </div>
               <button type="submit"
                      class="font-mono
                             text-xl
-                            text-txthl">Submit Changes</button>
+                            text-txthl
+                            bg-foreground2
+                            rounded-md
+                            p-1">Submit Changes</button>
        </form>
+       {% if event.accepts_staff %}
+              <button hx-patch="/event/{{ event.id }}"
+                      hx-vals='{"accepts_staff": false}'
+                      hx-swap="innerHTML"
+                      hx-target="#content"
+                      hx-ext="json-enc"
+                      class="bg-foreground1
+                               font-mono
+                             text-rej
+                               text-xl
+                               p-3">Disable Staff Registration</button>
+       {% else %}
+       <button hx-patch="/event/{{ event.id }}"
+               hx-vals='{"accepts_staff": true}'
+               hx-swap="innerHTML"
+               hx-target="#content"
+               hx-ext="json-enc"
+               class="bg-foreground1
+                        font-mono
+                      text-acc
+                        text-xl
+                        p-3">Enable Staff Registration</button>
+       {% endif %}
        <button hx-get="/event/{{ editor.event_id }}/staff-panel/{{ editor.user.id }}"
                hx-swap="innerHTML"
                hx-target="#content"
                class="font-mono
                       text-xl
-                    text-txthl">Cancel</button>
+                    text-txthl
+                      bg-foreground1
+                      rounded-md
+                      p-1">Cancel</button>
 </div>

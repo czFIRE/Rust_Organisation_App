@@ -132,15 +132,12 @@ pub async fn create_event(
 }
 
 fn is_update_data_empty(event_data: EventData) -> bool {
-    (event_data.name.is_none()
+    event_data.name.is_none()
         && event_data.description.is_none()
         && event_data.website.is_none()
         && event_data.start_date.is_none()
         && event_data.end_date.is_none()
-        && event_data.avatar_url.is_none())
-        || (event_data.avatar_url.is_some() && event_data.avatar_url.unwrap().is_empty())
-        || (event_data.website.is_some() && event_data.website.unwrap().is_empty())
-        || (event_data.description.is_some() && event_data.description.unwrap().is_empty())
+        && event_data.accepts_staff.is_none()
 }
 
 #[patch("/event/{event_id}")]

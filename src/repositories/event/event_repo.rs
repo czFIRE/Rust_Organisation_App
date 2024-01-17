@@ -246,7 +246,7 @@ impl EventRepository {
             && data.website.is_none()
             && data.start_date.is_none()
             && data.end_date.is_none()
-            && data.avatar_url.is_none()
+            && data.accepts_staff.is_none()
         {
             return Err(sqlx::Error::TypeNotFound {
                 type_name: "User Error".to_string(),
@@ -263,7 +263,7 @@ impl EventRepository {
                 website = COALESCE($3, website), 
                 start_date = COALESCE($4, start_date), 
                 end_date = COALESCE($5, end_date), 
-                avatar_url = COALESCE($6, avatar_url),
+                accepts_staff = COALESCE($6, accepts_staff),
                 edited_at = NOW() 
                 WHERE id = $7
                   AND deleted_at IS NULL 
@@ -284,7 +284,7 @@ impl EventRepository {
             data.website,
             data.start_date,
             data.end_date,
-            data.avatar_url,
+            data.accepts_staff,
             event_id,
         )
         .fetch_optional(tx.deref_mut())

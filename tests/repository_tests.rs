@@ -978,7 +978,7 @@ pub mod event_repo_tests {
                 website: Some("test.com".to_string()),
                 start_date: Some(NaiveDate::from_ymd_opt(2025, 9, 15).unwrap()),
                 end_date: Some(NaiveDate::from_ymd_opt(2025, 9, 16).unwrap()),
-                avatar_url: Some("test.jpg".to_string()),
+                accepts_staff: None,
             };
 
             let updated_event = event_repo
@@ -992,7 +992,6 @@ pub mod event_repo_tests {
             assert_eq!(updated_event.website, new_event_data.website);
             assert_eq!(updated_event.start_date, new_event_data.start_date.unwrap());
             assert_eq!(updated_event.end_date, new_event_data.end_date.unwrap());
-            assert_eq!(updated_event.avatar_url, new_event_data.avatar_url.unwrap());
 
             let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
             let time_difference_edited = time - updated_event.edited_at;
@@ -1010,7 +1009,7 @@ pub mod event_repo_tests {
                 website: None,
                 start_date: None,
                 end_date: None,
-                avatar_url: None,
+                accepts_staff: None,
             };
 
             let _updated_event = event_repo
@@ -1030,7 +1029,7 @@ pub mod event_repo_tests {
                 website: None,
                 start_date: None,
                 end_date: None,
-                avatar_url: None,
+                accepts_staff: None,
             };
 
             let _updated_event = event_repo
@@ -1065,7 +1064,7 @@ pub mod event_repo_tests {
                 website: None,
                 start_date: None,
                 end_date: None,
-                avatar_url: None,
+                accepts_staff: None,
             };
 
             let _updated_event = event_repo
