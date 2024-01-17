@@ -15,6 +15,7 @@ use std::io::Result;
 
 use std::sync::Arc;
 
+use crate::handlers::assigned_staff::initialize_assigned_staff_management_panel;
 use crate::handlers::comment::get_comment;
 use crate::handlers::comment::open_comment_update_mode;
 use crate::handlers::comment::open_event_comments_for_user;
@@ -184,6 +185,7 @@ async fn main() -> Result<()> {
             .service(update_assigned_staff)
             .service(delete_all_rejected_assigned_staff)
             .service(delete_assigned_staff)
+            .service(initialize_assigned_staff_management_panel)
             .service(open_tasks_panel)
             .service(open_single_task_panel)
             .service(open_task_creation_panel)

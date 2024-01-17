@@ -140,9 +140,16 @@ impl From<AssignedStaffExtended> for AssignedStaff {
 }
 
 #[derive(Template, Deserialize)]
-#[template(path = "event/staff/all-task-staff.html")]
+#[template(path = "event/staff/all-assigned-staff.html")]
 pub struct AllAssignedStaffTemplate {
     pub staff: Vec<AssignedStaff>,
+}
+
+#[derive(Template, Deserialize)]
+#[template(path = "event/staff/assigned-staff-management.html")]
+pub struct AssignedStaffManagementTemplate {
+    pub requester: AssignedStaff,
+    pub task_id: Uuid,
 }
 
 #[derive(Template, Deserialize)]

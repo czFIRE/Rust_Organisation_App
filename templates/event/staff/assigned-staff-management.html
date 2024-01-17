@@ -1,0 +1,45 @@
+<div id="staff-members"
+     hx-trigger="load"
+     hx-swap="innerHTML"
+     hx-get="/task/{{ task_id }}/staff"
+     class="flex
+            flex-col
+            items-center
+            space-y-10
+            p-3
+            w-full">
+</div>
+
+<div id="actions"
+     class="flex
+            flex-row
+            justify-between
+            items-center
+            space-x-10
+            p-3
+            m-3
+            w-9/12
+            rounded-md
+            bg-foreground1">
+    <button hx-delete="/task/{{ task_id }}/staff"
+            hx-swap="innerHTML"
+            hx-target="#staff-members"
+            hx-confirm="Delete all rejected staff?"
+            class="p-2
+                   rounded-md
+                 bg-foreground2
+                   font-mono
+                   text-txthl
+                   text-lg">Delete Rejected
+    </button>
+    <button hx-get="/event/staff/{{ requester.staff.id }}/task/{{ task_id }}"
+            hx-swap="innerHTML"
+            hx-target="#content"
+            class="p-2
+                   rounded-md
+                 bg-foreground2
+                   font-mono
+                   text-txthl
+                   text-lg">Go Back
+    </button>
+</div>

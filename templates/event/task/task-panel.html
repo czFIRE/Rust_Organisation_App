@@ -45,7 +45,10 @@
                             font-mono
                             text-txthl
                             text-lg">Edit Task</button>
-                <button class="p-2
+                <button hx-get="/task/{{task.id}}/staff/{{requester_id}}/management"
+                        hx-swap="innerHTML"
+                        hx-target="#content"
+                        class="p-2
                             rounded-md
                             bg-foreground2
                             font-mono

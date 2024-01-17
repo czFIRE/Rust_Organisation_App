@@ -23,7 +23,7 @@
                         w-24
                         h-24
                         rounded-md">
-                <img src="{{ staff_member.user.avatar_url }}" 
+                <img src="{{ staff_member.staff.user.avatar_url }}" 
                      class="object-contain
                             rounded-md" />
             </div>
@@ -36,20 +36,20 @@
                 <h4 class="font-mono
                         text-xl
                         text-txthl
-                        font-bold">{{ staff_member.user.name }}</h4>
+                        font-bold">{{ staff_member.staff.user.name }}</h4>
                 <div class="flex
                             flex-row
                             space-x-10
                             w-full">
                     <p class="font-mono
                               text-lg
-                            text-txt"><b>Age:</b> {{ staff_member.user.age }}</p>
+                            text-txt"><b>Age:</b> {{ chrono::offset::Local::now().naive_local().date().years_since(staff_member.staff.user.birth.clone()).expect("Should be valid") }}</p>
                     <p class="font-mono
                               text-lg
-                            text-txt"><b>Gender:</b> {{ staff_member.user.gender }}</p>
+                            text-txt"><b>Gender:</b> {{ staff_member.staff.user.gender }}</p>
                     <p class="font-mono
                               text-lg
-                            text-txt"><b>Company:</b> {{ staff_member.company.name }}</p>
+                            text-txt"><b>Company:</b> {{ staff_member.staff.company.name }}</p>
                 </div>
                 {% if staff_member.status == AcceptanceStatus::Pending %}
                     <div class="flex
@@ -58,8 +58,8 @@
                                 w-full">
                         <p class="font-mono
                                 text-lg
-                                text-pnd">Requesting to work as {{ staff_member.role }}</p>
-                        <form hx-patch="/event/{{ staff_member.event_id }}/staff/{{ staff_member.id}}"
+                                text-pnd">Requesting to work on this task.</p>
+                        <form hx-patch="/task/{{ staff_member.task_id }}/staff/{{ staff_member.staff.id }}"
                               hx-vals='js:{"decided_by": document.getElementById("misc_info").value}''
                               hx-ext="json-enc"
                               hx-swap="innerHTML"
@@ -86,7 +86,7 @@
                                 </svg>
                             </button>
                         </form>
-                        <form hx-patch="/event/{{ staff_member.event_id }}/staff/{{ staff_member.id}}"
+                        <form hx-patch="/task/{{ staff_member.task_id }}/staff/{{ staff_member.staff.id }}"
                               hx-vals='js:{"decided_by": document.getElementById("misc_info").value}''
                               hx-ext="json-enc"
                               hx-swap="innerHTML"
@@ -127,7 +127,7 @@
                                             {% else %}
                                                 Unknown
                                             {% endif %}</p>
-                        <button hx-delete="/event/{{ staff_member.event_id }}/staff/{{ staff_member.id }}"
+                        <button hx-delete="/task/{{ staff_member.task_id }}/staff"
                                 hx-swap="innerHTML"
                                 hx-target="#staff-members"
                                 hx-confirm="Are you sure you want to delete this rejected application?"
@@ -165,7 +165,7 @@
                font-bold
                text-txthl">Accepted Staff</h3>
         {% for staff_member in staff %}
-               {% if staff_member.status == AcceptanceStatus::Accepted %}
+            {% if staff_member.status == AcceptanceStatus::Accepted %}
                <div class="flex
                            flex-row
                            space-x-5
@@ -177,7 +177,7 @@
                                w-24
                                h-24
                                rounded-md">
-                       <img src="{{ staff_member.user.avatar_url }}" 
+                       <img src="{{ staff_member.staff.user.avatar_url }}" 
                             class="object-contain
                                    rounded-md" />
                    </div>
@@ -190,78 +190,27 @@
                        <h4 class="font-mono
                                text-xl
                                text-txthl
-                               font-bold">{{ staff_member.user.name }}</h4>
+                               font-bold">{{ staff_member.staff.user.name }}</h4>
                        <div class="flex
                                    flex-row
                                    space-x-10
                                    w-full">
                            <p class="font-mono
                                       text-lg
-                                   text-txt"><b>Age:</b> {{ staff_member.user.age }}</p>
+                                   text-txt"><b>Age:</b> {{ chrono::offset::Local::now().naive_local().date().years_since(staff_member.staff.user.birth.clone()).expect("Should be valid") }}</p>
                            <p class="font-mono
                                      text-lg
-                                   text-txt"><b>Gender:</b> {{ staff_member.user.gender }}</p>
+                                   text-txt"><b>Gender:</b> {{ staff_member.staff.user.gender }}</p>
                             <p class="font-mono
                                       text-lg
-                                    text-txt"><b>Company:</b> {{ staff_member.company.name }}</p>
+                                    text-txt"><b>Company:</b> {{ staff_member.staff.company.name }}</p>
                             <p class="font-mono
                                       text-lg
-                                    text-txt"><b>Role:</b> {{ staff_member.role }}</p>
-                            <form hx-patch="/event/{{ staff_member.event_id }}/staff/{{ staff_member.id}}"
-                                  hx-ext="json-enc"
-                                  hx-swap="innerHTML"
-                                  hx-target="#staff-members"
-                                  hx-confirm="Are you sure you want to change this staff member's role?">
-                                  {% if staff_member.role == EventRole::Staff %}
-                                    <input type="hidden"
-                                           class="hidden"
-                                           name="role"
-                                           id="role"
-                                           value="Organizer">
-                                    <button type="submit"
-                                            title="Promote">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                             fill="none"
-                                             viewBox="0 0 24 24"
-                                             stroke-width="1.5"
-                                             stroke="currentColor"
-                                             class="w-6
-                                                    h-6
-                                                    text-txthl">
-                                            <path stroke-linecap="round"
-                                                  stroke-linejoin="round"
-                                                  d="m4.5 18.75 7.5-7.5 7.5 7.5" />
-                                            <path stroke-linecap="round"
-                                                  stroke-linejoin="round"
-                                                  d="m4.5 12.75 7.5-7.5 7.5 7.5" />
-                                        </svg>                                      
-                                    </button>
-                                  {% else %}
-                                    <input type="hidden"
-                                           class="hidden"
-                                           name="role"
-                                           id="role"
-                                           value="Staff">
-                                    <button type="submit"
-                                            title="Demote">
-                                        <svg xmlns="http://www.w3.org/2000/svg"
-                                             fill="none"
-                                             viewBox="0 0 24 24"
-                                             stroke-width="1.5"
-                                             stroke="currentColor"
-                                             class="w-6
-                                                    h-6
-                                                    text-txthl">
-                                            <path stroke-linecap="round"
-                                                  stroke-linejoin="round"
-                                                  d="m4.5 5.25 7.5 7.5 7.5-7.5m-15 6 7.5 7.5 7.5-7.5" />
-                                        </svg>                                                                       
-                                    </button>
-                                  {% endif %}
+                                    text-txt"><b>Role:</b> {{ staff_member.staff.role }}</p>
                             </form>
                         </div>
                    </div>
                </div>
-               {% endif %}
-           {% endfor %}
+        {% endif %}
+    {% endfor %}
 </div>
