@@ -32,7 +32,9 @@ use crate::handlers::event_task::open_task_creation_panel;
 use crate::handlers::event_task::open_task_edit_panel;
 use crate::handlers::event_task::open_tasks_panel;
 use crate::handlers::event_task::update_task_completion;
+use crate::handlers::timesheet::get_expected_wage_calculation;
 use crate::handlers::timesheet::get_work_day;
+use crate::handlers::timesheet::open_sheet_submit_page;
 use crate::handlers::timesheet::toggle_work_day_edit_mode;
 use crate::handlers::timesheet::update_work_day;
 use crate::handlers::user::get_users;
@@ -226,6 +228,8 @@ async fn main() -> Result<()> {
             .service(toggle_work_day_edit_mode)
             .service(update_work_day)
             .service(get_work_day)
+            .service(get_expected_wage_calculation)
+            .service(open_sheet_submit_page)
             // Temporary
             .service(get_users_login)
             // For serving css

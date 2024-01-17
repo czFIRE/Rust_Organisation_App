@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{collections::HashMap, str::FromStr};
 
 use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;
@@ -15,7 +15,8 @@ use crate::{
         timesheet_repo::TimesheetRepository,
     },
     templates::timesheet::{
-        TimesheetTemplate, TimesheetsTemplate, WorkdayEditTemplate, WorkdayTemplate,
+        DetailedWage, TimesheetCalculateTemplate, TimesheetTemplate, TimesheetWageDetailed,
+        TimesheetsTemplate, WorkdayEditTemplate, WorkdayTemplate,
     },
 };
 
@@ -67,6 +68,7 @@ pub async fn get_all_timesheets_for_employment(
     handle_database_error(result.expect_err("Should be error."))
 }
 
+// ToDo: Remove???
 // Note: This is done automatically whenever event_staff is accepted to work on an event.
 #[post("/timesheet")]
 pub async fn create_timesheet(
@@ -122,6 +124,114 @@ pub async fn get_timesheet(
     }
 
     handle_database_error(result.expect_err("Should be error."))
+}
+
+#[get("/timesheet/{timesheet_id}/expected-wage")]
+pub async fn get_expected_wage_calculation(
+    timesheet_id: web::Path<String>,
+    timesheet_repo: web::Data<TimesheetRepository>,
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(timesheet_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let parsed_id = id_parse.expect("Should be valid.");
+    let sheet_res = timesheet_repo._read_one(parsed_id).await;
+    if sheet_res.is_err() {
+        return handle_database_error(sheet_res.expect_err("Should be an error."));
+    }
+
+    //ToDo: Here we call the calculation function
+
+    //ToDo: Get rid of this mock data.
+    let detailed_wage = DetailedWage {
+        tax_base: 3000.0,
+        net_wage: 4235.52,
+        employer_social_insurance: 500.0,
+        employee_health_insurance: 250.0,
+        employer_health_insurance: 750.0,
+        employee_social_insurance: 200.0,
+    };
+
+    let mut wages_per_month: HashMap<String, DetailedWage> = HashMap::new();
+    wages_per_month.insert("February".to_string(), detailed_wage.clone());
+    wages_per_month.insert("Maruary".to_string(), detailed_wage.clone());
+
+    let wage = TimesheetWageDetailed {
+        total_wage: detailed_wage,
+        wage_currency: "Czk".to_string(),
+        month_to_detailed_wage: wages_per_month,
+        error_option: None,
+    };
+
+    let template = TimesheetCalculateTemplate {
+        wage,
+        timesheet_id: parsed_id,
+        in_submit_mode: false,
+    };
+
+    let body = template.render();
+    if body.is_err() {
+        return HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+    }
+
+    HttpResponse::Ok().body(body.expect("Should be valid."))
+}
+
+#[get("/timesheet/{timesheet_id}/submit-page")]
+pub async fn open_sheet_submit_page(
+    timesheet_id: web::Path<String>,
+    timesheet_repo: web::Data<TimesheetRepository>,
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(timesheet_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let parsed_id = id_parse.expect("Should be valid.");
+    let sheet_res = timesheet_repo._read_one(parsed_id).await;
+    if sheet_res.is_err() {
+        return handle_database_error(sheet_res.expect_err("Should be an error."));
+    }
+
+    //ToDo: Here we call the calculation function
+
+    //ToDo: Get rid of this mock data.
+    let detailed_wage = DetailedWage {
+        tax_base: 3000.0,
+        net_wage: 4235.52,
+        employer_social_insurance: 500.0,
+        employee_health_insurance: 250.0,
+        employer_health_insurance: 750.0,
+        employee_social_insurance: 200.0,
+    };
+
+    let mut wages_per_month: HashMap<String, DetailedWage> = HashMap::new();
+    wages_per_month.insert("February".to_string(), detailed_wage.clone());
+    wages_per_month.insert("Maruary".to_string(), detailed_wage.clone());
+
+    let wage = TimesheetWageDetailed {
+        total_wage: detailed_wage,
+        wage_currency: "Czk".to_string(),
+        month_to_detailed_wage: wages_per_month,
+        error_option: None,
+    };
+
+    let template = TimesheetCalculateTemplate {
+        wage,
+        timesheet_id: parsed_id,
+        in_submit_mode: true,
+    };
+
+    let body = template.render();
+    if body.is_err() {
+        return HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+    }
+
+    HttpResponse::Ok().body(body.expect("Should be valid."))
 }
 
 fn is_data_empty(data: TimesheetUpdateData) -> bool {
