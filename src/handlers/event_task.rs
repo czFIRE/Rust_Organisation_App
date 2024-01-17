@@ -2,6 +2,7 @@ use std::str::FromStr;
 
 use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;
+use chrono::Utc;
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -148,8 +149,6 @@ pub async fn update_task(
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
-    println!("UPDATE REQUEST RECEIVED!!!!!!!!!!!!!!!!!!!!!!");
-
     let id_parse = Uuid::from_str(task_id.into_inner().as_str());
     if id_parse.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
@@ -165,6 +164,34 @@ pub async fn update_task(
     open_task_panel(task.creator_id, task, assigned_repo).await
 }
 
+#[patch("/event/task/{task_id}/completion")]
+pub async fn update_task_completion(
+    task_id: web::Path<String>,
+    task_repo: web::Data<TaskRepository>,
+    assigned_repo: web::Data<AssignedStaffRepository>,
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(task_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+    let parsed_id = id_parse.expect("Should be valid.");
+
+    let task_data = TaskData {
+        title: None,
+        finished_at: Some(Utc::now().naive_local()),
+        description: None,
+        priority: None,
+        accepts_staff: None,
+    };
+
+    let result = task_repo.update(parsed_id, task_data).await;
+    if result.is_err() {
+        return handle_database_error(result.expect_err("Should be an error."));
+    }
+    let task = result.expect("Should be valid.");
+
+    open_task_panel(task.creator_id, task, assigned_repo).await
+}
 #[delete("/event/task/{task_id}")]
 pub async fn delete_task(
     task_id: web::Path<String>,

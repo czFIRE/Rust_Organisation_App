@@ -30,11 +30,9 @@ pub struct NewAssignedStaffData {
 async fn get_staff_per_task(
     task_id: Uuid,
     query: AssignedStaffFilter,
-    assigned_repo:web::Data<AssignedStaffRepository>
+    assigned_repo: web::Data<AssignedStaffRepository>,
 ) -> HttpResponse {
-    let result = assigned_repo
-        .read_all_per_task(task_id, query)
-        .await;
+    let result = assigned_repo.read_all_per_task(task_id, query).await;
 
     if let Ok(assigned) = result {
         let assigned_vec: Vec<AssignedStaff> = assigned
@@ -259,7 +257,7 @@ pub async fn initialize_assigned_staff_management_panel(
         requester: requester.into(),
         task_id,
     };
-    
+
     let body = template.render();
     if body.is_err() {
         return HttpResponse::InternalServerError()

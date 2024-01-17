@@ -19,7 +19,8 @@
                  space-y-5
                  items-center
                  w-full
-                 bg-foreground1">
+                 bg-foreground1
+                 p-3">
         <div class="flex
                     flex-row
                     space-x-5
@@ -93,6 +94,17 @@
                        text-lg
                        bg-foreground2">Submit Changes</button>
     </form>
+    {% if task.finished_at.is_none() %}
+    <button class="rounded-md
+                p-1
+                text-acc
+                text-lg
+                bg-foreground2"
+            hx-patch="/event/task/{{ task.id }}/completion"
+            hx-swap="innerHTML"
+            hx-confirm="Are you sure? This is an irreversible action."
+            hx-target="#content">Set Task as Completed</button>
+    {% endif %}
     {% if task.accepts_staff %}
     <button class="rounded-md
                    p-1
@@ -117,24 +129,6 @@
             hx-target="#content">Turn On Staff Applications</button>
     {% endif %}
     <!-- TODO -->
-    {% if task.finished_at.is_none() %}
-    <input required
-           id="finished_at"
-           name="finished_at"
-           type="datetime-local"
-           value="today">
-    <button class="rounded-md
-                   p-1
-                 text-txthl
-                   text-lg
-                 bg-foreground2"
-            hx-patch="/event/task/{{ task.id }}"
-            hx-vals='js:{"finished_at": Date.now().getDate()}'
-            hx-swap="innerHTML"
-            hx-ext="json-enc"
-            hx-confirm="Are you sure? This is an irreversible action."
-            hx-target="#content">Set Task as Completed</button>
-    {% endif %}
     <button class="rounded-md
                    p-1
                    text-txthl

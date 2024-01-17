@@ -31,6 +31,7 @@ use crate::handlers::event_task::open_single_task_panel;
 use crate::handlers::event_task::open_task_creation_panel;
 use crate::handlers::event_task::open_task_edit_panel;
 use crate::handlers::event_task::open_tasks_panel;
+use crate::handlers::event_task::update_task_completion;
 use crate::handlers::timesheet::get_work_day;
 use crate::handlers::timesheet::toggle_work_day_edit_mode;
 use crate::handlers::timesheet::update_work_day;
@@ -194,6 +195,7 @@ async fn main() -> Result<()> {
             .service(get_event_task)
             .service(create_task)
             .service(update_task)
+            .service(update_task_completion)
             .service(delete_task)
             .service(get_all_event_staff)
             .service(get_event_staff)
