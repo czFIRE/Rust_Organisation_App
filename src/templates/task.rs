@@ -121,3 +121,10 @@ pub struct TaskCreationTemplate {
     pub creator_id: Uuid,
     pub event_id: Uuid,
 }
+
+#[derive(Template, Deserialize)]
+#[template(path = "event/task/task-edit.html")]
+pub struct TaskEditTemplate {
+    pub editor_id: Uuid,
+    pub task: EventTask,
+}

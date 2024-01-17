@@ -267,6 +267,7 @@ impl TaskRepository {
             && data.finished_at.is_none()
             && data.priority.is_none()
             && data.title.is_none()
+            && data.accepts_staff.is_none()
         {
             // TODO - add better error
             return Err(sqlx::Error::TypeNotFound {

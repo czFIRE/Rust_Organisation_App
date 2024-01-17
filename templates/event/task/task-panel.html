@@ -36,7 +36,10 @@
                     text-txthl
                       text-lg">Go Back</button>
         {% if task.creator_id == requester_id %}
-                <button class="p-2
+                <button hx-get="/event/staff/{{ requester_id }}/task-edit/{{ task.id }}"
+                        hx-swap="innerHTML"
+                        hx-target="#content"
+                        class="p-2
                             rounded-md
                             bg-foreground2
                             font-mono

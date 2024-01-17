@@ -18,8 +18,8 @@ use crate::{
         },
     },
     templates::task::{
-        EventTask, TaskCreationTemplate, TaskPanelTemplate, TaskTemplate, TasksPanelTemplate,
-        TasksTemplate,
+        EventTask, TaskCreationTemplate, TaskEditTemplate, TaskPanelTemplate, TaskTemplate,
+        TasksPanelTemplate, TasksTemplate,
     },
 };
 
@@ -142,10 +142,13 @@ pub async fn update_task(
     task_id: web::Path<String>,
     task_data: web::Json<TaskData>,
     task_repo: web::Data<TaskRepository>,
+    assigned_repo: web::Data<AssignedStaffRepository>,
 ) -> HttpResponse {
     if is_data_invalid(task_data.clone()) {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
+
+    println!("UPDATE REQUEST RECEIVED!!!!!!!!!!!!!!!!!!!!!!");
 
     let id_parse = Uuid::from_str(task_id.into_inner().as_str());
     if id_parse.is_err() {
@@ -154,19 +157,12 @@ pub async fn update_task(
     let parsed_id = id_parse.expect("Should be valid.");
 
     let result = task_repo.update(parsed_id, task_data.into_inner()).await;
-    if let Ok(task) = result {
-        let template: TaskTemplate = task.into();
-        let body = template.render();
-        if body.is_err() {
-            return HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
-        }
-        return HttpResponse::Ok()
-            .content_type("text/html")
-            .body(body.expect("Should be valid now."));
+    if result.is_err() {
+        return handle_database_error(result.expect_err("Should be an error."));
     }
+    let task = result.expect("Should be valid.");
 
-    handle_database_error(result.expect_err("Should be error."))
+    open_task_panel(task.creator_id, task, assigned_repo).await
 }
 
 #[delete("/event/task/{task_id}")]
@@ -316,4 +312,46 @@ pub async fn open_single_task_panel(
 
     let task = result.expect("Should be okay now.");
     open_task_panel(staff_id, task, assigned_repo).await
+}
+
+#[get("/event/staff/{staff_id}/task-edit/{task_id}")]
+pub async fn open_task_edit_panel(
+    path: web::Path<(String, String)>,
+    task_repo: web::Data<TaskRepository>,
+    assigned_repo: web::Data<AssignedStaffRepository>,
+) -> HttpResponse {
+    let parsed_ids = extract_path_tuple_ids(path.into_inner());
+    if parsed_ids.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let (staff_id, task_id) = parsed_ids.unwrap();
+
+    let task_res = task_repo.read_one(task_id).await;
+    if task_res.is_err() {
+        return handle_database_error(task_res.expect_err("Should be an error."));
+    }
+
+    let task = task_res.expect("Should be okay.");
+
+    let staff_res = assigned_repo.read_one(task_id, staff_id).await;
+    if staff_res.is_err() {
+        return handle_database_error(staff_res.expect_err("Should be an error."));
+    }
+
+    let staff = staff_res.expect("Should be okay.");
+    if staff.task_id != task_id || staff.staff.id != task.creator_id {
+        return HttpResponse::Forbidden().body(parse_error(http::StatusCode::FORBIDDEN));
+    }
+
+    let template = TaskEditTemplate {
+        editor_id: staff.staff.id,
+        task: task.into(),
+    };
+    let body = template.render();
+    if body.is_err() {
+        return HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+    }
+    HttpResponse::Ok().body(body.expect("Should be valid."))
 }
