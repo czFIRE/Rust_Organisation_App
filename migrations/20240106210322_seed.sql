@@ -613,6 +613,69 @@ BEGIN
     INSERT INTO wage_preset
         (name,
         valid_from,
+        valid_to,
+        description,
+        currency,
+        monthly_dpp_employee_no_tax_limit,
+        monthly_dpp_employer_no_tax_limit,
+        monthly_dpc_employee_no_tax_limit,
+        monthly_dpc_employer_no_tax_limit,
+        health_insurance_employee_tax_pct, social_insurance_employee_tax_pct,
+        health_insurance_employer_tax_pct, social_insurance_employer_tax_pct,
+        min_hourly_wage,
+        min_monthly_hpp_salary,
+        created_at, edited_at)
+    VALUES
+        ('cz_1966-01-01',
+        '1966-01-01',
+        '1992-12-31',
+        'An imaginary wage params valid for CSR starting from 1966/01/01',
+        'CSK',
+        5000,
+        5000,
+        2000,
+        2000,
+        4.5, 6.5,
+        24.8, 9.0,
+        60,
+        10000,
+        '2023-12-14 12:00', '2023-12-14 12:00');
+
+    INSERT INTO wage_preset
+        (name,
+        valid_from,
+        valid_to,
+        description,
+        currency,
+        monthly_dpp_employee_no_tax_limit,
+        monthly_dpp_employer_no_tax_limit,
+        monthly_dpc_employee_no_tax_limit,
+        monthly_dpc_employer_no_tax_limit,
+        health_insurance_employee_tax_pct, social_insurance_employee_tax_pct,
+        health_insurance_employer_tax_pct, social_insurance_employer_tax_pct,
+        min_hourly_wage,
+        min_monthly_hpp_salary,
+        created_at, edited_at)
+    VALUES
+        ('cz_2020-01-01',
+        '2020-01-01',
+        '2023-12-31',
+        'An imaginary wage params valid for Czech republic starting from 2020/01/01',
+        'CZK',
+        8000,
+        8000,
+        3500,
+        3500,
+        4.5, 6.5,
+        24.8, 9.0,
+        100.0,
+        15500,
+        '2023-12-16 08:00', '2023-12-16 08:00');
+
+    INSERT INTO wage_preset
+        (name,
+        valid_from,
+        valid_to,
         description,
         currency,
         monthly_dpp_employee_no_tax_limit,
@@ -627,6 +690,7 @@ BEGIN
     VALUES
         ('cz_2024-01-01',
         '2024-01-01',
+        NULL,
         'A wage params valid for Czech republic starting from 2024/01/01',
         'CZK',
         10000,
@@ -637,7 +701,7 @@ BEGIN
          24.8, 9.0,
          118.13,
          18900,
-        '2023-12-16 14:00', '2023-12-17 10:05');
+        '2023-12-16 14:00', '2023-12-16 14:00');
 
 --------------------------------------------------------------------------------
 

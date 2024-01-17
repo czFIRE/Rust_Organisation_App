@@ -31,6 +31,32 @@ pub async fn read_one_db_using_tx(tx: &mut Transaction<'_, sqlx::Postgres>,
     wage_preset_result
 }
 
+///
+/// Possibly gets a WagePreset applicable for a passed `date`.
+///
+pub async fn read_optional_matching_date_db_using_tx(
+    tx: &mut Transaction<'_, sqlx::Postgres>,
+    date: &NaiveDate)
+    -> DbResult<Option<WagePreset>> {
+
+    let wage_preset_result = sqlx::query_as!(
+        WagePreset,
+        r#"
+        SELECT *
+        FROM wage_preset
+        WHERE
+            valid_from <= $1
+            AND (valid_to IS NULL
+                 OR valid_to >= $1)
+        "#,
+        date,
+    )
+    .fetch_optional(tx.deref_mut())
+    .await;
+
+    wage_preset_result
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 #[derive(Clone)]
@@ -87,5 +113,28 @@ impl WagePresetRepository {
         .await?;
 
         Ok(wage_presets)
+    }
+
+    pub async fn read_optional_matching_date(
+        &self,
+        date: &NaiveDate)
+        -> DbResult<Option<WagePreset>> {
+        // TODO: Redis here
+
+        self.read_optional_matching_date_db(date).await
+    }
+
+    pub async fn read_optional_matching_date_db(
+        &self,
+        date: &NaiveDate)
+        -> DbResult<Option<WagePreset>> {
+        let mut tx = self.pool.begin().await?;
+
+        let preset_optional
+            = read_optional_matching_date_db_using_tx(&mut tx, date).await?;
+
+        tx.commit().await?;
+
+        Ok(preset_optional)
     }
 }

@@ -5,6 +5,7 @@ use sqlx::FromRow;
 pub struct WagePreset {
     pub name: String,
     pub valid_from: NaiveDate,
+    pub valid_to: Option<NaiveDate>,
     pub currency: String,
     pub description: String,
     pub monthly_dpp_employee_no_tax_limit: f32,

@@ -29,6 +29,9 @@ pub mod test_constants {
 
     pub const COMMENT0_ID: Uuid = uuid!("0d6cec6a-4fe8-4e44-bf68-e33de0ed121b");
     pub const COMMENT1_ID: Uuid = uuid!("daac23ec-fb36-434a-823b-49716ed2002c");
+
+    // a delta for float comparisons
+    pub const DELTA: f32 = 0.0000001;
 }
 
 #[cfg(test)]
@@ -3639,6 +3642,8 @@ mod timesheet_repo_tests {
 mod wage_preset_repo_tests {
     use std::sync::Arc;
 
+    use crate::test_constants::DELTA;
+
     use chrono::NaiveDate;
     use organization::{
         common::DbResult,
@@ -3683,7 +3688,58 @@ mod wage_preset_repo_tests {
             .read_all()
             .await
             .expect("Should succeed");
-        assert_eq!(presets.len(), 1);
+        assert_eq!(presets.len(), 3);
+
+        wage_preset_repo.disconnect().await;
+
+        Ok(())
+    }
+
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn read_optional_matching_date(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
+
+        let mut wage_preset_repo = WagePresetRepository::new(arc_pool);
+
+        // non-existent
+        {
+            let preset_optional = wage_preset_repo
+                .read_optional_matching_date(
+                    &NaiveDate::from_ymd_opt(1965, 12, 31).unwrap())
+                .await
+                .expect("Should succeed");
+            assert!(preset_optional.is_none());
+        }
+
+        {
+            let preset_optional = wage_preset_repo
+                .read_optional_matching_date(
+                    &NaiveDate::from_ymd_opt(2023, 06, 01).unwrap())
+                .await
+                .expect("Should succeed");
+            assert!(preset_optional.is_some());
+            assert!(preset_optional.unwrap().min_hourly_wage - 100.0 < DELTA);
+        }
+
+        {
+            let preset_optional = wage_preset_repo
+                .read_optional_matching_date(
+                    &NaiveDate::from_ymd_opt(2024, 01, 01).unwrap())
+                .await
+                .expect("Should succeed");
+            assert!(preset_optional.is_some());
+            assert!(preset_optional.unwrap().min_hourly_wage - 118.3 < DELTA);
+        }
+
+        {
+            let preset_optional = wage_preset_repo
+                .read_optional_matching_date(
+                    &NaiveDate::from_ymd_opt(2030, 06, 10).unwrap())
+                .await
+                .expect("Should succeed");
+            assert!(preset_optional.is_some());
+            assert!(preset_optional.unwrap().min_hourly_wage - 118.3 < DELTA);
+        }
 
         wage_preset_repo.disconnect().await;
 

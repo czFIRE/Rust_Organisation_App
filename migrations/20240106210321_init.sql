@@ -352,12 +352,18 @@ CREATE TABLE comment
 
 );
 
+--
 -- todo later: Once this special table gets finilized, put it into ERD as well.
+--
+-- todo later: We should enforce only one row has valid_to=NULL
+--             and no two (valid_from, valid_to) ranges intersect.
+--
 CREATE TABLE wage_preset
 (
 	name TEXT PRIMARY KEY,
     -------------------------------------------------------
     valid_from  DATE NOT NULL,
+    valid_to    DATE,
     description TEXT NOT NULL DEFAULT '',
     currency    TEXT NOT NULL,
 	monthly_dpp_employee_no_tax_limit REAL NOT NULL,
@@ -399,6 +405,8 @@ CREATE TABLE wage_preset
         CHECK (min_hourly_wage >= 0.0),
     CONSTRAINT check_wage_preset_min_monthly_hpp_salary_gte_0
         CHECK (min_monthly_hpp_salary >= 0.0),
+    CONSTRAINT check_wage_preset_valid_from_le_valid_to
+        CHECK (valid_from < valid_to),
     CONSTRAINT check_wage_preset_created_at_lte_edited_at
         CHECK (edited_at >= created_at)
 );
