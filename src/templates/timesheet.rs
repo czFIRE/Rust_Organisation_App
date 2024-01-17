@@ -156,6 +156,8 @@ impl From<TimesheetWithEvent> for TimesheetLite {
 #[template(path = "employment/timesheet/timesheets.html")]
 pub struct TimesheetsTemplate {
     pub timesheets: Vec<TimesheetLite>,
+    pub user_id: Uuid,
+    pub company_id: Uuid,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -193,4 +195,18 @@ pub struct TimesheetCalculateTemplate {
     pub wage: TimesheetWageDetailed,
     pub timesheet_id: Uuid,
     pub in_submit_mode: bool,
+}
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "employment/timesheet/timesheets-review.html")]
+pub struct TimesheetsReviewTemplate {
+    pub timesheets: Vec<TimesheetLite>,
+    pub manager_id: Uuid,
+    pub company_id: Uuid,
+}
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "employment/timesheet/timesheet-review.html")]
+pub struct TimesheetReviewTemplate {
+    pub sheet: TimesheetTemplate,
 }

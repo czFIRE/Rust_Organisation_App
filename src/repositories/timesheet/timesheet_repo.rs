@@ -332,13 +332,7 @@ impl TimesheetRepository {
     }
 
     fn _is_data_empty(data: TimesheetUpdateData) -> bool {
-        data.start_date.is_none()
-            && data.end_date.is_none()
-            && data.total_hours.is_none()
-            && data.is_editable.is_none()
-            && data.status.is_none()
-            && data.manager_note.is_none()
-            && data.workdays.is_none()
+        data.is_editable.is_none() && data.status.is_none() && data.manager_note.is_none()
     }
 
     /* Methods for workday are kept in timesheet_repo because
@@ -425,19 +419,14 @@ impl TimesheetRepository {
         sqlx::query!(
             r#"
             UPDATE timesheet
-            SET start_date = COALESCE($1, start_date),
-                end_date = COALESCE($2, end_date),
-                total_hours = COALESCE($3, total_hours),
-                is_editable = COALESCE($4, is_editable),
-                status = COALESCE($5, status),
-                manager_note = COALESCE($6, manager_note),
+            SET
+                is_editable = COALESCE($1, is_editable),
+                status = COALESCE($2, status),
+                manager_note = COALESCE($3, manager_note),
                 edited_at = NOW()
-            WHERE id = $7
+            WHERE id = $4
               AND deleted_at IS NULL
             "#,
-            data.start_date,
-            data.end_date,
-            data.total_hours,
             data.is_editable,
             data.status as Option<ApprovalStatus>,
             data.manager_note,
@@ -445,37 +434,6 @@ impl TimesheetRepository {
         )
         .execute(tx.deref_mut())
         .await?;
-
-        // This should likely be in a separate function.
-        if data.workdays.is_some() {
-            for workday in data.workdays.expect("Should be some!").into_iter() {
-                sqlx::query!(
-                    r#"
-                    UPDATE workday
-                    SET total_hours = COALESCE($1, total_hours),
-                        comment = COALESCE($2, comment),
-                        is_editable = COALESCE($3, is_editable),
-                        edited_at = NOW()
-                    WHERE timesheet_id = $4
-                      AND date = $5
-                      AND deleted_at IS NULL;"#,
-                    workday.total_hours,
-                    workday.comment,
-                    workday.is_editable,
-                    workday.timesheet_id,
-                    workday.date
-                )
-                .execute(tx.deref_mut())
-                .await?;
-            }
-        }
-
-        /* You may think this is redundant, BUT
-         *  since not all workdays may be edited,
-         *  it's better to just retrieve all of them after the change.
-         * Also we don't get event data from the update.
-         * But if we get the time, we should think about improving this.
-         */
 
         let workdays = sqlx::query_as!(
             Workday,

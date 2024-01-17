@@ -36,7 +36,7 @@ pub struct EventData {
     pub website: Option<String>,
     pub start_date: Option<NaiveDate>,
     pub end_date: Option<NaiveDate>,
-    pub accepts_staff: Option<bool>
+    pub accepts_staff: Option<bool>,
 }
 
 #[derive(Debug, Deserialize, Clone)]

@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE timesheet\n            SET\n                is_editable = COALESCE($1, is_editable),\n                status = COALESCE($2, status),\n                manager_note = COALESCE($3, manager_note),\n                edited_at = NOW()\n            WHERE id = $4\n              AND deleted_at IS NULL\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Bool",
+        {
+          "Custom": {
+            "name": "approval_status",
+            "kind": {
+              "Enum": [
+                "not_requested",
+                "pending",
+                "accepted",
+                "rejected"
+              ]
+            }
+          }
+        },
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e9fc93d69c417015a613f20110d0109f2f5a3704ad56073c18a19cfc538597f1"
+}

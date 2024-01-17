@@ -67,7 +67,7 @@
             <div class="flex
                             flex-row
                             space-x-3">
-                    {% if accepts_staff -%}
+                    {% if accepts_staff %}
                     <svg xmlns="http://www.w3.org/2000/svg" 
                          fill="none"
                          viewBox="0 0 24 24"
@@ -85,7 +85,7 @@
                             text-acc">
                         Accepting staff applications, register in the staff panel.
                     </p>
-                    {%- else -%}
+                    {% else %}
                     <svg xmlns="http://www.w3.org/2000/svg"
                          fill="none"
                          viewBox="0 0 24 24"
@@ -103,7 +103,7 @@
                             text-rej">
                         Not accepting staff applications.
                     </p>
-                    {%- endif %}
+                    {% endif %}
                 </div>
                 <!-- We can use -some- javascript, right? -->
                 <button hx-get="/event/{{ id }}/staff-panel/{user_id}"
@@ -117,7 +117,7 @@
                                 bg-foreground1
                                 p-3
                                 rounded-md">Open Staff Panel</button>
-                {% if website != "No website" -%}
+                {% if website != "No website" %}
                 <a href="{{ website }}">
                     <div class="flex
                                 flex-row
@@ -139,7 +139,7 @@
                                 text-txthl">Visit our website!</p>
                     </div>
                 </a>
-                {%- endif %}
+                {% endif %}
         </div>
     </div>
     <div>

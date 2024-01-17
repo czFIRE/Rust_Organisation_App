@@ -1,4 +1,4 @@
-<div id="timesheet-{{ id }}"
+<div id="timesheet-{{ sheet.id }}"
      class="flex
             flex-col
             px-10
@@ -8,22 +8,12 @@
     <h2 class="font-mono
                text-4xl
                font-extrabold
-               text-txthl">Timesheet: {{ event_name }}</h2>
+               text-txthl">Timesheet: {{ sheet.event_name }}</h2>
     <div id="sheet-status"
          class="flex
                 flex-row
                 space-x-2">
-        {% if is_editable %}
-            <p class="font-mono
-                      text-acc
-                      text-lg">Sheet Unlocked, </p>
-        {% else %}
-        <p class="font-mono
-                text-rej
-                  text-lg">Sheet Locked, </p>
-        {% endif %}
-
-        {% match status %}
+        {% match sheet.status %}
             {% when ApprovalStatus::Pending %}
                 <p class="font-mono
                           text-pnd
@@ -66,7 +56,7 @@
             </svg>
             <p class="font-mono
                       text-lg
-                    text-txt">{{ start_date.format("%d.%m.%Y").to_string() }} - {{ end_date.format("%d.%m.%Y").to_string() }}</p>
+                    text-txt">{{ sheet.start_date.format("%d.%m.%Y").to_string() }} - {{ sheet.end_date.format("%d.%m.%Y").to_string() }}</p>
         </div>
         <div class="flex
                     flex-row
@@ -81,71 +71,71 @@
                  class="w-6
                         h-6
                         text-txt">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                <path stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
             </svg>                      
             <p class="font-mono
                       text-lg
-                    text-txt"><b>Worked Hours:</b> {{ total_hours }}</p>
-        </div>
-        {% if manager_note.is_some() %}
-        <div class="flex
-                    flex-col
-                    space-y-2
-                    row-start-1
-                    col-span-3
-                    row-span-2
-                    bg-foreground1
-                    rounded-md
-                    text-wrap
-                    w-1/2
-                    p-2">
-            <h3 class="font-mono
-                       text-xl
-                       text-rej">Manager Note</h3>
-            <p class="font-mono
-                      text-lg
-                      text-rej">{{ manager_note.clone().unwrap() }}</p>
-        </div>
-        {% endif %}
-        <div class="flex
-                    flex-row
-                    space-x-5
-                    row-start-3
-                    col-span-5
-                    row-span-1
-                    w-1/2">
-                <button hx-get="/timesheet/{{ id }}/expected-wage"
-                        hx-swap="innerHTML"
-                        hx-target="#content"
-                        class="bg-foreground1
-                                 rounded-md
-                                 p-2
-                                 font-mono
-                               text-txthl
-                                 text-lg">Calculate Expected Wage</button>
-                {% if is_editable %}
-                <button hx-get="/timesheet/{{ id}}/submit-page"
-                        hx-swap="innerHTML"
-                        hx-target="#content"
-                        class="bg-foreground1
-                                rounded-md
-                                p-2
-                                font-mono
-                                text-txthl
-                                text-lg">Submit Sheet</button>
-                <button hx-delete="/timesheet/{{ id }}/days"
-                        hx-swap="innerHTML"
-                        hx-target="#content"
-                        hx-confirm="Are you sure you want to clear all data on the sheet?"
-                        class="bg-foreground1
-                                rounded-md
-                                p-2
-                                font-mono
-                                text-txthl
-                                text-lg">Clear Sheet</button>
-                {% endif %}
+                    text-txt"><b>Worked Hours:</b> {{ sheet.total_hours }}</p>
         </div>
     </div>
+    {% if sheet.status == ApprovalStatus::Pending %}
+    <div id="manager-actions"
+         class="flex
+                flex-col
+                space-y-5
+                items-center
+                w-10/12">
+        <button hx-patch="/timesheet/{{ sheet.id }}"
+                hx-swap="innerHTML"
+                hx-target="#content"
+                hx-ext="json-enc"
+                hx-confirm="Are you sure you want to approve this sheet?"
+                hx-vals='{"status": "Accepted"}'
+                class="bg-foreground2
+                         text-acc
+                         text-lg
+                         font-mono
+                         rounded-md
+                         p-1">Approve</button>
+        <form hx-patch="/timesheet/{{ sheet.id }}"
+              hx-swap="#innerHTML"
+              hx-target="#content"
+              hx-ext="json-enc"
+              hx-vals='{"status": "Rejected",
+                        "is_editable": true}'
+              id="reject-form"
+              class="flex
+                     flex-row
+                     align-middle
+                     space-x-5">
+            <label for="manager_note"
+                   class="font-mono
+                          text-txt
+                          text-xl">Reason:</label>
+            <input type="text"
+                   required
+                   maxlength="255"
+                   id="manager_note"
+                   name="manager_note"
+                   value='{{ sheet.manager_note.clone().unwrap_or("".to_string())}}'
+                   class="font-mono
+                          text-txt
+                          text-lg
+                          bg-foreground2
+                          rounded-md
+                          p-1">
+            <button type="submit"
+                    class="font-mono
+                           text-rej
+                           text-lg
+                           bg-foreground2
+                           rouded-md
+                           p-1">Reject</button>
+        </form>
+    </div>
+    {% endif %}
     <div id="workdays"
          class="flex
                 flex-col
@@ -158,7 +148,7 @@
                    font-bold
                    text-txthl
                    text-2xl">Workdays</h3>
-        {% for workday in work_days %}
+        {% for workday in sheet.work_days %}
         <div id="workday-{{ workday.date }}"
              class="flex
                     flex-row
@@ -187,22 +177,7 @@
                 <p class="font-mono
                           text-txt">{{ workday.comment.clone().unwrap_or("".to_string()) }}</p>
             </div>
-            <button hx-get="/timesheet/{{ id }}/day/{{ workday.date }}/edit-mode"
-                    hx-swap="#outerHTML"
-                    hx-target="#workday-{{ workday.date }}"
-                    class="font-mono
-                           text-lg
-                           text-txthl">Edit</button>
         </div>
         {% endfor %}
     </div>
-    <button hx-get="/user/{{user_id}}/employment/{{company_id}}/sheet"
-            hx-swap="innerHTML"
-            hx-target="#content"
-            class="font-mono
-                   text-txthl
-                   text-lg
-                   bg-foreground1
-                   rounded-md
-                   p-1">Go Back</button>
 </div>

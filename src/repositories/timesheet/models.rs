@@ -58,14 +58,9 @@ pub struct WorkdayUpdateData {
 
 #[derive(Debug, Clone, Deserialize, FromRow)]
 pub struct TimesheetUpdateData {
-    pub start_date: Option<NaiveDate>,
-    pub end_date: Option<NaiveDate>,
-    #[serde(deserialize_with = "de_f32_from_opt_string")]
-    pub total_hours: Option<f32>,
     pub is_editable: Option<bool>,
     pub status: Option<ApprovalStatus>,
     pub manager_note: Option<String>,
-    pub workdays: Option<Vec<WorkdayUpdateData>>,
 }
 
 #[derive(Debug, Deserialize, FromRow)]

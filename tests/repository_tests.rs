@@ -3360,13 +3360,9 @@ mod timesheet_repo_tests {
             assert_eq!(result.timesheet.user_id, user_id);
 
             let data = TimesheetUpdateData {
-                start_date: None,
-                end_date: None,
-                total_hours: None,
                 is_editable: None,
                 status: None,
                 manager_note: Some("Change X and Y.".to_string()),
-                workdays: None,
             };
 
             let result = timesheet_repo
@@ -3411,13 +3407,9 @@ mod timesheet_repo_tests {
             assert_eq!(result.timesheet.user_id, user_id);
 
             let data = TimesheetUpdateData {
-                start_date: None,
-                end_date: None,
-                total_hours: None,
                 is_editable: None,
                 status: None,
                 manager_note: None,
-                workdays: None,
             };
 
             let _ = timesheet_repo
@@ -3436,19 +3428,15 @@ mod timesheet_repo_tests {
                 .expect_err("Should not succeed.");
 
             let data = TimesheetUpdateData {
-                start_date: None,
-                end_date: None,
-                total_hours: None,
                 is_editable: None,
                 status: None,
                 manager_note: Some("Change X and Y.".to_string()),
-                workdays: None,
             };
 
             let _ = timesheet_repo
                 .update(sheet_id, data)
                 .await
-                .expect_err("Should succeed.");
+                .expect_err("Should not succeed.");
         }
 
         // Deleted sheet
@@ -3478,13 +3466,9 @@ mod timesheet_repo_tests {
                 .expect("Should succeed");
 
             let data = TimesheetUpdateData {
-                start_date: None,
-                end_date: None,
-                total_hours: None,
                 is_editable: None,
                 status: None,
                 manager_note: Some("Change X and Y.".to_string()),
-                workdays: None,
             };
 
             let _ = timesheet_repo
