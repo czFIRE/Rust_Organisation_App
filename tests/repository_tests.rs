@@ -129,7 +129,10 @@ pub mod user_repo_tests {
 
         {
             let users = user_repo
-                ._read_all(UsersQuery { name: None, email: None })
+                ._read_all(UsersQuery {
+                    name: None,
+                    email: None,
+                })
                 .await
                 .expect("Read all should succeed");
 

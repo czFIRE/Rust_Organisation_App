@@ -1,4 +1,8 @@
-use crate::{common::DbResult, repositories::{task::models::TaskUserFlattened, assigned_staff::models::AssignedStaffData}, models::AcceptanceStatus};
+use crate::{
+    common::DbResult,
+    models::AcceptanceStatus,
+    repositories::{assigned_staff::models::AssignedStaffData, task::models::TaskUserFlattened},
+};
 use async_trait::async_trait;
 use sqlx::{postgres::PgPool, Postgres, Transaction};
 use std::{ops::DerefMut, sync::Arc};

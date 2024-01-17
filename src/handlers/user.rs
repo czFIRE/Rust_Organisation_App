@@ -3,7 +3,9 @@ use std::str::FromStr;
 use crate::{
     errors::{handle_database_error, parse_error},
     repositories::user::models::{NewUser, UserData, UsersQuery},
-    templates::user::{UserEditTemplate, UserLiteTemplate, UserTemplate, UsersTemplate, UserInfoTemplate, UserInfo},
+    templates::user::{
+        UserEditTemplate, UserInfo, UserInfoTemplate, UserLiteTemplate, UserTemplate, UsersTemplate,
+    },
     utils::format_check::check::check_email_validity,
 };
 use actix_web::{delete, get, http, patch, post, put, web, HttpResponse};
@@ -12,7 +14,6 @@ use chrono::Utc;
 use uuid::Uuid;
 
 use crate::repositories::user::user_repo::UserRepository;
-
 
 // This function is a little redundant, but html returns
 // the unfilled input as "", which messes with the query.
@@ -24,8 +25,8 @@ fn parse_query(query: UsersQuery) -> UsersQuery {
             } else {
                 Some(query_name)
             }
-        },
-        None => None
+        }
+        None => None,
     };
 
     let email = match query.email {
@@ -35,14 +36,11 @@ fn parse_query(query: UsersQuery) -> UsersQuery {
             } else {
                 Some(query_email)
             }
-        },
-        None => None
+        }
+        None => None,
     };
-    
-    UsersQuery {
-        name,
-        email,
-    }
+
+    UsersQuery { name, email }
 }
 
 #[get("/user")]
@@ -54,13 +52,12 @@ pub async fn get_users(
     let result = user_repo._read_all(parsed_query).await;
     if let Ok(users) = result {
         let user_info_vec: Vec<UserInfo> = users.into_iter().map(|user| user.into()).collect();
-        let template = UserInfoTemplate {
-            user_info_vec,
-        };
+        let template = UserInfoTemplate { user_info_vec };
 
         let body = template.render();
         if body.is_err() {
-            return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
 
         return HttpResponse::Ok().body(body.expect("Should be valid now."));
@@ -101,7 +98,12 @@ pub async fn get_user(
 // Temporary workaround to the lack of auth.
 #[get("/users")]
 pub async fn get_users_login(user_repo: web::Data<UserRepository>) -> HttpResponse {
-    let result = user_repo._read_all( UsersQuery { name: None, email: None }).await;
+    let result = user_repo
+        ._read_all(UsersQuery {
+            name: None,
+            email: None,
+        })
+        .await;
     if let Ok(users) = result {
         let lite_users: Vec<UserLiteTemplate> = users.into_iter().map(|user| user.into()).collect();
         let template: UsersTemplate = UsersTemplate { users: lite_users };

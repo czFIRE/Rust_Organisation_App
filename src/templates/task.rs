@@ -1,13 +1,15 @@
+use crate::templates::staff::AssignedStaff;
 use askama::Template;
 use chrono::NaiveDateTime;
 use serde::Deserialize;
 use sqlx::types::uuid;
 use uuid::Uuid;
-use crate::templates::staff::AssignedStaff;
 
 use crate::{
-    models::{AcceptanceStatus, TaskPriority, EventRole},
-    repositories::{task::models::TaskExtended, user::models::UserLite, event_staff::models::StaffLite},
+    models::{AcceptanceStatus, EventRole, TaskPriority},
+    repositories::{
+        event_staff::models::StaffLite, task::models::TaskExtended, user::models::UserLite,
+    },
 };
 
 use super::user::UserLiteTemplate;
@@ -98,7 +100,6 @@ impl From<TaskExtended> for EventTask {
 pub struct TasksTemplate {
     pub tasks: Vec<EventTask>,
 }
-
 
 #[derive(Template, Deserialize)]
 #[template(path = "event/task/tasks-panel.html")]

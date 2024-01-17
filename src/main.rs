@@ -27,8 +27,8 @@ use crate::handlers::event::toggle_event_edit_mode;
 use crate::handlers::event_staff::initialize_staff_management_panel;
 use crate::handlers::event_staff::initialize_staff_panel;
 use crate::handlers::event_task::open_single_task_panel;
-use crate::handlers::event_task::open_tasks_panel;
 use crate::handlers::event_task::open_task_creation_panel;
+use crate::handlers::event_task::open_tasks_panel;
 use crate::handlers::timesheet::get_work_day;
 use crate::handlers::timesheet::toggle_work_day_edit_mode;
 use crate::handlers::timesheet::update_work_day;
@@ -60,7 +60,7 @@ use crate::handlers::{
         get_all_associated_companies_per_event_and_user, update_associated_company,
     },
     comment::{
-        create_event_comment, create_task_comment, delete_comment, open_task_comments_for_user, 
+        create_event_comment, create_task_comment, delete_comment, open_task_comments_for_user,
         update_comment,
     },
     company::{

@@ -37,7 +37,7 @@ impl crate::repositories::repository::DbRepository for EventRepository {
 impl EventRepository {
     pub async fn create(&self, data: NewEvent) -> DbResult<Event> {
         let mut tx = self.pool.begin().await?;
-        
+
         let new_event: Event = sqlx::query_as!(
             Event,
             r#" INSERT INTO event (

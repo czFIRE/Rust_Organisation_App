@@ -31,8 +31,8 @@ mod api_tests {
             update_associated_company,
         },
         comment::{
-            create_event_comment, create_task_comment, delete_comment, open_event_comments_for_user,
-            open_task_comments_for_user, update_comment,
+            create_event_comment, create_task_comment, delete_comment,
+            open_event_comments_for_user, open_task_comments_for_user, update_comment,
         },
         company::{create_company, delete_company, get_all_companies, get_company, update_company},
         employment::{

@@ -6,7 +6,8 @@ use crate::{
     models::{EmployeeLevel, EmploymentContract},
     repositories::employment::models::{EmploymentData, NewEmployment},
     templates::employment::{
-        EmploymentEditTemplate, EmploymentLite, EmploymentTemplate, SubordinatesTemplate, EmploymentCreateTemplate,
+        EmploymentCreateTemplate, EmploymentEditTemplate, EmploymentLite, EmploymentTemplate,
+        SubordinatesTemplate,
     },
     utils::deserialize_str_float::deserialize_float::de_f64_from_opt_string,
 };
@@ -185,7 +186,13 @@ pub async fn create_employment(
 
     // We don't want to show the manager the employee's view, so we re-render their view.
     if employee.manager_id.is_some() {
-        return get_full_employment(employee.manager_id.expect("Should be some"), company_id, employment_repo, true).await
+        return get_full_employment(
+            employee.manager_id.expect("Should be some"),
+            company_id,
+            employment_repo,
+            true,
+        )
+        .await;
     }
 
     // This is for the case when the first employee is created. We don't want to redirect the admin to them.

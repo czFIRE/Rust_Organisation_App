@@ -7,12 +7,20 @@ use uuid::Uuid;
 
 use crate::{
     errors::{handle_database_error, parse_error},
-    models::{TaskPriority, EventRole},
-    repositories::{task::{
-        models::{NewTask, TaskData, TaskFilter, TaskExtended},
-        task_repo::TaskRepository,
-    }, event_staff::event_staff_repo::StaffRepository, assigned_staff::assigned_staff_repo::AssignedStaffRepository},
-    templates::task::{TaskTemplate, TasksTemplate, TasksPanelTemplate, EventTask, TaskCreationTemplate, TaskPanelTemplate}, handlers::common::extract_path_tuple_ids,
+    handlers::common::extract_path_tuple_ids,
+    models::{EventRole, TaskPriority},
+    repositories::{
+        assigned_staff::assigned_staff_repo::AssignedStaffRepository,
+        event_staff::event_staff_repo::StaffRepository,
+        task::{
+            models::{NewTask, TaskData, TaskExtended, TaskFilter},
+            task_repo::TaskRepository,
+        },
+    },
+    templates::task::{
+        EventTask, TaskCreationTemplate, TaskPanelTemplate, TaskTemplate, TasksPanelTemplate,
+        TasksTemplate,
+    },
 };
 
 #[derive(Deserialize)]
@@ -205,7 +213,8 @@ pub async fn open_tasks_panel(
 
     let body = template.render();
     if body.is_err() {
-        return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        return HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
     }
 
     HttpResponse::Ok().body(body.expect("Should be valid."))
@@ -214,7 +223,7 @@ pub async fn open_tasks_panel(
 #[get("/event/staff/{staff_id}/task-creation")]
 pub async fn open_task_creation_panel(
     staff_id: web::Path<String>,
-    staff_repo: web::Data<StaffRepository>
+    staff_repo: web::Data<StaffRepository>,
 ) -> HttpResponse {
     let id_parse = Uuid::from_str(staff_id.into_inner().as_str());
     if id_parse.is_err() {
@@ -239,16 +248,17 @@ pub async fn open_task_creation_panel(
 
     let body = template.render();
     if body.is_err() {
-        return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        return HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
     }
 
     HttpResponse::Ok().body(body.expect("Should be valid here"))
 }
 
 async fn open_task_panel(
-    staff_id: Uuid, 
+    staff_id: Uuid,
     task: TaskExtended,
-    assigned_repo: web::Data<AssignedStaffRepository>
+    assigned_repo: web::Data<AssignedStaffRepository>,
 ) -> HttpResponse {
     let result = assigned_repo.read_one(task.task_id, staff_id).await;
     if result.is_err() {
@@ -262,12 +272,13 @@ async fn open_task_panel(
                 };
                 let body = template.render();
                 if body.is_err() {
-                    return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+                    return HttpResponse::InternalServerError()
+                        .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
                 }
                 HttpResponse::Ok().body(body.expect("Should be valid."))
-            },
-            _ => handle_database_error(error)
-        }
+            }
+            _ => handle_database_error(error),
+        };
     }
 
     let template = TaskPanelTemplate {
@@ -278,10 +289,11 @@ async fn open_task_panel(
 
     let body = template.render();
     if body.is_err() {
-        return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        return HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
     }
 
-    return HttpResponse::Ok().body(body.expect("Should be valid."))
+    return HttpResponse::Ok().body(body.expect("Should be valid."));
 }
 
 #[get("/event/staff/{staff_id}/task/{task_id}")]

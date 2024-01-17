@@ -105,7 +105,7 @@ pub struct UserEditTemplate {
 pub struct UserInfo {
     pub id: Uuid,
     pub name: String,
-    pub email: String
+    pub email: String,
 }
 
 impl From<User> for UserInfo {

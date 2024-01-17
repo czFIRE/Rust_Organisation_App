@@ -1,5 +1,5 @@
 use askama::Template;
-use chrono::{Utc, NaiveDate, NaiveDateTime};
+use chrono::{NaiveDate, NaiveDateTime, Utc};
 use serde::Deserialize;
 use sqlx::types::uuid;
 use uuid::Uuid;

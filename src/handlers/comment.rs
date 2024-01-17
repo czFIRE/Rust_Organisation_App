@@ -2,10 +2,19 @@ use std::str::FromStr;
 
 use crate::{
     errors::handle_database_error,
-    repositories::{comment::models::{CommentData, NewComment}, event_staff::event_staff_repo::StaffRepository, assigned_staff::assigned_staff_repo::AssignedStaffRepository},
-    templates::comment::{SingleComment, EventCommentsContainerTemplate, CommentTemplate, CommentUpdateModeTemplate, TaskCommentsContainerTemplate}, handlers::common::extract_path_tuple_ids, models::AcceptanceStatus,
+    handlers::common::extract_path_tuple_ids,
+    models::AcceptanceStatus,
+    repositories::{
+        assigned_staff::assigned_staff_repo::AssignedStaffRepository,
+        comment::models::{CommentData, NewComment},
+        event_staff::event_staff_repo::StaffRepository,
+    },
+    templates::comment::{
+        CommentTemplate, CommentUpdateModeTemplate, EventCommentsContainerTemplate, SingleComment,
+        TaskCommentsContainerTemplate,
+    },
 };
-use actix_web::{delete, get, http, post, web, HttpResponse, patch};
+use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;
 use serde::Deserialize;
 use uuid::Uuid;
@@ -42,10 +51,14 @@ pub async fn open_event_comments_for_user(
 
     let (event_id, user_id) = parsed_ids.unwrap();
 
-    let staff_res = staff_repo.read_by_event_and_user_id(event_id, user_id).await;
+    let staff_res = staff_repo
+        .read_by_event_and_user_id(event_id, user_id)
+        .await;
 
     // Not staff -> Can't access comments.
-    if staff_res.is_err() || staff_res.expect("Should be valid").status != AcceptanceStatus::Accepted {
+    if staff_res.is_err()
+        || staff_res.expect("Should be valid").status != AcceptanceStatus::Accepted
+    {
         return HttpResponse::Forbidden().body(parse_error(http::StatusCode::FORBIDDEN));
     }
 
@@ -55,20 +68,19 @@ pub async fn open_event_comments_for_user(
     if let Ok(comment) = result {
         let comments: Vec<SingleComment> =
             comment.into_iter().map(|comment| comment.into()).collect();
-        let template = EventCommentsContainerTemplate 
-            {
-                comments,
-                requester_id: user_id,
-                event_id
-            };
+        let template = EventCommentsContainerTemplate {
+            comments,
+            requester_id: user_id,
+            event_id,
+        };
         let body = template.render();
         if body.is_err() {
             return HttpResponse::InternalServerError()
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
         return HttpResponse::Ok()
-                .content_type("text/html")
-                .body(body.expect("Should be valid now."));
+            .content_type("text/html")
+            .body(body.expect("Should be valid now."));
     }
 
     handle_database_error(result.expect_err("Should be error."))
@@ -151,7 +163,9 @@ pub async fn open_task_comments_for_user(
     let staff_res = assigned_repo.read_one(task_id, staff_id).await;
 
     // Not (accepted) staff on the task -> Can't access comments.
-    if staff_res.is_err() || staff_res.as_ref().expect("Should be valid").status != AcceptanceStatus::Accepted {
+    if staff_res.is_err()
+        || staff_res.as_ref().expect("Should be valid").status != AcceptanceStatus::Accepted
+    {
         return HttpResponse::Forbidden().body(parse_error(http::StatusCode::FORBIDDEN));
     }
 
@@ -161,20 +175,19 @@ pub async fn open_task_comments_for_user(
     if let Ok(comment) = result {
         let comments: Vec<SingleComment> =
             comment.into_iter().map(|comment| comment.into()).collect();
-        let template = TaskCommentsContainerTemplate 
-            {
-                comments,
-                requester_id: staff_res.expect("Should be valid").staff.user.id,
-                task_id
-            };
+        let template = TaskCommentsContainerTemplate {
+            comments,
+            requester_id: staff_res.expect("Should be valid").staff.user.id,
+            task_id,
+        };
         let body = template.render();
         if body.is_err() {
             return HttpResponse::InternalServerError()
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
         return HttpResponse::Ok()
-                .content_type("text/html")
-                .body(body.expect("Should be valid now."));
+            .content_type("text/html")
+            .body(body.expect("Should be valid now."));
     }
 
     handle_database_error(result.expect_err("Should be error."))
@@ -245,11 +258,11 @@ pub async fn open_comment_update_mode(
     }
 
     let parsed_id = id_parse.expect("Should be valid.");
-    let result = comment_repo
-        .read_one(parsed_id)
-        .await;
+    let result = comment_repo.read_one(parsed_id).await;
     if let Ok(comment) = result {
-        let template: CommentUpdateModeTemplate = CommentUpdateModeTemplate { comment: comment.into() };
+        let template: CommentUpdateModeTemplate = CommentUpdateModeTemplate {
+            comment: comment.into(),
+        };
         let body = template.render();
         if body.is_err() {
             return HttpResponse::InternalServerError()
@@ -282,7 +295,9 @@ pub async fn update_comment(
         .update(parsed_id, comment_data.into_inner())
         .await;
     if let Ok(comment) = result {
-        let template: CommentTemplate = CommentTemplate { comment: comment.into() };
+        let template: CommentTemplate = CommentTemplate {
+            comment: comment.into(),
+        };
         let body = template.render();
         if body.is_err() {
             return HttpResponse::InternalServerError()
@@ -296,10 +311,10 @@ pub async fn update_comment(
 }
 
 #[get("/comment/{comment_id}")]
-pub async fn get_comment (
+pub async fn get_comment(
     comment_id: web::Path<String>,
     comment_repo: web::Data<CommentRepository>,
- ) -> HttpResponse {
+) -> HttpResponse {
     let id_parse = Uuid::from_str(comment_id.into_inner().as_str());
     if id_parse.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
@@ -310,12 +325,13 @@ pub async fn get_comment (
 
     if let Ok(comment) = result {
         let template = CommentTemplate {
-            comment: comment.into()
+            comment: comment.into(),
         };
 
         let body = template.render();
         if body.is_err() {
-            return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
 
         return HttpResponse::Ok().body(body.expect("Should be valid here."));
