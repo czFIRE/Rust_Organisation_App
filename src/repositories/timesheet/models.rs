@@ -1,8 +1,11 @@
-use crate::models::ApprovalStatus;
+use crate::models::{ApprovalStatus, EmploymentContract};
+use crate::repositories::wage_preset::models::WagePreset;
 use chrono::{NaiveDate, NaiveDateTime};
 use serde::Deserialize;
 use sqlx::prelude::FromRow;
 use uuid::Uuid;
+
+use std::collections::HashMap;
 
 #[derive(Debug, FromRow)]
 pub struct TimesheetStructureData {
@@ -70,7 +73,7 @@ pub struct TimesheetReadAllData {
     pub offset: Option<i64>,
 }
 
-#[derive(Debug, FromRow)]
+#[derive(Debug, Clone, FromRow)]
 pub struct Workday {
     pub timesheet_id: Uuid,
     pub date: NaiveDate,
@@ -85,4 +88,17 @@ pub struct Workday {
 pub struct TimesheetWithWorkdays {
     pub timesheet: TimesheetWithEvent,
     pub workdays: Vec<Workday>,
+}
+
+pub struct TimesheetsWithWorkdaysExtended {
+    pub timesheets: Vec<TimesheetWithWorkdays>,
+    pub hourly_wage: f64,
+    pub employment_type: EmploymentContract,
+
+    //
+    // A hashmap of date in `yyyy-mm` format to a `WagePreset` elems.
+    //
+    // Note: Empty values means no matching `wage preset` was found.
+    //
+    pub date_to_wage_presets: HashMap<String, Option<WagePreset>>,
 }
