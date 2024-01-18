@@ -6,43 +6,63 @@
   </div>
   <div id="user-content" class="flex flex-row gap-4 items-center">
     <div class="flex flex-col space-y-4">
-        <div class="flex flex-row space-x-4">
-            <div id="user-img" class="w-32 h-32 bg-foreground1 rounded-md">
-                <img src="{{ avatar_url }}" class="rounded-md object-fill" />
-            </div>
-            <div class="flex flex-col space-y-4">
-                <div class="flex flex-row space-x-4">
-                    <div class="flex flex-col">
-                        <p class="font-mono text-lg text-txthl">Name</p>
-                        <p class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md">{{ name }}</p>
-                    </div>
-                    <div class="flex flex-col">
-                        <p class="font-mono text-lg text-txthl">Birth Date</p>
-                        <p class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md">{{ birth.format("%d.%m.%Y").to_string() }}</p>
-                    </div>
-                </div>  
-                <div class="flex flex-row space-x-4">
-                    <div class="flex flex-col">
-                        <p class="font-mono text-lg text-txthl">Email</p>
-                        <p class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md">{{ email }}</p>
-                    </div>
-                    <div class="flex flex-col">
-                        <p class="font-mono text-lg text-txthl">Gender</p>
-                        <p class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md">{{ gender }}</p>
-                    </div>
-                </div>
-            </div>
+      <div class="flex flex-row space-x-4">
+        <div id="user-img" class="w-32 h-32 bg-foreground1 rounded-md">
+          <img src="{{ avatar_url }}" class="rounded-md object-fill" />
         </div>
-        <div class="flex flex-row space-x-4">
+        <div class="flex flex-col space-y-4">
+          <div class="flex flex-row space-x-4">
             <div class="flex flex-col">
-                <p class="font-mono text-lg text-txthl">Created At</p>
-                <p class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md">{{ created_at.format("%d.%m.%Y %H:%M:%S").to_string() }}</p>
+              <p class="font-mono text-lg text-txthl">Name</p>
+              <p
+                class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md"
+              >
+                {{ name }}
+              </p>
             </div>
             <div class="flex flex-col">
-                <p class="font-mono text-lg text-txthl">Last Edited At</p>
-                <p class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md">{{ edited_at.format("%d.%m.%Y %H:%M:%S").to_string() }}</p>
+              <p class="font-mono text-lg text-txthl">Birth Date</p>
+              <p
+                class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md"
+              >
+                {{ birth.format("%d.%m.%Y").to_string() }}
+              </p>
             </div>
+          </div>
+          <div class="flex flex-row space-x-4">
+            <div class="flex flex-col">
+              <p class="font-mono text-lg text-txthl">Email</p>
+              <p
+                class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md"
+              >
+                {{ email }}
+              </p>
+            </div>
+            <div class="flex flex-col">
+              <p class="font-mono text-lg text-txthl">Gender</p>
+              <p
+                class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md"
+              >
+                {{ gender }}
+              </p>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="flex flex-row space-x-4">
+        <div class="flex flex-col">
+          <p class="font-mono text-lg text-txthl">Created At</p>
+          <p class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md">
+            {{ created_at.format("%d.%m.%Y %H:%M:%S").to_string() }}
+          </p>
+        </div>
+        <div class="flex flex-col">
+          <p class="font-mono text-lg text-txthl">Last Edited At</p>
+          <p class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md">
+            {{ edited_at.format("%d.%m.%Y %H:%M:%S").to_string() }}
+          </p>
+        </div>
+      </div>
     </div>
   </div>
   <div id="user-controls" class="flex flex-row space-x-10">
