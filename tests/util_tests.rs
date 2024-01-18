@@ -61,27 +61,16 @@ mod calculate_wage_tests {
     };
     use organization::utils::calculate_wage::calculate_timesheet_wage;
 
-    use sqlx::{Pool, PgPool, Postgres};
+    use sqlx::PgPool;
 
     use crate::test_constants::{
         COMPANY1_ID, COMPANY2_ID, EVENT0_ID, TIMESHEET0_ID, TIMESHEET1_ID,
         USER1_ID, USER2_ID,
     };
 
-    async fn get_db_pool() -> Arc<Pool<Postgres>> {
-        dotenv().ok();
-
-        let database_url =
-            dotenv::var("DATABASE_URL").expect("DATABASE_URL is not set in .env file");
-        let pool = sqlx::PgPool::connect(&database_url)
-            .await
-            .expect("Failed to connect to the database.");
-        Arc::new(pool)
-    }
-
     #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
     async fn calculate_wage(pool: PgPool) -> DbResult<()> {
-        let arc_pool = get_db_pool().await;
+        let arc_pool = Arc::new(pool);
 
         let timesheet_repo = TimesheetRepository::new(arc_pool);
 
