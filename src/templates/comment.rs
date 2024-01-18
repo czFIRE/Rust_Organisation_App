@@ -17,6 +17,7 @@ pub struct CommentUpdateModeTemplate {
 #[derive(Template, Debug, Deserialize)]
 #[template(path = "comment/single-comment.html")]
 pub struct CommentTemplate {
+    pub requester_id: Uuid,
     pub comment: SingleComment,
 }
 
@@ -51,6 +52,7 @@ impl From<CommentExtended> for SingleComment {
 #[derive(Template, Debug, Deserialize)]
 #[template(path = "comment/comments.html")]
 pub struct CommentsTemplate {
+    pub requester_id: Uuid,
     pub comments: Vec<SingleComment>,
 }
 
