@@ -235,47 +235,6 @@ impl TimesheetRepository {
         Ok(timesheet.expect("Should be valid here."))
     }
 
-    pub async fn _read_all(&self, data: TimesheetReadAllData) -> DbResult<Vec<TimesheetWithEvent>> {
-        // This is for redis.
-
-        self._read_all_db(data).await
-    }
-
-    async fn _read_all_db(&self, data: TimesheetReadAllData) -> DbResult<Vec<TimesheetWithEvent>> {
-        let executor = self.pool.as_ref();
-
-        let timesheets = sqlx::query_as!(
-            TimesheetWithEvent,
-            r#"
-            SELECT timesheet.id, 
-                   timesheet.start_date, 
-                   timesheet.end_date, 
-                   total_hours, 
-                   is_editable, 
-                   status AS "approval_status!: ApprovalStatus", 
-                   manager_note AS "manager_note?", 
-                   user_id, 
-                   company_id,
-                   event_id,
-                   event.avatar_url AS event_avatar_url,
-                   event.name AS event_name,
-                   timesheet.created_at, 
-                   timesheet.edited_at
-            FROM timesheet 
-             JOIN event ON timesheet.event_id = event.id
-            WHERE timesheet.deleted_at IS NULL
-            ORDER BY timesheet.start_date
-            LIMIT $1 OFFSET $2;
-            "#,
-            data.limit,
-            data.offset
-        )
-        .fetch_all(executor)
-        .await?;
-
-        Ok(timesheets)
-    }
-
     pub async fn read_all_timesheets_per_employment(
         &self,
         user_id: Uuid,
