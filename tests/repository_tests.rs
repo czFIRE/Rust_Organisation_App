@@ -463,6 +463,7 @@ pub mod company_repo_tests {
             let filter = CompanyFilter {
                 limit: Some(2),
                 offset: Some(2),
+                name: None,
             };
 
             let companies_ = company_repo
@@ -475,6 +476,7 @@ pub mod company_repo_tests {
             let filter = CompanyFilter {
                 limit: None,
                 offset: None,
+                name: None,
             };
 
             let companies = company_repo

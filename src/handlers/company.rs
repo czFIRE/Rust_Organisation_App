@@ -1,6 +1,9 @@
 use std::str::FromStr;
 
-use crate::repositories::employment::employment_repo::EmploymentRepository;
+use crate::{
+    repositories::employment::employment_repo::EmploymentRepository,
+    templates::company::CompaniesInfoTemplate,
+};
 use actix_web::{delete, get, http, patch, post, put, web, HttpResponse};
 use askama::Template;
 use serde::Deserialize;
@@ -8,7 +11,7 @@ use uuid::Uuid;
 
 use crate::{
     errors::{handle_database_error, parse_error},
-    handlers::common::{extract_path_tuple_ids, QueryParams},
+    handlers::common::extract_path_tuple_ids,
     models::EmployeeLevel,
     repositories::company::{
         company_repo::CompanyRepository,
@@ -53,24 +56,11 @@ pub struct CompanyUpdateData {
     email: Option<String>,
 }
 
-#[get("/company")]
-pub async fn get_all_companies(
-    params: web::Query<QueryParams>,
+async fn get_many_companies(
+    filter: CompanyFilter,
     company_repo: web::Data<CompanyRepository>,
+    simple_view: bool,
 ) -> HttpResponse {
-    let query_params = params.into_inner();
-
-    if (query_params.limit.is_some() && query_params.limit.unwrap() < 0)
-        || (query_params.offset.is_some() && query_params.offset.unwrap() < 0)
-    {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
-    }
-
-    let filter = CompanyFilter {
-        limit: query_params.limit,
-        offset: query_params.offset,
-    };
-
     let result = company_repo.read_all(filter).await;
 
     if let Ok(companies) = result {
@@ -83,12 +73,18 @@ pub async fn get_all_companies(
             })
             .collect();
 
-        let template = CompaniesTemplate {
-            companies: lite_companies,
-        };
-
-        let body = template.render();
-
+        let body: Result<String, askama::Error>;
+        if !simple_view {
+            let template = CompaniesTemplate {
+                companies: lite_companies,
+            };
+            body = template.render();
+        } else {
+            let template = CompaniesInfoTemplate {
+                companies: lite_companies,
+            };
+            body = template.render();
+        }
         if body.is_err() {
             return HttpResponse::InternalServerError()
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
@@ -98,6 +94,42 @@ pub async fn get_all_companies(
     }
 
     handle_database_error(result.expect_err("Should be error."))
+}
+
+#[get("/company")]
+pub async fn get_all_companies(
+    params: web::Query<CompanyFilter>,
+    company_repo: web::Data<CompanyRepository>,
+) -> HttpResponse {
+    let query_params = params.into_inner();
+
+    if (query_params.limit.is_some() && query_params.limit.unwrap() < 0)
+        || (query_params.offset.is_some() && query_params.offset.unwrap() < 0)
+    {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    get_many_companies(query_params, company_repo, false).await
+}
+
+/* This exists because the function above is used mainly for the layout
+ * of companies in the company tab. This function retrieves a much simpler view
+ * used by administrators / event organizers for company-related operations.
+*/
+#[get("/company-info")]
+pub async fn get_company_information(
+    params: web::Query<CompanyFilter>,
+    company_repo: web::Data<CompanyRepository>,
+) -> HttpResponse {
+    let query_params = params.into_inner();
+
+    if (query_params.limit.is_some() && query_params.limit.unwrap() < 0)
+        || (query_params.offset.is_some() && query_params.offset.unwrap() < 0)
+    {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    get_many_companies(query_params, company_repo, true).await
 }
 
 #[get("/company/{company_id}")]

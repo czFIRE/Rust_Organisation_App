@@ -68,10 +68,11 @@ pub struct CompanyData {
     pub vatin: Option<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct CompanyFilter {
     pub limit: Option<i64>,
     pub offset: Option<i64>,
+    pub name: Option<String>,
 }
 
 #[derive(Debug, FromRow, Clone)]

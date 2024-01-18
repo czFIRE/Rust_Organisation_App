@@ -1,265 +1,170 @@
-<div id="company-edit"
-     class="flex
-            flex-col
-            space-y-10
-            w-full
-            p-3
-            items-center">
-    <h2 class="font-mono
-               text-4xl
-             text-txthl">Edit Company</h2>
-    <form hx-patch="/company/{{ id }}"
-          hx-swap="innerHTML"
-          hx-target="#content"
-          hx-ext="json-enc"
-          hx-confirm="Are you sure you want to make these changes?"
-          class="flex
-                 flex-col
-                 space-y-5
-                 p-3
-                 items-center
-                 w-8/12
-                 bg-foreground1
-                 rounded-md">
-        <div class="flex
-                    flex-row
-                    justify-between
-                    self-center
-                    space-x-5">
-            <div>
-                <label class="font-mono
-                            text-lg
-                            text-txt"
-                       for="name">Name:</label>
-                <input type="text"
-                       id="name"
-                       name="name"
-                       value="{{ name }}"
-                       class="font-mono
-                              text-lg
-                            text-txt
-                            bg-foreground2
-                              rounded-md">
-            </div>
-            <div>
-                <label class="font-mono
-                            text-lg
-                            text-txt"
-                    for="description">Description:</label>
-                <input type="text"
-                    id="description"
-                    name="description"
-                    value="{% if description.is_some() %}{{ description.as_ref().unwrap() }}{% else %}No Description{% endif %}"
-                    class="font-mono
-                            text-lg
-                            text-txt
-                            bg-foreground2
-                            rounded-md">
-            </div>
-        </div>
-        <div class="flex
-                    flex-row
-                    justify-between
-                    self-center
-                    space-x-5">
-            <div>
-                <label class="font-mono
-                            text-lg
-                            text-txt"
-                    for="phone">Phone:</label>
-                <input type="tel"
-                    id="phone"
-                    name="phone"
-                    value="{{ phone }}"
-                    class="font-mono
-                            text-lg
-                            text-txt
-                            bg-foreground2
-                            rounded-md">
-            </div>
-            <div>
-                <label class="font-mono
-                            text-lg
-                            text-txt"
-                    for="email">Email:</label>
-                <input type="email"
-                    id="email"
-                    name="email"
-                    value="{{ email }}"
-                    class="font-mono
-                            text-lg
-                            text-txt
-                            bg-foreground2
-                            rounded-md">
-            </div>
-            <div>
-                <label class="font-mono
-                            text-lg
-                            text-txt"
-                    for="web">Web:</label>
-                <input type="text"
-                    id="web"
-                    name="web"
-                    value="{% if website.is_some() %}{{ website.as_ref().unwrap() }}{% else %}No Web{% endif %}"
-                    class="font-mono
-                            text-lg
-                            text-txt
-                            bg-foreground2
-                            rounded-md">
-            </div>
-        </div>
-        <div class="flex
-                    flex-row
-                    justify-between
-                    self-center
-                    space-x-5">
-            <div>
-                <label class="font-mono
-                            text-lg
-                            text-txt"
-                    for="crn">CRN:</label>
-                <input type="text"
-                    id="crn"
-                    name="crn"
-                    value="{{ crn }}"
-                    class="font-mono
-                            text-lg
-                            text-txt
-                            bg-foreground2
-                            rounded-md">
-            </div>
-            <div>
-                <label class="font-mono
-                            text-lg
-                            text-txt"
-                       for="vatin">VATIN:</label>
-                <input type="text"
-                    id="vatin"
-                    name="vatin"
-                    value="{{ vatin }}"
-                    class="font-mono
-                            text-lg
-                            text-txt
-                            bg-foreground2
-                            rounded-md">
-            </div>
-        </div>
-        <div class="flex
-                    flex-row
-                    justify-between
-                    self-center
-                    space-x-5">
-            <div>
-                <label class="font-mono
-                                text-lg
-                                text-txt"
-                        for="country">Country:</label>
-                <input type="text"
-                        id="country"
-                        name="counry"
-                        value="{{ country }}"
-                        class="font-mono
-                                text-lg
-                                text-txt
-                                bg-foreground2
-                                rounded-md">
-            </div>
-            <div>
-                <label class="font-mono
-                            text-lg
-                            text-txt"
-                    for="region">Region:</label>
-                <input type="text"
-                    id="region"
-                    name="region"
-                    value="{{ region }}"
-                    class="font-mono
-                            text-lg
-                            text-txt
-                            bg-foreground2
-                            rounded-md">
-            </div>
-            <div>
-                <label class="font-mono
-                            text-lg
-                            text-txt"
-                    for="city">City:</label>
-                <input type="text"
-                    id="city"
-                    name="city"
-                    value="{{ city }}"
-                    class="font-mono
-                            text-lg
-                            text-txt
-                            bg-foreground2
-                            rounded-md">
-            </div>
-        </div>
-        <div class="flex
-                    flex-row
-                    justify-between
-                    self-center
-                    space-x-5">
-            <div>
-                <label class="font-mono
-                            text-lg
-                            text-txt"
-                    for="street">Street:</label>
-                <input type="text"
-                    id="street"
-                    name="street"
-                    value="{{ street }}"
-                    class="font-mono
-                            text-lg
-                            text-txt
-                            bg-foreground2
-                            rounded-md">
-            </div>
-            <div>
-                <label class="font-mono
-                            text-lg
-                            text-txt"
-                    for="postal_code">Postal Code:</label>
-                <input type="text"
-                    id="postal_code"
-                    name="postal_code"
-                    value="{{ postal_code }}"
-                    class="font-mono
-                            text-lg
-                            text-txt
-                            bg-foreground2
-                            rounded-md">
-            </div>
-            <div>
-                <label class="font-mono
-                            text-lg
-                            text-txt"
-                    for="address_number">Address Number:</label>
-                <input type="text"
-                    id="address_number"
-                    name="address_number"
-                    value="{{ address_number }}"
-                    class="font-mono
-                            text-lg
-                            text-txt
-                            bg-foreground2
-                            rounded-md">
-            </div>
-        </div>
-        <button type="submit"
-                class="font-mono
-                       text-lg
-                       bg-foreground2
-                       text-txthl
-                       rounded-md
-                       p-2">Submit
-        </button>
-    </form>
-    <button hx-get="/user/{{ id }}/employment/{{ user_id }}"
-            class="font-mono
-                   text-lg
-                 bg-foreground2
-                 text-txthl
-                   rounded-md
-                   p-2">Cancel</button>
+<div id="company-edit" class="flex flex-col space-y-10 w-full p-3 items-center">
+  <h2 class="font-mono text-4xl text-txthl">Edit Company</h2>
+  <form
+    hx-patch="/company/{{ id }}"
+    hx-swap="innerHTML"
+    hx-target="#content"
+    hx-ext="json-enc"
+    hx-confirm="Are you sure you want to make these changes?"
+    class="flex flex-col space-y-5 p-3 items-center w-8/12 bg-foreground1 rounded-md"
+  >
+    <div class="flex flex-row justify-between self-center space-x-5">
+      <div>
+        <label class="font-mono text-lg text-txt" for="name">Name:</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          value="{{ name }}"
+          class="font-mono text-lg text-txt bg-foreground2 rounded-md"
+        />
+      </div>
+      <div>
+        <label class="font-mono text-lg text-txt" for="description"
+          >Description:</label
+        >
+        <input
+          type="text"
+          id="description"
+          name="description"
+          value="{% if description.is_some() %}{{ description.as_ref().unwrap() }}{% else %}No Description{% endif %}"
+          class="font-mono text-lg text-txt bg-foreground2 rounded-md"
+        />
+      </div>
+    </div>
+    <div class="flex flex-row justify-between self-center space-x-5">
+      <div>
+        <label class="font-mono text-lg text-txt" for="phone">Phone:</label>
+        <input
+          type="tel"
+          id="phone"
+          name="phone"
+          value="{{ phone }}"
+          class="font-mono text-lg text-txt bg-foreground2 rounded-md"
+        />
+      </div>
+      <div>
+        <label class="font-mono text-lg text-txt" for="email">Email:</label>
+        <input
+          type="email"
+          id="email"
+          name="email"
+          value="{{ email }}"
+          class="font-mono text-lg text-txt bg-foreground2 rounded-md"
+        />
+      </div>
+      <div>
+        <label class="font-mono text-lg text-txt" for="web">Web:</label>
+        <input
+          type="text"
+          id="web"
+          name="web"
+          value="{% if website.is_some() %}{{ website.as_ref().unwrap() }}{% else %}No Web{% endif %}"
+          class="font-mono text-lg text-txt bg-foreground2 rounded-md"
+        />
+      </div>
+    </div>
+    <div class="flex flex-row justify-between self-center space-x-5">
+      <div>
+        <label class="font-mono text-lg text-txt" for="crn">CRN:</label>
+        <input
+          type="text"
+          id="crn"
+          name="crn"
+          value="{{ crn }}"
+          class="font-mono text-lg text-txt bg-foreground2 rounded-md"
+        />
+      </div>
+      <div>
+        <label class="font-mono text-lg text-txt" for="vatin">VATIN:</label>
+        <input
+          type="text"
+          id="vatin"
+          name="vatin"
+          value="{{ vatin }}"
+          class="font-mono text-lg text-txt bg-foreground2 rounded-md"
+        />
+      </div>
+    </div>
+    <div class="flex flex-row justify-between self-center space-x-5">
+      <div>
+        <label class="font-mono text-lg text-txt" for="country">Country:</label>
+        <input
+          type="text"
+          id="country"
+          name="counry"
+          value="{{ country }}"
+          class="font-mono text-lg text-txt bg-foreground2 rounded-md"
+        />
+      </div>
+      <div>
+        <label class="font-mono text-lg text-txt" for="region">Region:</label>
+        <input
+          type="text"
+          id="region"
+          name="region"
+          value="{{ region }}"
+          class="font-mono text-lg text-txt bg-foreground2 rounded-md"
+        />
+      </div>
+      <div>
+        <label class="font-mono text-lg text-txt" for="city">City:</label>
+        <input
+          type="text"
+          id="city"
+          name="city"
+          value="{{ city }}"
+          class="font-mono text-lg text-txt bg-foreground2 rounded-md"
+        />
+      </div>
+    </div>
+    <div class="flex flex-row justify-between self-center space-x-5">
+      <div>
+        <label class="font-mono text-lg text-txt" for="street">Street:</label>
+        <input
+          type="text"
+          id="street"
+          name="street"
+          value="{{ street }}"
+          class="font-mono text-lg text-txt bg-foreground2 rounded-md"
+        />
+      </div>
+      <div>
+        <label class="font-mono text-lg text-txt" for="postal_code"
+          >Postal Code:</label
+        >
+        <input
+          type="text"
+          id="postal_code"
+          name="postal_code"
+          value="{{ postal_code }}"
+          class="font-mono text-lg text-txt bg-foreground2 rounded-md"
+        />
+      </div>
+      <div>
+        <label class="font-mono text-lg text-txt" for="address_number"
+          >Address Number:</label
+        >
+        <input
+          type="text"
+          id="address_number"
+          name="address_number"
+          value="{{ address_number }}"
+          class="font-mono text-lg text-txt bg-foreground2 rounded-md"
+        />
+      </div>
+    </div>
+    <button
+      type="submit"
+      class="font-mono text-lg bg-foreground2 text-txthl rounded-md p-2"
+    >
+      Submit
+    </button>
+  </form>
+  <button
+    hx-get="/user/{{ id }}/employment/{{ user_id }}"
+    class="font-mono text-lg bg-foreground2 text-txthl rounded-md p-2"
+  >
+    Cancel
+  </button>
 </div>

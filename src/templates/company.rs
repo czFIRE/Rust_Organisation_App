@@ -139,27 +139,33 @@ impl From<AssociatedCompanyExtended> for AssociatedCompanyInfo {
 }
 
 #[derive(Template, Debug, Deserialize)]
-#[template(path = "company/associated-companies.html")]
+#[template(path = "company/associated-company/associated-companies.html")]
 pub struct AssociatedCompaniesTemplate {
     pub editable: bool,
     pub associated_companies: Vec<AssociatedCompanyInfo>,
 }
 
 #[derive(Template, Debug, Deserialize)]
-#[template(path = "company/associated-company-management.html")]
+#[template(path = "company/associated-company/associated-company-management.html")]
 pub struct AssociatedCompanyManagementTemplate {
     pub event_id: Uuid,
     pub companies: Vec<AssociatedCompanyInfo>,
 }
 
 #[derive(Template, Debug, Deserialize)]
-#[template(path = "company/associated-company-edit.html")]
+#[template(path = "company/associated-company/associated-company-edit.html")]
 pub struct AssociatedCompanyEditTemplate {
     pub company: AssociatedCompanyInfo,
 }
 
 #[derive(Template, Debug, Deserialize)]
-#[template(path = "company/associated-company-editable.html")]
+#[template(path = "company/associated-company/associated-company-editable.html")]
 pub struct EditableAssociatedCompanyTemplate {
     pub company: AssociatedCompanyInfo,
+}
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "company/companies-info.html")]
+pub struct CompaniesInfoTemplate {
+    pub companies: Vec<CompanyLite>,
 }

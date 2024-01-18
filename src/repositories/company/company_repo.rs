@@ -190,15 +190,24 @@ impl CompanyRepository {
     }
 
     pub async fn read_all(&self, filter: CompanyFilter) -> DbResult<Vec<Company>> {
+        let mut name_filter = if filter.name.is_some() {
+            filter.name.expect("Should be some").clone()
+        } else {
+            "".to_string()
+        };
+        name_filter.push('%');
+
         let executor = self.pool.as_ref();
 
         let companies = sqlx::query_as!(
             Company,
             "SELECT * FROM company 
              WHERE deleted_at IS NULL 
+               AND name LIKE $3
              LIMIT $1 OFFSET $2;",
             filter.limit,
             filter.offset,
+            name_filter,
         )
         .fetch_all(executor)
         .await?;

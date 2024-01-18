@@ -234,7 +234,7 @@ pub async fn delete_associated_company(
         return handle_database_error(error);
     }
 
-    HttpResponse::NoContent().finish()
+    HttpResponse::Ok().finish()
 }
 
 #[get("/event/{event_id}/company-management")]

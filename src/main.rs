@@ -24,6 +24,7 @@ use crate::handlers::comment::get_comment;
 use crate::handlers::comment::open_comment_update_mode;
 use crate::handlers::comment::open_event_comments_for_user;
 use crate::handlers::company::get_company_edit_mode;
+use crate::handlers::company::get_company_information;
 use crate::handlers::employment::toggle_employment_create;
 use crate::handlers::employment::toggle_employment_edit;
 use crate::handlers::event::switch_event_accepts_staff;
@@ -163,6 +164,7 @@ async fn main() -> Result<()> {
             .service(remove_user_avatar)
             .service(get_company)
             .service(get_all_companies)
+            .service(get_company_information)
             .service(create_company)
             .service(update_company)
             .service(delete_company)
