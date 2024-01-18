@@ -173,6 +173,7 @@ impl TaskRepository {
         Ok(task_user_flattened.into())
     }
 
+    // ToDo: Consider removing
     pub async fn _read_all(&self, filter: TaskFilter) -> DbResult<Vec<TaskExtended>> {
         let executor = self.pool.as_ref();
 
@@ -251,6 +252,7 @@ impl TaskRepository {
             INNER JOIN user_record ON event_staff.user_id=user_record.id 
             WHERE task.event_id=$1
               AND task.deleted_at IS NULL
+            ORDER BY task.title
             LIMIT $2 OFFSET $3"#,
             event_id,
             filter.limit,

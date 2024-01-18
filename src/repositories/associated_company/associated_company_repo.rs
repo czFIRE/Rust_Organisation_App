@@ -193,6 +193,7 @@ impl AssociatedCompanyRepository {
         self._read_all_db(filter).await
     }
 
+    // ToDo: Consider removing, unused
     async fn _read_all_db(
         &self,
         filter: AssociatedCompanyFilter,
@@ -298,6 +299,7 @@ impl AssociatedCompanyRepository {
             INNER JOIN event ON associated_company.event_id = event.id 
             WHERE associated_company.event_id = $1 
               AND associated_company.deleted_at IS NULL
+            ORDER BY "company_name!"
             LIMIT $2 OFFSET $3;
             "#,
             event_id,
@@ -323,6 +325,7 @@ impl AssociatedCompanyRepository {
             .await
     }
 
+    // ToDo: Consider removing, unused.
     async fn _read_all_events_for_company_db(
         &self,
         company_id: Uuid,
@@ -365,6 +368,7 @@ impl AssociatedCompanyRepository {
             INNER JOIN event ON associated_company.event_id = event.id 
             WHERE associated_company.company_id = $1
               AND associated_company.deleted_at IS NULL
+            ORDER BY "event_name!"
             LIMIT $2 OFFSET $3;
             "#,
             company_id,

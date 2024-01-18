@@ -337,6 +337,7 @@ impl StaffRepository {
             WHERE 
                 event_staff.event_id = $1
                 AND event_staff.deleted_at IS NULL
+            ORDER BY user_record.name
             LIMIT $2 OFFSET $3;
             "#,
             event_id,

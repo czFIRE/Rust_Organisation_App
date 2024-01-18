@@ -304,6 +304,7 @@ impl AssignedStaffRepository {
             WHERE 
                 assigned_staff.task_id = $1
                 AND assigned_staff.deleted_at IS NULL
+            ORDER BY user_name
             LIMIT $2 OFFSET $3"#,
             task_id,
             filter.limit,

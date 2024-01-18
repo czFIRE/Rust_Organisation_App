@@ -202,6 +202,7 @@ impl CommentRepository {
             WHERE 
                 comment.event_id = $1    
                 AND comment.deleted_at IS NULL
+            ORDER BY comment_created_at
             LIMIT $2 OFFSET $3      
             "#,
             event_id,
@@ -249,7 +250,8 @@ impl CommentRepository {
                 INNER JOIN user_record ON comment.author_id = user_record.id 
             WHERE 
                 comment.task_id = $1  
-                AND comment.deleted_at IS NULL  
+                AND comment.deleted_at IS NULL
+            ORDER BY comment_created_at
             LIMIT $2 OFFSET $3      
             "#,
             task_id,

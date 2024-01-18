@@ -204,6 +204,7 @@ impl EmploymentRepository {
             WHERE 
                 employment.user_id = $1 
                 AND employment.deleted_at IS NULL
+            ORDER BY employment_start_date
             LIMIT $2 OFFSET $3          
             "#,
             user_uuid,
@@ -216,7 +217,7 @@ impl EmploymentRepository {
         Ok(employment.into_iter().map(|e| e.into()).collect())
     }
 
-    // Retrieves all employments for a given company.
+    // Retrieves all employments for a given company. - Consider removing as it is unused?
     pub async fn _read_all_for_company(
         &self,
         company_uuid: Uuid,
@@ -317,6 +318,7 @@ impl EmploymentRepository {
                 employment.manager_id = $1
                 AND employment.company_id = $2
                 AND employment.deleted_at IS NULL
+            ORDER BY user_name
             LIMIT $3 OFFSET $4;
             "#,
             manager_uuid,

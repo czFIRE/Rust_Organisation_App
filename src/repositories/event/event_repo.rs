@@ -136,6 +136,7 @@ impl EventRepository {
                         FROM event 
                         WHERE accepts_staff = $1 
                           AND deleted_at IS NULL
+                        ORDER BY name
                         LIMIT $2 
                         OFFSET $3;"#,
                     accepts_staff,
@@ -151,6 +152,7 @@ impl EventRepository {
                     r#" SELECT * 
                         FROM event
                         WHERE deleted_at IS NULL 
+                        ORDER BY name
                         LIMIT $1 
                         OFFSET $2;"#,
                     filter.limit,

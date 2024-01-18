@@ -204,6 +204,7 @@ impl CompanyRepository {
             "SELECT * FROM company 
              WHERE deleted_at IS NULL 
                AND name LIKE $3
+             ORDER BY name
              LIMIT $1 OFFSET $2;",
             filter.limit,
             filter.offset,
@@ -242,7 +243,9 @@ impl CompanyRepository {
                 street,
                 postal_code,
                 street_number
-            FROM company INNER JOIN address on company.id = address.company_id LIMIT $1 OFFSET $2;",
+            FROM company INNER JOIN address on company.id = address.company_id 
+            ORDER BY name
+            LIMIT $1 OFFSET $2;",
             filter.limit,
             filter.offset,
         )
