@@ -47,17 +47,19 @@
       </div>
     </nav>
 
-    <div id="content" class="flex flex-col space-y-1 items-center mt-10 w-full">
+    <div id="content" class="flex flex-col space-y-5 items-center mt-10 w-full">
       {% block content %}
       <div id="title">
         <h1 class="font-mono text-4xl font-extrabold text-txthl">
           {{ landing_title }}
         </h1>
       </div>
-      <p class="text-txt text-xl text-wrap text-center">
-        Welcome to Orchestrate, a website that empowers companies with tools
-        all about the organization of music events.
-      </p>
+      <div class="text-wrap flex flex-col space-y-1 items-center mt-10 w-full">
+        <p class="text-txt text-xl text-center">
+          Welcome to Orchestrate, a website that empowers companies with tools
+          all about the organization of music events.
+        </p>
+      </div>
       <div class="text-wrap flex flex-col space-y-1 items-center mt-10">
         <p class="text-txt text-xl">
           Already using Orchestrate?
