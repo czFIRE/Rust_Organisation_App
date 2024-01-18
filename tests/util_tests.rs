@@ -29,43 +29,21 @@ pub mod test_constants {
 
     pub const COMMENT0_ID: Uuid = uuid!("0d6cec6a-4fe8-4e44-bf68-e33de0ed121b");
     pub const COMMENT1_ID: Uuid = uuid!("daac23ec-fb36-434a-823b-49716ed2002c");
-
-    // a delta for float comparisons
-    pub const DELTA: f32 = 0.0000001;
 }
 
 #[cfg(test)]
 mod calculate_wage_tests {
     use std::sync::Arc;
 
-    use crate::test_constants::DELTA;
-
-    use dotenv::dotenv;
     use chrono::NaiveDate;
-    use organization::{
-        common::DbResult,
-        repositories::{
-            wage_preset::{
-                wage_preset_repo::WagePresetRepository,
-                models::WagePreset,
-            },
-            repository::DbRepository,
-        },
-    };
-    use organization::{
-        models::ApprovalStatus,
-        repositories::timesheet::{
-            models::{TimesheetCreateData, TimesheetReadAllData, TimesheetUpdateData},
-            timesheet_repo::TimesheetRepository,
-        },
-    };
+    use organization::common::DbResult;
+    use organization::repositories::timesheet::timesheet_repo::TimesheetRepository;
     use organization::utils::calculate_wage::calculate_timesheet_wage;
 
     use sqlx::PgPool;
 
     use crate::test_constants::{
-        COMPANY1_ID, COMPANY2_ID, EVENT0_ID, TIMESHEET0_ID, TIMESHEET1_ID,
-        USER1_ID, USER2_ID,
+        COMPANY1_ID, TIMESHEET1_ID, USER1_ID,
     };
 
     #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]

@@ -3648,10 +3648,7 @@ mod wage_preset_repo_tests {
     use organization::{
         common::DbResult,
         repositories::{
-            wage_preset::{
-                wage_preset_repo::WagePresetRepository,
-                models::WagePreset,
-            },
+            wage_preset::wage_preset_repo::WagePresetRepository,
             repository::DbRepository,
         },
     };
