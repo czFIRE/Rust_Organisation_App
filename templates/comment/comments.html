@@ -1,61 +1,32 @@
 {% for comment in comments %}
-    <div id="{{ comment.id }}"
-            class="flex
-                flex-row
-                space-x-3
-                items-start
-                align-middle
-                rounded-md
-                m-2
-                w-10/12">
-        <div id="{{ comment.id }}-img"
-                class="bg-foreground2
-                    w-24
-                    h-24
-                    rounded-md">
-            <img src="{{ comment.author.avatar_url }}"
-                    class="object-contain
-                        rounded-md" />
-        </div>
-        <div id="{{ comment.id }}-content"
-                class="flex
-                    flex-col
-                    items-start
-                    w-10/12
-                    h-min-24
-                    space-y-1
-                    p-2
-                    rounded-sm
-                    bg-foreground2
-                    text-wrap">
-            <div class="flex
-                        flex-row
-                        items-start
-                        p-1
-                        space-x-5">
-                <!-- TODO: Make a call that retrieves a read-only user. -->
-                <h4 class="font-mono
-                            text-xl
-                            font-bold
-                            text-txthl">{{ comment.author.name }}</h4>
-                <p class="font-mono
-                            text-lg
-                            text-txt">{{ comment.created_at.format("%d.%m.%Y %H:%M:%S").to_string() }}</p>
-                {% if comment.created_at < comment.edited_at -%}
-                <p class="font-mono
-                            italic
-                            text-txt">(edited)</p>
-                {%- endif %}
-            </div>
-            <div class="flex
-                        flex-row
-                        items-start
-                        p-2
-                        space-x-5">
-                <p class="font-mono
-                            text-lg
-                            text-txt">{{ comment.content }}</p>
-            </div>
-        </div>
+<div
+  id="{{ comment.id }}"
+  class="flex flex-row space-x-3 items-start align-middle rounded-md m-2 w-10/12"
+>
+  <div id="{{ comment.id }}-img" class="bg-foreground2 w-24 h-24 rounded-md">
+    <img
+      src="{{ comment.author.avatar_url }}"
+      class="object-contain rounded-md"
+    />
+  </div>
+  <div
+    id="{{ comment.id }}-content"
+    class="flex flex-col items-start w-10/12 h-min-24 space-y-1 p-2 rounded-sm bg-foreground2 text-wrap"
+  >
+    <div class="flex flex-row items-start p-1 space-x-5">
+      <h4 class="font-mono text-xl font-bold text-txthl">
+        {{ comment.author.name }}
+      </h4>
+      <p class="font-mono text-lg text-txt">
+        {{ comment.created_at.format("%d.%m.%Y %H:%M:%S").to_string() }}
+      </p>
+      {% if comment.created_at < comment.edited_at -%}
+      <p class="font-mono italic text-txt">(edited)</p>
+      {%- endif %}
     </div>
+    <div class="flex flex-row items-start p-2 space-x-5">
+      <p class="font-mono text-lg text-txt">{{ comment.content }}</p>
+    </div>
+  </div>
+</div>
 {% endfor %}

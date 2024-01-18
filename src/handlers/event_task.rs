@@ -19,8 +19,8 @@ use crate::{
         },
     },
     templates::task::{
-        EventTask, TaskCreationTemplate, TaskEditTemplate, TaskPanelTemplate, TaskTemplate,
-        TasksPanelTemplate, TasksTemplate,
+        EventTask, TaskCreationTemplate, TaskEditTemplate, TaskPanelTemplate, TasksPanelTemplate,
+        TasksTemplate,
     },
 };
 
@@ -68,32 +68,32 @@ pub async fn get_event_tasks(
     handle_database_error(result.expect_err("Should be error."))
 }
 
-#[get("/event/task/{task_id}")]
-pub async fn get_event_task(
-    task_id: web::Path<String>,
-    task_repo: web::Data<TaskRepository>,
-) -> HttpResponse {
-    let id_parse = Uuid::from_str(task_id.into_inner().as_str());
-    if id_parse.is_err() {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
-    }
-    let parsed_id = id_parse.expect("Should be valid.");
+// #[get("/event/task/{task_id}")]
+// pub async fn get_event_task(
+//     task_id: web::Path<String>,
+//     task_repo: web::Data<TaskRepository>,
+// ) -> HttpResponse {
+//     let id_parse = Uuid::from_str(task_id.into_inner().as_str());
+//     if id_parse.is_err() {
+//         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+//     }
+//     let parsed_id = id_parse.expect("Should be valid.");
 
-    let result = task_repo.read_one(parsed_id).await;
-    if let Ok(task) = result {
-        let template: TaskTemplate = task.into();
-        let body = template.render();
-        if body.is_err() {
-            return HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
-        }
-        return HttpResponse::Ok()
-            .content_type("text/html")
-            .body(body.expect("Should be valid now."));
-    }
+//     let result = task_repo.read_one(parsed_id).await;
+//     if let Ok(task) = result {
+//         let template: TaskTemplate = task.into();
+//         let body = template.render();
+//         if body.is_err() {
+//             return HttpResponse::InternalServerError()
+//                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+//         }
+//         return HttpResponse::Ok()
+//             .content_type("text/html")
+//             .body(body.expect("Should be valid now."));
+//     }
 
-    handle_database_error(result.expect_err("Should be error."))
-}
+//     handle_database_error(result.expect_err("Should be error."))
+// }
 
 #[post("/event/{event_id}/task")]
 pub async fn create_task(

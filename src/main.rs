@@ -92,7 +92,7 @@ use crate::handlers::{
         create_event_staff, delete_all_rejected_event_staff, delete_event_staff,
         get_all_event_staff, get_event_staff, update_event_staff,
     },
-    event_task::{create_task, delete_task, get_event_task, get_event_tasks, update_task},
+    event_task::{create_task, delete_task, get_event_tasks, update_task},
     index::index,
     timesheet::{
         create_timesheet, get_all_timesheets_for_employment, get_timesheet, reset_timesheet_data,
@@ -203,7 +203,6 @@ async fn main() -> Result<()> {
             .service(open_task_creation_panel)
             .service(open_task_edit_panel)
             .service(get_event_tasks)
-            .service(get_event_task)
             .service(create_task)
             .service(update_task)
             .service(update_task_completion)

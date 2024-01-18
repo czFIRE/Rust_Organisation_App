@@ -1,140 +1,115 @@
-<div id="employment" 
-     class="flex
-            flex-col
-            space-y-4
-            items-center
-            w-max">
-    <h2 class="font-mono
-               font-bold
-               text-2xl
-               text-txthl">Employee Editing</h2>
-    <p class="font-mono
-              text-xl
-              text-pnd">Change only values you wish to change! Leave others untouched.</p>
+<div id="employment" class="flex flex-col space-y-4 items-center w-max">
+  <h2 class="font-mono font-bold text-2xl text-txthl">Employee Editing</h2>
+  <p class="font-mono text-xl text-pnd">
+    Change only values you wish to change! Leave others untouched.
+  </p>
 
-    <form hx-patch="/user/{{ user_id }}/employment/{{ company_id }}" 
-          hx-swap="innerHTML"
-          hx-target="#content"
-          hx-confirm="Are you sure you wish to edit the employee's employment data?"
-          hx-ext="json-enc"
-          id="user-edit"
-          class="flex
-                 flex-col
-                 align-middle
-                 space-y-2">
-        <input type="hidden" id="editor_id" name="editor_id" value="{{ editor_id }}">
-        <div class="flex flex-col">
-            <label for="hourly_wage"
-                   class="font-mono
-                          text-xl
-                          text-txt">Hourly Wage</label>
-            <input id="hourly_wage" 
-                   name="hourly_wage"
-                   type="number"
-                   min="0"
-                   step="0.01"
-                   class="font-mono
-                          text-lg
-                          text-txt
-                          bg-foreground1"
-                   value="{{ hourly_wage }}">
-        </div>
-        <div class="flex
-                    flex-col">
-            <label for="start_date"
-                   class="font-mono
-                          text-xl
-                          text-txt">Employment Start Date</label>
-            <input id="start_date"
-                   name="start_date"
-                   type="date"
-                   class="font-mono
-                          text-lg
-                          text-txt
-                          bg-foreground1"
-                   value="{{ start_date }}">
-        </div>
-        <div class="flex
-                    flex-col">
-            <label for="end_date"
-                   class="font-mono
-                          text-xl
-                          text-txt">Employment End Date</label>
-            <input id="end_date"
-                   name="end_date"
-                   type="date"
-                   class="font-mono
-                          text-lg
-                          text-txt
-                          bg-foreground1"
-                   value="{{ end_date }}">
-        </div>
-       <div class="flex
-                     flex-col">
-              <label for="description"
-                     class="font-mono
-                            text-xl
-                            text-txt">Description</label>
-              <input id="description"
-                     name="description"
-                     type="text"
-                     class="font-mono
-                     text-lg
-                     text-txt
-                     bg-foreground1"
-                     value='{{ description.clone().unwrap_or("".to_string()) }}''>
-       </div>
-        <div class="flex flex-col">
-            <label for="employment_type"
-                   class="font-mono
-                          text-xl
-                        text-txt">Employment Type</label>
-            <select id="employment_type"
-                    name="employment_type"
-                    value="{{ employment_type }}"
-                    class="font-mono
-                           text-lg
-                           text-txt
-                           bg-foreground1">
-              <option value="Hpp">Hpp</option>
-              <option value="Dpp">Dpp</option>
-              <option value="Dpc">Dpc</option>
-            </select>
-        </div>
-        <div class="flex flex-col">
-            <label for="level"
-                   class="font-mono
-                          text-xl
-                          text-txt">Employee Level</label>
-            <select id="employment_type"
-                    name="employment_type"
-                    value="{{ level }}"
-                    class="font-mono
-                           text-lg
-                         text-txt
-                         bg-foreground1">
-                    <option value="Basic">Basic</option>
-                    <option value="Manager">Manager</option>
-                    <option value="Company Administrator">Company Administrator</option>
-              </select>
-        </div>
+  <form
+    hx-patch="/user/{{ user_id }}/employment/{{ company_id }}"
+    hx-swap="innerHTML"
+    hx-target="#content"
+    hx-confirm="Are you sure you wish to edit the employee's employment data?"
+    hx-ext="json-enc"
+    id="user-edit"
+    class="flex flex-col align-middle space-y-2"
+  >
+    <input
+      type="hidden"
+      id="editor_id"
+      name="editor_id"
+      value="{{ editor_id }}"
+    />
+    <div class="flex flex-col">
+      <label for="hourly_wage" class="font-mono text-xl text-txt"
+        >Hourly Wage</label
+      >
+      <input
+        id="hourly_wage"
+        name="hourly_wage"
+        type="number"
+        min="0"
+        step="0.01"
+        class="font-mono text-lg text-txt bg-foreground1"
+        value="{{ hourly_wage }}"
+      />
+    </div>
+    <div class="flex flex-col">
+      <label for="start_date" class="font-mono text-xl text-txt"
+        >Employment Start Date</label
+      >
+      <input
+        id="start_date"
+        name="start_date"
+        type="date"
+        class="font-mono text-lg text-txt bg-foreground1"
+        value="{{ start_date }}"
+      />
+    </div>
+    <div class="flex flex-col">
+      <label for="end_date" class="font-mono text-xl text-txt"
+        >Employment End Date</label
+      >
+      <input
+        id="end_date"
+        name="end_date"
+        type="date"
+        class="font-mono text-lg text-txt bg-foreground1"
+        value="{{ end_date }}"
+      />
+    </div>
+    <div class="flex flex-col">
+      <label for="description" class="font-mono text-xl text-txt"
+        >Description</label
+      >
+      <input id="description" name="description" type="text" class="font-mono
+      text-lg text-txt bg-foreground1" value='{{
+      description.clone().unwrap_or("".to_string()) }}''>
+    </div>
+    <div class="flex flex-col">
+      <label for="employment_type" class="font-mono text-xl text-txt"
+        >Employment Type</label
+      >
+      <select
+        id="employment_type"
+        name="employment_type"
+        value="{{ employment_type }}"
+        class="font-mono text-lg text-txt bg-foreground1"
+      >
+        <option value="Hpp">Hpp</option>
+        <option value="Dpp">Dpp</option>
+        <option value="Dpc">Dpc</option>
+      </select>
+    </div>
+    <div class="flex flex-col">
+      <label for="level" class="font-mono text-xl text-txt"
+        >Employee Level</label
+      >
+      <select
+        id="employment_type"
+        name="employment_type"
+        value="{{ level }}"
+        class="font-mono text-lg text-txt bg-foreground1"
+      >
+        <option value="Basic">Basic</option>
+        <option value="Manager">Manager</option>
+        <option value="Company Administrator">Company Administrator</option>
+      </select>
+    </div>
 
-        <button type="submit"
-                class="font-mono
-                        text-xl
-                        text-txthl
-                        bg-foreground1
-                        rounded-md
-                        p-2">Save Changes</button>
-    </form>
-    <!-- Return to the editor's page, not the user's page. -->
-    <button hx-get="/user/{{ editor_id }}/employment/{{ company_id }}"
-            hx-swap="innerHTML"
-            hx-target="#content"
-            class="font-mono
-                   text-xl
-                   text-txthl
-                   bg-foreground1
-                   rounded-md
-                   p-2">Cancel</button>
+    <button
+      type="submit"
+      class="font-mono text-xl text-txthl bg-foreground1 rounded-md p-2"
+    >
+      Save Changes
+    </button>
+  </form>
+  <!-- Return to the editor's page, not the user's page. -->
+  <button
+    hx-get="/user/{{ editor_id }}/employment/{{ company_id }}"
+    hx-swap="innerHTML"
+    hx-target="#content"
+    class="font-mono text-xl text-txthl bg-foreground1 rounded-md p-2"
+  >
+    Cancel
+  </button>
 </div>

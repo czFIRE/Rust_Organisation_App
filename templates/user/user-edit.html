@@ -1,120 +1,83 @@
-<div id="user" 
-     class="flex
-            flex-col
-            space-y-5
-            items-center">
-    <div id="title">
-        <h2 class="col-span-4
-                   font-mono
-                   text-4xl
-                   font-extrabold
-                   text-txthl">My Account</h1>
-    </div>
-    <div id="user-content" 
-         class="flex
-                flex-row
-                space-x-10">
-        <form hx-patch="/user/{{ id }}"
-              hx-ext="json-enc"
-              class="flex 
-                     flex-col
-                     space-y-5
-                     items-center"
-              hx-swap="innerHTML"
-              hx-target="#content">
-            <p class="font-mono
-                      text-xl 
-                      text-pnd">Change only values you wish to change! Leave others untouched.</p>
-                <div class="flex
-                            flex-row
-                            space-x-5">
-                    <label class="font-mono
-                                  text-xl
-                                  text-txt"
-                            for="name">Name:</label>
-                    <input class="font-mono
-                                  text-xl
-                                  bg-foreground2
-                                  text-txt"
-                           type="text"
-                           id="name"
-                           name="name"
-                           placeholder="new name"
-                           value="{{ name }}">
-                </div>
-                <div class="flex
-                            flex-row
-                            space-x-5">
-                    <label class="font-mono
-                                  text-xl
-                                  text-txt" 
-                           for="email">Email*:</label>
-                    <input class="font-mono
-                                  text-xl
-                                  bg-foreground2
-                                  text-txt"
-                           type="email"
-                           id="email"
-                           name="email"
-                           placeholder="new email"
-                           value="{{ email }}">
-                </div>
-                <div class="flex
-                            flex-row
-                            space-x-5">
-                    <label class="font-mono
-                                  text-xl
-                                  text-txt"
-                           for="name">Birth Date:</label>
-                    <input class="font-mono
-                                  text-xl
-                                  bg-foreground2
-                                  text-txt"
-                           type="date"
-                           id="birth"
-                           name="birth"
-                           placeholder="new birth date"
-                           value="{{ birth }}">
-                </div>
-                <div class="flex
-                            flex-row
-                            space-x-5">
-                    <label class="font-mono
-                                  text-xl
-                                  text-txt"
-                           for="gender">Gender:</label>
-                     <select id="gender"
-                             name="gender"
-                             class="font-mono
-                                    text-xl
-                                    text-txt
-                                    bg-foreground2">
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
-                     </select>
-
-                <div class="flex flex-row space-x-5">
-                    <button type="submit"
-                            title="Submit Changes"
-                            class="font-mono
-                                   text-txthl
-                                   text-lg
-                                   bg-foreground1
-                                   p-1
-                                   rounded-md">Submit</button>
-                </div>
-                <p></p>
-                <button hx-get="/user/{{ id }}"
-                            hx-swap="innerHTML"
-                            hx-target="#content"
-                            title="Cancel"
-                            class="font-mono
-                                   text-txthl
-                                   text-lg
-                                   bg-foreground1
-                                   p-1
-                                   rounded-md">Cancel</button>
-        </form>
-    </div>
+<div id="user" class="flex flex-col space-y-5 items-center">
+  <div id="title">
+    <h2 class="col-span-4 font-mono text-4xl font-extrabold text-txthl">
+      My Account
+    </h2>
+  </div>
+  <div id="user-content" class="flex flex-row space-x-10">
+    <form
+      hx-patch="/user/{{ id }}"
+      hx-ext="json-enc"
+      class="flex flex-col space-y-5 items-center"
+      hx-swap="innerHTML"
+      hx-target="#content"
+    >
+      <p class="font-mono text-xl text-pnd">
+        Change only values you wish to change! Leave others untouched.
+      </p>
+      <div class="flex flex-row space-x-5">
+        <label class="font-mono text-xl text-txt" for="name">Name:</label>
+        <input
+          class="font-mono text-xl bg-foreground2 text-txt"
+          type="text"
+          id="name"
+          name="name"
+          placeholder="new name"
+          value="{{ name }}"
+        />
+      </div>
+      <div class="flex flex-row space-x-5">
+        <label class="font-mono text-xl text-txt" for="email">Email*:</label>
+        <input
+          class="font-mono text-xl bg-foreground2 text-txt"
+          type="email"
+          id="email"
+          name="email"
+          placeholder="new email"
+          value="{{ email }}"
+        />
+      </div>
+      <div class="flex flex-row space-x-5">
+        <label class="font-mono text-xl text-txt" for="name">Birth Date:</label>
+        <input
+          class="font-mono text-xl bg-foreground2 text-txt"
+          type="date"
+          id="birth"
+          name="birth"
+          placeholder="new birth date"
+          value="{{ birth }}"
+        />
+      </div>
+      <div class="flex flex-row space-x-5">
+        <label class="font-mono text-xl text-txt" for="gender">Gender:</label>
+        <select
+          id="gender"
+          name="gender"
+          class="font-mono text-xl text-txt bg-foreground2"
+        >
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="flex flex-row space-x-5">
+        <button
+          type="submit"
+          title="Submit Changes"
+          class="font-mono text-txthl text-lg bg-foreground1 p-1 rounded-md"
+        >
+          Submit
+        </button>
+      </div>
+    </form>
+    <button
+      hx-get="/user/{{ id }}"
+      hx-swap="innerHTML"
+      hx-target="#content"
+      title="Cancel"
+      class="font-mono text-txthl text-lg bg-foreground1 p-1 rounded-md"
+    >
+      Cancel
+    </button>
+  </div>
 </div>

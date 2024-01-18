@@ -1,73 +1,57 @@
-<div id="staff-register"
-     class="flex
-            flex-col
-            space-y-4
-            items-center">
-    <h2 class="font-mono
-               text-4xl
-               text-txthl">Staff Registration</h2>
-    {% if companies.is_empty() -%}
-        <p class="font-mono
-                  text-2xl
-                  text-rej">You cannot register to this event - none of your employers are associated with it.</p>
-    {%- else -%}
-    <form class="flex
-                 flex-col
-                 items-center
-                 space-y-5"
-          hx-post="/event/{{ event_id }}/staff"
-          hx-swap="innerHTML"
-          hx-target="#content"
-          hx-ext="json-enc"
-          hx-confirm="Are you sure you want to register? This action can't be withdrawn.">
-        <input type="hidden"
-            id="user_id"
-            name="user_id"
-            value="{{ user_id }}">
-        <input type="hidden"
-                id="role"
-                name="role"
-                value="Staff">
-        
-        <fieldset>
-            <legend class="font-mono
-                        text-pnd
-                        text-xl">Select the company you are signing up from:</legend>
-            {% for company in companies %}
-            <div class="flex
-                        flex-row
-                        space-x-2
-                        bg-foreground1
-                        rounded-md
-                        m-2
-                        p-2">
-                <input type="radio"
-                        id="{{ company.company_id }}"
-                        name="company_id"
-                        value="{{ company.company_id }}">
-                <label class="font-mono
-                            text-txt
-                            text-lg"
-                        for="{{ company.company_id }}">{{ company.company_name }} - {{ company.employment_level }}, {{ company.employment_type}} </label>
-            </div>
-            {% endfor %}
-        </fieldset>
-            <button type="submit"
-                    title="Submit Registration"
-                    class="text-txthl
-                            text-lg
-                            p-2
-                          bg-foreground1
-                            rounded-md">Register</button>
-    </form>
-    {% endif %}
-    
-    <button hx-get="/event/{{ event_id }}"
-            hx-swap="innerHTML"
-            hx-target="#content"
-            class="text-txthl
-                    text-lg
-                    p-2
-                    bg-foreground1
-                    rounded-md">Cancel</button>
+<div id="staff-register" class="flex flex-col space-y-4 items-center">
+  <h2 class="font-mono text-4xl text-txthl">Staff Registration</h2>
+  {% if companies.is_empty() -%}
+  <p class="font-mono text-2xl text-rej">
+    You cannot register to this event - none of your employers are associated
+    with it.
+  </p>
+  {%- else -%}
+  <form
+    class="flex flex-col items-center space-y-5"
+    hx-post="/event/{{ event_id }}/staff"
+    hx-swap="innerHTML"
+    hx-target="#content"
+    hx-ext="json-enc"
+    hx-confirm="Are you sure you want to register? This action can't be withdrawn."
+  >
+    <input type="hidden" id="user_id" name="user_id" value="{{ user_id }}" />
+    <input type="hidden" id="role" name="role" value="Staff" />
+
+    <fieldset>
+      <legend class="font-mono text-pnd text-xl">
+        Select the company you are signing up from:
+      </legend>
+      {% for company in companies %}
+      <div class="flex flex-row space-x-2 bg-foreground1 rounded-md m-2 p-2">
+        <input
+          type="radio"
+          id="{{ company.company_id }}"
+          name="company_id"
+          value="{{ company.company_id }}"
+        />
+        <label class="font-mono text-txt text-lg" for="{{ company.company_id }}"
+          >{{ company.company_name }} - {{ company.employment_level }}, {{
+          company.employment_type}}
+        </label>
+      </div>
+      {% endfor %}
+    </fieldset>
+    <button
+      type="submit"
+      title="Submit Registration"
+      class="text-txthl text-lg p-2 bg-foreground1 rounded-md"
+    >
+      Register
+    </button>
+  </form>
+  {% endif %}
+
+  <button
+    hx-get="/event/{{ event_id }}"
+    hx-swap="innerHTML"
+    hx-target="#content"
+    class="text-txthl text-lg p-2 bg-foreground1 rounded-md"
+  >
+    Cancel
+  </button>
 </div>

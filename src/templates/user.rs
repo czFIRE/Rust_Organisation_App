@@ -41,8 +41,7 @@ impl From<User> for UserTemplate {
     }
 }
 
-#[derive(Template, Debug, Deserialize)]
-#[template(path = "user/user-lite.html")]
+#[derive(Debug, Deserialize)]
 pub struct UserLiteTemplate {
     pub id: Uuid,
     pub name: String,

@@ -1,95 +1,65 @@
-<div id="task-panel"
-         class="flex
-                flex-col
-                rounded-md
-                bg-foreground1
-                space-y-5
-                items-start
-                text-wrap
-                p-2
-                w-full">
-        <div class="flex
-                    flex-row
-                    space-x-3
-                    w-full">
-                {% if task.finished_at.is_some() %}
-                <svg xmlns="http://www.w3.org/2000/svg"
-                     fill="none"
-                     viewBox="0 0 24 24"
-                     stroke-width="1.5"
-                     stroke="currentColor"
-                     class="w-8
-                            h-8
-                            text-acc">
-                   <path stroke-linecap="round"
-                         stroke-linejoin="round"
-                         d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
-                </svg>                      
-                {% endif %}
-                <h2 class="font-mono
-                           font-bold
-                           text-3xl
-                         text-txthl">{{ task.title }}</h2>
-        </div>
-        <div class="flex
-                    flex-row
-                    space-x-5
-                    w-full">
-                {% match task.priority %}
-                    {% when TaskPriority::Low %}
-                    <p class="font-mono
-                            text-lg
-                            text-acc">Low Priority Task</p>
-                    {% when TaskPriority::Medium %}
-                    <p class="font-mono
-                            text-lg
-                            text-pnd">Medium Priority Task</p>
-                    {% when TaskPriority::High %}
-                    <p class="font-mono
-                            text-lg
-                            text-rej">High Priority Task</p>
-                {% endmatch %}
-                {% if task.accepts_staff -%}
-                        <p class="font-mono
-                                  text-lg
-                                text-acc">Accepting Staff - Register below</p>
-                {%- else -%}
-                        <p class="font-mono
-                                  text-lg
-                                text-rej">Not Accepting Staff</p>
-                {%- endif %}
-        </div>
-        <div class="flex
-                    flex-row
-                    space-x-5
-                    w-full">
-                <p class="font-mono
-                          text-lg
-                          text-txt">{{task.description}}</p>
-        </div>
-        <p class="font-mono
-                  text-lg
-                text-txt"><b>Created By:</b> {{ task.creator.name }}</p>
-        {% if task.finished_at.is_some() %}
-        <div class="flex
-                    flex-row
-                    space-x-3
-                    w-full">
-                <svg xmlns="http://www.w3.org/2000/svg"
-                     fill="none"
-                     viewBox="0 0 24 24"
-                     stroke-width="1.5"
-                     stroke="currentColor"
-                     class="w-6
-                            h-6
-                            text-acc">
-                        <path stroke-linecap="round"
-                              stroke-linejoin="round"
-                              d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                </svg>
-                <p class="font-mono
-                        text-lg
-                        text-acc">Finished At: {{ task.finished_at.unwrap().format("%d.%m.%Y %H:%M:%S").to_string() }}</p>
-        </div>
-        {% endif %}
+<div
+  id="task-panel"
+  class="flex flex-col rounded-md bg-foreground1 space-y-5 items-start text-wrap p-2 w-full"
+>
+  <div class="flex flex-row space-x-3 w-full">
+    {% if task.finished_at.is_some() %}
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke-width="1.5"
+      stroke="currentColor"
+      class="w-8 h-8 text-acc"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z"
+      />
+    </svg>
+    {% endif %}
+    <h2 class="font-mono font-bold text-3xl text-txthl">{{ task.title }}</h2>
+  </div>
+  <div class="flex flex-row space-x-5 w-full">
+    {% match task.priority %} {% when TaskPriority::Low %}
+    <p class="font-mono text-lg text-acc">Low Priority Task</p>
+    {% when TaskPriority::Medium %}
+    <p class="font-mono text-lg text-pnd">Medium Priority Task</p>
+    {% when TaskPriority::High %}
+    <p class="font-mono text-lg text-rej">High Priority Task</p>
+    {% endmatch %} {% if task.accepts_staff -%}
+    <p class="font-mono text-lg text-acc">Accepting Staff - Register below</p>
+    {%- else -%}
+    <p class="font-mono text-lg text-rej">Not Accepting Staff</p>
+    {%- endif %}
+  </div>
+  <div class="flex flex-row space-x-5 w-full">
+    <p class="font-mono text-lg text-txt">{{task.description}}</p>
+  </div>
+  <p class="font-mono text-lg text-txt">
+    <b>Created By:</b> {{ task.creator.name }}
+  </p>
+  {% if task.finished_at.is_some() %}
+  <div class="flex flex-row space-x-3 w-full">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke-width="1.5"
+      stroke="currentColor"
+      class="w-6 h-6 text-acc"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"
+      />
+    </svg>
+    <p class="font-mono text-lg text-acc">
+      Finished At: {{ task.finished_at.unwrap().format("%d.%m.%Y
+      %H:%M:%S").to_string() }}
+    </p>
+  </div>
+  {% endif %}
 </div>

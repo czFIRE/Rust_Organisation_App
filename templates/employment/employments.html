@@ -1,25 +1,12 @@
-<div id="employments"
-     class="flex
-            flex-col
-            m-2
-            space-y-1
-            items-center
-            w-full">
-    <div id="title">
-        <h2 class="font-mono
-                   text-4xl
-                   font-extrabold
-                   text-txthl">Employments</h2>
-    </div>
-    <div id="employments"
-         class="flex
-                flex-col
-                space-y-2
-                w-10/12
-                m-10
-                items-center">
-        {% for employment in employments %}
-            {% include "employment-lite.html" %}
-        {% endfor %}
-    </div>
+<div id="employments" class="flex flex-col m-2 space-y-1 items-center w-full">
+  <div id="title">
+    <h2 class="font-mono text-4xl font-extrabold text-txthl">Employments</h2>
+  </div>
+  <div
+    id="employments"
+    class="flex flex-col space-y-2 w-10/12 m-10 items-center"
+  >
+    {% for employment in employments %} {% include "employment-lite.html" %} {%
+    endfor %}
+  </div>
 </div>

@@ -277,22 +277,18 @@ fn any_formatless_string_empty(company_data: &CompanyUpdateData) -> bool {
 
 fn validate_update_data(company_data: CompanyUpdateData) -> bool {
     if is_data_empty(&company_data) {
-        println!("DATA EMPTY!");
         return false;
     }
 
     if any_formatless_string_empty(&company_data) {
-        println!("ANY FORMATLESS STRING EMPTY!");
         return false;
     }
 
     if company_data.email.is_some() && !check_email_validity(company_data.email.unwrap()) {
-        println!("CHECK EMAIL VALIDITY!");
         return false;
     }
 
     if company_data.phone.is_some() && !check_phone_validity(company_data.phone.unwrap()) {
-        println!("CHECK PHONE VALIDITY!");
         return false;
     }
     true

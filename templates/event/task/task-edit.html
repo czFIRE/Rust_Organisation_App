@@ -1,140 +1,100 @@
-<div id="task-edit"
-     class="flex
-            flex-col
-            space-y-5
-            m-5
-            items-center
-            w-10/12">
-    <h2 class="font-mono
-               font-bold
-               text-txthl
-               text-3xl">Task Edit</h2>
-    <form hx-patch="/event/task/{{ task.id }}"
-          hx-swap="innerHTML"
-          hx-target="#content"
-          hx-ext="json-enc"
-          id="task-edit-form"
-          class="flex
-                 flex-col
-                 space-y-5
-                 items-center
-                 w-full
-                 bg-foreground1
-                 p-3">
-        <div class="flex
-                    flex-row
-                    space-x-5
-                    items-center
-                    w-full">
-            <label for="title"
-                   class="font-mono
-                          text-txt
-                          text-lg">Title:</label>
-            <input id="title"
-                   name="title"
-                   required
-                   type="text"
-                   minlength="3"
-                   value="{{ task.title }}"
-                   class="font-mono
-                          text-txt
-                          text-lg
-                          bg-foreground2
-                          rounded-md
-                          p-1">
-        </div>
-        <div class="flex
-                    flex-row
-                    space-x-5
-                    items-start
-                    w-full">
-            <label for="description"
-                   class="font-mono
-                          text-txt
-                          text-lg">Description:</label>
-            <input id="description"
-                   name="description"
-                   type="text"
-                   required
-                   value="{{ task.description }}"
-                   class="font-mono
-                          text-txt
-                          text-lg
-                          bg-foreground2
-                          rounded-md
-                          p-1">
-        </div>
-        <div class="flex
-                    flex-row
-                    space-x-5
-                    items-start
-                    w-full">
-            <label for="priority"
-                   class="font-mono
-                          text-txt
-                          text-lg">Task Priority:</label>
-            <select id="priority"
-                    required
-                    name="priority"
-                    class="font-mono
-                           text-txt
-                           text-lg
-                           bg-foreground2
-                           rounded-md
-                           p-1">
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-            </select>
-        </div>
-        <button type="submit"
-                class="rounded-md
-                       p-1
-                       text-txthl
-                       text-lg
-                       bg-foreground2">Submit Changes</button>
-    </form>
-    {% if task.finished_at.is_none() %}
-    <button class="rounded-md
-                p-1
-                text-acc
-                text-lg
-                bg-foreground2"
-            hx-patch="/event/task/{{ task.id }}/completion"
-            hx-swap="innerHTML"
-            hx-confirm="Are you sure? This is an irreversible action."
-            hx-target="#content">Set Task as Completed</button>
-    {% endif %}
-    {% if task.accepts_staff %}
-    <button class="rounded-md
-                   p-1
-                 text-txthl
-                   text-lg
-                 bg-foreground2"
-            hx-patch="/event/task/{{ task.id }}"
-            hx-vals='js:{"accepts_staff": false}'
-            hx-swap="innerHTML"
-            hx-ext="json-enc"
-            hx-target="#content">Turn Off Staff Applications</button>
-    {% else %}
-    <button class="rounded-md
-                   p-1
-                 text-txthl
-                   text-lg
-                 bg-foreground2"
-            hx-patch="/event/task/{{ task.id }}"
-            hx-vals='js:{"accepts_staff": true}'
-            hx-swap="innerHTML"
-            hx-ext="json-enc"
-            hx-target="#content">Turn On Staff Applications</button>
-    {% endif %}
-    <!-- TODO -->
-    <button class="rounded-md
-                   p-1
-                   text-txthl
-                   text-lg
-                   bg-foreground2"
-            hx-get="/event/staff/{{ editor_id }}/task/{{ task.id }}"
-            hx-swap="innerHTML"
-            hx-target="#content">Go Back</button>
+<div id="task-edit" class="flex flex-col space-y-5 m-5 items-center w-10/12">
+  <h2 class="font-mono font-bold text-txthl text-3xl">Task Edit</h2>
+  <form
+    hx-patch="/event/task/{{ task.id }}"
+    hx-swap="innerHTML"
+    hx-target="#content"
+    hx-ext="json-enc"
+    id="task-edit-form"
+    class="flex flex-col space-y-5 items-center w-full bg-foreground1 p-3"
+  >
+    <div class="flex flex-row space-x-5 items-center w-full">
+      <label for="title" class="font-mono text-txt text-lg">Title:</label>
+      <input
+        id="title"
+        name="title"
+        required
+        type="text"
+        minlength="3"
+        value="{{ task.title }}"
+        class="font-mono text-txt text-lg bg-foreground2 rounded-md p-1"
+      />
+    </div>
+    <div class="flex flex-row space-x-5 items-start w-full">
+      <label for="description" class="font-mono text-txt text-lg"
+        >Description:</label
+      >
+      <input
+        id="description"
+        name="description"
+        type="text"
+        required
+        value="{{ task.description }}"
+        class="font-mono text-txt text-lg bg-foreground2 rounded-md p-1"
+      />
+    </div>
+    <div class="flex flex-row space-x-5 items-start w-full">
+      <label for="priority" class="font-mono text-txt text-lg"
+        >Task Priority:</label
+      >
+      <select
+        id="priority"
+        required
+        name="priority"
+        class="font-mono text-txt text-lg bg-foreground2 rounded-md p-1"
+      >
+        <option value="Low">Low</option>
+        <option value="Medium">Medium</option>
+        <option value="High">High</option>
+      </select>
+    </div>
+    <button
+      type="submit"
+      class="rounded-md p-1 text-txthl text-lg bg-foreground2"
+    >
+      Submit Changes
+    </button>
+  </form>
+  {% if task.finished_at.is_none() %}
+  <button
+    class="rounded-md p-1 text-acc text-lg bg-foreground2"
+    hx-patch="/event/task/{{ task.id }}/completion"
+    hx-swap="innerHTML"
+    hx-confirm="Are you sure? This is an irreversible action."
+    hx-target="#content"
+  >
+    Set Task as Completed
+  </button>
+  {% endif %} {% if task.accepts_staff %}
+  <button
+    class="rounded-md p-1 text-txthl text-lg bg-foreground2"
+    hx-patch="/event/task/{{ task.id }}"
+    hx-vals='js:{"accepts_staff": false}'
+    hx-swap="innerHTML"
+    hx-ext="json-enc"
+    hx-target="#content"
+  >
+    Turn Off Staff Applications
+  </button>
+  {% else %}
+  <button
+    class="rounded-md p-1 text-txthl text-lg bg-foreground2"
+    hx-patch="/event/task/{{ task.id }}"
+    hx-vals='js:{"accepts_staff": true}'
+    hx-swap="innerHTML"
+    hx-ext="json-enc"
+    hx-target="#content"
+  >
+    Turn On Staff Applications
+  </button>
+  {% endif %}
+  <!-- TODO -->
+  <button
+    class="rounded-md p-1 text-txthl text-lg bg-foreground2"
+    hx-get="/event/staff/{{ editor_id }}/task/{{ task.id }}"
+    hx-swap="innerHTML"
+    hx-target="#content"
+  >
+    Go Back
+  </button>
 </div>
