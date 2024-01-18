@@ -78,7 +78,7 @@ impl AssociatedCompanyRepository {
         self.read_one_db(company_id, event_id).await
     }
 
-    pub async fn read_one_db(
+    async fn read_one_db(
         &self,
         company_id: Uuid,
         event_id: Uuid,
@@ -193,7 +193,7 @@ impl AssociatedCompanyRepository {
         self._read_all_db(filter).await
     }
 
-    pub async fn _read_all_db(
+    async fn _read_all_db(
         &self,
         filter: AssociatedCompanyFilter,
     ) -> DbResult<Vec<AssociatedCompanyExtended>> {
@@ -256,7 +256,7 @@ impl AssociatedCompanyRepository {
         self.read_all_companies_for_event_db(event_id, filter).await
     }
 
-    pub async fn read_all_companies_for_event_db(
+    async fn read_all_companies_for_event_db(
         &self,
         event_id: Uuid,
         filter: AssociatedCompanyFilter,
@@ -323,7 +323,7 @@ impl AssociatedCompanyRepository {
             .await
     }
 
-    pub async fn _read_all_events_for_company_db(
+    async fn _read_all_events_for_company_db(
         &self,
         company_id: Uuid,
         filter: AssociatedCompanyFilter,

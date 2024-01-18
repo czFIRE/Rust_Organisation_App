@@ -16,6 +16,10 @@ use std::io::Result;
 use std::sync::Arc;
 
 use crate::handlers::assigned_staff::initialize_assigned_staff_management_panel;
+use crate::handlers::associated_company::get_associated_company_edit_form;
+use crate::handlers::associated_company::get_editable_associated_companies;
+use crate::handlers::associated_company::get_editable_associated_company;
+use crate::handlers::associated_company::open_associated_company_management_panel;
 use crate::handlers::comment::get_comment;
 use crate::handlers::comment::open_comment_update_mode;
 use crate::handlers::comment::open_event_comments_for_user;
@@ -215,6 +219,10 @@ async fn main() -> Result<()> {
             .service(create_associated_company)
             .service(update_associated_company)
             .service(delete_associated_company)
+            .service(open_associated_company_management_panel)
+            .service(get_editable_associated_companies)
+            .service(get_editable_associated_company)
+            .service(get_associated_company_edit_form)
             .service(open_event_comments_for_user)
             .service(create_event_comment)
             .service(open_task_comments_for_user)

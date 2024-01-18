@@ -111,9 +111,8 @@ pub struct CompaniesTemplate {
     pub companies: Vec<CompanyLite>,
 }
 
-#[derive(Template, Debug, Deserialize)]
-#[template(path = "company/associated-company.html")]
-pub struct AssociatedCompanyTemplate {
+#[derive(Debug, Deserialize)]
+pub struct AssociatedCompanyInfo {
     pub event_id: Uuid,
     pub company: CompanyLite,
     pub association_type: Association,
@@ -121,7 +120,7 @@ pub struct AssociatedCompanyTemplate {
     pub edited_at: NaiveDateTime,
 }
 
-impl From<AssociatedCompanyExtended> for AssociatedCompanyTemplate {
+impl From<AssociatedCompanyExtended> for AssociatedCompanyInfo {
     fn from(associated: AssociatedCompanyExtended) -> Self {
         let company_lite = CompanyLite {
             id: associated.company.id,
@@ -129,7 +128,7 @@ impl From<AssociatedCompanyExtended> for AssociatedCompanyTemplate {
             avatar_url: associated.company.avatar_url,
         };
 
-        AssociatedCompanyTemplate {
+        AssociatedCompanyInfo {
             event_id: associated.event.id,
             company: company_lite,
             association_type: associated.association_type,
@@ -142,5 +141,25 @@ impl From<AssociatedCompanyExtended> for AssociatedCompanyTemplate {
 #[derive(Template, Debug, Deserialize)]
 #[template(path = "company/associated-companies.html")]
 pub struct AssociatedCompaniesTemplate {
-    pub associated_companies: Vec<AssociatedCompanyTemplate>,
+    pub editable: bool,
+    pub associated_companies: Vec<AssociatedCompanyInfo>,
+}
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "company/associated-company-management.html")]
+pub struct AssociatedCompanyManagementTemplate {
+    pub event_id: Uuid,
+    pub companies: Vec<AssociatedCompanyInfo>,
+}
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "company/associated-company-edit.html")]
+pub struct AssociatedCompanyEditTemplate {
+    pub company: AssociatedCompanyInfo,
+}
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "company/associated-company-editable.html")]
+pub struct EditableAssociatedCompanyTemplate {
+    pub company: AssociatedCompanyInfo,
 }

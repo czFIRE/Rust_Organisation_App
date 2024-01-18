@@ -109,6 +109,11 @@
                                 text-xl
                                 p-3">Edit Event
                 </button>
+                <button hx-get="/event/{{ event_id}}/company-management"
+                        hx-swap="innerHTML"
+                        hx-target="#content"
+                        class="bg-foreground1 font-mono text-txthl text-xl p-3">Manage Associated Companies
+                </button>
                 <button hx-delete="/event/{{ event_id }}"
                         hx-swap="innerHTML"
                         hx-target="#content"

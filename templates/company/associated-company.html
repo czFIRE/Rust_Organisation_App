@@ -1,7 +1,20 @@
-{{ event_id }}
-{{ company.id }}
-{{ company.name }}
-{{ company.avatar_url }}
-{{ association_type }}
-{{ created_at }}
-{{ edited_at }}
+<button
+  hx-get="/company/{{ company.company.id }}"
+  hx-swap="innerHTML"
+  hx-target="#content"
+>
+  <div
+    id="company"
+    class="flex flex-row space-x-2 bg-foreground1 border-foreground2 border-2 rounded-md items-start align-middle pr-2 w-80 h-fit"
+  >
+    <div class="rounded-md w-28 h-28">
+      <img class="object-fill" src="{{ company.company.avatar_url }}" />
+    </div>
+    <div class="flex flex-col space-y-2 pr-1">
+      <h4 class="text-txthl text-lg font-extrabold">
+        {{ company.company.name }}
+      </h4>
+      <p class="text-txt text-lg">{{ company.association_type }}</p>
+    </div>
+  </div>
+</button>

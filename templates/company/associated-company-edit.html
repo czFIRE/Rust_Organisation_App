@@ -1,0 +1,79 @@
+<div
+  id="company-{{ company.company.id }}"
+  class="flex flex-row space-x-2 bg-foreground1 border-foreground2 border-2 rounded-md items-start align-middle pr-2 w-80 h-fit"
+>
+  <div class="rounded-md w-28 h-28">
+    <img class="object-fill" src="{{ company.company.avatar_url }}" />
+  </div>
+  <div class="flex flex-col space-y-2 pr-1">
+    <div class="flex flex-row space-x-5">
+      <h4 class="text-txthl text-lg font-extrabold">
+        {{ company.company.name }}
+      </h4>
+    </div>
+    <div class="flex flex-row space-x-5">
+      <form
+        hx-patch="/event/{{ company.event_id}}/company/{{ company.company.id }}"
+        hx-swap="outerHTML"
+        hx-target="#company-{{ company.company.id }}"
+        hx-ext="json-enc"
+        class="flex flex-row space-x-5"
+      >
+        <div class="flex flex-col">
+          <label for="association_type" class="font-mono text-txt text-lg"
+            >Type:</label
+          >
+          <select
+            required
+            value="{{company.association_type}}"
+            id="association_type"
+            name="association_type"
+            class="font-mono text-txt text-lg bg-foreground2 rounded-md"
+          >
+            <option value="Sponsor">Sponsor</option>
+            <option value="Organizer">Organizer</option>
+            <option value="Media">Media</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <button type="submit" title="Save Changes">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="w-6 h-6 text-acc"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="m4.5 12.75 6 6 9-13.5"
+            />
+          </svg>
+        </button>
+      </form>
+      <button
+        hx-get="/event/{{ company.event_id }}/company/{{ company.company.id }}/editable"
+        hx-swap="outerHTML"
+        hx-target="#company-{{ company.company.id }}"
+        title="Cancel Changes"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="w-6 h-6 text-rej"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M6 18 18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
