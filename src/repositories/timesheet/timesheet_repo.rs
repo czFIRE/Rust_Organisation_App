@@ -751,19 +751,18 @@ impl TimesheetRepository {
 
             while cur_date <= date_to {
                 let year_and_month = cur_date.into();
-                if date_to_wage_presets.contains_key(&year_and_month) {
-                    continue;
-                }
-                //
+                if !date_to_wage_presets.contains_key(&year_and_month) {
+                    //
                 // todo later: Try to find a preset in `date_to_wage_presets`
                 //             first as its faster than seeking it DB.
                 //
                 let preset_optional
-                    = wage_preset_repo::read_optional_matching_date_db_using_tx(
-                        &mut tx, &cur_date)
-                    .await?;
+                        = wage_preset_repo::read_optional_matching_date_db_using_tx(
+                            &mut tx, &cur_date)
+                        .await?;
 
-                date_to_wage_presets.insert(year_and_month, preset_optional);
+                    date_to_wage_presets.insert(year_and_month, preset_optional);
+                }
 
                 if let Some(cur_date_incremented)
                     = cur_date.checked_add_months(Months::new(1)) {
