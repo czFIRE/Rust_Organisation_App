@@ -133,6 +133,7 @@ impl UserRepository {
             WHERE deleted_at IS NULL
               AND name = COALESCE($1, name)
               AND email = COALESCE($2, email)
+            ORDER BY name
             "#,
             filter.name,
             filter.email

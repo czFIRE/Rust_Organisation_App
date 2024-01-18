@@ -81,7 +81,6 @@ impl TimesheetRepository {
         .fetch_one(tx.deref_mut())
         .await?;
 
-        // ToDo: This can probably be done better, but we need the event there as well.
         let timesheet = sqlx::query_as!(
             TimesheetWithEvent,
             r#"
@@ -265,6 +264,7 @@ impl TimesheetRepository {
             FROM timesheet 
              JOIN event ON timesheet.event_id = event.id
             WHERE timesheet.deleted_at IS NULL
+            ORDER BY timesheet.start_date
             LIMIT $1 OFFSET $2;
             "#,
             data.limit,
@@ -318,6 +318,7 @@ impl TimesheetRepository {
             WHERE user_id = $1
               AND company_id = $2
               AND timesheet.deleted_at IS NULL
+            ORDER BY timesheet.start_date
             LIMIT $3 OFFSET $4;
             "#,
             user_id,
