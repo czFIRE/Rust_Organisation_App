@@ -1,0 +1,40 @@
+<div
+    id="user-search"
+    class="bg-foreground1 flex flex-col rounded-md w-full items-center m-5 p-2"
+  >
+    <h3 class="font-mono text-txthl text-2xl font-bold">Find Users</h3>
+    <form
+      hx-get="/user"
+      hx-swap="innerHTML"
+      hx-target="#user-results"
+      class="flex flex-col space-y-1 w-10/12 p-2 items-center bg-foreground1 rounded-md"
+    >
+      <div class="flex flex-col">
+        <label for="name" class="font-mono text-txt text-lg">Name</label>
+        <input
+          id="name"
+          name="name"
+          class="font-mono text-txt text-lg bg-foreground2 p-1 rounded-md"
+        />
+      </div>
+      <div class="flex flex-col">
+        <label for="email" class="font-mono text-txt text-lg">Email</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          class="font-mono text-txt text-lg bg-foreground2 p-1 rounded-md"
+        />
+      </div>
+      <div class="flex flex-col">
+        <button
+          type="submit"
+          class="font-mono text-txthl text-lg bg-foreground2 p-1 rounded-md"
+        >
+          Search
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div id="user-results"></div>

@@ -4,7 +4,8 @@ use crate::{
     errors::{handle_database_error, parse_error},
     repositories::user::models::{NewUser, UserData, UsersQuery},
     templates::user::{
-        UserEditTemplate, UserInfo, UserInfoTemplate, UserLiteTemplate, UserTemplate, UsersTemplate,
+        AdminTemplate, UserEditTemplate, UserInfo, UserInfoTemplate, UserLiteTemplate,
+        UserTemplate, UsersTemplate,
     },
     utils::format_check::check::check_email_validity,
 };
@@ -283,6 +284,21 @@ pub async fn delete_user(
     }
 
     HttpResponse::NoContent().finish()
+}
+
+#[get("/admin")]
+pub async fn open_admin_panel() -> HttpResponse {
+    let template = AdminTemplate {
+        title: "Admin Panel".to_string(),
+    };
+
+    let body = template.render();
+    if body.is_err() {
+        return HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+    }
+
+    HttpResponse::Ok().body(body.expect("Should be valid."))
 }
 
 //TODO: Once file store/load is done.

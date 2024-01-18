@@ -1,0 +1,209 @@
+<div
+    id="company-creation"
+    class="bg-foreground1 rounded-md w-full flex flex-col items-center m-5 p-5"
+  >
+    <h2 class="font-mono font-bold text-txthl text-4xl">Company Creation</h2>
+    <form
+      class="grid grid-cols-3 grid-rows-7 gap-4"
+      hx-post="/company"
+      hx-swap="innerHTML"
+      hx-target="#content"
+      hx-ext="json-enc"
+    >
+      <div class="flex flex-col col-start-1 col-end-1 row-start-1 row-end-1">
+        <label for="name" class="font-mono text-txt text-lg">Name</label>
+        <input
+          required
+          id="name"
+          name="name"
+          class="font-mono text-txt text-lg bg-foreground2 rounded-md p-1"
+        />
+      </div>
+      <div
+        class="flex flex-col col-start-2 col-span-2 col-end-3 row-start-1 row-end-1 w-full"
+      >
+        <label for="description" class="font-mono text-txt text-lg"
+          >Description</label
+        >
+        <input
+          id="description"
+          name="description"
+          class="font-mono w-full text-txt text-lg bg-foreground2 rounded-md p-1"
+        />
+      </div>
+      <div
+        class="flex flex-col col-start-1 col-span-1 col-end-1 row-start-2 row-end-2"
+      >
+        <label for="website" class="font-mono text-txt text-lg">Website</label>
+        <input
+          type="url"
+          id="website"
+          name="website"
+          class="font-mono text-txt text-lg bg-foreground2 rounded-md p-1"
+        />
+      </div>
+      <div
+        class="flex flex-col col-start-2 col-span-1 col-end-2 row-start-2 row-end-2"
+      >
+        <label for="phone" class="font-mono text-txt text-lg">Phone</label>
+        <input
+          required
+          id="phone"
+          name="phone"
+          type="tel"
+          class="font-mono text-txt text-lg bg-foreground2 rounded-md p-1"
+        />
+      </div>
+      <div
+        class="flex flex-col col-start-3 col-span-1 col-end-3 row-start-2 row-end-2"
+      >
+        <label for="email" class="font-mono text-txt text-lg">Email</label>
+        <input
+          required
+          id="email"
+          name="email"
+          type="email"
+          class="font-mono text-txt text-lg bg-foreground2 rounded-md p-1"
+        />
+      </div>
+      <div
+        class="flex flex-col col-start-1 col-span-1 col-end-1 row-start-3 row-end-3"
+      >
+        <label for="crn" class="font-mono text-txt text-lg">CRN</label>
+        <input
+          required
+          id="crn"
+          name="crn"
+          type="text"
+          class="font-mono text-txt text-lg bg-foreground2 rounded-md p-1"
+        />
+      </div>
+      <div
+        class="flex flex-col col-start-2 col-span-1 col-end-2 row-start-3 row-end-3"
+      >
+        <label for="vatin" class="font-mono text-txt text-lg">VATIN</label>
+        <input
+          required
+          id="vatin"
+          name="vatin"
+          type="text"
+          class="font-mono text-txt text-lg bg-foreground2 rounded-md p-1"
+        />
+      </div>
+      <div
+        class="flex flex-col col-start-1 col-span-3 col-end-3 row-start-4 row-end-4"
+      >
+        <p class="text-txthl text-lg font-mono font-bold">
+          Address Information
+        </p>
+      </div>
+      <div
+        class="flex flex-col col-start-1 col-span-1 col-end-1 row-start-5 row-end-5"
+      >
+        <label for="country" class="font-mono text-txt text-lg">Country</label>
+        <input
+          required
+          id="country"
+          name="country"
+          type="text"
+          class="font-mono text-txt text-lg bg-foreground2 rounded-md p-1"
+        />
+      </div>
+      <div
+        class="flex flex-col col-start-2 col-span-1 col-end-2 row-start-5 row-end-5"
+      >
+        <label for="region" class="font-mono text-txt text-lg">Region</label>
+        <input
+          required
+          id="region"
+          name="region"
+          type="text"
+          class="font-mono text-txt text-lg bg-foreground2 rounded-md p-1"
+        />
+      </div>
+      <div
+        class="flex flex-col col-start-3 col-span-1 col-end-3 row-start-5 row-end-5"
+      >
+        <label for="city" class="font-mono text-txt text-lg">City</label>
+        <input
+          required
+          id="city"
+          name="city"
+          type="text"
+          class="font-mono text-txt text-lg bg-foreground2 rounded-md p-1"
+        />
+      </div>
+      <div
+        class="flex flex-col col-start-1 col-span-1 col-end-1 row-start-6 row-end-6"
+      >
+        <label for="street" class="font-mono text-txt text-lg">Street</label>
+        <input
+          required
+          id="street"
+          name="street"
+          type="text"
+          class="font-mono text-txt text-lg bg-foreground2 rounded-md p-1"
+        />
+      </div>
+      <div
+        class="flex flex-col col-start-2 col-span-1 col-end-2 row-start-6 row-end-6"
+      >
+        <label for="number" class="font-mono text-txt text-lg"
+          >Address Number</label
+        >
+        <input
+          required
+          id="number"
+          name="number"
+          type="text"
+          class="font-mono text-txt text-lg bg-foreground2 rounded-md p-1"
+        />
+      </div>
+      <div
+        class="flex flex-col col-start-3 col-span-1 col-end-3 row-start-6 row-end-6"
+      >
+        <label for="postal_code" class="font-mono text-txt text-lg"
+          >Postal Code</label
+        >
+        <input
+          required
+          id="postal_code"
+          name="postal_code"
+          type="text"
+          class="font-mono text-txt text-lg bg-foreground2 rounded-md p-1"
+        />
+      </div>
+      <div
+        class="flex flex-col col-start-1 col-span-3 col-end-3 row-start-7 row-end-7"
+      >
+        <p class="text-txthl text-lg font-mono font-bold">First Employee</p>
+      </div>
+      <div
+        class="flex flex-col col-start-1 col-span-3 col-end-3 row-start-8 row-end-8 w-full"
+      >
+        <label for="employee_id" class="font-mono text-txt text-lg"
+          >User ID</label
+        >
+        <input
+          required
+          id="employee_id"
+          name="employee_id"
+          type="text"
+          pattern="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+          minlength="36"
+          maxlength="36"
+          class="font-mono text-txt text-lg bg-foreground2 rounded-md p-1 w-full"
+        />
+      </div>
+      <div
+        class="flex flex-col col-start-1 col-span-3 col-end-3 row-start-7 row-end-7"
+      >
+        <button
+          type="input"
+          class="bg-foreground2 font-mono text-lg text-txthl rounded-md p-1"
+        >
+          Create Company
+        </button>
+      </div>
+    </form>
+  </div>

@@ -33,6 +33,7 @@ pub struct NewCompanyData {
     postal_code: String,
     phone: String,
     email: String,
+    employee_id: Uuid,
 }
 
 #[derive(Deserialize, Clone)]
@@ -145,12 +146,6 @@ fn validate_creation_data(data: NewCompanyData) -> bool {
         return false;
     }
 
-    if (data.description.is_some() && data.description.unwrap().is_empty())
-        || (data.website.is_some() && data.website.unwrap().is_empty())
-    {
-        return false;
-    }
-
     if !check_email_validity(data.email) {
         return false;
     }
@@ -187,7 +182,9 @@ pub async fn create_company(
         street_number: data.number.clone(),
     };
 
-    let result = company_repo.create(company_data, address).await;
+    let result = company_repo
+        .create(company_data, address, data.employee_id)
+        .await;
 
     if let Ok(company) = result {
         let template: CompanyTemplate = company.into();

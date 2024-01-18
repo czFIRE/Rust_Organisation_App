@@ -123,3 +123,9 @@ impl From<User> for UserInfo {
 pub struct UserInfoTemplate {
     pub user_info_vec: Vec<UserInfo>,
 }
+
+#[derive(Template)]
+#[template(path = "user/admin/admin.html")]
+pub struct AdminTemplate {
+    pub title: String,
+}

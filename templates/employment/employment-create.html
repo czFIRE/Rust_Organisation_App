@@ -1,228 +1,153 @@
-<div id="employment-create"
-     class="flex
-            flex-col
-            space-y-10
-            items-center
-            w-full">
-    <h2 class="font-mono
-               text-txthl
-               text-4xl">Create New Employment</h2>
-    <form hx-post="/employment"
-          hx-swap="innerHTML"
-          hx-target="#content"
-          hx-ext="json-enc"
-          class="flex
-                 flex-col
-                 space-y-5
-                 w-10/12
-                 p-5
-                 items-center
-                 bg-foreground1
-                 rounded-md">
-        <div class="flex
-                    flex-row
-                    space-x-2">
-            <label for="user_id"
-                   class="font-mono
-                          text-lg
-                          text-txt">User ID:</label>
-            <input id="user_id"
-                   name="user_id"
-                   required
-                   pattern="[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}"
-                   class="font-mono
-                          text-lg
-                          text-txt
-                          bg-foreground2
-                          p-1
-                          rounded-md">
-        </div>
-        <input id="company_id"
-               name="company_id"
-               value="{{ company_id }}"
-               required
-               hidden
-               class="hidden">
-        <input id="manager_id"
-               name="manager_id"
-               value="{{ creator_id }}"
-               required
-               hidden
-               class="hidden">
-        <div class="flex
-                    flex-row
-                    space-x-2">
-            <label for="hourly_wage"
-                   class="font-mono
-                          text-lg
-                          text-txt">Hourly Wage:</label>
-            <input id="hourly_wage"
-                   name="hourly_wage"
-                   required
-                   type="number"
-                   min="0"
-                   step="0.01"
-                   class="font-mono
-                          text-lg
-                          text-txt
-                          bg-foreground2
-                          p-1
-                          rounded-md">
-        </div>
-        <div class="flex
-                    flex-row
-                    space-x-2">
-            <label for="start_date"
-                   class="font-mono
-                          text-lg
-                          text-txt">Start Date:</label>
-            <input id="start_date"
-                   name="start_date"
-                   required
-                   type="date"
-                   class="font-mono
-                          text-lg
-                          text-txt
-                          bg-foreground2
-                          p-1
-                          rounded-md">
-        </div>
-        <div class="flex
-                    flex-row
-                    space-x-2">
-            <label for="end_date"
-                   class="font-mono
-                          text-lg
-                          text-txt">End Date:</label>
-            <input id="end_date"
-                   name="end_date"
-                   required
-                   type="date"
-                   class="font-mono
-                          text-lg
-                          text-txt
-                          bg-foreground2
-                          p-1
-                          rounded-md">
-        </div>
-        <div class="flex
-                    flex-row
-                    space-x-2">
-            <label for="description"
-                   class="font-mono
-                          text-lg
-                          text-txt">Job Description:</label>
-            <input id="description"
-                   name="description"
-                   type="text"
-                   class="font-mono
-                          text-lg
-                          text-txt
-                          bg-foreground2
-                          p-1
-                          rounded-md">
-        </div>
-        <div class="flex
-                    flex-row
-                    space-x-2">
-            <label for="employment_type"
-                   class="font-mono
-                          text-lg
-                          text-txt">Employment Type:</label>
-            <select id="employment_type"
-                    name="employment_type"
-                    class="font-mono
-                           text-lg
-                           text-txt
-                           bg-foreground2">
-                <option value="Hpp">HPP</option>
-                <option value="Dpp">DPP</option>
-                <option value="Dpc">DPC</option>
-            </select>
-        </div>
-        <div class="flex
-                    flex-row
-                    space-x-2">
-            <label for="description"
-                   class="font-mono
-                          text-lg
-                        text-txt
-                        bg-foreground2"">Employee Level:</label>
-            <select id="level"
-                    name="level"
-                    class="font-mono
-                           text-lg
-                         text-txt
-                         bg-foreground2">
-                <option value="Basic">Basic</option>
-                <option value="Manager">Manager</option>
-                {% if creator_level == EmployeeLevel::CompanyAdministrator %}
-                    <option value="Company Administrator">Company Administrator</option>
-                {% endif %}
-            </select>
-        </div>
-        <button class="font-mono
-                       text-lg
-                       text-txthl
-                       bg-foreground2
-                       rounded-md
-                       p-1">Create Employment</button>
+<div
+  id="employment-create"
+  class="flex flex-col space-y-3 items-center w-full"
+>
+  <div
+    id="employee-creation"
+    class="bg-foreground1 rounded-md w-full flex flex-col space-y-2 items-center m-5 p-5"
+  >
+    <h2 class="font-mono text-txthl text-3xl">Create New Employment</h2>
+    <form
+      hx-post="/employment"
+      hx-swap="innerHTML"
+      hx-target="#content"
+      hx-ext="json-enc"
+      class="grid grid-cols-4 grid-rows-4 gap-4"
+    >
+      <div
+        class="flex flex-col col-start-1 col-span-2 col-end-2 row-start-1 row-end-1 w-full"
+      >
+        <label for="user_id" class="font-mono text-lg text-txt">User ID</label>
+        <input
+          id="user_id"
+          name="user_id"
+          required
+          minlength="36"
+          maxlength="36"
+          pattern="^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$"
+          class="font-mono text-lg text-txt bg-foreground2 p-1 rounded-md w-full"
+        />
+      </div>
+      <div
+        class="flex flex-col col-start-3 col-span-2 col-end-4 row-start-1 row-end-1 w-full"
+      >
+        <label for="description" class="font-mono text-lg text-txt"
+          >Job Description</label
+        >
+        <input
+          id="description"
+          name="description"
+          required
+          class="font-mono text-lg text-txt bg-foreground2 p-1 rounded-md w-full"
+        />
+      </div>
+      <div
+        class="flex flex-col col-start-1 col-span-1 col-end-1 row-start-2 row-end-2"
+      >
+        <label for="start_date" class="font-mono text-lg text-txt"
+          >Start Date</label
+        >
+        <input
+          id="start_date"
+          name="start_date"
+          required
+          type="date"
+          class="font-mono text-lg text-txt bg-foreground2 p-1 rounded-md"
+        />
+      </div>
+      <div
+        class="flex flex-col col-start-2 col-span-1 col-end-2 row-start-2 row-end-2"
+      >
+        <label for="end_date" class="font-mono text-lg text-txt"
+          >End Date</label
+        >
+        <input
+          id="end_date"
+          name="end_date"
+          required
+          type="date"
+          class="font-mono text-lg text-txt bg-foreground2 p-1 rounded-md"
+        />
+      </div>
+      <div
+        class="flex flex-col col-start-1 col-span-1 col-end-1 row-start-3 row-end-3"
+      >
+        <label for="description" class="font-mono text-lg text-txt"
+          >Employee Level</label
+        >
+        <select
+          id="level"
+          name="level"
+          class="font-mono text-lg text-txt bg-foreground2 rounded-md p-1"
+        >
+          <option value="Basic">Basic</option>
+          <option value="Manager">Manager</option>
+          {% if creator_level == EmployeeLevel::CompanyAdministrator %}
+          <option value="Company Administrator">Company Administrator</option>
+          {% endif %}
+        </select>
+      </div>
+      <div
+        class="flex flex-col col-start-2 col-span-1 col-end-2 row-start-3 row-end-3"
+      >
+        <label for="employment_type" class="font-mono text-lg text-txt"
+          >Employment Type:</label
+        >
+        <select
+          id="employment_type"
+          name="employment_type"
+          class="font-mono text-lg text-txt bg-foreground2 rounded-md p-1"
+        >
+          <option value="Hpp">HPP</option>
+          <option value="Dpp">DPP</option>
+          <option value="Dpc">DPC</option>
+        </select>
+      </div>
+      <div
+        class="flex flex-col col-start-3 col-span-2 col-end-4 row-start-3 row-end-3 w-full"
+      >
+        <label for="hourly_wage" class="font-mono text-lg text-txt"
+          >Hourly Wage (CZK)</label
+        >
+        <input
+          id="hourly_wage"
+          name="hourly_wage"
+          required
+          type="number"
+          min="0"
+          step="0.01"
+          class="font-mono text-lg text-txt bg-foreground2 p-1 rounded-md w-full"
+        />
+      </div>
+      <input
+        id="company_id"
+        name="company_id"
+        value="{{ company_id }}"
+        required
+        hidden
+        class="hidden"
+      />
+      <input
+        id="manager_id"
+        name="manager_id"
+        value="{{ creator_id }}"
+        required
+        hidden
+        class="hidden"
+      />
+      <div
+        class="flex flex-col col-start1 col-span-4 col-end-4 row-start-4 row-end-4"
+      >
+        <button
+          class="font-mono text-lg text-txthl bg-foreground2 rounded-md p-1"
+        >
+          Create Employment
+        </button>
+      </div>
     </form>
+  </div>
 
-    <h3 class="font-mono
-               text-txthl
-               text-xl">Find Users</h3>
+  {% include "../user/user-search.html" %}
 
-    <form hx-get="/user"
-          hx-swap="innerHTML"
-          hx-target="#user-results"
-          class="flex
-                 flex-row
-                 space-x-5
-                 w-10/12
-                 p-5
-                 items-center
-               bg-foreground1
-                 rounded-md">
-        <div>
-            <label for="name"
-                   class="font-mono
-                          text-txt
-                          text-lg">Name:</label>
-            <input id="name"
-                   name="name"
-                   class="font-mono
-                          text-txt
-                          text-lg
-                          bg-foreground2
-                          p-1
-                          rounded-md">
-        </div>
-        <div>
-            <label for="email"
-                   class="font-mono
-                          text-txt
-                          text-lg">Email:</label>
-            <input id="email"
-                   name="email"
-                   type="email"
-                   class="font-mono
-                          text-txt
-                          text-lg
-                          bg-foreground2
-                          p-1
-                          rounded-md">
-        </div>
-        <button type="submit"
-                class="font-mono
-                       text-txthl
-                       text-lg
-                       bg-foreground2
-                       p-1
-                       rounded-md">Search</button>
-    </form>
-    <div id="user-results">
-
-    </div>
-    <button hx-get=""></button>
+  <div id="user-results"></div>
 </div>

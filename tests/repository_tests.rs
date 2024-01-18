@@ -342,7 +342,7 @@ pub mod company_repo_tests {
     use sqlx::PgPool;
     use uuid::uuid;
 
-    use crate::test_constants;
+    use crate::test_constants::{self, USER0_ID};
 
     #[sqlx::test(fixtures("companies"), migrations = "migrations/no_seed")]
     async fn create_company_test(pool: PgPool) -> DbResult<()> {
@@ -370,7 +370,7 @@ pub mod company_repo_tests {
         };
 
         let new_company = company_repo
-            .create(company_data.clone(), address_data.clone())
+            .create(company_data.clone(), address_data.clone(), USER0_ID)
             .await
             .expect("Create should succeed");
 

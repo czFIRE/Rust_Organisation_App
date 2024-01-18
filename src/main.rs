@@ -40,6 +40,7 @@ use crate::handlers::timesheet::open_timesheet_for_review;
 use crate::handlers::timesheet::toggle_work_day_edit_mode;
 use crate::handlers::timesheet::update_work_day;
 use crate::handlers::user::get_users;
+use crate::handlers::user::open_admin_panel;
 use crate::handlers::user::toggle_user_edit;
 use crate::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
 use crate::repositories::comment::comment_repo::CommentRepository;
@@ -234,6 +235,7 @@ async fn main() -> Result<()> {
             .service(get_timesheets_for_review)
             .service(get_expected_wage_calculation)
             .service(open_sheet_submit_page)
+            .service(open_admin_panel)
             // Temporary
             .service(get_users_login)
             // For serving css and static files overall

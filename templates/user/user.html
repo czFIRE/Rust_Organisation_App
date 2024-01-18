@@ -62,6 +62,11 @@
     <div class="space-x-5 col-span-4 flex flex-row items-end align-middle">
         <input hidden class="invisible" id="user_id" name="user_id" value="{{ id }}">
         <input hidden class="invisible" id="misc_info" name="misc_info" value="">
+        {% if role == UserRole::Admin %}
+        <button hx-get="/admin" hx-target="#content">
+            <p class="font-mono text-xl text-txthl">Administration</p>
+        </button>
+        {% endif %}
         <button hx-get="/event" hx-target="#content">
             <p class="font-mono text-xl text-txthl">Events</p>
         </button>
