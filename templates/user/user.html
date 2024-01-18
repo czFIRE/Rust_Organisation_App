@@ -1,28 +1,48 @@
-<div id="user" class="flex flex-col space-y-5 items-center">
+<div id="user" class="flex flex-col space-y-5 items-center w-full">
   <div id="title">
     <h2 class="col-span-4 font-mono text-4xl font-extrabold text-txthl">
       My Account
     </h2>
   </div>
-  <div id="user-content" class="flex flex-row space-x-10">
-    <div class="flex flex-row space-x-10">
-      <div class="flex flex-col space-y-5">
-        <p class="font-mono text-xl text-txt"><b>Name:</b> {{ name }}</p>
-        <p class="font-mono text-xl text-txt"><b>Email:</b> {{ email }}</p>
-        <p class="font-mono text-xl text-txt">
-          <b>Created At</b> {{ created_at }}
-        </p>
-      </div>
-      <div class="flex flex-col space-y-5">
-        <p class="font-mono text-xl text-txt"><b>Birthdate:</b> {{ birth }}</p>
-        <p class="font-mono text-xl text-txt"><b>Gender:</b> {{ gender }}</p>
-        <p class="font-mono text-xl text-txt">
-          <b>Edited At:</b> {{ edited_at }}
-        </p>
-      </div>
-    </div>
-    <div id="user-img" class="bg-foreground1 w-32 h-32 rounded-sm">
-      <img src="{{ avatar_url }}" class="rounded-sm object-fill" />
+  <div id="user-content" class="flex flex-row gap-4 items-center">
+    <div class="flex flex-col space-y-4">
+        <div class="flex flex-row space-x-4">
+            <div id="user-img" class="w-32 h-32 bg-foreground1 rounded-md">
+                <img src="{{ avatar_url }}" class="rounded-md object-fill" />
+            </div>
+            <div class="flex flex-col space-y-4">
+                <div class="flex flex-row space-x-4">
+                    <div class="flex flex-col">
+                        <p class="font-mono text-lg text-txthl">Name</p>
+                        <p class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md">{{ name }}</p>
+                    </div>
+                    <div class="flex flex-col">
+                        <p class="font-mono text-lg text-txthl">Birth Date</p>
+                        <p class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md">{{ birth.format("%d.%m.%Y").to_string() }}</p>
+                    </div>
+                </div>  
+                <div class="flex flex-row space-x-4">
+                    <div class="flex flex-col">
+                        <p class="font-mono text-lg text-txthl">Email</p>
+                        <p class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md">{{ email }}</p>
+                    </div>
+                    <div class="flex flex-col">
+                        <p class="font-mono text-lg text-txthl">Gender</p>
+                        <p class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md">{{ gender }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex flex-row space-x-4">
+            <div class="flex flex-col">
+                <p class="font-mono text-lg text-txthl">Created At</p>
+                <p class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md">{{ created_at.format("%d.%m.%Y %H:%M:%S").to_string() }}</p>
+            </div>
+            <div class="flex flex-col">
+                <p class="font-mono text-lg text-txthl">Last Edited At</p>
+                <p class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md">{{ edited_at.format("%d.%m.%Y %H:%M:%S").to_string() }}</p>
+            </div>
+        </div>
     </div>
   </div>
   <div id="user-controls" class="flex flex-row space-x-10">
@@ -74,7 +94,7 @@
 <nav
   id="topbar"
   hx-swap-oob="true"
-  class="grid grid-cols-10 gap-4 bg-foreground1 py-3 w-full"
+  class="flex flex-row justify-between items-center bg-foreground1 p-3"
 >
   <h1
     class="col-start-1 col-span-3 col-end-4 font-mono text-4xl font-extrabold text-txt ml-5"
@@ -124,6 +144,22 @@
           stroke-linecap="round"
           stroke-linejoin="round"
           d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+        />
+      </svg>
+    </button>
+    <button title="Log Out" hx-confirm="Are you sure you want to log out?">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="w-8 h-8 text-rej"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15"
         />
       </svg>
     </button>
