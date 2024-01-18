@@ -1,5 +1,6 @@
 use crate::models::{ApprovalStatus, EmploymentContract};
 use crate::repositories::wage_preset::models::WagePreset;
+use crate::utils::year_and_month::YearAndMonth;
 use chrono::{NaiveDate, NaiveDateTime};
 use serde::Deserialize;
 use sqlx::prelude::FromRow;
@@ -96,9 +97,9 @@ pub struct TimesheetsWithWorkdaysExtended {
     pub employment_type: EmploymentContract,
 
     //
-    // A hashmap of date in `yyyy-mm` format to a `WagePreset` elems.
+    // A hashmap mapping date to `WagePreset` elems.
     //
-    // Note: Empty values means no matching `wage preset` was found.
+    // Note: Empty value means no matching `wage preset` was found.
     //
-    pub date_to_wage_presets: HashMap<String, Option<WagePreset>>,
+    pub date_to_wage_presets: HashMap<YearAndMonth, Option<WagePreset>>,
 }

@@ -12,6 +12,8 @@ use crate::repositories::wage_preset::{
 
 use crate::repositories::employment::employment_repo;
 
+use crate::utils::year_and_month::YearAndMonth;
+
 use std::collections::HashMap;
 use chrono::{Duration, NaiveDate, Datelike, Months};
 use sqlx::postgres::PgPool;
@@ -726,7 +728,7 @@ impl TimesheetRepository {
                 &mut tx, user_id, company_id)
             .await?;
 
-        let mut date_to_wage_presets = HashMap::<String, Option<WagePreset>>::new();
+        let mut date_to_wage_presets = HashMap::<YearAndMonth, Option<WagePreset>>::new();
 
         //
         // Go through each timesheet and compute which wage presets it requires.
@@ -748,8 +750,8 @@ impl TimesheetRepository {
             let mut cur_date = date_from.with_day(1).unwrap();
 
             while cur_date <= date_to {
-                let yyyy_mm = cur_date.format("%Y-%m").to_string();
-                if date_to_wage_presets.contains_key(&yyyy_mm) {
+                let year_and_month = cur_date.into();
+                if date_to_wage_presets.contains_key(&year_and_month) {
                     continue;
                 }
                 //
@@ -761,7 +763,7 @@ impl TimesheetRepository {
                         &mut tx, &cur_date)
                     .await?;
 
-                date_to_wage_presets.insert(yyyy_mm.clone(), preset_optional);
+                date_to_wage_presets.insert(year_and_month, preset_optional);
 
                 if let Some(cur_date_incremented)
                     = cur_date.checked_add_months(Months::new(1)) {
