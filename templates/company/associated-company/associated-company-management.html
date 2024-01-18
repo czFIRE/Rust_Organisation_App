@@ -55,6 +55,19 @@
     </form>
   </div>
 
+  <div class="flex flex-row items-center w-full">
+    <button
+      hx-get="/event/{{ event_id}}/staff-panel/{user_id}"
+      hx-swap="innerHTML"
+      hx-target="#content"
+      hx-vals='js:{"user_id": document.getElementById("user_id").value}'
+      hx-ext="path-params"
+      class="bg-foreground rounded-md p-1 text-txthl text-lg font-mono"
+    >
+      Back
+    </button>
+  </div>
+
   <div>
     <div
       id="associated-companies-editable"
@@ -62,6 +75,6 @@
       hx-trigger="load"
     ></div>
   </div>
-  
+
   {% include "../company-search.html" %}
 </div>
