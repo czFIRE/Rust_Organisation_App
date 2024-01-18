@@ -127,7 +127,10 @@ pub async fn create_event_comment(
     if let Ok(comment) = comments_result {
         let comments: Vec<SingleComment> =
             comment.into_iter().map(|comment| comment.into()).collect();
-        let template = CommentsTemplate { requester_id: new_comment.author_id, comments };
+        let template = CommentsTemplate {
+            requester_id: new_comment.author_id,
+            comments,
+        };
         let body = template.render();
         if body.is_err() {
             return HttpResponse::InternalServerError()
@@ -234,7 +237,10 @@ pub async fn create_task_comment(
     if let Ok(comment) = comments_result {
         let comments: Vec<SingleComment> =
             comment.into_iter().map(|comment| comment.into()).collect();
-            let template = CommentsTemplate { requester_id: new_comment.author_id, comments };
+        let template = CommentsTemplate {
+            requester_id: new_comment.author_id,
+            comments,
+        };
         let body = template.render();
         if body.is_err() {
             return HttpResponse::InternalServerError()

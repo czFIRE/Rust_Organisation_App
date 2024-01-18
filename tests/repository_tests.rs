@@ -981,6 +981,7 @@ pub mod event_repo_tests {
                 start_date: Some(NaiveDate::from_ymd_opt(2025, 9, 15).unwrap()),
                 end_date: Some(NaiveDate::from_ymd_opt(2025, 9, 16).unwrap()),
                 accepts_staff: None,
+                avatar_url: None,
             };
 
             let updated_event = event_repo
@@ -1012,6 +1013,7 @@ pub mod event_repo_tests {
                 start_date: None,
                 end_date: None,
                 accepts_staff: None,
+                avatar_url: None,
             };
 
             let _updated_event = event_repo
@@ -1032,6 +1034,7 @@ pub mod event_repo_tests {
                 start_date: None,
                 end_date: None,
                 accepts_staff: None,
+                avatar_url: None,
             };
 
             let _updated_event = event_repo
@@ -1067,6 +1070,7 @@ pub mod event_repo_tests {
                 start_date: None,
                 end_date: None,
                 accepts_staff: None,
+                avatar_url: None,
             };
 
             let _updated_event = event_repo

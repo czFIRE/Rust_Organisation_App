@@ -3,7 +3,12 @@ use std::str::FromStr;
 use crate::{
     repositories::employment::employment_repo::EmploymentRepository,
     templates::company::CompaniesInfoTemplate,
+    utils::image_storage::{
+        img_manipulation::{remove_image, store_image},
+        models::{ImageCategory, UploadForm, DEFAULT_COMPANY_IMAGE, MAX_FILE_SIZE},
+    },
 };
+use actix_multipart::form::MultipartForm;
 use actix_web::{delete, get, http, patch, post, put, web, HttpResponse};
 use askama::Template;
 use serde::Deserialize;
@@ -433,18 +438,107 @@ pub async fn get_company_edit_mode(
     handle_database_error(result.expect_err("Should be error."))
 }
 
-//TODO: Once file store/load is done.
-#[get("/company/{company_id}/avatar")]
-pub async fn get_company_avatar(_id: web::Path<String>) -> HttpResponse {
-    todo!()
-}
-
 #[put("/company/{company_id}/avatar")]
-pub async fn upload_company_avatar(_id: web::Path<String>) -> HttpResponse {
-    todo!()
+pub async fn upload_company_avatar(
+    company_id: web::Path<String>,
+    MultipartForm(form): MultipartForm<UploadForm>,
+    company_repo: web::Data<CompanyRepository>,
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(company_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let parsed_id = id_parse.expect("Should be okay.");
+
+    if form.file.size == 0 || form.file.size > MAX_FILE_SIZE {
+        return HttpResponse::BadRequest().body("Incorrect file size. The limit is 10MB.");
+    }
+
+    if form.file.content_type.is_none()
+        || form
+            .file
+            .content_type
+            .clone()
+            .expect("Should be valid")
+            .subtype()
+            != "jpeg"
+    {
+        return HttpResponse::BadRequest().body("Invalid file type.");
+    }
+
+    let image_res = store_image(parsed_id, ImageCategory::CompanyImage, form.file);
+    if image_res.is_err() {
+        return HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+    }
+    let image_path = image_res.expect("Should be valid.");
+    let data = CompanyData {
+        name: None,
+        email: None,
+        website: None,
+        description: None,
+        phone: None,
+        crn: None,
+        vatin: None,
+        avatar_url: Some(image_path),
+    };
+
+    let address = AddressUpdateData {
+        country: None,
+        region: None,
+        city: None,
+        postal_code: None,
+        street: None,
+        street_number: None,
+    };
+
+    let result = company_repo.update(parsed_id, data, address).await;
+    if result.is_err() {
+        return handle_database_error(result.expect_err("Should be an error."));
+    }
+    HttpResponse::Ok().body("New image uploaded!")
 }
 
 #[delete("/company/{company_id}/avatar")]
-pub async fn remove_company_avatar(_id: web::Path<String>) -> HttpResponse {
-    todo!()
+pub async fn remove_company_avatar(
+    company_id: web::Path<String>,
+    company_repo: web::Data<CompanyRepository>,
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(company_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let parsed_id = id_parse.expect("Should be okay.");
+    if remove_image(parsed_id, ImageCategory::CompanyImage).is_err() {
+        return HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+    }
+
+    let data = CompanyData {
+        name: None,
+        email: None,
+        website: None,
+        description: None,
+        phone: None,
+        crn: None,
+        vatin: None,
+        avatar_url: Some(DEFAULT_COMPANY_IMAGE.to_string()),
+    };
+
+    let address = AddressUpdateData {
+        country: None,
+        region: None,
+        city: None,
+        postal_code: None,
+        street: None,
+        street_number: None,
+    };
+
+    let result = company_repo.update(parsed_id, data, address).await;
+    if result.is_err() {
+        return handle_database_error(result.expect_err("Should be an error."));
+    }
+    HttpResponse::Ok().body("Company image deleted.")
 }

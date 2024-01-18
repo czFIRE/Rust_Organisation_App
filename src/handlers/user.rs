@@ -7,8 +7,15 @@ use crate::{
         AdminTemplate, UserEditTemplate, UserInfo, UserInfoTemplate, UserLiteTemplate,
         UserTemplate, UsersTemplate,
     },
-    utils::format_check::check::check_email_validity,
+    utils::{
+        format_check::check::check_email_validity,
+        image_storage::{
+            img_manipulation::{remove_image, store_image},
+            models::{ImageCategory, UploadForm, DEFAULT_USER_IMAGE, MAX_FILE_SIZE},
+        },
+    },
 };
+use actix_multipart::form::MultipartForm;
 use actix_web::{delete, get, http, patch, post, put, web, HttpResponse};
 use askama::Template;
 use chrono::Utc;
@@ -301,18 +308,84 @@ pub async fn open_admin_panel() -> HttpResponse {
     HttpResponse::Ok().body(body.expect("Should be valid."))
 }
 
-//TODO: Once file store/load is done.
-#[get("/user/{user_id}/avatar")]
-pub async fn get_user_avatar(_id: web::Path<String>) -> HttpResponse {
-    todo!()
-}
-
 #[put("/user/{user_id}/avatar")]
-pub async fn upload_user_avatar(_id: web::Path<String>) -> HttpResponse {
-    todo!()
+pub async fn upload_user_avatar(
+    user_id: web::Path<String>,
+    MultipartForm(form): MultipartForm<UploadForm>,
+    user_repo: web::Data<UserRepository>,
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(user_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let parsed_id = id_parse.expect("Should be okay.");
+
+    if form.file.size == 0 || form.file.size > MAX_FILE_SIZE {
+        return HttpResponse::BadRequest().body("Incorrect file size. The limit is 10MB.");
+    }
+
+    if form.file.content_type.is_none()
+        || form
+            .file
+            .content_type
+            .clone()
+            .expect("Should be valid")
+            .subtype()
+            != "jpeg"
+    {
+        return HttpResponse::BadRequest().body("Invalid file type.");
+    }
+
+    let image_res = store_image(parsed_id, ImageCategory::UserImage, form.file);
+    if image_res.is_err() {
+        return HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+    }
+    let image_path = image_res.expect("Should be valid.");
+    let data = UserData {
+        name: None,
+        email: None,
+        birth: None,
+        gender: None,
+        role: None,
+        avatar_url: Some(image_path),
+    };
+    let user_res = user_repo.update_user(parsed_id, data).await;
+    if user_res.is_err() {
+        return handle_database_error(user_res.expect_err("Should be an error."));
+    }
+    HttpResponse::Ok().body("New image uploaded!")
 }
 
 #[delete("/user/{user_id}/avatar")]
-pub async fn remove_user_avatar(_id: web::Path<String>) -> HttpResponse {
-    todo!()
+pub async fn remove_user_avatar(
+    user_id: web::Path<String>,
+    user_repo: web::Data<UserRepository>,
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(user_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let parsed_id = id_parse.expect("Should be okay.");
+    if remove_image(parsed_id, ImageCategory::UserImage).is_err() {
+        return HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+    }
+
+    let data = UserData {
+        name: None,
+        email: None,
+        birth: None,
+        gender: None,
+        role: None,
+        avatar_url: Some(DEFAULT_USER_IMAGE.to_string()),
+    };
+
+    let res = user_repo.update_user(parsed_id, data).await;
+    if res.is_err() {
+        return handle_database_error(res.expect_err("Should be an error."));
+    }
+    HttpResponse::Ok().body("Profile image deleted.")
 }

@@ -77,16 +77,16 @@ use crate::handlers::{
         update_comment,
     },
     company::{
-        create_company, delete_company, get_all_companies, get_company, get_company_avatar,
-        remove_company_avatar, update_company, upload_company_avatar,
+        create_company, delete_company, get_all_companies, get_company, remove_company_avatar,
+        update_company, upload_company_avatar,
     },
     employment::{
         create_employment, delete_employment, get_employment, get_employments_per_user,
         get_subordinates, update_employment,
     },
     event::{
-        create_event, delete_event, get_event, get_event_avatar, get_events, remove_event_avatar,
-        update_event, upload_event_avatar,
+        create_event, delete_event, get_event, get_events, remove_event_avatar, update_event,
+        upload_event_avatar,
     },
     event_staff::{
         create_event_staff, delete_all_rejected_event_staff, delete_event_staff,
@@ -99,8 +99,7 @@ use crate::handlers::{
         update_timesheet,
     },
     user::{
-        create_user, delete_user, get_user, get_user_avatar, remove_user_avatar, update_user,
-        upload_user_avatar,
+        create_user, delete_user, get_user, remove_user_avatar, update_user, upload_user_avatar,
     },
 };
 
@@ -159,7 +158,6 @@ async fn main() -> Result<()> {
             .service(create_user)
             .service(update_user)
             .service(delete_user)
-            .service(get_user_avatar)
             .service(upload_user_avatar)
             .service(remove_user_avatar)
             .service(get_company)
@@ -169,7 +167,6 @@ async fn main() -> Result<()> {
             .service(update_company)
             .service(delete_company)
             .service(get_company_edit_mode)
-            .service(get_company_avatar)
             .service(upload_company_avatar)
             .service(remove_company_avatar)
             .service(get_events)
@@ -177,7 +174,6 @@ async fn main() -> Result<()> {
             .service(create_event)
             .service(update_event)
             .service(delete_event)
-            .service(get_event_avatar)
             .service(upload_event_avatar)
             .service(remove_event_avatar)
             .service(toggle_event_edit_mode)

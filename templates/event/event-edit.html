@@ -90,6 +90,40 @@
     Enable Staff Registration
   </button>
   {% endif %}
+  <div class="flex flex-row space-x-5">
+    <form
+      hx-encoding="multipart/form-data"
+      hx-put="/event/{{ event.id }}/avatar"
+      hx-swap="innerHTML"
+      hx-target="#result-text"
+      class="grid grid-cols-4 grid-rows-1 gap-4 bg-foreground1 rounded-md p-2"
+    >
+      <input
+        type="file"
+        id="file"
+        required
+        name="file"
+        accept="image/jpeg"
+        class="col-start-1 col-end-1 row-start-1 row-end-1 text-txt bg-foreground2"
+      />
+      <button
+        type="submit"
+        class="col-start-2 col-end-2 row-start-1 row-end-1 text-txthl bg-foreground2 rounded-md p-1"
+      >
+        Upload
+      </button>
+    </form>
+    <button
+      hx-delete="/event/{{ event.id }}/avatar"
+      hx-swap="innerHTML"
+      hx-target="#result-text"
+      hx-confirm="Truly delete image?"
+      class="text-rej bg-foreground2 rounded-md p-1"
+    >
+      Delete Image
+    </button>
+    <p id="result-text" class="font-mono text-txt text-lg"></p>
+  </div>
   <button
     hx-get="/event/{{ editor.event_id }}/staff-panel/{{ editor.user.id }}"
     hx-swap="innerHTML"
