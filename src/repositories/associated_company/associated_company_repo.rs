@@ -504,4 +504,25 @@ impl AssociatedCompanyRepository {
 
         Ok(result)
     }
+
+    /*
+     * Actually deletes associated companies marked with deleted_at.
+     * This should only be used by administrators or not at all.
+     * Here, we mainly use it for the API testing, so that created
+     * data is cleaned up.
+     */
+    pub async fn _hard_delete_deleted_associated_companies(&self) -> DbResult<()> {
+        let executor = self.pool.as_ref();
+
+        // Associated Company is a 'stub' table, we can delete
+        // without cascading.
+        sqlx::query!(
+            "DELETE FROM associated_company
+             WHERE deleted_at IS NOT NULL;"
+        )
+        .execute(executor)
+        .await?;
+
+        Ok(())
+    }
 }

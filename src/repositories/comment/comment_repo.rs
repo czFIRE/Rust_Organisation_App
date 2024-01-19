@@ -318,4 +318,17 @@ impl CommentRepository {
 
         Ok(())
     }
+
+    pub async fn _hard_delete_deleted_comments(&self) -> DbResult<()> {
+        let executor = self.pool.as_ref();
+
+        sqlx::query!(
+            "DELETE from comment
+             WHERE deleted_at IS NOT NULL"
+        )
+        .execute(executor)
+        .await?;
+
+        Ok(())
+    }
 }

@@ -386,6 +386,13 @@ BEGIN
         VALUES
         (company0_id, event2_id, 'organizer',
         '2023-06-06 10:38', '2023-06-07 14:30');
+    
+    INSERT INTO associated_company
+        (company_id, event_id, type,
+        created_at, edited_at)
+        VALUES
+        (company2_id, event0_id, 'sponsor',
+        '2023-12-12 12:38', '2023-12-12 12:38');
 
 --------------------------------------------------------------------------------
 

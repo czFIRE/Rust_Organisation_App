@@ -7,7 +7,7 @@ mod api_tests {
     use actix_web::{http, web};
     use actix_web::{test, App};
     use chrono::NaiveDate;
-    use dotenv::dotenv;
+    use organization::common::DbResult;
     use organization::handlers::associated_company::get_all_associated_companies_per_event_and_user;
     use organization::models::{EmployeeLevel, EmploymentContract};
     use organization::repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository;
@@ -56,20 +56,9 @@ mod api_tests {
 
     use regex::Regex;
     use serde_json::json;
-    use sqlx::{Pool, Postgres};
+    use sqlx::PgPool;
     use std::str::{self, FromStr};
     use uuid::Uuid;
-
-    async fn get_db_pool() -> Arc<Pool<Postgres>> {
-        dotenv().ok();
-
-        let database_url =
-            dotenv::var("DATABASE_URL").expect("DATABASE_URL is not set in .env file");
-        let pool = sqlx::PgPool::connect(&database_url)
-            .await
-            .expect("Failed to connect to the database.");
-        Arc::new(pool)
-    }
 
     #[actix_web::test]
     async fn index_get() {
@@ -81,9 +70,9 @@ mod api_tests {
         assert!(res.status().is_success());
     }
 
-    #[actix_web::test]
-    async fn create_patch_delete_user_test() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn create_patch_delete_user_test(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let user_repository = UserRepository::new(arc_pool.clone());
         let user_repo = web::Data::new(user_repository);
 
@@ -174,9 +163,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
-    #[actix_web::test]
-    async fn user_get_existing() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn user_get_existing(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let user_repository = UserRepository::new(arc_pool.clone());
         let user_repo = web::Data::new(user_repository);
 
@@ -195,9 +184,9 @@ mod api_tests {
         assert!(body.contains("dave@null.com"));
     }
 
-    #[actix_web::test]
-    async fn user_get_not_existing() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn user_get_not_existing(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let user_repository = UserRepository::new(arc_pool.clone());
         let user_repo = web::Data::new(user_repository);
 
@@ -212,9 +201,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
-    #[actix_web::test]
-    async fn user_get_invalid_uuid_format() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn user_get_invalid_uuid_format(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let user_repository = UserRepository::new(arc_pool.clone());
         let user_repo = web::Data::new(user_repository);
 
@@ -229,9 +218,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    #[actix_web::test]
-    async fn patch_non_existent_user() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn patch_non_existent_user(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let user_repository = UserRepository::new(arc_pool.clone());
         let user_repo = web::Data::new(user_repository);
 
@@ -251,9 +240,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
-    #[actix_web::test]
-    async fn patch_user_invalid_uuid_format() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn patch_user_invalid_uuid_format(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let user_repository = UserRepository::new(arc_pool.clone());
         let user_repo = web::Data::new(user_repository);
 
@@ -279,9 +268,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    #[actix_web::test]
-    async fn delete_user_invalid_uuid_format() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn delete_user_invalid_uuid_format(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let user_repository = UserRepository::new(arc_pool.clone());
         let user_repo = web::Data::new(user_repository);
 
@@ -302,9 +291,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    #[actix_web::test]
-    async fn get_all_companies_test() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_all_companies_test(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let company_repository = CompanyRepository::new(arc_pool.clone());
         let company_repo = web::Data::new(company_repository);
 
@@ -321,9 +310,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
     }
 
-    #[actix_web::test]
-    async fn get_existing_company_test() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_existing_company_test(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool); //get_db_pool().await;
         let company_repository = CompanyRepository::new(arc_pool.clone());
         let company_repo = web::Data::new(company_repository);
 
@@ -351,11 +340,13 @@ mod api_tests {
         assert!(body.contains("CA"));
         assert!(body.contains("Santa Clara"));
         assert!(body.contains("Augustine Drive"));
+
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_non_existing_company_test() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_non_existing_company_test(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let company_repository = CompanyRepository::new(arc_pool.clone());
         let company_repo = web::Data::new(company_repository);
 
@@ -374,9 +365,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
-    #[actix_web::test]
-    async fn get_company_invalid_uuid_format() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_company_invalid_uuid_format(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let company_repository = CompanyRepository::new(arc_pool.clone());
         let company_repo = web::Data::new(company_repository);
 
@@ -395,9 +386,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    #[actix_web::test]
-    async fn create_update_delete_company_test() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn create_update_delete_company_test(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool); //get_db_pool().await;
         let company_repository = CompanyRepository::new(arc_pool.clone());
         let company_repo = web::Data::new(company_repository);
 
@@ -502,11 +493,13 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn patch_non_existent_company() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn patch_non_existent_company(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let company_repository = CompanyRepository::new(arc_pool.clone());
         let company_repo = web::Data::new(company_repository);
 
@@ -531,9 +524,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
-    #[actix_web::test]
-    async fn patch_company_invalid_uuid_format() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn patch_company_invalid_uuid_format(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let company_repository = CompanyRepository::new(arc_pool.clone());
         let company_repo = web::Data::new(company_repository);
 
@@ -558,9 +551,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    #[actix_web::test]
-    async fn delete_company_invalid_uuid_format() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn delete_company_invalid_uuid_format(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let company_repository = CompanyRepository::new(arc_pool.clone());
         let company_repo = web::Data::new(company_repository);
 
@@ -579,9 +572,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    #[actix_web::test]
-    async fn get_events_test() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_events_test(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let event_repository = EventRepository::new(arc_pool.clone());
         let event_repo = web::Data::new(event_repository);
 
@@ -594,9 +587,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
     }
 
-    #[actix_web::test]
-    async fn get_existing_event() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_existing_event(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let event_repository = EventRepository::new(arc_pool.clone());
         let event_repo = web::Data::new(event_repository);
 
@@ -617,9 +610,9 @@ mod api_tests {
         assert!(body.contains("A legendary music festival"));
     }
 
-    #[actix_web::test]
-    async fn get_non_existent_event() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_non_existent_event(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let event_repository = EventRepository::new(arc_pool.clone());
         let event_repo = web::Data::new(event_repository);
 
@@ -634,9 +627,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
-    #[actix_web::test]
-    async fn get_event_invalid_uuid_format() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_event_invalid_uuid_format(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let event_repository = EventRepository::new(arc_pool.clone());
         let event_repo = web::Data::new(event_repository);
 
@@ -651,9 +644,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    #[actix_web::test]
-    async fn create_update_delete_event_test() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn create_update_delete_event_test(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let event_repository = EventRepository::new(arc_pool.clone());
         let event_repo = web::Data::new(event_repository);
         let employment_repo = web::Data::new(EmploymentRepository::new(arc_pool.clone()));
@@ -730,9 +723,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
-    #[actix_web::test]
-    async fn patch_non_existent_event() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn patch_non_existent_event(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let event_repository = EventRepository::new(arc_pool.clone());
         let event_repo = web::Data::new(event_repository);
 
@@ -756,9 +749,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
-    #[actix_web::test]
-    async fn patch_event_invalid_uuid_format() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn patch_event_invalid_uuid_format(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let event_repository = EventRepository::new(arc_pool.clone());
         let event_repo = web::Data::new(event_repository);
 
@@ -780,9 +773,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    #[actix_web::test]
-    async fn patch_event_empty_data() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn patch_event_empty_data(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let event_repository = EventRepository::new(arc_pool.clone());
         let event_repo = web::Data::new(event_repository);
 
@@ -804,9 +797,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    #[actix_web::test]
-    async fn delete_event_invalid_uuid_format() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn delete_event_invalid_uuid_format(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let event_repository = EventRepository::new(arc_pool.clone());
         let event_repo = web::Data::new(event_repository);
 
@@ -825,9 +818,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    #[actix_web::test]
-    async fn get_all_tasks_per_event() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_all_tasks_per_event(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let repository = TaskRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -846,9 +839,9 @@ mod api_tests {
         assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
     }
 
-    #[actix_web::test]
-    async fn get_all_tasks_per_event_invalid_uuid_format() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_all_tasks_per_event_invalid_uuid_format(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let repository = TaskRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -863,9 +856,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    #[actix_web::test]
-    async fn create_update_delete_task_test() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn create_update_delete_task_test(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let repository = TaskRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
         let assigned_repo = web::Data::new(AssignedStaffRepository::new(arc_pool.clone()));
@@ -967,9 +960,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
-    #[actix_web::test]
-    async fn patch_non_existent_task() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn patch_non_existent_task(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let repository = TaskRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
         let assigned_repo = web::Data::new(AssignedStaffRepository::new(arc_pool.clone()));
@@ -994,9 +987,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
     }
 
-    #[actix_web::test]
-    async fn patch_task_invalid_uuid_format() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn patch_task_invalid_uuid_format(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let repository = TaskRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
         let assigned_repo = web::Data::new(AssignedStaffRepository::new(arc_pool.clone()));
@@ -1021,9 +1014,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    #[actix_web::test]
-    async fn delete_task_invalid_uuid_format() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn delete_task_invalid_uuid_format(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let repository = TaskRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -1037,9 +1030,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    #[actix_web::test]
-    async fn open_event_comments_for_user_test() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn open_event_comments_for_user_test(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let repository = CommentRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
         let staff_repo = web::Data::new(StaffRepository::new(arc_pool.clone()));
@@ -1059,9 +1052,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
     }
 
-    #[actix_web::test]
-    async fn open_event_comments_for_user_invalid_uuid_format() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn open_event_comments_for_user_invalid_uuid_format(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let repository = CommentRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -1081,9 +1074,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    #[actix_web::test]
-    async fn create_update_delete_event_comment() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn create_update_delete_event_comment(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let repository = CommentRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -1162,11 +1155,14 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+
+        let res = repo._hard_delete_deleted_comments().await;
+        assert!(res.is_ok());
     }
 
-    #[actix_web::test]
-    async fn create_event_comment_non_existent_event() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn create_event_comment_non_existent_event(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let repository = CommentRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -1192,9 +1188,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    #[actix_web::test]
-    async fn create_event_comment_invalid_uuid_format() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn create_event_comment_invalid_uuid_format(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
         let repository = CommentRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -1220,9 +1216,9 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    #[actix_web::test]
-    async fn update_comment_invalid_uuid() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn update_comment_invalid_uuid(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let repository = CommentRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -1239,11 +1235,12 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_all_task_comments_test() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_all_task_comments_test(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let repository = CommentRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
         let assigned_repo = web::Data::new(AssignedStaffRepository::new(arc_pool.clone()));
@@ -1260,11 +1257,12 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::OK);
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_all_task_comments_invalid_uuid_format() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_all_task_comments_invalid_uuid_format(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let repository = CommentRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
         let assigned_repo = web::Data::new(AssignedStaffRepository::new(arc_pool.clone()));
@@ -1281,11 +1279,12 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn create_update_delete_task_comment() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn create_update_delete_task_comment(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let repository = CommentRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -1363,11 +1362,15 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+
+        let res = repo._hard_delete_deleted_comments().await;
+        assert!(res.is_ok());
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn create_task_comment_non_existent_task() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn create_task_comment_non_existent_task(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let repository = CommentRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -1389,11 +1392,12 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn create_task_comment_invalid_uuid_format() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn create_task_comment_invalid_uuid_format(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let repository = CommentRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -1416,11 +1420,12 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_employments_per_user_test() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_employments_per_user_test(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let employment_repository = EmploymentRepository::new(arc_pool.clone());
         let employment_repo = web::Data::new(employment_repository);
 
@@ -1440,11 +1445,12 @@ mod api_tests {
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         assert!(body.contains("0465041f-fe64-461f-9f71-71e3b97ca85f"));
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_employments_invalid_uuid_format() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_employments_invalid_uuid_format(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let employment_repository = EmploymentRepository::new(arc_pool.clone());
         let employment_repo = web::Data::new(employment_repository);
 
@@ -1461,11 +1467,12 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_employment_test() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_employment_test(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let employment_repository = EmploymentRepository::new(arc_pool.clone());
         let employment_repo = web::Data::new(employment_repository);
 
@@ -1486,11 +1493,12 @@ mod api_tests {
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         assert!(body.contains("35341253-da20-40b6-96d8-ce069b1ba5d4"));
         assert!(body.contains("b5188eda-528d-48d4-8cee-498e0971f9f5"));
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_employment_non_existent_user() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_employment_non_existent_user(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let employment_repository = EmploymentRepository::new(arc_pool.clone());
         let employment_repo = web::Data::new(employment_repository);
 
@@ -1507,11 +1515,12 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_employment_non_existent_company() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_employment_non_existent_company(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let employment_repository = EmploymentRepository::new(arc_pool.clone());
         let employment_repo = web::Data::new(employment_repository);
 
@@ -1528,11 +1537,12 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_employment_invalid_uuid_format() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_employment_invalid_uuid_format(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let employment_repository = EmploymentRepository::new(arc_pool.clone());
         let employment_repo = web::Data::new(employment_repository);
 
@@ -1551,12 +1561,12 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+        Ok(())
     }
 
-    //ToDo: No data for this yet.
-    #[actix_web::test]
-    async fn get_subordinates_test() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_subordinates_test(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let employment_repository = EmploymentRepository::new(arc_pool.clone());
         let employment_repo = web::Data::new(employment_repository);
 
@@ -1573,11 +1583,12 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::OK);
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_subordinates_errors() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_subordinates_errors(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let employment_repository = EmploymentRepository::new(arc_pool.clone());
         let employment_repo = web::Data::new(employment_repository);
 
@@ -1603,11 +1614,12 @@ mod api_tests {
         // Bad UUID at company ID
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn create_update_delete_employment() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn create_update_delete_employment(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let employment_repository = EmploymentRepository::new(arc_pool.clone());
         let employment_repo = web::Data::new(employment_repository);
 
@@ -1700,11 +1712,12 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn create_employment_errors() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn create_employment_errors(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let employment_repository = EmploymentRepository::new(arc_pool.clone());
         let employment_repo = web::Data::new(employment_repository);
 
@@ -1753,11 +1766,12 @@ mod api_tests {
         // Error: No company ID
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_all_event_staff_test() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_all_event_staff_test(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let staff_repository = StaffRepository::new(arc_pool.clone());
         let staff_repo = web::Data::new(staff_repository);
 
@@ -1777,11 +1791,12 @@ mod api_tests {
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_all_event_staff_errors() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_all_event_staff_errors(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let staff_repository = StaffRepository::new(arc_pool.clone());
         let staff_repo = web::Data::new(staff_repository);
 
@@ -1799,11 +1814,12 @@ mod api_tests {
 
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_event_staff_test() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_event_staff_test(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let staff_repository = StaffRepository::new(arc_pool.clone());
         let staff_repo = web::Data::new(staff_repository);
 
@@ -1827,11 +1843,12 @@ mod api_tests {
 
         assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
         assert!(body.contains("9281b570-4d02-4096-9136-338a613c71cd"));
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_event_staff_errors() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_event_staff_errors(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let staff_repository = StaffRepository::new(arc_pool.clone());
         let staff_repo = web::Data::new(staff_repository);
 
@@ -1859,11 +1876,12 @@ mod api_tests {
         // Invalid UUID format.
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn create_update_delete_event_staff() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn create_update_delete_event_staff(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let staff_repository = StaffRepository::new(arc_pool.clone());
         let staff_repo = web::Data::new(staff_repository);
 
@@ -2044,11 +2062,12 @@ mod api_tests {
         // Duplicate delete
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_all_assigned_staff_test() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_all_assigned_staff_test(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let repository = AssignedStaffRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -2069,11 +2088,12 @@ mod api_tests {
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         assert!(body.contains("Dave Null"));
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_all_assigned_staff_invalid_uuid() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_all_assigned_staff_invalid_uuid(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let repository = AssignedStaffRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -2093,11 +2113,12 @@ mod api_tests {
         // Invalid uuid
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_assigned_staff_test() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_assigned_staff_test(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let repository = AssignedStaffRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -2117,11 +2138,12 @@ mod api_tests {
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         assert!(body.contains("9281b570-4d02-4096-9136-338a613c71cd"));
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_assigned_staff_errors() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_assigned_staff_errors(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let repository = AssignedStaffRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -2149,11 +2171,12 @@ mod api_tests {
         // Invalid UUID format
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn create_update_delete_assigned_staff() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn create_update_delete_assigned_staff(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let repository = AssignedStaffRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
         let staff_repo = web::Data::new(StaffRepository::new(arc_pool.clone()));
@@ -2234,13 +2257,12 @@ mod api_tests {
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
 
-        //ToDo: Permanent Delete Here.
+        Ok(())
     }
 
-    //ToDo:
-    #[actix_web::test]
-    async fn create_assigned_staff_errors() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn create_assigned_staff_errors(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let repository = AssignedStaffRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -2280,11 +2302,12 @@ mod api_tests {
         // Empty data
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_all_associated_companies_per_event() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_all_associated_companies_per_event(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let repository = AssociatedCompanyRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -2306,11 +2329,12 @@ mod api_tests {
 
         assert!(body.contains("AMD"));
         assert!(body.contains("Prusa Research"));
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_all_associated_comapnies_invalid_uuid_format() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_all_associated_comapnies_invalid_uuid_format(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let repository = AssociatedCompanyRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -2327,11 +2351,12 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_all_associated_companies_per_event_and_user_test() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_all_associated_companies_per_event_and_user_test(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let repository = AssociatedCompanyRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
         let emp_repo = web::Data::new(EmploymentRepository::new(arc_pool.clone()));
@@ -2364,11 +2389,14 @@ mod api_tests {
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
 
         assert!(!body.contains("134d5286-5f55-4637-9b98-223a5820a464"));
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_all_associated_companies_per_event_and_user_errors_test() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_all_associated_companies_per_event_and_user_errors_test(
+        pool: PgPool,
+    ) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let repository = AssociatedCompanyRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
         let emp_repo = web::Data::new(EmploymentRepository::new(arc_pool.clone()));
@@ -2393,11 +2421,12 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn create_update_delete_associated_company() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn create_update_delete_associated_company(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let repository = AssociatedCompanyRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -2496,11 +2525,13 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_all_timesheets_for_employment_test() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_all_timesheets_for_employment_test(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let repository = TimesheetRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -2522,11 +2553,12 @@ mod api_tests {
 
         assert!(body.contains("Darkness 2024"));
         assert!(body.contains("Unlocked"));
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_all_timesheets_for_employment_invalid_uuid_format() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_all_timesheets_for_employment_invalid_uuid_format(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let repository = TimesheetRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -2543,11 +2575,12 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_timesheet_test() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_timesheet_test(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let repository = TimesheetRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -2563,11 +2596,12 @@ mod api_tests {
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
 
         assert!(body.contains("Darkness 2024"));
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_non_existent_timesheet() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_non_existent_timesheet(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let repository = TimesheetRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -2579,11 +2613,12 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn get_timesheet_invalid_uuid_format() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn get_timesheet_invalid_uuid_format(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let repository = TimesheetRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
@@ -2595,11 +2630,12 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+        Ok(())
     }
 
-    #[actix_web::test]
-    async fn create_update_timesheet() {
-        let arc_pool = get_db_pool().await;
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn create_update_timesheet(pool: PgPool) -> DbResult<()> {
+        let arc_pool = Arc::new(pool);
         let repository = TimesheetRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
         let employment_repo = web::Data::new(EmploymentRepository::new(arc_pool.clone()));
@@ -2660,5 +2696,6 @@ mod api_tests {
 
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
+        Ok(())
     }
 }
