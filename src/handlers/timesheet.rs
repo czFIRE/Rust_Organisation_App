@@ -4,30 +4,15 @@ use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;
 use uuid::Uuid;
 
-use crate::{handlers::common::QueryParams, models::ApprovalStatus};
-
-#[derive(Deserialize)]
-pub struct NewTimesheetData {
-    user_id: Uuid,
-    company_id: Uuid,
-    event_id: Uuid,
-    start_date: chrono::DateTime<Utc>,
-    end_date: chrono::DateTime<Utc>,
-}
-
-#[derive(Deserialize)]
-pub struct WorkDay {
-    total_hours: Option<u8>, // If none, the default is 0.
-    comment: Option<String>,
-}
-
-#[derive(Deserialize)]
-pub struct TimesheetData {
-    workdays: Option<Vec<WorkDay>>,
-    is_editable: Option<bool>,
-    status: Option<ApprovalStatus>,
-    manager_note: Option<String>,
-}
+use crate::{
+    errors::{handle_database_error, parse_error},
+    handlers::common::extract_path_tuple_ids,
+    repositories::timesheet::{
+        models::{TimesheetCreateData, TimesheetReadAllData, TimesheetUpdateData},
+        timesheet_repo::TimesheetRepository,
+    },
+    templates::timesheet::{TimesheetTemplate, TimesheetsTemplate},
+};
 
 #[get("/user/{user_id}/employment/{company_id}/sheet")]
 pub async fn get_all_timesheets_for_employment(

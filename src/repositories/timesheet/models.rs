@@ -75,8 +75,8 @@ pub struct Workday {
     pub date: NaiveDate,
     pub total_hours: f32,
     pub comment: Option<String>,
-    pub created_at: NaiveDate,
-    pub edited_at: NaiveDate,
+    pub created_at: NaiveDateTime,
+    pub edited_at: NaiveDateTime,
 }
 
 #[derive(Debug, FromRow)]

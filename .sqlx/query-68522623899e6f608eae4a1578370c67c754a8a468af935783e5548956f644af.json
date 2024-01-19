@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "UPDATE workday\n            SET total_hours = 0,\n                comment = NULL,\n                edited_at = NOW()\n            WHERE timesheet_id = $1\n              AND deleted_at IS NULL\n            RETURNING timesheet_id,\n                      date,\n                      total_hours,\n                      comment,\n                      is_editable,\n                      created_at,\n                      edited_at;",
+  "query": "UPDATE workday\n            SET total_hours = 0,\n                comment = NULL,\n                edited_at = NOW()\n            WHERE timesheet_id = $1\n              AND deleted_at IS NULL\n            RETURNING timesheet_id,\n                      date,\n                      total_hours,\n                      comment,\n                      created_at,\n                      edited_at;",
   "describe": {
     "columns": [
       {
@@ -25,16 +25,11 @@
       },
       {
         "ordinal": 4,
-        "name": "is_editable",
-        "type_info": "Bool"
-      },
-      {
-        "ordinal": 5,
         "name": "created_at",
         "type_info": "Timestamp"
       },
       {
-        "ordinal": 6,
+        "ordinal": 5,
         "name": "edited_at",
         "type_info": "Timestamp"
       }
@@ -50,9 +45,8 @@
       false,
       true,
       false,
-      false,
       false
     ]
   },
-  "hash": "4ada5679b9b15e41d85d007e7420fbfcc0fcebede15950dc564092988a116b3b"
+  "hash": "68522623899e6f608eae4a1578370c67c754a8a468af935783e5548956f644af"
 }

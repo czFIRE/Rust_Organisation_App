@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                INSERT INTO workday (timesheet_id,\n                                     date,\n                                     is_editable)\n                VALUES ($1, $2, $3)\n                RETURNING timesheet_id,\n                          date,\n                          total_hours,\n                          comment,\n                          is_editable,\n                          created_at,\n                          edited_at;\n                ",
+  "query": "\n                INSERT INTO workday (timesheet_id,\n                                     date)\n                VALUES ($1, $2)\n                RETURNING timesheet_id,\n                          date,\n                          total_hours,\n                          comment,\n                          created_at,\n                          edited_at;\n                ",
   "describe": {
     "columns": [
       {
@@ -25,16 +25,11 @@
       },
       {
         "ordinal": 4,
-        "name": "is_editable",
-        "type_info": "Bool"
-      },
-      {
-        "ordinal": 5,
         "name": "created_at",
         "type_info": "Timestamp"
       },
       {
-        "ordinal": 6,
+        "ordinal": 5,
         "name": "edited_at",
         "type_info": "Timestamp"
       }
@@ -42,8 +37,7 @@
     "parameters": {
       "Left": [
         "Uuid",
-        "Date",
-        "Bool"
+        "Date"
       ]
     },
     "nullable": [
@@ -52,9 +46,8 @@
       false,
       true,
       false,
-      false,
       false
     ]
   },
-  "hash": "39ff539535c5e9d07c53549765aee234cb29e3bb860f0c7bf5095bd16f382029"
+  "hash": "3f3d90888fa55373617d881491078bf2de15fe64b5cd459c01c40eb71b95854e"
 }

@@ -11,9 +11,9 @@ use crate::{models::ApprovalStatus, repositories::timesheet::models::TimesheetWi
 #[template(path = "employment/timesheet/workday.html")]
 pub struct WorkdayTemplate {
     pub timesheet_id: Uuid,
-    pub work_date: NaiveDate,
-    pub total_hours: u8,
-    pub comment: Option<String>,
+    pub date: NaiveDate,
+    pub total_hours: f32,
+    pub comment: String,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
 }
@@ -49,7 +49,6 @@ impl From<TimesheetWithWorkdays> for TimesheetTemplate {
                 date: workday.date,
                 total_hours: workday.total_hours,
                 comment: workday.comment.unwrap_or("No comment.".to_string()),
-                is_editable: workday.is_editable,
                 created_at: workday.created_at,
                 edited_at: workday.edited_at,
             })
