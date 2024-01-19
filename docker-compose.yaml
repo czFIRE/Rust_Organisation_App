@@ -3,12 +3,12 @@ version: "3"
 services:
   web:
     container_name: web-container
+    restart: always
     build: .
     ports:
-      - "8000:8000"
+      - ${PORT}:${PORT}
     depends_on:
       - db
-      - redis
 
   db:
     container_name: postgres-container
@@ -30,17 +30,3 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     ports:
       - "5050:80"
-
-  adminer:
-    container_name: adminer-container
-    image: adminer
-    restart: always
-    ports:
-      - "8080:8080"
-  
-  redis:
-    container_name: redis-container
-    image: redis:latest
-    restart: always
-    ports:
-      - "6379:6379"

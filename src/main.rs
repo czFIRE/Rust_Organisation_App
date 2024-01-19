@@ -25,6 +25,7 @@ use crate::repositories::task::task_repo::TaskRepository;
 use crate::repositories::timesheet::timesheet_repo::TimesheetRepository;
 use crate::repositories::user::user_repo::UserRepository;
 use actix_web::web;
+use serde::Deserialize;
 
 use crate::handlers::{
     assigned_staff::{
@@ -67,16 +68,27 @@ use crate::handlers::{
     },
 };
 
-const HOST: &str = "0.0.0.0:8000";
+#[derive(Deserialize)]
+pub struct Config {
+    pub host: String,
+    pub port: u16,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        envy::from_env::<Config>().expect("HTTP: missing environment variables")
+    }
+}
 
 #[tokio::main]
 async fn main() -> Result<()> {
     dotenv().expect("Failed to load .env file");
 
+    let config = Config::default();
+
     let pool = setup_db_pool().await;
     let arc_pool = Arc::new(pool);
 
-    // Add repositories here.
     let user_repository = UserRepository::new(arc_pool.clone());
     let company_repository = CompanyRepository::new(arc_pool.clone());
     let event_repository = EventRepository::new(arc_pool.clone());
@@ -99,7 +111,8 @@ async fn main() -> Result<()> {
     let timesheet_repo = web::Data::new(timesheet_repository);
     let comment_repo = web::Data::new(comment_repository);
 
-    println!("Starting server on {}", HOST);
+    println!("Starting server on http://{}:{}", config.host, config.port);
+
     HttpServer::new(move || {
         App::new()
             .app_data(user_repo.clone())
@@ -176,7 +189,7 @@ async fn main() -> Result<()> {
             .service(update_timesheet)
             .service(reset_timesheet_data)
     })
-    .bind(HOST)?
+    .bind((config.host, config.port))?
     .run()
     .await
 }
