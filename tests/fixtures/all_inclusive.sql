@@ -19,6 +19,10 @@ DECLARE
   user3_id UUID := '51a01dbf-dcd5-43a0-809c-94ed8e61d420';
   user4_id UUID := '30eff81e-a8d9-4ddc-b92e-e4b58e145920';
   user5_id UUID := 'ced9f31c-8662-4812-9005-b8ae85d3b951';
+  user6_id UUID := '4a799b2c-3b5f-41ec-a6e3-442cef915051';
+  user7_id UUID := 'ac6ca4f1-0654-4815-b3b3-2fe7c50c173c';
+  user8_id UUID := '68d792bb-6c78-4cd5-94c5-8db6f162b586';
+  user9_id UUID := '8a4e01c6-a7f7-48dd-be76-f4816a21b888';
 
   event0_id UUID := 'b71fd7ce-c891-410a-9bb4-70fc5c7748f8';
   event1_id UUID := '3f152d12-0bbd-429a-a9c5-28967d6370cc';
@@ -171,6 +175,30 @@ BEGIN
         (user5_id, 'Alan Papalochus', 'alan@pap.cz', '1968-08-01', 'alan.jpg',
         'male', 'user', 'available',
         '2024-01-01 10:33', '2024-01-01 10:33');
+    
+    INSERT INTO user_record 
+	    (id, name, email, birth, 
+	     gender, role, status) 
+    VALUES (user6_id, 'James Bean', 'jamesbean176@snailmail.com',
+            '1999-07-02', 'male', 'user', 'available');
+
+    INSERT INTO user_record 
+        (id, name, email, birth, 
+        gender, role, status) 
+    VALUES (user7_id, 'Rick Grimes', 'python@cowboy.com',
+            '1987-05-06', 'male', 'user', 'available');
+
+    INSERT INTO user_record 
+        (id, name, email, birth, 
+        gender, role, status) 
+    VALUES (user8_id, 'Ferris McRustacean', 'crab@rave.com',
+            '2015-05-15', 'other', 'user', 'available');
+
+    INSERT INTO user_record 
+        (id, name, email, birth, 
+        gender, role, status) 
+    VALUES (user9_id, 'Borra Checker', 'cannot@borrow.var',
+            '2015-05-15', 'female', 'admin', 'available');
 
 --------------------------------------------------------------------------------
 
@@ -226,7 +254,7 @@ BEGIN
         VALUES
         (user3_id, company2_id, NULL, 150,
         '2023-01-01', '2025-01-01', '-',
-        'dpp', 'basic',
+        'dpp', 'company_administrator',
         '2022-12-29 12:38', '2023-12-10 14:52');
 
     INSERT INTO employment
@@ -240,6 +268,48 @@ BEGIN
         'dpc', 'basic',
         '2023-12-30 11:38', '2023-12-31 14:52');
 
+    INSERT INTO employment 
+        (user_id, company_id, manager_id, hourly_wage,
+        start_date, end_date, description, type, level)
+        VALUES (user6_id, company0_id, user0_id, 250.0,
+            '2020-01-01', '9999-12-31', 'Concert catering evaluator',
+            'hpp', 'basic');
+        
+    INSERT INTO employment 
+        (user_id, company_id, manager_id, hourly_wage,
+        start_date, end_date, description, type, level)
+        VALUES (user7_id, company0_id, user0_id, 500,
+            '2010-10-31', '9999-12-31', 'Head of Security',
+            'hpp', 'manager');
+        
+    INSERT INTO employment 
+        (user_id, company_id, manager_id, hourly_wage,
+        start_date, end_date, description, type, level)
+        VALUES (user8_id, company0_id, user0_id, 200,
+            '2024-01-01', '2025-12-31', 'Crab Herder',
+            'dpp', 'basic');
+        
+    INSERT INTO employment 
+        (user_id, company_id, manager_id, hourly_wage,
+        start_date, end_date, description, type, level)
+    VALUES (user8_id, company1_id, user0_id, 200,
+	    '2024-01-01', '2025-12-31', 'RAII Ambassador',
+	    'dpp', 'basic');
+
+    INSERT INTO employment 
+        (user_id, company_id, manager_id, hourly_wage,
+        start_date, end_date, description, type, level)
+        VALUES (user9_id, company0_id, user0_id, 200,
+            '2020-02-01', '2024-12-31', 'Equipment Loan Supervisor',
+            'dpc', 'basic');
+
+    INSERT INTO employment 
+        (user_id, company_id, manager_id, hourly_wage,
+        start_date, end_date, description, type, level)
+    VALUES (user8_id, company2_id, user3_id, 800,
+        '2019-01-01', '9999-12-31', 'Head of Rave Tech Research',
+        'hpp', 'manager');
+        
 --------------------------------------------------------------------------------
 
     INSERT INTO event
@@ -388,94 +458,94 @@ BEGIN
 --------------------------------------------------------------------------------
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet0_id, '1969-08-15', 12, '', true,
+        (timesheet0_id, '1969-08-15', 12, '',
         '1969-08-16 18:28', '1969-08-17 08:22');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet0_id, '1969-08-16', 10, '', true,
+        (timesheet0_id, '1969-08-16', 10, '',
         '1969-08-17 20:00', '1969-08-17 20:00');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet1_id, '1969-08-14', 10, '', false,
+        (timesheet1_id, '1969-08-14', 10, '',
         '1969-08-17 19:58', '1969-08-17 19:59');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet1_id, '1969-08-15', 4.5, 'I was overworked as a mule!', false,
+        (timesheet1_id, '1969-08-15', 4.5, 'I was overworked as a mule!',
         '1969-08-17 20:00', '1969-08-17 20:00');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet1_id, '1969-08-16', 9.5, '', false,
+        (timesheet1_id, '1969-08-16', 9.5, '',
         '1969-08-17 20:40', '1969-08-17 21:00');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet2_id, '2024-01-01', 8, '', false,
+        (timesheet2_id, '2024-01-01', 8, '',
         '2024-01-01 22:33', '2024-01-01 22:33');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet2_id, '2024-01-02', 7, '', false,
+        (timesheet2_id, '2024-01-02', 7, '',
         '2024-01-02 20:10', '2024-01-02 21:12');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet3_id, '1969-07-28', 11.5, '', true,
+        (timesheet3_id, '1969-07-28', 11.5, '',
         '1969-07-28 23:00', '1969-07-28 23:00');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet3_id, '1969-07-30', 11.5, '', true,
+        (timesheet3_id, '1969-07-30', 11.5, '',
         '1969-07-30 23:00', '1969-07-30 23:00');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet3_id, '1969-08-10', 14, '', true,
+        (timesheet3_id, '1969-08-10', 14, '',
         '1969-08-10 23:00', '1969-08-10 23:00');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet3_id, '1969-08-11', 12, '', true,
+        (timesheet3_id, '1969-08-11', 12, '',
         '1969-08-11 23:00', '1969-08-11 23:00');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet3_id, '1969-08-12', 12, '', true,
+        (timesheet3_id, '1969-08-12', 12, '',
         '1969-08-12 23:00', '1969-08-12 23:00');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet3_id, '1969-08-13', 14, '', true,
+        (timesheet3_id, '1969-08-13', 14, '',
         '1969-08-13 23:00', '1969-08-13 23:00');
 
 --------------------------------------------------------------------------------

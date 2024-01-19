@@ -1,0 +1,90 @@
+<div
+  id="comment-{{ comment.id }}"
+  class="flex flex-row space-x-3 items-start align-middle rounded-md m-2 w-10/12"
+>
+  <div id="{{ comment.id }}-img" class="bg-foreground2 w-24 h-24 rounded-md">
+    <img
+      src="{{ comment.author.avatar_url }}"
+      class="object-contain rounded-md"
+    />
+  </div>
+  <div
+    id="{{ comment.id }}-content"
+    class="flex flex-col items-start w-10/12 h-min-24 space-y-1 p-2 rounded-sm bg-foreground2 text-wrap"
+  >
+    <div class="flex flex-row items-start p-1 space-x-5">
+      <h4 class="font-mono text-lg font-bold text-txthl">
+        {{ comment.author.name }}
+      </h4>
+      <p class="font-mono text-lg text-txt">
+        {{ comment.created_at.format("%d.%m.%Y %H:%M:%S").to_string() }}
+      </p>
+      {% if comment.created_at < comment.edited_at -%}
+      <p class="font-mono italic text-txt">(edited)</p>
+      {%- endif %}
+    </div>
+    <form
+      id="form-{{ comment.id}}"
+      hx-patch="/comment/{{ comment.id }}"
+      hx-swap="#outerHTML"
+      hx-target="#comment-{{ comment.id }}"
+      hx-ext="json-enc"
+      class="flex flex-row items-start p-2 space-x-5"
+    >
+      <input
+        id="content"
+        name="content"
+        type="text"
+        minlength="1"
+        value="{{ comment.content }}"
+        class="font-mono w-full text-txt rounded-md bg-foreground1"
+      />
+    </form>
+  </div>
+  <div id="comment-actions" class="flex flex-row space-x-3">
+    <button
+      hx-patch="/comment/{{ comment.id }}"
+      hx-swap="#outerHTML"
+      hx-target="#comment-{{ comment.id }}"
+      hx-ext="json-enc"
+      hx-include="#form-{{ comment.id }}"
+      title="Submit Changes"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="w-6 h-6 text-acc"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="m4.5 12.75 6 6 9-13.5"
+        />
+      </svg>
+    </button>
+    <button
+      hx-get="/comment/{{ comment.id }}"
+      hx-swap="innerHTML"
+      hx-target="#comment-{{ comment.id }}"
+      title="Cancel"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="w-6 h-6 text-rej"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M6 18 18 6M6 6l12 12"
+        />
+      </svg>
+    </button>
+  </div>
+</div>

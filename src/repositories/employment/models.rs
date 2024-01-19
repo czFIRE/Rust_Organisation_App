@@ -70,6 +70,19 @@ pub struct EmploymentFilter {
     pub offset: Option<i64>,
 }
 
+#[derive(Debug, Deserialize, Clone)]
+pub struct Subordinate {
+    pub user_id: Uuid,
+    pub user_name: String,
+    pub avatar_url: String,
+    pub company_id: Uuid,
+    pub manager_id: Uuid,
+    pub employment_type: EmploymentContract,
+    pub start_date: NaiveDate,
+    pub end_date: NaiveDate,
+    pub review_requested: bool,
+}
+
 #[derive(Debug, FromRow)]
 pub struct EmploymentContractAndHourlyWage {
     pub hourly_wage: f64,

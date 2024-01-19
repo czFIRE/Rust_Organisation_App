@@ -2,12 +2,18 @@ use std::str::FromStr;
 
 use crate::{
     errors::handle_database_error,
-    handlers::common::extract_path_tuple_ids,
+    handlers::common::{extract_path_triple_ids, extract_path_tuple_ids},
+    models::{EmployeeLevel, EmploymentContract},
     repositories::employment::models::{EmploymentData, NewEmployment},
-    templates::employment::{EmploymentLiteTemplate, EmploymentTemplate},
+    templates::employment::{
+        EmploymentCreateTemplate, EmploymentEditTemplate, EmploymentLite, EmploymentTemplate,
+        SubordinatesTemplate,
+    },
 };
 use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;
+use chrono::NaiveDate;
+use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::{
@@ -16,6 +22,18 @@ use crate::{
     templates::employment::EmploymentsTemplate,
 };
 
+#[derive(Clone, Debug, Deserialize)]
+pub struct EmploymentUpdateData {
+    pub editor_id: Uuid,
+    pub manager_id: Option<Uuid>,
+    pub hourly_wage: Option<f64>,
+    pub start_date: Option<NaiveDate>,
+    pub end_date: Option<NaiveDate>,
+    pub description: Option<String>,
+    pub employment_type: Option<EmploymentContract>,
+    pub level: Option<EmployeeLevel>,
+}
+
 #[get("/user/{user_id}/employment")]
 pub async fn get_employments_per_user(
     user_id: web::Path<String>,
@@ -23,7 +41,6 @@ pub async fn get_employments_per_user(
     employment_repo: web::Data<EmploymentRepository>,
 ) -> HttpResponse {
     let query_params = params.into_inner();
-
     if (query_params.limit.is_some() && query_params.limit.unwrap() < 0)
         || (query_params.offset.is_some() && query_params.offset.unwrap() < 0)
     {
@@ -41,11 +58,10 @@ pub async fn get_employments_per_user(
         .await;
 
     if let Ok(employments) = result {
-        let employment_vec: Vec<EmploymentLiteTemplate> = employments
+        let employment_vec: Vec<EmploymentLite> = employments
             .into_iter()
             .map(|employment| employment.into())
             .collect();
-
         let template = EmploymentsTemplate {
             employments: employment_vec,
         };
@@ -60,7 +76,6 @@ pub async fn get_employments_per_user(
             .content_type("text/html")
             .body(body.expect("Should be valid now."));
     }
-
     handle_database_error(result.expect_err("Should be error."))
 }
 
@@ -132,14 +147,10 @@ pub async fn get_subordinates(
         .read_subordinates(user_id, company_id, query_params)
         .await;
 
-    if let Ok(employments) = result {
-        let employment_vec: Vec<EmploymentLiteTemplate> = employments
-            .into_iter()
-            .map(|employment| employment.into())
-            .collect();
-
-        let template = EmploymentsTemplate {
-            employments: employment_vec,
+    if let Ok(subordinates) = result {
+        let template = SubordinatesTemplate {
+            user_id,
+            subordinates,
         };
 
         let body = template.render();
@@ -161,7 +172,6 @@ pub async fn create_employment(
     new_employment: web::Json<NewEmployment>,
     employment_repo: web::Data<EmploymentRepository>,
 ) -> HttpResponse {
-    let user_id = new_employment.user_id;
     let company_id = new_employment.company_id;
 
     let result = employment_repo.create(new_employment.into_inner()).await;
@@ -170,48 +180,182 @@ pub async fn create_employment(
         return handle_database_error(error);
     }
 
-    // This isn't very pleasant, but it is what it is. Maybe fix later.
-    // This is done because the repo doesn't return the necessary data from the function.
-    get_full_employment(user_id, company_id, employment_repo, true).await
+    let employee = result.expect("Should be valid");
+
+    // We don't want to show the manager the employee's view, so we re-render their view.
+    if employee.manager_id.is_some() {
+        return get_full_employment(
+            employee.manager_id.expect("Should be some"),
+            company_id,
+            employment_repo,
+            true,
+        )
+        .await;
+    }
+
+    // This is for the case when the first employee is created. We don't want to redirect the admin to them.
+    HttpResponse::NoContent().finish()
 }
 
-fn is_data_empty(data: EmploymentData) -> bool {
+#[get("/user/{user_id}/employment/{company_id}/mode/{editor_id}")]
+pub async fn toggle_employment_edit(
+    path: web::Path<(String, String, String)>,
+    employment_repo: web::Data<EmploymentRepository>,
+) -> HttpResponse {
+    let parsed_ids = extract_path_triple_ids(path.into_inner());
+    if parsed_ids.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let (user_id, company_id, editor_id) = parsed_ids.unwrap();
+    let result = employment_repo.read_one(user_id, company_id).await;
+    if let Ok(employment) = result {
+        // Only the direct manager may edit an employee.
+        if employment.manager.is_none()
+            || employment.manager.is_some() && employment.manager.unwrap().id != editor_id
+        {
+            return HttpResponse::Forbidden().body(parse_error(http::StatusCode::FORBIDDEN));
+        }
+        let template: EmploymentEditTemplate = EmploymentEditTemplate {
+            editor_id,
+            user_id: employment.user_id,
+            company_id: employment.company.id,
+            employment_type: employment.employment_type,
+            hourly_wage: employment.hourly_wage,
+            level: employment.level,
+            description: employment.description,
+            start_date: employment.start_date,
+            end_date: employment.end_date,
+        };
+
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Ok()
+            .content_type("text/html")
+            .body(body.expect("Should be valid now."));
+    }
+
+    handle_database_error(result.expect_err("Should be error."))
+}
+
+#[get("/user/{user_id}/employment/{company_id}/creation-mode")]
+pub async fn toggle_employment_create(
+    path: web::Path<(String, String)>,
+    employment_repo: web::Data<EmploymentRepository>,
+) -> HttpResponse {
+    let parsed_ids = extract_path_tuple_ids(path.into_inner());
+    if parsed_ids.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let (creator_id, company_id) = parsed_ids.unwrap();
+    let result = employment_repo.read_one(creator_id, company_id).await;
+    if let Ok(employment) = result {
+        // Only a manager or a company admin may create new employments
+        if employment.level == EmployeeLevel::Basic {
+            return HttpResponse::Forbidden().body(parse_error(http::StatusCode::FORBIDDEN));
+        }
+        let template: EmploymentCreateTemplate = EmploymentCreateTemplate {
+            company_id,
+            creator_id,
+            creator_level: employment.level,
+        };
+
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Ok()
+            .content_type("text/html")
+            .body(body.expect("Should be valid now."));
+    }
+
+    handle_database_error(result.expect_err("Should be error."))
+}
+
+fn is_data_invalid(data: EmploymentUpdateData) -> bool {
     data.manager_id.is_none()
-        && data.hourly_wage.is_none()
+        && (data.hourly_wage.is_none() || data.hourly_wage.unwrap() <= 0.0) // This should likely check against minimum wage instead.
         && data.start_date.is_none()
         && data.end_date.is_none()
         && data.description.is_none()
         && data.employment_type.is_none()
         && data.level.is_none()
+        || (data.start_date.is_some()
+            && data.end_date.is_some()
+            && data.start_date.unwrap() > data.end_date.unwrap())
 }
 
 #[patch("/user/{user_id}/employment/{company_id}")]
 pub async fn update_employment(
     path: web::Path<(String, String)>,
-    employment_data: web::Json<EmploymentData>,
+    employment_data: web::Json<EmploymentUpdateData>,
     employment_repo: web::Data<EmploymentRepository>,
 ) -> HttpResponse {
-    if is_data_empty(employment_data.clone()) {
+    if is_data_invalid(employment_data.clone()) {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
-
     let parsed_ids = extract_path_tuple_ids(path.into_inner());
     if parsed_ids.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
     let (user_id, company_id) = parsed_ids.unwrap();
-    let result = employment_repo
-        .update(user_id, company_id, employment_data.into_inner())
-        .await;
+
+    // We have to compare these dates against old dates.
+    if employment_data.start_date.is_some() || employment_data.end_date.is_some() {
+        let current_employment = employment_repo.read_one(user_id, company_id).await;
+
+        if current_employment.is_err() {
+            return handle_database_error(current_employment.expect_err("Should be error."));
+        }
+
+        let current = current_employment.expect("Should be valid now.");
+
+        if employment_data.start_date.is_some()
+            && employment_data.start_date.unwrap() > current.end_date
+        {
+            return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        }
+
+        if employment_data.end_date.is_some()
+            && employment_data.end_date.unwrap() < current.start_date
+        {
+            return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        }
+    }
+
+    let data = EmploymentData {
+        manager_id: employment_data.manager_id,
+        hourly_wage: employment_data.hourly_wage,
+        start_date: employment_data.start_date,
+        end_date: employment_data.end_date,
+        description: employment_data.description.clone(),
+        employment_type: employment_data.employment_type.clone(),
+        level: employment_data.level.clone(),
+    };
+
+    let result = employment_repo.update(user_id, company_id, data).await;
 
     if let Err(error) = result {
         return handle_database_error(error);
     }
 
     // This isn't very pleasant, but it is what it is. Maybe fix later.
-    // This is done because the repo doesn't return the necessary data from the function.
-    get_full_employment(user_id, company_id, employment_repo, false).await
+    // Editor id because we don't want to render the employee's view.
+    get_full_employment(
+        employment_data.editor_id,
+        company_id,
+        employment_repo,
+        false,
+    )
+    .await
 }
 
 #[delete("/user/{user_id}/employment/{company_id}")]
@@ -231,5 +375,5 @@ pub async fn delete_employment(
         return handle_database_error(error);
     }
 
-    HttpResponse::NoContent().finish()
+    HttpResponse::Ok().finish()
 }

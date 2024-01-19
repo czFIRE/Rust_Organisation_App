@@ -1,5 +1,14 @@
 use std::str::FromStr;
 
+use crate::{
+    repositories::employment::employment_repo::EmploymentRepository,
+    templates::company::CompaniesInfoTemplate,
+    utils::image_storage::{
+        img_manipulation::{remove_image, store_image},
+        models::{ImageCategory, UploadForm, DEFAULT_COMPANY_IMAGE, MAX_FILE_SIZE},
+    },
+};
+use actix_multipart::form::MultipartForm;
 use actix_web::{delete, get, http, patch, post, put, web, HttpResponse};
 use askama::Template;
 use serde::Deserialize;
@@ -7,12 +16,14 @@ use uuid::Uuid;
 
 use crate::{
     errors::{handle_database_error, parse_error},
-    handlers::common::QueryParams,
+    handlers::common::extract_path_tuple_ids,
+    models::EmployeeLevel,
     repositories::company::{
         company_repo::CompanyRepository,
         models::{AddressData, AddressUpdateData, CompanyData, CompanyFilter, NewCompany},
     },
-    templates::company::{CompaniesTemplate, CompanyLiteTemplate, CompanyTemplate},
+    templates::company::{CompaniesTemplate, CompanyEditTemplate, CompanyLite, CompanyTemplate},
+    utils::format_check::check::{check_email_validity, check_phone_validity},
 };
 
 #[derive(Deserialize, Clone)]
@@ -30,6 +41,7 @@ pub struct NewCompanyData {
     postal_code: String,
     phone: String,
     email: String,
+    employee_id: Uuid,
 }
 
 #[derive(Deserialize, Clone)]
@@ -49,41 +61,34 @@ pub struct CompanyUpdateData {
     email: Option<String>,
 }
 
-#[get("/company")]
-pub async fn get_all_companies(
-    params: web::Query<QueryParams>,
+async fn get_many_companies(
+    filter: CompanyFilter,
     company_repo: web::Data<CompanyRepository>,
+    simple_view: bool,
 ) -> HttpResponse {
-    let query_params = params.into_inner();
-
-    if (query_params.limit.is_some() && query_params.limit.unwrap() < 0)
-        || (query_params.offset.is_some() && query_params.offset.unwrap() < 0)
-    {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
-    }
-
-    let filter = CompanyFilter {
-        limit: query_params.limit,
-        offset: query_params.offset,
-    };
-
     let result = company_repo.read_all(filter).await;
 
     if let Ok(companies) = result {
         let lite_companies = companies
             .into_iter()
-            .map(|company| CompanyLiteTemplate {
+            .map(|company| CompanyLite {
                 id: company.id,
                 name: company.name,
                 avatar_url: company.avatar_url,
             })
             .collect();
 
-        let template = CompaniesTemplate {
-            companies: lite_companies,
+        let body: Result<String, askama::Error> = if !simple_view {
+            let template = CompaniesTemplate {
+                companies: lite_companies,
+            };
+            template.render()
+        } else {
+            let template = CompaniesInfoTemplate {
+                companies: lite_companies,
+            };
+            template.render()
         };
-
-        let body = template.render();
 
         if body.is_err() {
             return HttpResponse::InternalServerError()
@@ -94,6 +99,42 @@ pub async fn get_all_companies(
     }
 
     handle_database_error(result.expect_err("Should be error."))
+}
+
+#[get("/company")]
+pub async fn get_all_companies(
+    params: web::Query<CompanyFilter>,
+    company_repo: web::Data<CompanyRepository>,
+) -> HttpResponse {
+    let query_params = params.into_inner();
+
+    if (query_params.limit.is_some() && query_params.limit.unwrap() < 0)
+        || (query_params.offset.is_some() && query_params.offset.unwrap() < 0)
+    {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    get_many_companies(query_params, company_repo, false).await
+}
+
+/* This exists because the function above is used mainly for the layout
+ * of companies in the company tab. This function retrieves a much simpler view
+ * used by administrators / event organizers for company-related operations.
+*/
+#[get("/company-info")]
+pub async fn get_company_information(
+    params: web::Query<CompanyFilter>,
+    company_repo: web::Data<CompanyRepository>,
+) -> HttpResponse {
+    let query_params = params.into_inner();
+
+    if (query_params.limit.is_some() && query_params.limit.unwrap() < 0)
+        || (query_params.offset.is_some() && query_params.offset.unwrap() < 0)
+    {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    get_many_companies(query_params, company_repo, true).await
 }
 
 #[get("/company/{company_id}")]
@@ -127,10 +168,8 @@ pub async fn get_company(
     handle_database_error(result.expect_err("Should be error."))
 }
 
-fn is_creation_data_invalid(data: NewCompanyData) -> bool {
-    data.name.is_empty()
-        || (data.description.is_some() && data.description.unwrap().is_empty())
-        || (data.website.is_some() && data.website.unwrap().is_empty())
+fn validate_creation_data(data: NewCompanyData) -> bool {
+    if data.name.is_empty()
         || data.phone.is_empty()
         || data.email.is_empty()
         || data.crn.is_empty()
@@ -140,7 +179,15 @@ fn is_creation_data_invalid(data: NewCompanyData) -> bool {
         || data.city.is_empty()
         || data.postal_code.is_empty()
         || data.street.is_empty()
-        || data.street.is_empty()
+    {
+        return false;
+    }
+
+    if !check_email_validity(data.email) {
+        return false;
+    }
+
+    check_phone_validity(data.phone)
 }
 
 #[post("/company")]
@@ -149,7 +196,7 @@ pub async fn create_company(
     company_repo: web::Data<CompanyRepository>,
 ) -> HttpResponse {
     let data = new_company.into_inner();
-    if is_creation_data_invalid(data.clone()) {
+    if !validate_creation_data(data.clone()) {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
@@ -172,7 +219,9 @@ pub async fn create_company(
         street_number: data.number.clone(),
     };
 
-    let result = company_repo.create(company_data, address).await;
+    let result = company_repo
+        .create(company_data, address, data.employee_id)
+        .await;
 
     if let Ok(company) = result {
         let template: CompanyTemplate = company.into();
@@ -192,9 +241,8 @@ pub async fn create_company(
     handle_database_error(result.expect_err("Should be error."))
 }
 
-// TODO: This is rather ugly. Might rewrite if there is time left at the end. :copium:
-fn is_update_data_empty(company_data: CompanyUpdateData) -> bool {
-    (company_data.name.is_none()
+fn is_data_empty(company_data: &CompanyUpdateData) -> bool {
+    company_data.name.is_none()
         && company_data.description.is_none()
         && company_data.website.is_none()
         && company_data.crn.is_none()
@@ -206,20 +254,49 @@ fn is_update_data_empty(company_data: CompanyUpdateData) -> bool {
         && company_data.number.is_none()
         && company_data.postal_code.is_none()
         && company_data.phone.is_none()
-        && company_data.email.is_none())
-        || (company_data.name.is_some() && company_data.name.unwrap().is_empty())
-        || (company_data.description.is_some() && company_data.description.unwrap().is_empty())
-        || (company_data.website.is_some() && company_data.website.unwrap().is_empty())
-        || (company_data.crn.is_some() && company_data.crn.unwrap().is_empty())
-        || (company_data.vatin.is_some() && company_data.vatin.unwrap().is_empty())
-        || (company_data.country.is_some() && company_data.country.unwrap().is_empty())
-        || (company_data.region.is_some() && company_data.region.unwrap().is_empty())
-        || (company_data.city.is_some() && company_data.city.unwrap().is_empty())
-        || (company_data.street.is_some() && company_data.street.unwrap().is_empty())
-        || (company_data.number.is_some() && company_data.number.unwrap().is_empty())
-        || (company_data.postal_code.is_some() && company_data.postal_code.unwrap().is_empty())
-        || (company_data.phone.is_some() && company_data.phone.unwrap().is_empty())
-        || (company_data.email.is_some() && company_data.email.unwrap().is_empty())
+        && company_data.email.is_none()
+}
+
+/*
+ * On the semantics of 'formatless'. Some strings here could definitely
+ * have some format imposed upon them, but we ultimately decided that it may
+ * be wiser to leave this as it is and not bother with restricting format of
+ * things like CRN and VATIN.
+ * Similarly, postal codes could vary for different locations.
+ */
+fn any_formatless_string_empty(company_data: &CompanyUpdateData) -> bool {
+    (company_data.name.is_some() && company_data.name.as_ref().unwrap().is_empty())
+        || (company_data.description.is_some()
+            && company_data.description.as_ref().unwrap().is_empty())
+        || (company_data.website.is_some() && company_data.website.as_ref().unwrap().is_empty())
+        || (company_data.crn.is_some() && company_data.crn.as_ref().unwrap().is_empty())
+        || (company_data.vatin.is_some() && company_data.vatin.as_ref().unwrap().is_empty())
+        || (company_data.country.is_some() && company_data.country.as_ref().unwrap().is_empty())
+        || (company_data.region.is_some() && company_data.region.as_ref().unwrap().is_empty())
+        || (company_data.city.is_some() && company_data.city.as_ref().unwrap().is_empty())
+        || (company_data.street.is_some() && company_data.street.as_ref().unwrap().is_empty())
+        || (company_data.number.is_some() && company_data.number.as_ref().unwrap().is_empty())
+        || (company_data.postal_code.is_some()
+            && company_data.postal_code.as_ref().unwrap().is_empty())
+}
+
+fn validate_update_data(company_data: CompanyUpdateData) -> bool {
+    if is_data_empty(&company_data) {
+        return false;
+    }
+
+    if any_formatless_string_empty(&company_data) {
+        return false;
+    }
+
+    if company_data.email.is_some() && !check_email_validity(company_data.email.unwrap()) {
+        return false;
+    }
+
+    if company_data.phone.is_some() && !check_phone_validity(company_data.phone.unwrap()) {
+        return false;
+    }
+    true
 }
 
 #[patch("/company/{company_id}")]
@@ -230,7 +307,7 @@ pub async fn update_company(
 ) -> HttpResponse {
     let data = company_data.into_inner();
 
-    if is_update_data_empty(data.clone()) {
+    if !validate_update_data(data.clone()) {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
@@ -303,18 +380,165 @@ pub async fn delete_company(
     HttpResponse::NoContent().finish()
 }
 
-//TODO: Once file store/load is done.
-#[get("/company/{company_id}/avatar")]
-pub async fn get_company_avatar(_id: web::Path<String>) -> HttpResponse {
-    todo!()
+#[get("/company/{company_id}/mode/{user_id}")]
+pub async fn get_company_edit_mode(
+    path: web::Path<(String, String)>,
+    company_repo: web::Data<CompanyRepository>,
+    employment_repo: web::Data<EmploymentRepository>,
+) -> HttpResponse {
+    let parsed_ids = extract_path_tuple_ids(path.into_inner());
+    if parsed_ids.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let (company_id, user_id) = parsed_ids.unwrap();
+    let employee_res = employment_repo.read_one(user_id, company_id).await;
+    if employee_res.is_err() {
+        return handle_database_error(employee_res.expect_err("Should be an error."));
+    }
+
+    let employee = employee_res.expect("Should be valid now.");
+
+    if employee.level != EmployeeLevel::CompanyAdministrator {
+        return HttpResponse::Forbidden().body(parse_error(http::StatusCode::FORBIDDEN));
+    }
+
+    let result = company_repo.read_one_extended(company_id).await;
+    if let Ok(company) = result {
+        let template: CompanyEditTemplate = CompanyEditTemplate {
+            id: company.company_id,
+            user_id,
+            name: company.name,
+            description: company.description,
+            phone: company.phone,
+            email: company.email,
+            website: company.website,
+            crn: company.crn,
+            vatin: company.vatin,
+            country: company.country,
+            region: company.region,
+            city: company.city,
+            street: company.street,
+            postal_code: company.postal_code,
+            address_number: company.street_number,
+        };
+
+        let body = template.render();
+
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Ok()
+            .content_type("text/html")
+            .body(body.expect("Should be valid."));
+    }
+
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[put("/company/{company_id}/avatar")]
-pub async fn upload_company_avatar(_id: web::Path<String>) -> HttpResponse {
-    todo!()
+pub async fn upload_company_avatar(
+    company_id: web::Path<String>,
+    MultipartForm(form): MultipartForm<UploadForm>,
+    company_repo: web::Data<CompanyRepository>,
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(company_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let parsed_id = id_parse.expect("Should be okay.");
+
+    if form.file.size == 0 || form.file.size > MAX_FILE_SIZE {
+        return HttpResponse::BadRequest().body("Incorrect file size. The limit is 10MB.");
+    }
+
+    if form.file.content_type.is_none()
+        || form
+            .file
+            .content_type
+            .clone()
+            .expect("Should be valid")
+            .subtype()
+            != "jpeg"
+    {
+        return HttpResponse::BadRequest().body("Invalid file type.");
+    }
+
+    let image_res = store_image(parsed_id, ImageCategory::Company, form.file);
+    if image_res.is_err() {
+        return HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+    }
+    let image_path = image_res.expect("Should be valid.");
+    let data = CompanyData {
+        name: None,
+        email: None,
+        website: None,
+        description: None,
+        phone: None,
+        crn: None,
+        vatin: None,
+        avatar_url: Some(image_path),
+    };
+
+    let address = AddressUpdateData {
+        country: None,
+        region: None,
+        city: None,
+        postal_code: None,
+        street: None,
+        street_number: None,
+    };
+
+    let result = company_repo.update(parsed_id, data, address).await;
+    if result.is_err() {
+        return handle_database_error(result.expect_err("Should be an error."));
+    }
+    HttpResponse::Ok().body("New image uploaded!")
 }
 
 #[delete("/company/{company_id}/avatar")]
-pub async fn remove_company_avatar(_id: web::Path<String>) -> HttpResponse {
-    todo!()
+pub async fn remove_company_avatar(
+    company_id: web::Path<String>,
+    company_repo: web::Data<CompanyRepository>,
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(company_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let parsed_id = id_parse.expect("Should be okay.");
+    if remove_image(parsed_id, ImageCategory::Company).is_err() {
+        return HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+    }
+
+    let data = CompanyData {
+        name: None,
+        email: None,
+        website: None,
+        description: None,
+        phone: None,
+        crn: None,
+        vatin: None,
+        avatar_url: Some(DEFAULT_COMPANY_IMAGE.to_string()),
+    };
+
+    let address = AddressUpdateData {
+        country: None,
+        region: None,
+        city: None,
+        postal_code: None,
+        street: None,
+        street_number: None,
+    };
+
+    let result = company_repo.update(parsed_id, data, address).await;
+    if result.is_err() {
+        return handle_database_error(result.expect_err("Should be an error."));
+    }
+    HttpResponse::Ok().body("Company image deleted.")
 }

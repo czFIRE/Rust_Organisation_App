@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM associated_company\n             WHERE deleted_at IS NOT NULL;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "da689a09b4542100e8dbd080b1f8d42c3527612f74cf01d62a45994f49a0a393"
+}

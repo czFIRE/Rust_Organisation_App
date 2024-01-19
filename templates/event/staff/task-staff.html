@@ -1,9 +1,18 @@
-{{ task_id }},
-{{ staff.id }},
-{{ staff.user.id }},
-{{ staff.company.id }},
-{{ staff.event_id }},
-{{ staff.role }},
-{{ status }}
-{{ created_at }}
-{{ edited_at }}
+<div id="task-staff-panel" class="flex flex-col space-y-10">
+  {% match status %} {% when AcceptanceStatus::Pending %}
+  <p class="font-mono text-xl text-pnd">
+    Your application for this task is still under review. Check back later.
+  </p>
+  {% when AcceptanceStatus::Rejected %}
+  <p class="font-mono text-xl text-rej">
+    Your application to work on this task was rejected.
+  </p>
+  {% when AcceptanceStatus::Accepted %}
+  <p class="font-mono text-4xl text-acc">
+    THIS IS WHERE TASKSTAFF INFO WILL BE.
+  </p>
+  {% endmatch %}
+</div>
+{{ task_id }}, {{ staff.id }}, {{ staff.user.id }}, {{ staff.company.id }}, {{
+staff.event_id }}, {{ staff.role }}, {{ status }} {{ created_at }} {{ edited_at
+}}

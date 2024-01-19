@@ -1,0 +1,84 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT \n                employment.user_id AS user_id, \n                subordinate.name AS user_name,\n                subordinate.avatar_url AS avatar_url,\n                employment.company_id AS company_id,\n                employment.start_date AS start_date, \n                employment.end_date AS end_date, \n                employment.type AS \"employment_type!: EmploymentContract\",\n                employment.manager_id AS \"manager_id!\",\n                (SELECT COUNT(id) \n                 FROM timesheet \n                 WHERE user_id = employment.user_id \n                   AND company_id = employment.company_id \n                   AND status = 'pending') > 0 \n                   AS \"review_requested!\"\n            FROM \n                employment \n                INNER JOIN user_record AS subordinate ON employment.user_id = subordinate.id\n                INNER JOIN company ON employment.company_id = company.id \n            WHERE \n                employment.manager_id = $1\n                AND employment.company_id = $2\n                AND employment.deleted_at IS NULL\n            ORDER BY user_name\n            LIMIT $3 OFFSET $4;\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "avatar_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "company_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "start_date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 5,
+        "name": "end_date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 6,
+        "name": "employment_type!: EmploymentContract",
+        "type_info": {
+          "Custom": {
+            "name": "employment_contract",
+            "kind": {
+              "Enum": [
+                "dpp",
+                "dpc",
+                "hpp"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "manager_id!",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 8,
+        "name": "review_requested!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      null
+    ]
+  },
+  "hash": "398603c97c8c0e38e45485143157c2ba1b9eea86a4a39e5e7f87f4e0aff10945"
+}

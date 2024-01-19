@@ -8,8 +8,21 @@ use uuid::Uuid;
 use super::user::UserLiteTemplate;
 
 #[derive(Template, Debug, Deserialize)]
-#[template(path = "comment/comment.html")]
+#[template(path = "comment/comment-update.html")]
+pub struct CommentUpdateModeTemplate {
+    pub comment: SingleComment,
+}
+
+// This is not quite pleasant, but ... yeah.
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "comment/single-comment.html")]
 pub struct CommentTemplate {
+    pub requester_id: Uuid,
+    pub comment: SingleComment,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SingleComment {
     pub id: Uuid,
     pub parent_category_id: Uuid,
     pub author: UserLiteTemplate,
@@ -18,10 +31,10 @@ pub struct CommentTemplate {
     pub edited_at: NaiveDateTime,
 }
 
-impl From<CommentExtended> for CommentTemplate {
+impl From<CommentExtended> for SingleComment {
     fn from(value: CommentExtended) -> Self {
         let author_lite: UserLite = value.author.into();
-        CommentTemplate {
+        SingleComment {
             id: value.comment_id,
             parent_category_id: if value.event_id.is_some() {
                 value.event_id.unwrap()
@@ -39,5 +52,22 @@ impl From<CommentExtended> for CommentTemplate {
 #[derive(Template, Debug, Deserialize)]
 #[template(path = "comment/comments.html")]
 pub struct CommentsTemplate {
-    pub comments: Vec<CommentTemplate>,
+    pub requester_id: Uuid,
+    pub comments: Vec<SingleComment>,
+}
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "comment/event-comments-container.html")]
+pub struct EventCommentsContainerTemplate {
+    pub comments: Vec<SingleComment>,
+    pub requester_id: Uuid,
+    pub event_id: Uuid,
+}
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "comment/task-comments-container.html")]
+pub struct TaskCommentsContainerTemplate {
+    pub comments: Vec<SingleComment>,
+    pub requester_id: Uuid,
+    pub task_id: Uuid,
 }

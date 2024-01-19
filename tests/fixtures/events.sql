@@ -30,6 +30,131 @@ DECLARE
   comment1_id UUID := 'daac23ec-fb36-434a-823b-49716ed2002c';
 
 BEGIN
+    INSERT INTO user_record
+        (id, name, email, birth, avatar_url,
+        gender, role, status,
+        created_at, edited_at)
+        VALUES
+        (user0_id, 'Dave Null', 'dave@null.com', '1996-06-23', 'dave.jpg',
+        'male', 'admin', 'available',
+        '2023-12-22 08:38:20.288688', '2023-12-22 08:38:20.288688');
+
+    INSERT INTO user_record
+        (id, name, email, birth, avatar_url,
+        gender, role, status,
+        created_at, edited_at)
+        VALUES
+        (user1_id, 'Tana Smith', 't.smith@seznam.cz', '1994-02-10', 'tana.jpg',
+        'female', 'user', 'available',
+        '2023-12-26 07:33:20.288688', '2023-12-26 07:33:20.288688');
+
+    INSERT INTO user_record
+        (id, name, email, birth, avatar_url,
+        gender, role, status,
+        created_at, edited_at)
+        VALUES
+        (user2_id, 'John Doe', 'doe@gmail.com', '1998-06-23', 'doe.jpg',
+        'male', 'user', 'available',
+        '2023-12-22 08:38:20.288688', '2023-12-22 08:38:20.288688');
+        
+    INSERT INTO company
+        (id, name, description,
+        website, crn, vatin,
+        phone, email, avatar_url,
+        created_at, edited_at)
+        VALUES
+        (company0_id, 'AMD', 'Advanced Micro Devices, Inc.',
+        'https://amd.com', 'crn_amd', 'vatin_amd',
+        '+1 408-749-4000', 'info@amd.com', 'amd.png',
+        '2023-12-22 08:38:20.288688', '2023-12-22 08:38:20.288688');
+
+    INSERT INTO company
+        (id, name, description,
+        website, crn, vatin,
+        phone, email, avatar_url,
+        created_at, edited_at)
+        VALUES
+        (company1_id, 'ReportLab', 'ReportLab Europe Ltd.',
+        'https://reportlab.com', 'crn_reportlab', 'vatin_reportlab',
+        '+44 20 8191 7277', 'support@reportlab.com', 'reportlab.png',
+        '2023-12-24 08:38:20.288688', '2023-12-24 08:38:20.288688');
+
+    INSERT INTO company
+        (id, name, description,
+        website, crn, vatin,
+        phone, email, avatar_url,
+        created_at, edited_at)
+        VALUES
+        (company2_id, 'Prusa Research', 'Prusa Research a.s.',
+        'https://prusa3d.com', 'CRN_prusa', 'CZ06649114',
+        '123 456 789', 'info@prusa3d.com', 'prusa_design.png',
+        '2023-12-24 15:55:20.288688', '2023-12-24 19:38:20.288688');
+
+    INSERT INTO address
+        (company_id, country, region, city,
+        street, street_number, postal_code)
+        VALUES
+        (company0_id, 'United States', 'CA', 'Santa Clara',
+        'Augustine Drive', '2485', '95054');
+
+    INSERT INTO address
+        (company_id, country, region, city,
+        street, street_number, postal_code)
+        VALUES
+        (company1_id, 'United Kingdom', 'Wimbledon', 'London',
+        'Wimbledon Hill Road', '35', 'SW19 7NB');
+
+    INSERT INTO address
+        (company_id, country, region, city,
+        street, street_number, postal_code)
+        VALUES
+        (company2_id, 'Czech republic', 'Prague', 'Prague',
+        'Partyzanska', '188/7A', '170 00');
+
+    INSERT INTO employment
+        (user_id, company_id, manager_id, hourly_wage,
+        start_date, end_date, description,
+        type, level,
+        created_at, edited_at)
+          VALUES
+        (user0_id, company0_id, NULL, 300,
+        '2023-01-01', '2025-01-01', '-',
+        'hpp', 'company_administrator',
+        '2022-12-29 12:38:20.4', '2023-12-10 14:52:20.1');
+
+    INSERT INTO employment
+        (user_id, company_id, manager_id, hourly_wage,
+        start_date, end_date, description,
+        type, level,
+        created_at, edited_at)
+          VALUES
+        (user1_id, company0_id, user0_id, 250,
+        '2023-01-01', '2025-01-01', '-',
+        'dpp', 'manager',
+        '2022-12-29 12:38:20.4', '2023-12-10 14:52:20.1');
+
+    INSERT INTO employment 
+        (user_id, company_id, manager_id, hourly_wage,
+        start_date, end_date, description,
+        type, level,
+        created_at, edited_at)
+          VALUES
+        (user2_id, company1_id, NULL, 270,
+        '2023-01-01', '2025-01-01', '-',
+        'dpc', 'basic',
+        '2022-12-29 12:38:20.4', '2023-12-10 14:52:20.1');
+
+    INSERT INTO employment
+        (user_id, company_id, manager_id, hourly_wage,
+        start_date, end_date, description,
+        type, level,
+        created_at, edited_at)
+          VALUES
+        (user2_id, company0_id, user0_id, 200,
+        '2023-01-01', '2025-01-01', '-',
+        'dpp', 'basic',
+        '2022-12-29 12:38:20.4', '2023-12-10 14:52:20.1');
+
     INSERT INTO event
         (id, name, description,
         website, accepts_staff,

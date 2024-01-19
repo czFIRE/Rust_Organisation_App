@@ -1,16 +1,29 @@
 use std::str::FromStr;
 
+use actix_multipart::form::MultipartForm;
 use actix_web::{delete, get, http, patch, post, put, web, HttpResponse};
 use askama::Template;
 use uuid::Uuid;
 
 use crate::{
     errors::{handle_database_error, parse_error},
-    repositories::event::{
-        event_repo::EventRepository,
-        models::{EventData, EventFilter, NewEvent},
+    handlers::common::extract_path_tuple_ids,
+    models::{EmployeeLevel, EventRole},
+    repositories::{
+        employment::employment_repo::EmploymentRepository,
+        event::{
+            event_repo::EventRepository,
+            models::{EventData, EventFilter, NewEvent},
+        },
+        event_staff::event_staff_repo::StaffRepository,
     },
-    templates::event::{EventLiteTemplate, EventTemplate, EventsTemplate},
+    templates::event::{
+        EventCreateTemplate, EventEditTemplate, EventLite, EventTemplate, EventsTemplate,
+    },
+    utils::image_storage::{
+        img_manipulation::{remove_image, store_image},
+        models::{ImageCategory, UploadForm, DEFAULT_EVENT_IMAGE, MAX_FILE_SIZE},
+    },
 };
 
 #[get("/event")]
@@ -29,8 +42,7 @@ pub async fn get_events(
     let result = event_repo.read_all(query_params).await;
 
     if let Ok(events) = result {
-        let lite_events: Vec<EventLiteTemplate> =
-            events.into_iter().map(|event| event.into()).collect();
+        let lite_events: Vec<EventLite> = events.into_iter().map(|event| event.into()).collect();
 
         let template = EventsTemplate {
             events: lite_events,
@@ -85,11 +97,24 @@ pub async fn get_event(
 pub async fn create_event(
     new_event: web::Json<NewEvent>,
     event_repo: web::Data<EventRepository>,
+    employment_repo: web::Data<EmploymentRepository>,
 ) -> HttpResponse {
-    if (new_event.website.is_some() && new_event.website.as_ref().unwrap().is_empty())
-        || (new_event.description.is_some() && new_event.description.as_ref().unwrap().is_empty())
-    {
+    if new_event.start_date > new_event.end_date {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let employee_res = employment_repo
+        .read_one(new_event.creator_id, new_event.company_id)
+        .await;
+
+    if employee_res.is_err() {
+        return handle_database_error(employee_res.expect_err("Should be error."));
+    }
+
+    let employee = employee_res.expect("Should be OK");
+
+    if employee.level != EmployeeLevel::CompanyAdministrator {
+        return HttpResponse::Forbidden().body(parse_error(http::StatusCode::FORBIDDEN));
     }
 
     let result = event_repo.create(new_event.into_inner()).await;
@@ -112,15 +137,12 @@ pub async fn create_event(
 }
 
 fn is_update_data_empty(event_data: EventData) -> bool {
-    (event_data.name.is_none()
+    event_data.name.is_none()
         && event_data.description.is_none()
         && event_data.website.is_none()
         && event_data.start_date.is_none()
         && event_data.end_date.is_none()
-        && event_data.avatar_url.is_none())
-        || (event_data.avatar_url.is_some() && event_data.avatar_url.unwrap().is_empty())
-        || (event_data.website.is_some() && event_data.website.unwrap().is_empty())
-        || (event_data.description.is_some() && event_data.description.unwrap().is_empty())
+        && event_data.accepts_staff.is_none()
 }
 
 #[patch("/event/{event_id}")]
@@ -158,6 +180,24 @@ pub async fn update_event(
     handle_database_error(result.expect_err("Should be error."))
 }
 
+#[patch("/event/{event_id}/acceptance")]
+pub async fn switch_event_accepts_staff(
+    event_id: web::Path<String>,
+    event_repo: web::Data<EventRepository>,
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(event_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let parsed_id = id_parse.expect("Should be valid.");
+    let result = event_repo.switch_accepts_staff(parsed_id).await;
+    if result.is_ok() {
+        return HttpResponse::NoContent().finish();
+    }
+    handle_database_error(result.expect_err("Should be error."))
+}
+
 #[delete("/event/{event_id}")]
 pub async fn delete_event(
     event_id: web::Path<String>,
@@ -178,18 +218,158 @@ pub async fn delete_event(
     HttpResponse::NoContent().finish()
 }
 
-//TODO: Once file store/load is done.
-#[get("/event/{event_id}/avatar")]
-pub async fn get_event_avatar(_id: web::Path<String>) -> HttpResponse {
-    todo!()
+#[get("/event/{event_id}/edit-mode/{staff_id}")]
+pub async fn toggle_event_edit_mode(
+    path: web::Path<(String, String)>,
+    event_repo: web::Data<EventRepository>,
+    staff_repo: web::Data<StaffRepository>,
+) -> HttpResponse {
+    let parsed_ids = extract_path_tuple_ids(path.into_inner());
+    if parsed_ids.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let (event_id, staff_id) = parsed_ids.unwrap();
+    let staff_res = staff_repo.read_one(staff_id).await;
+    if staff_res.is_err() {
+        return handle_database_error(staff_res.expect_err("Should be an error."));
+    }
+    let staff = staff_res.expect("Should be valid.");
+    // Check if the staffer is an organizer for this event.
+    if staff.role != EventRole::Organizer || staff.event_id != event_id {
+        return HttpResponse::Forbidden().body(parse_error(http::StatusCode::FORBIDDEN));
+    }
+    let result = event_repo.read_one(event_id).await;
+    if let Ok(event) = result {
+        let template = EventEditTemplate {
+            event: event.into(),
+            editor: staff.into(),
+        };
+
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Ok().body(body.expect("Should be valid now."));
+    }
+    handle_database_error(result.expect_err("Should be an error."))
+}
+
+#[get("/user/{user_id}/employment/{company_id}/event")]
+pub async fn toggle_event_creation_mode(
+    path: web::Path<(String, String)>,
+    employment_repo: web::Data<EmploymentRepository>,
+) -> HttpResponse {
+    let parsed_ids = extract_path_tuple_ids(path.into_inner());
+    if parsed_ids.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let (user_id, company_id) = parsed_ids.unwrap();
+    let employment_res = employment_repo.read_one(user_id, company_id).await;
+    if let Ok(employment) = employment_res {
+        if employment.level != EmployeeLevel::CompanyAdministrator {
+            return HttpResponse::Forbidden().body(parse_error(http::StatusCode::FORBIDDEN));
+        }
+
+        let template = EventCreateTemplate {
+            creator_id: employment.user_id,
+            company_id: employment.company.id,
+        };
+
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Ok().body(body.expect("Should be valid now."));
+    }
+    handle_database_error(employment_res.expect_err("Should be an error."))
 }
 
 #[put("/event/{event_id}/avatar")]
-pub async fn upload_event_avatar(_id: web::Path<String>) -> HttpResponse {
-    todo!()
+pub async fn upload_event_avatar(
+    event_id: web::Path<String>,
+    MultipartForm(form): MultipartForm<UploadForm>,
+    event_repo: web::Data<EventRepository>,
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(event_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let parsed_id = id_parse.expect("Should be okay.");
+
+    if form.file.size == 0 || form.file.size > MAX_FILE_SIZE {
+        return HttpResponse::BadRequest().body("Incorrect file size. The limit is 10MB.");
+    }
+
+    if form.file.content_type.is_none()
+        || form
+            .file
+            .content_type
+            .clone()
+            .expect("Should be valid")
+            .subtype()
+            != "jpeg"
+    {
+        return HttpResponse::BadRequest().body("Invalid file type.");
+    }
+
+    let image_res = store_image(parsed_id, ImageCategory::Event, form.file);
+    if image_res.is_err() {
+        return HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+    }
+    let image_path = image_res.expect("Should be valid.");
+    let data = EventData {
+        name: None,
+        description: None,
+        website: None,
+        start_date: None,
+        end_date: None,
+        accepts_staff: None,
+        avatar_url: Some(image_path),
+    };
+    let result = event_repo.update(parsed_id, data).await;
+    if result.is_err() {
+        return handle_database_error(result.expect_err("Should be an error."));
+    }
+    HttpResponse::Ok().body("New image uploaded!")
 }
 
 #[delete("/event/{event_id}/avatar")]
-pub async fn remove_event_avatar(_id: web::Path<String>) -> HttpResponse {
-    todo!()
+pub async fn remove_event_avatar(
+    event_id: web::Path<String>,
+    event_repo: web::Data<EventRepository>,
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(event_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let parsed_id = id_parse.expect("Should be okay.");
+    if remove_image(parsed_id, ImageCategory::Event).is_err() {
+        return HttpResponse::InternalServerError()
+            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+    }
+
+    let data = EventData {
+        name: None,
+        description: None,
+        website: None,
+        start_date: None,
+        end_date: None,
+        accepts_staff: None,
+        avatar_url: Some(DEFAULT_EVENT_IMAGE.to_string()),
+    };
+
+    let result = event_repo.update(parsed_id, data).await;
+    if result.is_err() {
+        return handle_database_error(result.expect_err("Should be an error."));
+    }
+    HttpResponse::Ok().body("Event image deleted.")
 }

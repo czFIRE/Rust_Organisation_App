@@ -1,0 +1,80 @@
+<div
+  id="associated-company-management"
+  class="flex flex-col items-center w-full"
+>
+  <div
+    id="creation-panel"
+    class="bg-foreground1 rounded-md w-full flex flex-col items-center m-5 p-5"
+  >
+    <h2 class="font-mono font-bold text-txthl text-2xl">Add Company</h2>
+    <form
+      hx-post="/event/{{event_id}}/company"
+      hx-swap="#innerHTML"
+      hx-target="#associated-container"
+      hx-ext="json-enc"
+      hx-confirm="Do you really want to add this company?"
+      class="flex flex-row space-x-3"
+    >
+      <div class="flex flex-col">
+        <label for="company_id" class="font-mono text-txthl text-lg"
+          >Company ID</label
+        >
+        <input
+          required
+          id="company_id"
+          name="company_id"
+          type="text"
+          minlength="36"
+          maxlength="36"
+          pattern="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+          class="bg-foreground2 p-1 rounded-md text-txt font-mono text-lg w-full"
+        />
+      </div>
+      <div class="flex flex-col">
+        <label for="association_type" class="font-mono text-txthl text-lg"
+          >Company ID</label
+        >
+        <select
+          required
+          id="association_type"
+          name="association_type"
+          class="bg-foreground2 p-1 rounded-md text-txt font-mono text-lg w-full"
+        >
+          <option value="Sponsor">Sponsor</option>
+          <option value="Organizer">Organizer</option>
+          <option value="Media">Media</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <button
+        type="submit"
+        class="bg-foreground2 p-1 rounded-md text-txthl font-mono text-lg"
+      >
+        Add Company
+      </button>
+    </form>
+  </div>
+
+  <div class="flex flex-row items-center w-full">
+    <button
+      hx-get="/event/{{ event_id}}/staff-panel/{user_id}"
+      hx-swap="innerHTML"
+      hx-target="#content"
+      hx-vals='js:{"user_id": document.getElementById("user_id").value}'
+      hx-ext="path-params"
+      class="bg-foreground rounded-md p-1 text-txthl text-lg font-mono"
+    >
+      Back
+    </button>
+  </div>
+
+  <div>
+    <div
+      id="associated-companies-editable"
+      hx-get="/event/{{ event_id }}/company/editable"
+      hx-trigger="load"
+    ></div>
+  </div>
+
+  {% include "../company-search.html" %}
+</div>

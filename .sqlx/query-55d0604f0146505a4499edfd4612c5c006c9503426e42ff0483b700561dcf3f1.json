@@ -1,0 +1,55 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE workday\n            SET total_hours = COALESCE($1, total_hours),\n                comment = COALESCE($2, comment),\n                edited_at = NOW()\n            WHERE timesheet_id = $3\n              AND date = $4\n              AND deleted_at IS NULL\n            RETURNING timesheet_id,\n                      date,\n                      total_hours,\n                      comment,\n                      created_at,\n                      edited_at;",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "timesheet_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 2,
+        "name": "total_hours",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 3,
+        "name": "comment",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 5,
+        "name": "edited_at",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Float4",
+        "Text",
+        "Uuid",
+        "Date"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "55d0604f0146505a4499edfd4612c5c006c9503426e42ff0483b700561dcf3f1"
+}

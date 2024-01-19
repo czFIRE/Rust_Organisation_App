@@ -10,6 +10,8 @@ pub struct NewEvent {
     pub website: Option<String>,
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
+    pub creator_id: Uuid,
+    pub company_id: Uuid,
 }
 
 #[derive(Debug, FromRow, Clone)]
@@ -34,6 +36,7 @@ pub struct EventData {
     pub website: Option<String>,
     pub start_date: Option<NaiveDate>,
     pub end_date: Option<NaiveDate>,
+    pub accepts_staff: Option<bool>,
     pub avatar_url: Option<String>,
 }
 

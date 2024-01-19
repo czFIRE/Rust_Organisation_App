@@ -1,8 +1,115 @@
-{{ id }}
-{{ user.id }}
-{{ company.id }}
-{{ event_id }}
-{{ role }}
-{{ status }}
-{{ created_at }}
-{{ edited_at }}
+<div id="staff-panel" class="flex flex-col space-y-10 items-center">
+  {% if status != AcceptanceStatus::Accepted -%}
+  <h2 class="font-mono text-4xl text-txthl font-bold">Registration Status</h2>
+
+  {% if status == AcceptanceStatus::Pending -%}
+  <p class="font-mono text-xl text-pnd">
+    Your application is still under review. Check back later.
+  </p>
+  {%- else -%}
+  <p class="font-mono text-xl text-rej">
+    Your application to work on this event was rejected.
+  </p>
+  {%- endif %}
+  <button
+    hx-get="/event/{{ event_id }}"
+    hx-swap="innerHTML"
+    hx-target="#content"
+    class="bg-foreground1 font-mono text-txthl text-xl p-3"
+  >
+    Back
+  </button>
+  {%- else -%}
+  <h2 class="font-mono text-4xl text-txthl">Staff Panel</h2>
+  <div
+    id="staff-info"
+    class="flex flex-col space-y-2 items-center justify-items-center w-full"
+  >
+    <p class="font-mono text-xl text-txt">
+      You are working on this event under {{ company.name }}. Your current role
+      on the event is {{ role }}.
+    </p>
+    <div
+      id="staff-actions"
+      class="flex flex-col flex-wrap space-y-5 align-middle items-center w-full"
+    >
+      <div
+        id="basic_actions"
+        class="flex flex-row space-x-5 content-between justify-center w-full"
+      >
+        <button
+          hx-get="/event/staff/{{ id }}/tasks-panel"
+          hx-swap="innerHTML"
+          hx-target="#content"
+          class="bg-foreground1 font-mono text-txthl text-xl p-3"
+        >
+          View Tasks
+        </button>
+        <button
+          hx-get="/user/{{ user.id }}/employment/{{ company.id }}"
+          hx-swap="innerHTML"
+          hx-target="#content"
+          class="bg-foreground1 font-mono text-txthl text-xl p-3"
+        >
+          Access Related Employment
+        </button>
+        <button
+          hx-get="/company/{{ company.id }}"
+          hx-swap="innerHTML"
+          hx-target="#content"
+          class="bg-foreground1 font-mono text-txthl text-xl p-3"
+        >
+          Access Your Company
+        </button>
+      </div>
+      {% if role == EventRole::Organizer %}
+      <div
+        id="organizer-actions"
+        class="flex flex-row space-x-5 justify-center content-between w-full"
+      >
+        <button
+          hx-get="/event/{{ event_id }}/staff/{{ id }}/management"
+          hx-swap="innerHTML"
+          hx-target="#content"
+          class="bg-foreground1 font-mono text-txthl text-xl p-3"
+        >
+          Manage Staff
+        </button>
+        <button
+          hx-get="/event/{{ event_id }}/edit-mode/{{ id }}"
+          hx-swap="innerHTML"
+          hx-target="#content"
+          class="bg-foreground1 font-mono text-txthl text-xl p-3"
+        >
+          Edit Event
+        </button>
+        <button
+          hx-get="/event/{{ event_id}}/company-management"
+          hx-swap="innerHTML"
+          hx-target="#content"
+          class="bg-foreground1 font-mono text-txthl text-xl p-3"
+        >
+          Manage Associated Companies
+        </button>
+        <button
+          hx-delete="/event/{{ event_id }}"
+          hx-swap="innerHTML"
+          hx-target="#content"
+          hx-confirm="Are you sure you want to permanently delete the event?"
+          class="bg-foreground1 font-mono text-rej text-xl p-3"
+        >
+          Delete Event
+        </button>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div
+    id="comments"
+    hx-get="event/{{ event_id }}/comment-panel/{{ user.id }}"
+    hx-trigger="load"
+    class="w-full"
+  ></div>
+  {%- endif %}
+</div>

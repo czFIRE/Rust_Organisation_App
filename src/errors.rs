@@ -3,7 +3,7 @@ use serde::Serialize;
 
 #[derive(Serialize)]
 pub struct ErrorResponse {
-    error: String,
+    pub error: String,
 }
 
 pub fn parse_error(code: http::StatusCode) -> String {

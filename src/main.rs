@@ -1,4 +1,5 @@
 mod common;
+mod configs;
 mod errors;
 mod handlers;
 mod models;
@@ -6,14 +7,27 @@ mod repositories;
 mod templates;
 mod utils;
 
-use actix_web::{App, HttpServer};
+use actix_files::Files as ActixFiles;
+use actix_web::{middleware::Logger, App, HttpServer};
 use dotenv::dotenv;
+use env_logger::Env;
 use sqlx::{Pool, Postgres};
 use std::io::Result;
 
 use std::sync::Arc;
 
-use crate::repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository;
+use crate::configs::assigned_staff_config::configure_assigned_staff_endpoints;
+use crate::configs::associated_company_config::configure_associated_company_endpoints;
+use crate::configs::comment_config::configure_comment_endpoints;
+use crate::configs::company_config::configure_company_endpoints;
+use crate::configs::employment_config::configure_employment_endpoints;
+use crate::configs::event_config::configure_event_endpoints;
+use crate::configs::staff_config::configure_staff_endpoints;
+use crate::configs::task_config::configure_task_endpoints;
+use crate::configs::timesheet_config::configure_timesheet_endpoints;
+use crate::configs::user_config::configure_user_endpoints;
+
+use crate::handlers::index::index;
 use crate::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
 use crate::repositories::comment::comment_repo::CommentRepository;
 use crate::repositories::company::company_repo::CompanyRepository;
@@ -24,49 +38,12 @@ use crate::repositories::repository::DbRepository;
 use crate::repositories::task::task_repo::TaskRepository;
 use crate::repositories::timesheet::timesheet_repo::TimesheetRepository;
 use crate::repositories::user::user_repo::UserRepository;
+use crate::{
+    handlers::user::get_users_login,
+    repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository,
+};
 use actix_web::web;
 use serde::Deserialize;
-
-use crate::handlers::{
-    assigned_staff::{
-        create_assigned_staff, delete_all_rejected_assigned_staff, delete_assigned_staff,
-        get_all_assigned_staff, get_assigned_staff, update_assigned_staff,
-    },
-    associated_company::{
-        create_associated_company, delete_associated_company, get_all_associated_companies,
-        get_all_associated_companies_per_event_and_user, update_associated_company,
-    },
-    comment::{
-        create_event_comment, create_task_comment, delete_comment, get_all_event_comments,
-        get_all_task_comments, update_comment,
-    },
-    company::{
-        create_company, delete_company, get_all_companies, get_company, get_company_avatar,
-        remove_company_avatar, update_company, upload_company_avatar,
-    },
-    employment::{
-        create_employment, delete_employment, get_employment, get_employments_per_user,
-        get_subordinates, update_employment,
-    },
-    event::{
-        create_event, delete_event, get_event, get_event_avatar, get_events, remove_event_avatar,
-        update_event, upload_event_avatar,
-    },
-    event_staff::{
-        create_event_staff, delete_all_rejected_event_staff, delete_event_staff,
-        get_all_event_staff, get_event_staff, update_event_staff,
-    },
-    event_task::{create_task, delete_task, get_event_task, get_event_tasks, update_task},
-    index::index,
-    timesheet::{
-        create_timesheet, get_all_timesheets_for_employment, get_timesheet, reset_timesheet_data,
-        update_timesheet,
-    },
-    user::{
-        create_user, delete_user, get_user, get_user_avatar, remove_user_avatar, update_user,
-        upload_user_avatar,
-    },
-};
 
 #[derive(Deserialize)]
 pub struct Config {
@@ -83,12 +60,13 @@ impl Default for Config {
 #[tokio::main]
 async fn main() -> Result<()> {
     dotenv().expect("Failed to load .env file");
+    std::env::set_var("RUST_LOG", "debug");
+    env_logger::Builder::from_env(Env::default().default_filter_or("debug")).init();
 
     let config = Config::default();
 
     let pool = setup_db_pool().await;
     let arc_pool = Arc::new(pool);
-
     let user_repository = UserRepository::new(arc_pool.clone());
     let company_repository = CompanyRepository::new(arc_pool.clone());
     let event_repository = EventRepository::new(arc_pool.clone());
@@ -125,69 +103,23 @@ async fn main() -> Result<()> {
             .app_data(associated_company_repo.clone())
             .app_data(timesheet_repo.clone())
             .app_data(comment_repo.clone())
+            .wrap(Logger::default())
+            .wrap(Logger::new("%a %{User-Agent}i"))
             .service(index)
-            .service(get_user)
-            .service(create_user)
-            .service(update_user)
-            .service(delete_user)
-            .service(get_user_avatar)
-            .service(upload_user_avatar)
-            .service(remove_user_avatar)
-            .service(get_company)
-            .service(get_all_companies)
-            .service(create_company)
-            .service(update_company)
-            .service(delete_company)
-            .service(get_company_avatar)
-            .service(upload_company_avatar)
-            .service(remove_company_avatar)
-            .service(get_events)
-            .service(get_event)
-            .service(create_event)
-            .service(update_event)
-            .service(delete_event)
-            .service(get_event_avatar)
-            .service(upload_event_avatar)
-            .service(remove_event_avatar)
-            .service(get_employment)
-            .service(get_employments_per_user)
-            .service(get_subordinates)
-            .service(create_employment)
-            .service(update_employment)
-            .service(delete_employment)
-            .service(get_all_assigned_staff)
-            .service(get_assigned_staff)
-            .service(create_assigned_staff)
-            .service(update_assigned_staff)
-            .service(delete_all_rejected_assigned_staff)
-            .service(delete_assigned_staff)
-            .service(get_event_tasks)
-            .service(get_event_task)
-            .service(create_task)
-            .service(update_task)
-            .service(delete_task)
-            .service(get_all_event_staff)
-            .service(get_event_staff)
-            .service(create_event_staff)
-            .service(update_event_staff)
-            .service(delete_all_rejected_event_staff)
-            .service(delete_event_staff)
-            .service(get_all_associated_companies)
-            .service(get_all_associated_companies_per_event_and_user)
-            .service(create_associated_company)
-            .service(update_associated_company)
-            .service(delete_associated_company)
-            .service(get_all_event_comments)
-            .service(create_event_comment)
-            .service(get_all_task_comments)
-            .service(create_task_comment)
-            .service(update_comment)
-            .service(delete_comment)
-            .service(get_all_timesheets_for_employment)
-            .service(get_timesheet)
-            .service(create_timesheet)
-            .service(update_timesheet)
-            .service(reset_timesheet_data)
+            .configure(configure_user_endpoints)
+            .configure(configure_company_endpoints)
+            .configure(configure_event_endpoints)
+            .configure(configure_employment_endpoints)
+            .configure(configure_assigned_staff_endpoints)
+            .configure(configure_task_endpoints)
+            .configure(configure_staff_endpoints)
+            .configure(configure_associated_company_endpoints)
+            .configure(configure_comment_endpoints)
+            .configure(configure_timesheet_endpoints)
+            // Temporary
+            .service(get_users_login)
+            // For serving css and static files overall
+            .service(ActixFiles::new("/", "./src/static").prefer_utf8(true))
     })
     .bind((config.host, config.port))?
     .run()

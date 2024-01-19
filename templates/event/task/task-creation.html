@@ -1,0 +1,67 @@
+<div
+  id="task-creation"
+  class="flex flex-col space-y-2 items-center w-full rounded-md bg-foreground1"
+>
+  <h2 class="font-mono font-bold text-txthl text-2xl">Task Creation</h2>
+  <form
+    hx-post="/event/{{ event_id }}/task"
+    hx-swap="innerHTML"
+    hx-target="#content"
+    hx-ext="json-enc"
+    class="flex flex-col space-y-2 w-full items-center"
+  >
+    <input
+      type="hidden"
+      class="hidden"
+      id="creator_id"
+      name="creator_id"
+      value="{{ creator_id }}"
+    />
+    <div class="flex flex-col space-x-2">
+      <label for="title" class="font-mono font-lg text-txt">Title:</label>
+      <input
+        name="title"
+        id="title"
+        class="font-mono font-lg text-txt bg-foreground2 rounded-md p-1"
+      />
+    </div>
+    <div class="flex flex-col space-x-2">
+      <label for="description" class="font-mono font-lg text-txt"
+        >Description:</label
+      >
+      <input
+        name="description"
+        id="description"
+        class="font-mono font-lg text-txt bg-foreground2 rounded-md p-1"
+      />
+    </div>
+    <div class="flex flex-col space-x-2">
+      <label for="priority" class="font-mono font-lg text-txt"
+        >Task Priority:</label
+      >
+      <select
+        id="priority"
+        name="priority"
+        class="font-mono text-lg text-txt bg-foreground2"
+      >
+        <option value="Low">Low</option>
+        <option value="Medium">Medium</option>
+        <option value="High">High</option>
+      </select>
+    </div>
+    <button
+      type="submit"
+      class="font-mono text-txthl text-lg bg-foreground2 rounded-md p-1"
+    >
+      Submit
+    </button>
+  </form>
+  <button
+    hx-get="/event/{{ event_id }}/staff/{{ creator_id }}/tasks-panel"
+    hx-swap="innerHTML"
+    hx-target="#content"
+    class="font-mono text-txthl text-lg bg-foreground2 rounded-md p-1"
+  >
+    Cancel
+  </button>
+</div>

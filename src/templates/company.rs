@@ -68,17 +68,36 @@ impl From<CompanyExtended> for CompanyTemplate {
     }
 }
 
-#[derive(Template, Debug, Deserialize)]
-#[template(path = "company/company-lite.html")]
-pub struct CompanyLiteTemplate {
+#[derive(Template, Deserialize)]
+#[template(path = "company/company-edit.html")]
+pub struct CompanyEditTemplate {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub name: String,
+    pub description: Option<String>,
+    pub phone: String,
+    pub email: String,
+    pub website: Option<String>,
+    pub crn: String,
+    pub vatin: String,
+    pub country: String,
+    pub region: String,
+    pub city: String,
+    pub street: String,
+    pub postal_code: String,
+    pub address_number: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CompanyLite {
     pub id: Uuid,
     pub name: String,
     pub avatar_url: String,
 }
 
-impl From<Company> for CompanyLiteTemplate {
+impl From<Company> for CompanyLite {
     fn from(company: Company) -> Self {
-        CompanyLiteTemplate {
+        CompanyLite {
             id: company.id,
             name: company.name,
             avatar_url: company.avatar_url,
@@ -89,28 +108,27 @@ impl From<Company> for CompanyLiteTemplate {
 #[derive(Template, Debug, Deserialize)]
 #[template(path = "company/companies.html")]
 pub struct CompaniesTemplate {
-    pub companies: Vec<CompanyLiteTemplate>,
+    pub companies: Vec<CompanyLite>,
 }
 
-#[derive(Template, Debug, Deserialize)]
-#[template(path = "company/associated-company.html")]
-pub struct AssociatedCompanyTemplate {
+#[derive(Debug, Deserialize)]
+pub struct AssociatedCompanyInfo {
     pub event_id: Uuid,
-    pub company: CompanyLiteTemplate,
+    pub company: CompanyLite,
     pub association_type: Association,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
 }
 
-impl From<AssociatedCompanyExtended> for AssociatedCompanyTemplate {
+impl From<AssociatedCompanyExtended> for AssociatedCompanyInfo {
     fn from(associated: AssociatedCompanyExtended) -> Self {
-        let company_lite = CompanyLiteTemplate {
+        let company_lite = CompanyLite {
             id: associated.company.id,
             name: associated.company.name,
             avatar_url: associated.company.avatar_url,
         };
 
-        AssociatedCompanyTemplate {
+        AssociatedCompanyInfo {
             event_id: associated.event.id,
             company: company_lite,
             association_type: associated.association_type,
@@ -121,7 +139,33 @@ impl From<AssociatedCompanyExtended> for AssociatedCompanyTemplate {
 }
 
 #[derive(Template, Debug, Deserialize)]
-#[template(path = "company/associated-companies.html")]
+#[template(path = "company/associated-company/associated-companies.html")]
 pub struct AssociatedCompaniesTemplate {
-    pub associated_companies: Vec<AssociatedCompanyTemplate>,
+    pub editable: bool,
+    pub associated_companies: Vec<AssociatedCompanyInfo>,
+}
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "company/associated-company/associated-company-management.html")]
+pub struct AssociatedCompanyManagementTemplate {
+    pub event_id: Uuid,
+    pub companies: Vec<AssociatedCompanyInfo>,
+}
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "company/associated-company/associated-company-edit.html")]
+pub struct AssociatedCompanyEditTemplate {
+    pub company: AssociatedCompanyInfo,
+}
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "company/associated-company/associated-company-editable.html")]
+pub struct EditableAssociatedCompanyTemplate {
+    pub company: AssociatedCompanyInfo,
+}
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "company/companies-info.html")]
+pub struct CompaniesInfoTemplate {
+    pub companies: Vec<CompanyLite>,
 }

@@ -1,12 +1,12 @@
-use crate::repositories::timesheet::models::TimesheetWithEvent;
+use std::collections::HashMap;
+
+use crate::repositories::timesheet::models::{TimesheetWithEvent, Workday};
 use askama::Template;
 use chrono::{NaiveDate, NaiveDateTime};
 use serde::Deserialize;
 use sqlx::types::uuid;
-use std::collections::HashMap;
 use uuid::Uuid;
 
-use crate::utils::year_and_month::YearAndMonth;
 use crate::{models::ApprovalStatus, repositories::timesheet::models::TimesheetWithWorkdays};
 
 #[derive(Template, Debug, Deserialize)]
@@ -15,9 +15,42 @@ pub struct WorkdayTemplate {
     pub timesheet_id: Uuid,
     pub date: NaiveDate,
     pub total_hours: f32,
-    pub comment: String,
+    pub comment: Option<String>,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
+}
+
+impl From<Workday> for WorkdayTemplate {
+    fn from(workday: Workday) -> Self {
+        WorkdayTemplate {
+            timesheet_id: workday.timesheet_id,
+            date: workday.date,
+            total_hours: workday.total_hours,
+            comment: workday.comment,
+            created_at: workday.created_at,
+            edited_at: workday.edited_at,
+        }
+    }
+}
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "employment/timesheet/workday-edit.html")]
+pub struct WorkdayEditTemplate {
+    pub timesheet_id: Uuid,
+    pub date: NaiveDate,
+    pub total_hours: f32,
+    pub comment: Option<String>,
+}
+
+impl From<Workday> for WorkdayEditTemplate {
+    fn from(workday: Workday) -> Self {
+        WorkdayEditTemplate {
+            timesheet_id: workday.timesheet_id,
+            date: workday.date,
+            total_hours: workday.total_hours,
+            comment: workday.comment,
+        }
+    }
 }
 
 #[derive(Template, Debug, Deserialize)]
@@ -40,7 +73,7 @@ pub struct TimesheetTemplate {
     pub work_days: Vec<WorkdayTemplate>,
     pub is_editable: bool,
     pub status: ApprovalStatus,
-    pub manager_note: String,
+    pub manager_note: Option<String>,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
 }
@@ -54,7 +87,7 @@ impl From<TimesheetWithWorkdays> for TimesheetTemplate {
                 timesheet_id: workday.timesheet_id,
                 date: workday.date,
                 total_hours: workday.total_hours,
-                comment: workday.comment.unwrap_or("No comment.".to_string()),
+                comment: workday.comment,
                 created_at: workday.created_at,
                 edited_at: workday.edited_at,
             })
@@ -73,19 +106,15 @@ impl From<TimesheetWithWorkdays> for TimesheetTemplate {
             work_days: workdays,
             is_editable: full_timesheet.timesheet.is_editable,
             status: full_timesheet.timesheet.approval_status,
-            manager_note: full_timesheet
-                .timesheet
-                .manager_note
-                .unwrap_or("No note.".to_string()),
+            manager_note: full_timesheet.timesheet.manager_note,
             created_at: full_timesheet.timesheet.created_at,
             edited_at: full_timesheet.timesheet.edited_at,
         }
     }
 }
 
-#[derive(Template, Debug, Deserialize)]
-#[template(path = "employment/timesheet/timesheet-lite.html")]
-pub struct TimesheetLiteTemplate {
+#[derive(Debug, Deserialize)]
+pub struct TimesheetLite {
     pub id: Uuid,
     pub user_id: Uuid,
     pub company_id: Uuid,
@@ -102,9 +131,9 @@ pub struct TimesheetLiteTemplate {
     pub edited_at: NaiveDateTime,
 }
 
-impl From<TimesheetWithEvent> for TimesheetLiteTemplate {
+impl From<TimesheetWithEvent> for TimesheetLite {
     fn from(timesheet: TimesheetWithEvent) -> Self {
-        TimesheetLiteTemplate {
+        TimesheetLite {
             id: timesheet.id,
             user_id: timesheet.user_id,
             company_id: timesheet.company_id,
@@ -125,10 +154,12 @@ impl From<TimesheetWithEvent> for TimesheetLiteTemplate {
 #[derive(Template, Debug, Deserialize)]
 #[template(path = "employment/timesheet/timesheets.html")]
 pub struct TimesheetsTemplate {
-    pub timesheets: Vec<TimesheetLiteTemplate>,
+    pub timesheets: Vec<TimesheetLite>,
+    pub user_id: Uuid,
+    pub company_id: Uuid,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct DetailedWage {
     // A tax value which is used for computing employee's `net wage` and such.
     pub tax_base: f32,
@@ -137,9 +168,6 @@ pub struct DetailedWage {
     //
     pub net_wage: f32,
 
-    // Number of worked hours per timesheet or a whole month.
-    pub worked_hours: f32,
-
     // Note: In `wage_currency` units.
     pub employee_social_insurance: f32,
     pub employee_health_insurance: f32,
@@ -147,47 +175,37 @@ pub struct DetailedWage {
     pub employer_health_insurance: f32,
 }
 
-impl Default for DetailedWage {
-    fn default() -> DetailedWage {
-        DetailedWage {
-            tax_base: 0.0,
-            net_wage: 0.0,
-            worked_hours: 0.0,
-            employee_social_insurance: 0.0,
-            employee_health_insurance: 0.0,
-            employer_social_insurance: 0.0,
-            employer_health_insurance: 0.0,
-        }
-    }
-}
-
-#[derive(Template, Debug, Deserialize)]
-#[template(path = "employment/timesheet/timesheet_wage_detailed.html")]
+#[derive(Debug, Deserialize)]
 pub struct TimesheetWageDetailed {
     // A total wage data for selected timesheet's work.
     pub total_wage: DetailedWage,
 
     pub wage_currency: String,
-    pub hourly_wage: f32,
 
-    //
-    // A wage employee is supposed to get for selected event's work,
-    // divided into months.
-    //
-    pub month_to_detailed_wage: HashMap<YearAndMonth, DetailedWage>,
+    pub month_to_detailed_wage: HashMap<String, DetailedWage>,
 
     // Note: Empty value means a wage computation went well and data are valid.
     pub error_option: Option<String>,
 }
 
-impl Default for TimesheetWageDetailed {
-    fn default() -> TimesheetWageDetailed {
-        TimesheetWageDetailed {
-            total_wage: DetailedWage::default(),
-            wage_currency: "".to_string(),
-            hourly_wage: 0.0,
-            month_to_detailed_wage: HashMap::new(),
-            error_option: None,
-        }
-    }
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "employment/timesheet/timesheet-wage.html")]
+pub struct TimesheetCalculateTemplate {
+    pub wage: TimesheetWageDetailed,
+    pub timesheet_id: Uuid,
+    pub in_submit_mode: bool,
+}
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "employment/timesheet/timesheets-review.html")]
+pub struct TimesheetsReviewTemplate {
+    pub timesheets: Vec<TimesheetLite>,
+    pub manager_id: Uuid,
+    pub company_id: Uuid,
+}
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "employment/timesheet/timesheet-review.html")]
+pub struct TimesheetReviewTemplate {
+    pub sheet: TimesheetTemplate,
 }

@@ -1,0 +1,20 @@
+<div
+  id="associated-container"
+  class="flex flex-col items-center align-middle w-full"
+>
+  <h3 class="text-txt font-mono text-2xl">Associated Companies</h3>
+  <div
+    id="associated-companies"
+    class="flex flex-row gap-2 items-center align-middle w-full"
+  >
+    {% if editable %} 
+        {% for company in associated_companies %} 
+            {% include "associated-company-editable.html" %} 
+        {% endfor %} 
+    {% else %} 
+        {% for company in associated_companies %} 
+            {% include "associated-company.html" %}
+        {% endfor %}
+    {% endif %}
+  </div>
+</div>

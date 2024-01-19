@@ -44,7 +44,7 @@ pub mod user_repo_tests {
         repositories::{
             repository::DbRepository,
             user::{
-                models::{NewUser, UserData},
+                models::{NewUser, UserData, UsersQuery},
                 user_repo::UserRepository,
             },
         },
@@ -129,7 +129,10 @@ pub mod user_repo_tests {
 
         {
             let users = user_repo
-                ._read_all()
+                ._read_all(UsersQuery {
+                    name: None,
+                    email: None,
+                })
                 .await
                 .expect("Read all should succeed");
 
@@ -141,11 +144,11 @@ pub mod user_repo_tests {
 
             let user2 = &users[1];
 
-            assert_eq!(user2.name, "Tana Smith");
+            assert_eq!(user2.name, "John Doe");
 
             let user3 = &users[2];
 
-            assert_eq!(user3.name, "John Doe");
+            assert_eq!(user3.name, "Tana Smith");
         }
 
         user_repo.disconnect().await;
@@ -339,7 +342,7 @@ pub mod company_repo_tests {
     use sqlx::PgPool;
     use uuid::uuid;
 
-    use crate::test_constants;
+    use crate::test_constants::{self, USER0_ID};
 
     #[sqlx::test(fixtures("companies"), migrations = "migrations/no_seed")]
     async fn create_company_test(pool: PgPool) -> DbResult<()> {
@@ -367,7 +370,7 @@ pub mod company_repo_tests {
         };
 
         let new_company = company_repo
-            .create(company_data.clone(), address_data.clone())
+            .create(company_data.clone(), address_data.clone(), USER0_ID)
             .await
             .expect("Create should succeed");
 
@@ -460,6 +463,7 @@ pub mod company_repo_tests {
             let filter = CompanyFilter {
                 limit: Some(2),
                 offset: Some(2),
+                name: None,
             };
 
             let companies_ = company_repo
@@ -472,6 +476,7 @@ pub mod company_repo_tests {
             let filter = CompanyFilter {
                 limit: None,
                 offset: None,
+                name: None,
             };
 
             let companies = company_repo
@@ -487,11 +492,11 @@ pub mod company_repo_tests {
 
             let company2 = &companies[1];
 
-            assert_eq!(company2.name, "ReportLab");
+            assert_eq!(company2.name, "Prusa Research");
 
             let company3 = &companies[2];
 
-            assert_eq!(company3.name, "Prusa Research");
+            assert_eq!(company3.name, "ReportLab");
         }
 
         company_repo.disconnect().await;
@@ -818,7 +823,7 @@ pub mod event_repo_tests {
     use sqlx::PgPool;
     use uuid::uuid;
 
-    use crate::test_constants;
+    use crate::test_constants::{self, COMPANY0_ID, USER0_ID};
 
     #[sqlx::test(fixtures("events"), migrations = "migrations/no_seed")]
     async fn create(pool: PgPool) -> DbResult<()> {
@@ -827,6 +832,8 @@ pub mod event_repo_tests {
         let mut event_repo = EventRepository::new(arc_pool);
 
         let new_event_data = NewEvent {
+            company_id: COMPANY0_ID,
+            creator_id: USER0_ID,
             name: "Test Event".to_string(),
             description: Some("Test Description".to_string()),
             website: Some("test.com".to_string()),
@@ -920,11 +927,11 @@ pub mod event_repo_tests {
 
             let event = &events[0];
 
-            assert_eq!(event.name, "Woodstock");
+            assert_eq!(event.name, "PyCon");
 
             let event = &events[1];
 
-            assert_eq!(event.name, "PyCon");
+            assert_eq!(event.name, "Woodstock");
         }
 
         {
@@ -973,7 +980,8 @@ pub mod event_repo_tests {
                 website: Some("test.com".to_string()),
                 start_date: Some(NaiveDate::from_ymd_opt(2025, 9, 15).unwrap()),
                 end_date: Some(NaiveDate::from_ymd_opt(2025, 9, 16).unwrap()),
-                avatar_url: Some("test.jpg".to_string()),
+                accepts_staff: None,
+                avatar_url: None,
             };
 
             let updated_event = event_repo
@@ -987,7 +995,6 @@ pub mod event_repo_tests {
             assert_eq!(updated_event.website, new_event_data.website);
             assert_eq!(updated_event.start_date, new_event_data.start_date.unwrap());
             assert_eq!(updated_event.end_date, new_event_data.end_date.unwrap());
-            assert_eq!(updated_event.avatar_url, new_event_data.avatar_url.unwrap());
 
             let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
             let time_difference_edited = time - updated_event.edited_at;
@@ -1005,6 +1012,7 @@ pub mod event_repo_tests {
                 website: None,
                 start_date: None,
                 end_date: None,
+                accepts_staff: None,
                 avatar_url: None,
             };
 
@@ -1025,6 +1033,7 @@ pub mod event_repo_tests {
                 website: None,
                 start_date: None,
                 end_date: None,
+                accepts_staff: None,
                 avatar_url: None,
             };
 
@@ -1060,6 +1069,7 @@ pub mod event_repo_tests {
                 website: None,
                 start_date: None,
                 end_date: None,
+                accepts_staff: None,
                 avatar_url: None,
             };
 
@@ -1303,11 +1313,11 @@ pub mod associated_company_repo_tests {
 
             let associated_company = &associated_companies[0];
 
-            assert_eq!(associated_company.event.name, "Woodstock");
+            assert_eq!(associated_company.event.name, "PyCon");
 
             let associated_company = &associated_companies[1];
 
-            assert_eq!(associated_company.event.name, "PyCon");
+            assert_eq!(associated_company.event.name, "Woodstock");
         }
 
         associated_company_repo.disconnect().await;
@@ -1704,17 +1714,15 @@ pub mod employment_repo_tests {
 
         let employment = &employments[0];
 
-        assert_eq!(employment.company.name, "AMD");
-        assert_eq!(employment.manager.clone().unwrap().name, "Dave Null");
-        assert_eq!(employment.hourly_wage, 250.0);
-        assert_eq!(employment.user_id, test_constants::USER1_ID);
+        assert_eq!(employment.company_id, company_id);
+        assert_eq!(employment.manager_id, test_constants::USER0_ID);
+        assert_eq!(employment.user_id, test_constants::USER2_ID);
 
         let employment = &employments[1];
 
-        assert_eq!(employment.company.name, "AMD");
-        assert_eq!(employment.manager.clone().unwrap().name, "Dave Null");
-        assert_eq!(employment.hourly_wage, 200.0);
-        assert_eq!(employment.user_id, test_constants::USER2_ID);
+        assert_eq!(employment.company_id, company_id);
+        assert_eq!(employment.manager_id, test_constants::USER0_ID);
+        assert_eq!(employment.user_id, test_constants::USER1_ID);
 
         employment_repo.disconnect().await;
 
@@ -2946,7 +2954,7 @@ pub mod comment_repo_tests {
         let comment_id = test_constants::COMMENT0_ID;
 
         let comment = comment_repo
-            ._read_one(comment_id)
+            .read_one(comment_id)
             .await
             .expect("Read should succeed");
 
@@ -3044,7 +3052,7 @@ pub mod comment_repo_tests {
             let comment_id = test_constants::COMMENT0_ID;
 
             let _comment = comment_repo
-                ._read_one(comment_id)
+                .read_one(comment_id)
                 .await
                 .expect("Read should succeed");
 
@@ -3103,7 +3111,7 @@ pub mod comment_repo_tests {
             let comment_id = test_constants::COMMENT0_ID;
 
             let comment = comment_repo
-                ._read_one(comment_id)
+                .read_one(comment_id)
                 .await
                 .expect("Read should succeed");
 
@@ -3115,7 +3123,7 @@ pub mod comment_repo_tests {
                 .expect("Delete should succeed");
 
             let _ = comment_repo
-                ._read_one(comment_id)
+                .read_one(comment_id)
                 .await
                 .expect_err("Read should not succeed");
 
@@ -3146,7 +3154,7 @@ pub mod comment_repo_tests {
             let comment_id = test_constants::COMMENT0_ID;
 
             let comment = comment_repo
-                ._read_one(comment_id)
+                .read_one(comment_id)
                 .await
                 .expect("Read should succeed");
 
@@ -3155,7 +3163,7 @@ pub mod comment_repo_tests {
             comment_repo.delete(comment_id).await.unwrap();
 
             let _ = comment_repo
-                ._read_one(comment_id)
+                .read_one(comment_id)
                 .await
                 .expect_err("Read should not succeed");
         }
@@ -3166,7 +3174,7 @@ pub mod comment_repo_tests {
             let comment_id = test_constants::COMMENT0_ID;
 
             let _ = comment_repo
-                ._read_one(comment_id)
+                .read_one(comment_id)
                 .await
                 .expect_err("Read should not succeed");
 
@@ -3308,7 +3316,7 @@ mod timesheet_repo_tests {
                 offset: None,
             };
             let result = timesheet_repo
-                .read_all_per_employment(user_id, company_id, data)
+                .read_all_timesheets_per_employment(user_id, company_id, data)
                 .await
                 .expect("Should succed");
             assert_eq!(result.len(), 1);
@@ -3324,7 +3332,7 @@ mod timesheet_repo_tests {
                 offset: None,
             };
             let result = timesheet_repo
-                .read_all_per_employment(user_id, company_id, data)
+                .read_all_timesheets_per_employment(user_id, company_id, data)
                 .await
                 .expect("Should succed");
             assert_eq!(result.len(), 0);
@@ -3358,13 +3366,9 @@ mod timesheet_repo_tests {
             assert_eq!(result.timesheet.user_id, user_id);
 
             let data = TimesheetUpdateData {
-                start_date: None,
-                end_date: None,
-                total_hours: None,
                 is_editable: None,
                 status: None,
                 manager_note: Some("Change X and Y.".to_string()),
-                workdays: None,
             };
 
             let result = timesheet_repo
@@ -3409,13 +3413,9 @@ mod timesheet_repo_tests {
             assert_eq!(result.timesheet.user_id, user_id);
 
             let data = TimesheetUpdateData {
-                start_date: None,
-                end_date: None,
-                total_hours: None,
                 is_editable: None,
                 status: None,
                 manager_note: None,
-                workdays: None,
             };
 
             let _ = timesheet_repo
@@ -3434,19 +3434,15 @@ mod timesheet_repo_tests {
                 .expect_err("Should not succeed.");
 
             let data = TimesheetUpdateData {
-                start_date: None,
-                end_date: None,
-                total_hours: None,
                 is_editable: None,
                 status: None,
                 manager_note: Some("Change X and Y.".to_string()),
-                workdays: None,
             };
 
             let _ = timesheet_repo
                 .update(sheet_id, data)
                 .await
-                .expect_err("Should succeed.");
+                .expect_err("Should not succeed.");
         }
 
         // Deleted sheet
@@ -3476,13 +3472,9 @@ mod timesheet_repo_tests {
                 .expect("Should succeed");
 
             let data = TimesheetUpdateData {
-                start_date: None,
-                end_date: None,
-                total_hours: None,
                 is_editable: None,
                 status: None,
                 manager_note: Some("Change X and Y.".to_string()),
-                workdays: None,
             };
 
             let _ = timesheet_repo

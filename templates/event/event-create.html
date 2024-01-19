@@ -1,0 +1,82 @@
+<div id="event-create" class="flex flex-col space-y-10 items-center w-full">
+  <h2 class="font-mono text-txthl text-4xl">Create Event</h2>
+  <form
+    hx-post="/event"
+    hx-swap="innerHTML"
+    hx-target="#content"
+    hx-ext="json-enc"
+    class="flex flex-col space-y-5 p-3 items-center w-8/12 bg-foreground1 rounded-md"
+  >
+    <div class="flex flex-row justify-between self-center space-x-5">
+      <label class="font-mono text-lg text-txt" for="name">Name:</label>
+      <input
+        type="text"
+        id="name"
+        name="name"
+        class="font-mono text-lg text-txt bg-foreground2 rounded-md"
+      />
+    </div>
+    <div class="flex flex-row justify-between self-center space-x-5">
+      <label class="font-mono text-lg text-txt" for="description"
+        >Description:</label
+      >
+      <input
+        type="text"
+        id="description"
+        name="description"
+        class="font-mono text-lg text-txt bg-foreground2 rounded-md"
+      />
+    </div>
+    <div class="flex flex-row justify-between self-center space-x-5">
+      <label class="font-mono text-lg text-txt" for="website">Website:</label>
+      <input
+        type="url"
+        id="website"
+        name="website"
+        class="font-mono text-lg text-txt bg-foreground2 rounded-md"
+      />
+    </div>
+    <div class="flex flex-row justify-between self-center space-x-5">
+      <label class="font-mono text-lg text-txt" for="start_date"
+        >Event Work Start:</label
+      >
+      <input
+        type="date"
+        id="start_date"
+        name="start_date"
+        class="font-mono text-lg text-txt bg-foreground2 rounded-md"
+      />
+    </div>
+    <div class="flex flex-row justify-between self-center space-x-5">
+      <label class="font-mono text-lg text-txt" for="end_date"
+        >Event Work End:</label
+      >
+      <input
+        type="date"
+        id="end_date"
+        name="end_date"
+        class="font-mono text-lg text-txt bg-foreground2 rounded-md"
+      />
+    </div>
+    <input
+      type="hidden"
+      class="hidden"
+      id="creator_id"
+      name="creator_id"
+      value="{{ creator_id }}"
+    />
+    <input
+      type="hidden"
+      class="hidden"
+      id="company_id"
+      name="company_id"
+      value="{{ company_id }}"
+    />
+    <button
+      type="submit"
+      class="font-mono text-txthl text-lg rounded-md p-2 bg-foreground2"
+    >
+      Create Event
+    </button>
+  </form>
+</div>

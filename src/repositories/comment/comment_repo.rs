@@ -72,12 +72,12 @@ impl CommentRepository {
         Ok(full_comment)
     }
 
-    pub async fn _read_one(&self, comment_id: Uuid) -> DbResult<CommentExtended> {
+    pub async fn read_one(&self, comment_id: Uuid) -> DbResult<CommentExtended> {
         // Redis here
-        self._read_one_db(comment_id).await
+        self.read_one_db(comment_id).await
     }
 
-    async fn _read_one_db(&self, comment_id: Uuid) -> DbResult<CommentExtended> {
+    async fn read_one_db(&self, comment_id: Uuid) -> DbResult<CommentExtended> {
         let executor = self.pool.as_ref();
 
         let comment: CommentUserFlattened = sqlx::query_as!(
@@ -202,6 +202,7 @@ impl CommentRepository {
             WHERE 
                 comment.event_id = $1    
                 AND comment.deleted_at IS NULL
+            ORDER BY comment_created_at
             LIMIT $2 OFFSET $3      
             "#,
             event_id,
@@ -249,7 +250,8 @@ impl CommentRepository {
                 INNER JOIN user_record ON comment.author_id = user_record.id 
             WHERE 
                 comment.task_id = $1  
-                AND comment.deleted_at IS NULL  
+                AND comment.deleted_at IS NULL
+            ORDER BY comment_created_at
             LIMIT $2 OFFSET $3      
             "#,
             task_id,
@@ -312,6 +314,19 @@ impl CommentRepository {
             comment_id,
         )
         .fetch_one(executor)
+        .await?;
+
+        Ok(())
+    }
+
+    pub async fn _hard_delete_deleted_comments(&self) -> DbResult<()> {
+        let executor = self.pool.as_ref();
+
+        sqlx::query!(
+            "DELETE from comment
+             WHERE deleted_at IS NOT NULL"
+        )
+        .execute(executor)
         .await?;
 
         Ok(())

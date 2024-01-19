@@ -41,8 +41,7 @@ impl From<User> for UserTemplate {
     }
 }
 
-#[derive(Template, Debug, Deserialize)]
-#[template(path = "user/user-lite.html")]
+#[derive(Debug, Deserialize)]
 pub struct UserLiteTemplate {
     pub id: Uuid,
     pub name: String,
@@ -84,4 +83,48 @@ impl From<User> for UserLiteTemplate {
             avatar_url: user.avatar_url,
         }
     }
+}
+
+#[derive(Template, Debug, Deserialize)]
+#[template(path = "user/users.html")]
+pub struct UsersTemplate {
+    pub users: Vec<UserLiteTemplate>,
+}
+
+#[derive(Template)]
+#[template(path = "user/user-edit.html")]
+pub struct UserEditTemplate {
+    pub id: Uuid,
+    pub name: String,
+    pub email: String,
+    pub birth: NaiveDate,
+    pub gender: Gender,
+}
+
+pub struct UserInfo {
+    pub id: Uuid,
+    pub name: String,
+    pub email: String,
+}
+
+impl From<User> for UserInfo {
+    fn from(value: User) -> Self {
+        UserInfo {
+            id: value.id,
+            name: value.name,
+            email: value.email,
+        }
+    }
+}
+
+#[derive(Template)]
+#[template(path = "user/user-info.html")]
+pub struct UserInfoTemplate {
+    pub user_info_vec: Vec<UserInfo>,
+}
+
+#[derive(Template)]
+#[template(path = "user/admin/admin.html")]
+pub struct AdminTemplate {
+    pub title: String,
 }

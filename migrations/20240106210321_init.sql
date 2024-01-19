@@ -263,6 +263,7 @@ CREATE TABLE event_staff
         REFERENCES employment (user_id, company_id),
     FOREIGN KEY (event_id) REFERENCES event (id),
     FOREIGN KEY (decided_by) REFERENCES event_staff (id),
+    UNIQUE (user_id, event_id), -- Logic: Users should be only registered to an event once.
     -------------------------------------------------------
     CONSTRAINT check_event_staff_decided_by_null_iff_pending
         CHECK (NOT(decided_by IS NULL AND status != 'pending')),

@@ -4,9 +4,11 @@ use sqlx::{postgres::PgPool, Postgres, Transaction};
 use std::{ops::DerefMut, sync::Arc};
 use uuid::Uuid;
 
+use crate::models::{EmployeeLevel, EmploymentContract};
+
 use super::models::{
     AssociatedCompany, AssociatedCompanyData, AssociatedCompanyExtended, AssociatedCompanyFilter,
-    AssociatedCompanyFlattened, NewAssociatedCompany,
+    AssociatedCompanyFlattened, AssociatedCompanyLite, NewAssociatedCompany,
 };
 
 use crate::models::Association;
@@ -76,7 +78,7 @@ impl AssociatedCompanyRepository {
         self.read_one_db(company_id, event_id).await
     }
 
-    pub async fn read_one_db(
+    async fn read_one_db(
         &self,
         company_id: Uuid,
         event_id: Uuid,
@@ -191,7 +193,8 @@ impl AssociatedCompanyRepository {
         self._read_all_db(filter).await
     }
 
-    pub async fn _read_all_db(
+    // ToDo: Consider removing, unused
+    async fn _read_all_db(
         &self,
         filter: AssociatedCompanyFilter,
     ) -> DbResult<Vec<AssociatedCompanyExtended>> {
@@ -254,7 +257,7 @@ impl AssociatedCompanyRepository {
         self.read_all_companies_for_event_db(event_id, filter).await
     }
 
-    pub async fn read_all_companies_for_event_db(
+    async fn read_all_companies_for_event_db(
         &self,
         event_id: Uuid,
         filter: AssociatedCompanyFilter,
@@ -296,6 +299,7 @@ impl AssociatedCompanyRepository {
             INNER JOIN event ON associated_company.event_id = event.id 
             WHERE associated_company.event_id = $1 
               AND associated_company.deleted_at IS NULL
+            ORDER BY "company_name!"
             LIMIT $2 OFFSET $3;
             "#,
             event_id,
@@ -321,7 +325,8 @@ impl AssociatedCompanyRepository {
             .await
     }
 
-    pub async fn _read_all_events_for_company_db(
+    // ToDo: Consider removing, unused.
+    async fn _read_all_events_for_company_db(
         &self,
         company_id: Uuid,
         filter: AssociatedCompanyFilter,
@@ -363,6 +368,7 @@ impl AssociatedCompanyRepository {
             INNER JOIN event ON associated_company.event_id = event.id 
             WHERE associated_company.company_id = $1
               AND associated_company.deleted_at IS NULL
+            ORDER BY "event_name!"
             LIMIT $2 OFFSET $3;
             "#,
             company_id,
@@ -451,6 +457,71 @@ impl AssociatedCompanyRepository {
         if result.is_none() {
             return Err(sqlx::Error::RowNotFound);
         }
+
+        Ok(())
+    }
+
+    pub async fn get_all_associated_companies_for_event_and_user(
+        &self,
+        event_id: Uuid,
+        user_id: Uuid,
+    ) -> DbResult<Vec<AssociatedCompanyLite>> {
+        // ToDo: Redis here if we get the time for it.
+        self.get_all_associated_companies_for_event_and_user_db(event_id, user_id)
+            .await
+    }
+
+    async fn get_all_associated_companies_for_event_and_user_db(
+        &self,
+        event_id: Uuid,
+        user_id: Uuid,
+    ) -> DbResult<Vec<AssociatedCompanyLite>> {
+        let executor = self.pool.as_ref();
+
+        let result = sqlx::query_as!(
+            AssociatedCompanyLite,
+            r#"
+            SELECT company.id AS company_id,
+                   company.name AS company_name,
+                   employment.type AS "employment_type!: EmploymentContract",
+                   employment.level AS "employment_level!: EmployeeLevel",
+                   associated_company.event_id AS event_id,
+                   employment.user_id AS user_id
+            FROM associated_company
+            INNER JOIN employment ON employment.company_id = associated_company.company_id
+            INNER JOIN company ON associated_company.company_id = company.id
+            WHERE associated_company.deleted_at IS NULL
+              AND employment.deleted_at IS NULL
+              AND company.deleted_at IS NULL
+              AND associated_company.event_id = $1
+              AND employment.user_id = $2;
+            "#,
+            event_id,
+            user_id,
+        )
+        .fetch_all(executor)
+        .await?;
+
+        Ok(result)
+    }
+
+    /*
+     * Actually deletes associated companies marked with deleted_at.
+     * This should only be used by administrators or not at all.
+     * Here, we mainly use it for the API testing, so that created
+     * data is cleaned up.
+     */
+    pub async fn _hard_delete_deleted_associated_companies(&self) -> DbResult<()> {
+        let executor = self.pool.as_ref();
+
+        // Associated Company is a 'stub' table, we can delete
+        // without cascading.
+        sqlx::query!(
+            "DELETE FROM associated_company
+             WHERE deleted_at IS NOT NULL;"
+        )
+        .execute(executor)
+        .await?;
 
         Ok(())
     }

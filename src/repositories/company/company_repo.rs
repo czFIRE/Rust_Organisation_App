@@ -1,8 +1,11 @@
 use crate::common::DbResult;
 use async_trait::async_trait;
+use chrono::Utc;
 use sqlx::postgres::PgPool;
 use std::{ops::DerefMut, sync::Arc};
 use uuid::Uuid;
+
+use crate::models::{EmployeeLevel, EmploymentContract};
 
 use super::models::{
     Address, AddressData, AddressUpdateData, Company, CompanyData, CompanyExtended, CompanyFilter,
@@ -35,6 +38,7 @@ impl CompanyRepository {
         &self,
         data: NewCompany,
         address: AddressData,
+        first_employee_id: Uuid,
     ) -> DbResult<CompanyExtended> {
         let mut tx = self.pool.begin().await?;
 
@@ -74,6 +78,26 @@ impl CompanyRepository {
             address.street_number
         )
         .fetch_one(tx.deref_mut())
+        .await?;
+
+        let starter_date = Utc::now().naive_local().date();
+
+        sqlx::query!(
+            r#"
+            INSERT INTO employment ( 
+                user_id, company_id, manager_id, hourly_wage,
+                start_date, end_date, description, type, level
+            )
+            VALUES ($1, $2, $3, 200, $4, date('9999-12-31'), 'First administrator', $5, $6);
+            "#,
+            first_employee_id,
+            company.id,
+            first_employee_id,
+            starter_date,
+            EmploymentContract::Hpp as EmploymentContract,
+            EmployeeLevel::CompanyAdministrator as EmployeeLevel,
+        )
+        .execute(tx.deref_mut())
         .await?;
 
         tx.commit().await?;
@@ -166,15 +190,25 @@ impl CompanyRepository {
     }
 
     pub async fn read_all(&self, filter: CompanyFilter) -> DbResult<Vec<Company>> {
+        let mut name_filter = if filter.name.is_some() {
+            filter.name.expect("Should be some").clone()
+        } else {
+            "".to_string()
+        };
+        name_filter.push('%');
+
         let executor = self.pool.as_ref();
 
         let companies = sqlx::query_as!(
             Company,
             "SELECT * FROM company 
              WHERE deleted_at IS NULL 
+               AND name LIKE $3
+             ORDER BY name
              LIMIT $1 OFFSET $2;",
             filter.limit,
             filter.offset,
+            name_filter,
         )
         .fetch_all(executor)
         .await?;
@@ -209,7 +243,9 @@ impl CompanyRepository {
                 street,
                 postal_code,
                 street_number
-            FROM company INNER JOIN address on company.id = address.company_id LIMIT $1 OFFSET $2;",
+            FROM company INNER JOIN address on company.id = address.company_id 
+            ORDER BY name
+            LIMIT $1 OFFSET $2;",
             filter.limit,
             filter.offset,
         )

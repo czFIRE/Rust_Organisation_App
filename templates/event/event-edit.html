@@ -1,0 +1,135 @@
+<div id="event" class="flex flex-col space-y-5 items-center w-full">
+  <h2 class="font-mono text-4xl text-txthl">Edit Event</h2>
+  <form
+    hx-patch="/event/{{ event.id }}"
+    hx-swap="innerHTML"
+    hx-target="#content"
+    hx-ext="json-enc"
+    hx-confirm="Are you sure you want to make these changes to the event?"
+    class="flex flex-col p-2 space-y-3 align-middle items-center rounded-md bg-foreground1"
+  >
+    <div class="flex flex-row space-x-3">
+      <label for="name" class="font-mono text-xl text-txt">Name:</label>
+      <input
+        id="name"
+        name="name"
+        class="font-mono text-xl text-txt bg-foreground2"
+        value="{{ event.name }}"
+      />
+    </div>
+    <div class="flex flex-row space-x-3">
+      <label for="website" class="font-mono text-xl text-txt">Website:</label>
+      <input
+        id="website"
+        name="website"
+        class="font-mono text-xl text-txt bg-foreground2"
+        value="{{ event.website }}"
+      />
+    </div>
+    <div class="flex flex-row space-x-3">
+      <label for="start_date" class="font-mono text-xl text-txt"
+        >Start Date:</label
+      >
+      <input
+        id="start_date"
+        name="start_date"
+        class="font-mono text-xl text-txt bg-foreground2"
+        type="date"
+        value="{{ event.start_date }}"
+      />
+    </div>
+    <div class="flex flex-row space-x-3">
+      <label for="end" class="font-mono text-xl text-txt">End Date:</label>
+      <input
+        id="end_date"
+        name="end_date"
+        class="font-mono text-xl text-txt bg-foreground2"
+        type="date"
+        value="{{ event.end_date }}"
+      />
+    </div>
+    <div class="flex flex-row space-x-3 w-10/12">
+      <label for="description" class="font-mono text-xl text-txt"
+        >Description:</label
+      >
+      <input
+        id="description"
+        name="description"
+        type="text"
+        class="font-mono text-xl text-txt w-full text-wrap overflow-y-scroll bg-foreground2"
+        value="{{ event.description }}"
+      />
+    </div>
+    <button
+      type="submit"
+      class="font-mono text-xl text-txthl bg-foreground2 rounded-md p-1"
+    >
+      Submit Changes
+    </button>
+  </form>
+  {% if event.accepts_staff %}
+  <button
+    hx-patch="/event/{{ event.id }}"
+    hx-vals='{"accepts_staff": false}'
+    hx-swap="innerHTML"
+    hx-target="#content"
+    hx-ext="json-enc"
+    class="bg-foreground1 font-mono text-rej text-xl p-3"
+  >
+    Disable Staff Registration
+  </button>
+  {% else %}
+  <button
+    hx-patch="/event/{{ event.id }}"
+    hx-vals='{"accepts_staff": true}'
+    hx-swap="innerHTML"
+    hx-target="#content"
+    hx-ext="json-enc"
+    class="bg-foreground1 font-mono text-acc text-xl p-3"
+  >
+    Enable Staff Registration
+  </button>
+  {% endif %}
+  <div class="flex flex-row space-x-5">
+    <form
+      hx-encoding="multipart/form-data"
+      hx-put="/event/{{ event.id }}/avatar"
+      hx-swap="innerHTML"
+      hx-target="#result-text"
+      class="grid grid-cols-4 grid-rows-1 gap-4 bg-foreground1 rounded-md p-2"
+    >
+      <input
+        type="file"
+        id="file"
+        required
+        name="file"
+        accept="image/jpeg"
+        class="col-start-1 col-end-1 row-start-1 row-end-1 text-txt bg-foreground2"
+      />
+      <button
+        type="submit"
+        class="col-start-2 col-end-2 row-start-1 row-end-1 text-txthl bg-foreground2 rounded-md p-1"
+      >
+        Upload
+      </button>
+    </form>
+    <button
+      hx-delete="/event/{{ event.id }}/avatar"
+      hx-swap="innerHTML"
+      hx-target="#result-text"
+      hx-confirm="Truly delete image?"
+      class="text-rej bg-foreground2 rounded-md p-1"
+    >
+      Delete Image
+    </button>
+    <p id="result-text" class="font-mono text-txt text-lg"></p>
+  </div>
+  <button
+    hx-get="/event/{{ editor.event_id }}/staff-panel/{{ editor.user.id }}"
+    hx-swap="innerHTML"
+    hx-target="#content"
+    class="font-mono text-xl text-txthl bg-foreground1 rounded-md p-1"
+  >
+    Cancel
+  </button>
+</div>

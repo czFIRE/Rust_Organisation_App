@@ -1,0 +1,70 @@
+<div id="task-page" class="flex flex-col space-y-5 m-5 items-center w-10/12">
+  <div
+    id="task-info"
+    class="flex flex-col rounded-md bg-foreground1 space-y-1 text-start text-wrap w-full"
+  >
+    {% include "task-single.html" %}
+  </div>
+  <div
+    id="task-actions"
+    class="flex flex-row justify-between rounded-md space-x-10 p-3 m-3 w-full bg-foreground1"
+  >
+    <button
+      hx-get="/event/staff/{{ requester_id }}/tasks-panel"
+      hx-swap="innerHTML"
+      hx-target="#content"
+      class="p-2 rounded-md bg-foreground2 font-mono text-txthl text-lg"
+    >
+      Go Back
+    </button>
+    {% if task.creator_id == requester_id %}
+    <button
+      hx-get="/event/staff/{{ requester_id }}/task-edit/{{ task.id }}"
+      hx-swap="innerHTML"
+      hx-target="#content"
+      class="p-2 rounded-md bg-foreground2 font-mono text-txthl text-lg"
+    >
+      Edit Task
+    </button>
+    <button
+      hx-get="/task/{{task.id}}/staff/{{requester_id}}/management"
+      hx-swap="innerHTML"
+      hx-target="#content"
+      class="p-2 rounded-md bg-foreground2 font-mono text-txthl text-lg"
+    >
+      Review Applications
+    </button>
+    {% endif %}
+  </div>
+  <div
+    id="assigned-staff-panel"
+    class="flex flex-col rounded-md space-y-1 text-start text-wrap w-full"
+  >
+    {% if assigned_staff.is_some() %} {% include "../staff/assigned-staff.html"
+    %} {% else %}
+    <div id="registration-prompt" class="flex flex-row space-x-3">
+      <p class="font-mono text-txt text-lg">
+        You have not yet applied for this task.
+      </p>
+      <form
+        hx-post="/task/{{ task.id }}/staff"
+        hx-ext="json-enc"
+        hx-swap="outerHTML"
+        hx-target="#registration-prompt"
+        hx-confirm="Are you sure you want to apply?"
+      >
+        <input
+          type="hidden"
+          class="hidden"
+          id="staff_id"
+          name="staff_id"
+          value="{{ requester_id }}"
+        />
+        <button type="submit" class="font-mono text-txthl text-lg">
+          Apply for work.
+        </button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</div>

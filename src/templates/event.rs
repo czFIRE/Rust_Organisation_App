@@ -6,6 +6,8 @@ use uuid::Uuid;
 
 use crate::repositories::event::models::Event;
 
+use super::staff::StaffTemplate;
+
 #[derive(Template, Debug, Deserialize)]
 #[template(path = "event/event.html")]
 pub struct EventTemplate {
@@ -30,7 +32,7 @@ impl From<Event> for EventTemplate {
             description: event
                 .description
                 .unwrap_or("No description set.".to_string()),
-            website: event.website.unwrap_or("No website set.".to_string()),
+            website: event.website.unwrap_or("No website".to_string()),
             accepts_staff: event.accepts_staff,
             start_date: event.start_date,
             end_date: event.end_date,
@@ -40,9 +42,8 @@ impl From<Event> for EventTemplate {
     }
 }
 
-#[derive(Template, Debug, Deserialize)]
-#[template(path = "event/event-lite.html")]
-pub struct EventLiteTemplate {
+#[derive(Debug, Deserialize)]
+pub struct EventLite {
     pub id: Uuid,
     pub avatar_url: String,
     pub name: String,
@@ -51,9 +52,9 @@ pub struct EventLiteTemplate {
     pub end_date: NaiveDate,
 }
 
-impl From<Event> for EventLiteTemplate {
+impl From<Event> for EventLite {
     fn from(event: Event) -> Self {
-        EventLiteTemplate {
+        EventLite {
             id: event.id,
             avatar_url: event.avatar_url,
             name: event.name,
@@ -67,5 +68,19 @@ impl From<Event> for EventLiteTemplate {
 #[derive(Template, Debug, Deserialize)]
 #[template(path = "event/events.html")]
 pub struct EventsTemplate {
-    pub events: Vec<EventLiteTemplate>,
+    pub events: Vec<EventLite>,
+}
+
+#[derive(Template, Debug)]
+#[template(path = "event/event-edit.html")]
+pub struct EventEditTemplate {
+    pub event: EventTemplate,
+    pub editor: StaffTemplate,
+}
+
+#[derive(Template, Debug)]
+#[template(path = "event/event-create.html")]
+pub struct EventCreateTemplate {
+    pub creator_id: Uuid,
+    pub company_id: Uuid,
 }

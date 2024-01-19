@@ -1,6 +1,11 @@
 use crate::{
     common::DbResult,
-    repositories::timesheet::models::{TimeRange, TimesheetStructureData},
+    models::{Association, EventRole},
+    repositories::{
+        associated_company::models::AssociatedCompanyMinimal,
+        event_staff::models::StaffInfo,
+        timesheet::models::{TimeRange, TimesheetStructureData},
+    },
 };
 use async_trait::async_trait;
 use chrono::{DateTime, Datelike, TimeZone, Utc};
@@ -31,7 +36,7 @@ impl crate::repositories::repository::DbRepository for EventRepository {
 
 impl EventRepository {
     pub async fn create(&self, data: NewEvent) -> DbResult<Event> {
-        let executor = self.pool.as_ref();
+        let mut tx = self.pool.begin().await?;
 
         let new_event: Event = sqlx::query_as!(
             Event,
@@ -56,8 +61,43 @@ impl EventRepository {
             data.start_date,
             data.end_date,
         )
-        .fetch_one(executor)
+        .fetch_one(tx.deref_mut())
         .await?;
+
+        let _: AssociatedCompanyMinimal = sqlx::query_as!(
+            AssociatedCompanyMinimal,
+            r#"
+            INSERT INTO associated_company
+                (company_id, event_id, type)
+            VALUES ($1, $2, $3)
+            RETURNING company_id,
+                      event_id;
+            "#,
+            data.company_id,
+            new_event.id,
+            Association::Organizer as Association,
+        )
+        .fetch_one(tx.deref_mut())
+        .await?;
+
+        let _: StaffInfo = sqlx::query_as!(
+            StaffInfo,
+            r#"
+            INSERT INTO event_staff
+                ( user_id, company_id, event_id, role )
+            VALUES
+                ( $1, $2, $3, $4 )
+            RETURNING id;
+            "#,
+            data.creator_id,
+            data.company_id,
+            new_event.id,
+            EventRole::Organizer as EventRole,
+        )
+        .fetch_one(tx.deref_mut())
+        .await?;
+
+        tx.commit().await?;
 
         Ok(new_event)
     }
@@ -96,6 +136,7 @@ impl EventRepository {
                         FROM event 
                         WHERE accepts_staff = $1 
                           AND deleted_at IS NULL
+                        ORDER BY name
                         LIMIT $2 
                         OFFSET $3;"#,
                     accepts_staff,
@@ -111,6 +152,7 @@ impl EventRepository {
                     r#" SELECT * 
                         FROM event
                         WHERE deleted_at IS NULL 
+                        ORDER BY name
                         LIMIT $1 
                         OFFSET $2;"#,
                     filter.limit,
@@ -124,7 +166,6 @@ impl EventRepository {
         Ok(events)
     }
 
-    //TODO: This should probably be in timesheet.
     pub async fn update_timesheet_range_for_event(
         &self,
         event_id: Uuid,
@@ -206,9 +247,12 @@ impl EventRepository {
             && data.website.is_none()
             && data.start_date.is_none()
             && data.end_date.is_none()
+            && data.accepts_staff.is_none()
             && data.avatar_url.is_none()
         {
-            return Err(sqlx::Error::RowNotFound);
+            return Err(sqlx::Error::TypeNotFound {
+                type_name: "User Error".to_string(),
+            });
         }
 
         let mut tx = self.pool.begin().await?;
@@ -221,9 +265,10 @@ impl EventRepository {
                 website = COALESCE($3, website), 
                 start_date = COALESCE($4, start_date), 
                 end_date = COALESCE($5, end_date), 
-                avatar_url = COALESCE($6, avatar_url), 
+                accepts_staff = COALESCE($6, accepts_staff),
+                avatar_url = COALESCE($7, avatar_url),
                 edited_at = NOW() 
-                WHERE id = $7
+                WHERE id = $8
                   AND deleted_at IS NULL 
                 RETURNING id, 
                 name, 
@@ -242,6 +287,7 @@ impl EventRepository {
             data.website,
             data.start_date,
             data.end_date,
+            data.accepts_staff,
             data.avatar_url,
             event_id,
         )
@@ -267,6 +313,35 @@ impl EventRepository {
         }
 
         Ok(result_event)
+    }
+
+    pub async fn switch_accepts_staff(&self, event_id: Uuid) -> DbResult<()> {
+        let executor = self.pool.as_ref();
+
+        let _ = sqlx::query_as!(
+            Event,
+            r#"UPDATE event
+               SET accepts_staff = NOT accepts_staff,
+                   edited_at = NOW()
+               WHERE id = $1
+                 AND deleted_at IS NULL
+               RETURNING id, 
+                         name, 
+                         description, 
+                         website, 
+                         accepts_staff, 
+                         start_date, 
+                         end_date, 
+                         avatar_url, 
+                         created_at, 
+                         edited_at, 
+                         deleted_at;"#,
+            event_id,
+        )
+        .fetch_one(executor)
+        .await?;
+
+        Ok(())
     }
 
     pub async fn delete(&self, event_id: Uuid) -> DbResult<()> {

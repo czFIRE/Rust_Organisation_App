@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::models::{Gender, UserRole, UserStatus};
 
-use super::models::{NewUser, User, UserData};
+use super::models::{NewUser, User, UserData, UsersQuery};
 
 use async_trait::async_trait;
 
@@ -104,16 +104,31 @@ impl UserRepository {
         Ok(user)
     }
 
-    pub async fn _read_all(&self) -> DbResult<Vec<User>> {
+    pub async fn _read_all(&self, filter: UsersQuery) -> DbResult<Vec<User>> {
         // TODO: Redis here
 
-        self._read_all_db().await
+        self._read_all_db(filter).await
     }
 
-    async fn _read_all_db(&self) -> DbResult<Vec<User>> {
+    //ToDo: Use wildcard???
+    async fn _read_all_db(&self, filter: UsersQuery) -> DbResult<Vec<User>> {
         let executor = self.pool.as_ref();
 
-        let user: Vec<User> = sqlx::query_as!(
+        let mut name_filter = if filter.name.is_some() {
+            filter.name.expect("Should be some").clone()
+        } else {
+            "".to_string()
+        };
+        name_filter.push('%');
+
+        let mut email_filter = if filter.email.is_some() {
+            filter.email.expect("Should be some").clone()
+        } else {
+            "".to_string()
+        };
+        email_filter.push('%');
+
+        let users: Vec<User> = sqlx::query_as!(
             User,
             r#"SELECT 
                 id, 
@@ -128,18 +143,23 @@ impl UserRepository {
                 edited_at, 
                 deleted_at 
             FROM 
-                user_record 
+                user_record
+            WHERE deleted_at IS NULL
+              AND name LIKE $1
+              AND email LIKE $2
+            ORDER BY name
             "#,
+            name_filter,
+            email_filter,
         )
         .fetch_all(executor)
         .await?;
 
-        Ok(user)
+        Ok(users)
     }
 
     // Update a user in the DB.
     pub async fn update_user(&self, user_id: Uuid, data: UserData) -> DbResult<User> {
-        // TODO - this should support transactions
         let executor = self.pool.as_ref();
 
         if data.avatar_url.is_none()
@@ -150,15 +170,9 @@ impl UserRepository {
             && data.role.is_none()
         {
             // TODO - add better error
-            return Err(sqlx::Error::RowNotFound);
-        }
-
-        // Should return error if we can't find the user
-        let user_check = self.read_one(user_id).await?;
-
-        if user_check.deleted_at.is_some() {
-            // TODO better error
-            return Err(sqlx::Error::RowNotFound);
+            return Err(sqlx::Error::TypeNotFound {
+                type_name: "User Error".to_string(),
+            });
         }
 
         let user_res: User = sqlx::query_as!(

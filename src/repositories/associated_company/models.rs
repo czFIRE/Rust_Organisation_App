@@ -4,7 +4,7 @@ use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
 
 use crate::{
-    models::Association,
+    models::{Association, EmployeeLevel, EmploymentContract},
     repositories::{company::models::Company, event::models::Event},
 };
 
@@ -119,4 +119,20 @@ impl From<AssociatedCompanyFlattened> for AssociatedCompanyExtended {
             deleted_at: value.deleted_at,
         }
     }
+}
+
+#[derive(Debug, Deserialize, Clone, FromRow)]
+pub struct AssociatedCompanyLite {
+    pub company_id: Uuid,
+    pub company_name: String,
+    pub employment_type: EmploymentContract,
+    pub employment_level: EmployeeLevel,
+    pub event_id: Uuid,
+    pub user_id: Uuid,
+}
+
+#[derive(Debug, Deserialize, Clone, FromRow)]
+pub struct AssociatedCompanyMinimal {
+    pub company_id: Uuid,
+    pub event_id: Uuid,
 }

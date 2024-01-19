@@ -1,6 +1,6 @@
 use crate::models::{ApprovalStatus, EmploymentContract};
 use crate::repositories::wage_preset::models::WagePreset;
-use crate::utils::year_and_month::YearAndMonth;
+use crate::utils::wage_calc::models::YearAndMonth;
 use chrono::{NaiveDate, NaiveDateTime};
 use serde::Deserialize;
 use sqlx::prelude::FromRow;
@@ -58,13 +58,9 @@ pub struct WorkdayUpdateData {
 
 #[derive(Debug, Clone, Deserialize, FromRow)]
 pub struct TimesheetUpdateData {
-    pub start_date: Option<NaiveDate>,
-    pub end_date: Option<NaiveDate>,
-    pub total_hours: Option<f32>,
     pub is_editable: Option<bool>,
     pub status: Option<ApprovalStatus>,
     pub manager_note: Option<String>,
-    pub workdays: Option<Vec<WorkdayUpdateData>>,
 }
 
 #[derive(Debug, Deserialize, FromRow)]

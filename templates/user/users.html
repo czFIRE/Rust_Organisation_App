@@ -1,0 +1,13 @@
+<div id="users" class="flex flex-col space-y-2">
+    {% for user in users %}
+    <div class="flex flex-row space-x-5">
+        <p class="text-txt
+                    text-xl">{{user.name}} </p>
+        <button hx-get="/user/{{user.id}}"
+                hx-swap="outerHTML" 
+                hx-target="#users"
+                class="text-txthl
+                         text-xl">Log in!</a>
+    </div>
+    {% endfor %}
+</div>

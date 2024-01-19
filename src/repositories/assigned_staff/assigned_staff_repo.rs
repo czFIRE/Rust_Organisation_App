@@ -63,7 +63,6 @@ impl AssignedStaffRepository {
             .read_one_tx(new_staff.task_id, new_staff.staff_id, tx)
             .await?;
 
-        // TODO - are we returning the right thing here?
         Ok(assigned_staff)
     }
 
@@ -75,7 +74,6 @@ impl AssignedStaffRepository {
     async fn read_one_db(&self, task_id: Uuid, staff_id: Uuid) -> DbResult<AssignedStaffExtended> {
         let executor = self.pool.as_ref();
 
-        //TODO Note to self, make sure that removing the ? from the end of decided_by:avatar_url did not break anything.
         let assigned_staff: AssignedStaffStaffUserCompanyFlattened = sqlx::query_as!(
             AssignedStaffStaffUserCompanyFlattened,
             r#"
@@ -241,7 +239,6 @@ impl AssignedStaffRepository {
     ) -> DbResult<Vec<AssignedStaffExtended>> {
         let executor = self.pool.as_ref();
 
-        //TODO Note to self, make sure that removing the ? from the end of decided_by:avatar_url did not break anything.
         let assigned_staff_to_task: Vec<AssignedStaffStaffUserCompanyFlattened> = sqlx::query_as!(
             AssignedStaffStaffUserCompanyFlattened,
             r#"
@@ -307,6 +304,7 @@ impl AssignedStaffRepository {
             WHERE 
                 assigned_staff.task_id = $1
                 AND assigned_staff.deleted_at IS NULL
+            ORDER BY user_name
             LIMIT $2 OFFSET $3"#,
             task_id,
             filter.limit,

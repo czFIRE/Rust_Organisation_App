@@ -1,0 +1,130 @@
+<div
+  id="timesheet-{{ sheet.id }}"
+  class="flex flex-col px-10 space-y-6 w-full text-wrap"
+>
+  <h2 class="font-mono text-4xl font-extrabold text-txthl">
+    Timesheet: {{ sheet.event_name }}
+  </h2>
+  <div id="sheet-status" class="flex flex-row space-x-2">
+    {% match sheet.status %} {% when ApprovalStatus::Pending %}
+    <p class="font-mono text-pnd text-lg">Submitted</p>
+    {% when ApprovalStatus::Accepted %}
+    <p class="font-mono text-acc text-lg">Accepted</p>
+    {% when ApprovalStatus::Rejected %}
+    <p class="font-mono text-rej text-lg">Rejected</p>
+    {% when ApprovalStatus::NotRequested %}
+    <p class="font-mono text-txt text-lg">Not Submitted</p>
+    {% endmatch %}
+  </div>
+  <div id="sheet-panel" class="grid grid-cols-5 grid-rows-3 w-full text-wrap">
+    <div class="flex flex-row space-x-4 col-span-2">
+      <svg
+        class="w-6 h-6 text-txt"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5m-9-6h.008v.008H12v-.008ZM12 15h.008v.008H12V15Zm0 2.25h.008v.008H12v-.008ZM9.75 15h.008v.008H9.75V15Zm0 2.25h.008v.008H9.75v-.008ZM7.5 15h.008v.008H7.5V15Zm0 2.25h.008v.008H7.5v-.008Zm6.75-4.5h.008v.008h-.008v-.008Zm0 2.25h.008v.008h-.008V15Zm0 2.25h.008v.008h-.008v-.008Zm2.25-4.5h.008v.008H16.5v-.008Zm0 2.25h.008v.008H16.5V15Z"
+        />
+      </svg>
+      <p class="font-mono text-lg text-txt">
+        {{ sheet.start_date.format("%d.%m.%Y").to_string() }} - {{
+        sheet.end_date.format("%d.%m.%Y").to_string() }}
+      </p>
+    </div>
+    <div class="flex flex-row space-x-4 col-span-2 row-start-2">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="w-6 h-6 text-txt"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+        />
+      </svg>
+      <p class="font-mono text-lg text-txt">
+        <b>Worked Hours:</b> {{ sheet.total_hours }}
+      </p>
+    </div>
+  </div>
+  {% if sheet.status == ApprovalStatus::Pending %}
+  <div
+    id="manager-actions"
+    class="flex flex-col space-y-5 items-center w-10/12"
+  >
+    <button
+      hx-patch="/timesheet/{{ sheet.id }}"
+      hx-swap="innerHTML"
+      hx-target="#content"
+      hx-ext="json-enc"
+      hx-confirm="Are you sure you want to approve this sheet?"
+      hx-vals='{"status": "Accepted"}'
+      class="bg-foreground2 text-acc text-lg font-mono rounded-md p-1"
+    >
+      Approve
+    </button>
+    <form
+      hx-patch="/timesheet/{{ sheet.id }}"
+      hx-swap="#innerHTML"
+      hx-target="#content"
+      hx-ext="json-enc"
+      hx-vals='{"status": "Rejected",
+                        "is_editable": true}'
+      id="reject-form"
+      class="flex flex-row align-middle space-x-5"
+    >
+      <label for="manager_note" class="font-mono text-txt text-xl"
+        >Reason:</label
+      >
+      <input
+        type="text"
+        required
+        maxlength="255"
+        id="manager_note"
+        name="manager_note"
+        value='{{ sheet.manager_note.clone().unwrap_or("".to_string())}}'
+        class="font-mono text-txt text-lg bg-foreground2 rounded-md p-1"
+      />
+      <button
+        type="submit"
+        class="font-mono text-rej text-lg bg-foreground2 rouded-md p-1"
+      >
+        Reject
+      </button>
+    </form>
+  </div>
+  {% endif %}
+  <div
+    id="workdays"
+    class="flex flex-col space-y-3 p-5 items-center w-full bg-foreground1"
+  >
+    <h3 class="font-mono font-bold text-txthl text-2xl">Workdays</h3>
+    {% for workday in sheet.work_days %}
+    <div
+      id="workday-{{ workday.date }}"
+      class="flex flex-row w-10/12 items-start align-middle rounded-md p-2 space-x-12 text-wrap overflow-hidden bg-foreground2"
+    >
+      <p class="font-mono text-txt font-bold text-lg">
+        {{ workday.date.format("%d.%m.%Y").to_string() }}
+      </p>
+      <p class="font-mono text-txt text-lg">Hours: {{ workday.total_hours }}</p>
+      <div class="flex flex-row space-x-1">
+        <p class="font-mono text-txt text-lg">Comment:</p>
+        <p class="font-mono text-txt">
+          {{ workday.comment.clone().unwrap_or("".to_string()) }}
+        </p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>

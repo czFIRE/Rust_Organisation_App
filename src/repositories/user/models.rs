@@ -14,6 +14,12 @@ pub struct NewUser {
     pub role: UserRole,
 }
 
+#[derive(Debug, Deserialize, Clone)]
+pub struct UsersQuery {
+    pub name: Option<String>,
+    pub email: Option<String>,
+}
+
 // TODO needs to be kept the same as in task/models.rs => TaskUserFlattened
 // TODO needs to be kept the same as in staff/models.rs => StaffUserCompanyFlattened
 // TODO needs to be kept the same as in employment/models.rs => EmploymentUserCompanyFlattened
