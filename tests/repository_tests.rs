@@ -3207,8 +3207,8 @@ mod timesheet_repo_tests {
     use sqlx::PgPool;
 
     use crate::test_constants::{
-        COMPANY1_ID, COMPANY2_ID, EVENT0_ID, TIMESHEET0_ID, TIMESHEET1_ID,
-        TIMESHEET4_ID, USER1_ID, USER2_ID,
+        COMPANY1_ID, COMPANY2_ID, EVENT0_ID, TIMESHEET0_ID, TIMESHEET1_ID, TIMESHEET4_ID, USER1_ID,
+        USER2_ID,
     };
     #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
     async fn create(pool: PgPool) {
@@ -3557,10 +3557,12 @@ mod timesheet_repo_tests {
             {
                 let result = timesheet_repo
                     .read_all_with_date_from_to_per_employment(
-                        user_id, company_id,
+                        user_id,
+                        company_id,
                         NaiveDate::from_ymd_opt(1969, 7, 28).unwrap(),
                         NaiveDate::from_ymd_opt(1969, 7, 31).unwrap(),
-                        true)
+                        true,
+                    )
                     .await
                     .expect("Should succeed");
                 assert_eq!(result.len(), 1);
@@ -3575,10 +3577,12 @@ mod timesheet_repo_tests {
             {
                 let result = timesheet_repo
                     .read_all_with_date_from_to_per_employment(
-                        user_id, company_id,
+                        user_id,
+                        company_id,
                         NaiveDate::from_ymd_opt(1969, 7, 28).unwrap(),
                         NaiveDate::from_ymd_opt(1969, 7, 31).unwrap(),
-                        false)
+                        false,
+                    )
                     .await
                     .expect("Should succeed");
                 assert_eq!(result.len(), 1);
@@ -3589,10 +3593,12 @@ mod timesheet_repo_tests {
             {
                 let result = timesheet_repo
                     .read_all_with_date_from_to_per_employment(
-                        user_id, company_id,
+                        user_id,
+                        company_id,
                         NaiveDate::from_ymd_opt(1969, 7, 28).unwrap(),
                         NaiveDate::from_ymd_opt(1969, 8, 30).unwrap(),
-                        true)
+                        true,
+                    )
                     .await
                     .expect("Should succeed");
                 assert_eq!(result.len(), 2);
@@ -3604,10 +3610,12 @@ mod timesheet_repo_tests {
             {
                 let result = timesheet_repo
                     .read_all_with_date_from_to_per_employment(
-                        user_id, company_id,
+                        user_id,
+                        company_id,
                         NaiveDate::from_ymd_opt(1969, 8, 26).unwrap(),
                         NaiveDate::from_ymd_opt(1969, 9, 10).unwrap(),
-                        false)
+                        false,
+                    )
                     .await
                     .expect("Should succeed");
                 assert_eq!(result.len(), 0);
@@ -3624,10 +3632,12 @@ mod timesheet_repo_tests {
 
             let result = timesheet_repo
                 .read_all_with_date_from_to_per_employment(
-                    user_id, company_id,
+                    user_id,
+                    company_id,
                     NaiveDate::from_ymd_opt(1969, 9, 1).unwrap(),
                     NaiveDate::from_ymd_opt(2020, 12, 31).unwrap(),
-                    true)
+                    true,
+                )
                 .await
                 .expect("Should succeed");
             assert_eq!(result.len(), 0);
@@ -3650,14 +3660,12 @@ mod timesheet_repo_tests {
             // Check 2 timesheet are returned.
             //
             {
-            let timesheets_extended
-                = timesheet_repo.read_all_with_date_from_to_per_employment_extended_db(
-                    user_id,
-                    company_id,
-                    date_from,
-                    date_to)
-                .await
-                .expect("Should succeed");
+                let timesheets_extended = timesheet_repo
+                    .read_all_with_date_from_to_per_employment_extended_db(
+                        user_id, company_id, date_from, date_to,
+                    )
+                    .await
+                    .expect("Should succeed");
 
                 assert_eq!(timesheets_extended.timesheets.len(), 2);
                 assert_eq!(timesheets_extended.date_to_wage_presets.len(), 2);
@@ -3676,8 +3684,7 @@ mod wage_preset_repo_tests {
     use organization::{
         common::DbResult,
         repositories::{
-            wage_preset::wage_preset_repo::WagePresetRepository,
-            repository::DbRepository,
+            repository::DbRepository, wage_preset::wage_preset_repo::WagePresetRepository,
         },
     };
     use sqlx::PgPool;
@@ -3709,10 +3716,7 @@ mod wage_preset_repo_tests {
 
         let mut wage_preset_repo = WagePresetRepository::new(arc_pool);
 
-        let presets = wage_preset_repo
-            .read_all()
-            .await
-            .expect("Should succeed");
+        let presets = wage_preset_repo.read_all().await.expect("Should succeed");
         assert_eq!(presets.len(), 3);
 
         wage_preset_repo.disconnect().await;
@@ -3729,8 +3733,7 @@ mod wage_preset_repo_tests {
         // non-existent
         {
             let preset_optional = wage_preset_repo
-                .read_optional_matching_date(
-                    &NaiveDate::from_ymd_opt(1965, 12, 31).unwrap())
+                .read_optional_matching_date(&NaiveDate::from_ymd_opt(1965, 12, 31).unwrap())
                 .await
                 .expect("Should succeed");
             assert!(preset_optional.is_none());
@@ -3738,8 +3741,7 @@ mod wage_preset_repo_tests {
 
         {
             let preset_optional = wage_preset_repo
-                .read_optional_matching_date(
-                    &NaiveDate::from_ymd_opt(2023, 06, 01).unwrap())
+                .read_optional_matching_date(&NaiveDate::from_ymd_opt(2023, 06, 01).unwrap())
                 .await
                 .expect("Should succeed");
             assert!(preset_optional.is_some());
@@ -3748,8 +3750,7 @@ mod wage_preset_repo_tests {
 
         {
             let preset_optional = wage_preset_repo
-                .read_optional_matching_date(
-                    &NaiveDate::from_ymd_opt(2024, 01, 01).unwrap())
+                .read_optional_matching_date(&NaiveDate::from_ymd_opt(2024, 01, 01).unwrap())
                 .await
                 .expect("Should succeed");
             assert!(preset_optional.is_some());
@@ -3758,8 +3759,7 @@ mod wage_preset_repo_tests {
 
         {
             let preset_optional = wage_preset_repo
-                .read_optional_matching_date(
-                    &NaiveDate::from_ymd_opt(2030, 06, 10).unwrap())
+                .read_optional_matching_date(&NaiveDate::from_ymd_opt(2030, 06, 10).unwrap())
                 .await
                 .expect("Should succeed");
             assert!(preset_optional.is_some());

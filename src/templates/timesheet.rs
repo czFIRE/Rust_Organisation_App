@@ -6,13 +6,8 @@ use sqlx::types::uuid;
 use std::collections::HashMap;
 use uuid::Uuid;
 
-use crate::{
-    models::ApprovalStatus,
-    repositories::timesheet::models::{
-        TimesheetWithWorkdays,
-    },
-};
 use crate::utils::year_and_month::YearAndMonth;
+use crate::{models::ApprovalStatus, repositories::timesheet::models::TimesheetWithWorkdays};
 
 #[derive(Template, Debug, Deserialize)]
 #[template(path = "employment/timesheet/workday.html")]
@@ -53,7 +48,8 @@ pub struct TimesheetTemplate {
 
 impl From<TimesheetWithWorkdays> for TimesheetTemplate {
     fn from(full_timesheet: TimesheetWithWorkdays) -> Self {
-        let workdays = full_timesheet.workdays
+        let workdays = full_timesheet
+            .workdays
             .into_iter()
             .map(|workday| WorkdayTemplate {
                 timesheet_id: workday.timesheet_id,
@@ -170,7 +166,6 @@ impl Default for DetailedWage {
 #[derive(Template, Debug, Deserialize)]
 #[template(path = "employment/timesheet/timesheet_wage_detailed.html")]
 pub struct TimesheetWageDetailed {
-
     // A total wage data for selected timesheet's work.
     pub total_wage: DetailedWage,
 

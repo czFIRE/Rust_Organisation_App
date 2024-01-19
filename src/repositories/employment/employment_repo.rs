@@ -8,8 +8,8 @@ use uuid::Uuid;
 use std::ops::DerefMut;
 
 use super::models::{
-    Employment, EmploymentData, EmploymentExtended, EmploymentFilter,
-    EmploymentUserCompanyFlattened, NewEmployment, EmploymentContractAndHourlyWage,
+    Employment, EmploymentContractAndHourlyWage, EmploymentData, EmploymentExtended,
+    EmploymentFilter, EmploymentUserCompanyFlattened, NewEmployment,
 };
 
 use crate::models::{EmployeeLevel, EmploymentContract, Gender, UserRole, UserStatus};
@@ -37,9 +37,8 @@ impl crate::repositories::repository::DbRepository for EmploymentRepository {
 pub async fn read_one_lite_db_using_tx(
     tx: &mut Transaction<'_, sqlx::Postgres>,
     user_id: Uuid,
-    company_id: Uuid)
-    -> DbResult<EmploymentContractAndHourlyWage> {
-
+    company_id: Uuid,
+) -> DbResult<EmploymentContractAndHourlyWage> {
     let employment_lite = sqlx::query_as!(
         EmploymentContractAndHourlyWage,
         r#"
@@ -52,8 +51,8 @@ pub async fn read_one_lite_db_using_tx(
         user_id,
         company_id
     )
-        .fetch_one(tx.deref_mut())
-        .await;
+    .fetch_one(tx.deref_mut())
+    .await;
 
     employment_lite
 }

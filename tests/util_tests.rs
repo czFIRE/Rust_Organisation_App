@@ -41,31 +41,28 @@ mod calculate_wage_tests {
     use chrono::NaiveDate;
     use organization::common::DbResult;
     use organization::repositories::timesheet::timesheet_repo::TimesheetRepository;
-    use organization::templates::timesheet::{
-        DetailedWage,
-        TimesheetWageDetailed,
-    };
+    use organization::templates::timesheet::{DetailedWage, TimesheetWageDetailed};
     use organization::utils::calculate_wage::calculate_timesheet_wage;
 
     use sqlx::PgPool;
 
     use crate::test_constants::{
-        COMPANY1_ID, COMPANY2_ID, TIMESHEET1_ID, TIMESHEET2_ID, TIMESHEET3_ID,
-        USER1_ID, USER3_ID,
+        COMPANY1_ID, COMPANY2_ID, TIMESHEET1_ID, TIMESHEET2_ID, TIMESHEET3_ID, USER1_ID, USER3_ID,
     };
 
-    fn check_finished_detailed_wage_result(
-        timesheet_wage_detailed: &TimesheetWageDetailed) {
+    fn check_finished_detailed_wage_result(timesheet_wage_detailed: &TimesheetWageDetailed) {
         let total_wage: &DetailedWage = &timesheet_wage_detailed.total_wage;
 
         assert!(timesheet_wage_detailed.error_option.is_none());
 
         assert!(total_wage.tax_base >= total_wage.net_wage);
-        assert!(total_wage.tax_base
+        assert!(
+            total_wage.tax_base
                 - (total_wage.net_wage
-                   + total_wage.employee_social_insurance
-                   + total_wage.employee_social_insurance)
-                < DELTA);
+                    + total_wage.employee_social_insurance
+                    + total_wage.employee_social_insurance)
+                < DELTA
+        );
     }
 
     #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
@@ -83,23 +80,19 @@ mod calculate_wage_tests {
             // Get timesheets of an employee who participated at several events
             // within this time period.
             //
-            let timesheets_extended
-                = timesheet_repo.read_all_with_date_from_to_per_employment_extended_db(
-                    user_id,
-                    company_id,
-                    date_from,
-                    date_to)
+            let timesheets_extended = timesheet_repo
+                .read_all_with_date_from_to_per_employment_extended_db(
+                    user_id, company_id, date_from, date_to,
+                )
                 .await
                 .expect("Should succeed");
 
             assert_eq!(timesheets_extended.timesheets.len(), 2);
             assert_eq!(timesheets_extended.date_to_wage_presets.len(), 2);
 
-            let timesheet_wage_detailed
-                = calculate_timesheet_wage(
-                    false, &timesheets_extended,
-                    main_timesheet_id)
-                .expect("Should succeed");
+            let timesheet_wage_detailed =
+                calculate_timesheet_wage(false, &timesheets_extended, main_timesheet_id)
+                    .expect("Should succeed");
 
             assert_eq!(timesheet_wage_detailed.month_to_detailed_wage.len(), 1);
             check_finished_detailed_wage_result(&timesheet_wage_detailed);
@@ -115,20 +108,16 @@ mod calculate_wage_tests {
             // Get timesheets of an employee who participated at several events
             // within this time period.
             //
-            let timesheets_extended
-                = timesheet_repo.read_all_with_date_from_to_per_employment_extended_db(
-                    user_id,
-                    company_id,
-                    date_from,
-                    date_to)
+            let timesheets_extended = timesheet_repo
+                .read_all_with_date_from_to_per_employment_extended_db(
+                    user_id, company_id, date_from, date_to,
+                )
                 .await
                 .expect("Should succeed");
 
-            let timesheet_wage_detailed
-                = calculate_timesheet_wage(
-                    false, &timesheets_extended,
-                    main_timesheet_id)
-                .expect("Should succeed");
+            let timesheet_wage_detailed =
+                calculate_timesheet_wage(false, &timesheets_extended, main_timesheet_id)
+                    .expect("Should succeed");
 
             assert_eq!(timesheet_wage_detailed.month_to_detailed_wage.len(), 2);
 
@@ -146,25 +135,20 @@ mod calculate_wage_tests {
             let date_to = date_from;
             let main_timesheet_id = TIMESHEET2_ID;
 
-            let mut timesheets_extended
-                = timesheet_repo.read_all_with_date_from_to_per_employment_extended_db(
-                    user_id,
-                    company_id,
-                    date_from,
-                    date_to)
+            let mut timesheets_extended = timesheet_repo
+                .read_all_with_date_from_to_per_employment_extended_db(
+                    user_id, company_id, date_from, date_to,
+                )
                 .await
                 .expect("Should succeed");
 
-            assert_eq!(timesheets_extended.employment_type,
-                       EmploymentContract::Dpp);
+            assert_eq!(timesheets_extended.employment_type, EmploymentContract::Dpp);
 
             timesheets_extended.hourly_wage = 90.0;
 
-            let timesheet_wage_detailed
-                = calculate_timesheet_wage(
-                    false, &timesheets_extended,
-                    main_timesheet_id)
-                .expect("Should succeed");
+            let timesheet_wage_detailed =
+                calculate_timesheet_wage(false, &timesheets_extended, main_timesheet_id)
+                    .expect("Should succeed");
 
             assert!(timesheet_wage_detailed.error_option.is_some());
         }

@@ -12,9 +12,10 @@ use super::models::WagePreset;
 use async_trait::async_trait;
 
 // Reads a single preset from the DB using an existing transaction handler.
-pub async fn read_one_db_using_tx(tx: &mut Transaction<'_, sqlx::Postgres>,
-                                  preset_name: &String)
-                                  -> DbResult<WagePreset> {
+pub async fn read_one_db_using_tx(
+    tx: &mut Transaction<'_, sqlx::Postgres>,
+    preset_name: &String,
+) -> DbResult<WagePreset> {
     let wage_preset_result: DbResult<WagePreset> = sqlx::query_as!(
         WagePreset,
         r#"
@@ -25,8 +26,8 @@ pub async fn read_one_db_using_tx(tx: &mut Transaction<'_, sqlx::Postgres>,
             "#,
         preset_name,
     )
-        .fetch_one(tx.deref_mut())
-        .await;
+    .fetch_one(tx.deref_mut())
+    .await;
 
     wage_preset_result
 }
@@ -36,9 +37,8 @@ pub async fn read_one_db_using_tx(tx: &mut Transaction<'_, sqlx::Postgres>,
 ///
 pub async fn read_optional_matching_date_db_using_tx(
     tx: &mut Transaction<'_, sqlx::Postgres>,
-    date: &NaiveDate)
-    -> DbResult<Option<WagePreset>> {
-
+    date: &NaiveDate,
+) -> DbResult<Option<WagePreset>> {
     let wage_preset_result = sqlx::query_as!(
         WagePreset,
         r#"
@@ -117,8 +117,8 @@ impl WagePresetRepository {
 
     pub async fn read_optional_matching_date(
         &self,
-        date: &NaiveDate)
-        -> DbResult<Option<WagePreset>> {
+        date: &NaiveDate,
+    ) -> DbResult<Option<WagePreset>> {
         // TODO: Redis here
 
         self.read_optional_matching_date_db(date).await
@@ -126,12 +126,11 @@ impl WagePresetRepository {
 
     pub async fn read_optional_matching_date_db(
         &self,
-        date: &NaiveDate)
-        -> DbResult<Option<WagePreset>> {
+        date: &NaiveDate,
+    ) -> DbResult<Option<WagePreset>> {
         let mut tx = self.pool.begin().await?;
 
-        let preset_optional
-            = read_optional_matching_date_db_using_tx(&mut tx, date).await?;
+        let preset_optional = read_optional_matching_date_db_using_tx(&mut tx, date).await?;
 
         tx.commit().await?;
 

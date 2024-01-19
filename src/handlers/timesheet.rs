@@ -167,8 +167,6 @@ pub async fn update_timesheet(
         //     wage_preset: ,
         // }
 
-
-
         let template: TimesheetTemplate = full_timesheet.into();
 
         let body = template.render();

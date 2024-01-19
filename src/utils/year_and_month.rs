@@ -1,4 +1,4 @@
-use chrono::{NaiveDate, Datelike};
+use chrono::{Datelike, NaiveDate};
 use serde::Deserialize;
 
 #[derive(Hash, Eq, PartialEq, PartialOrd, Ord, Deserialize, Debug, Clone)]

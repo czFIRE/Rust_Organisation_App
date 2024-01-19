@@ -2,19 +2,14 @@
 // todo: Some code parts was written in a rush, a bit of refactoring needed.
 //
 
-use crate::{
-    repositories::wage_preset::models::{WagePreset},
-};
+use crate::repositories::wage_preset::models::WagePreset;
 
-use crate::templates::timesheet::{
-    DetailedWage,
-    TimesheetWageDetailed,
-};
+use crate::templates::timesheet::{DetailedWage, TimesheetWageDetailed};
 
-use crate::repositories::timesheet::models::{
-    Workday, TimesheetWithEvent, TimesheetsWithWorkdaysExtended
-};
 use crate::models::EmploymentContract;
+use crate::repositories::timesheet::models::{
+    TimesheetWithEvent, TimesheetsWithWorkdaysExtended, Workday,
+};
 use crate::utils::year_and_month::YearAndMonth;
 
 use uuid::Uuid;
@@ -36,8 +31,7 @@ impl WorkdaysInfo {
             self.total_hours += workday.total_hours;
         }
     }
-    fn compute_tax_base(&mut self,
-                        hourly_wage: f32) {
+    fn compute_tax_base(&mut self, hourly_wage: f32) {
         self.tax_base = self.total_hours * hourly_wage;
     }
 }
@@ -70,24 +64,28 @@ struct WagePresetOptimized {
 
 impl WagePresetOptimized {
     // Construct a new instance using `WagePreset`.
-    fn new_wage_preset(wage_preset: &WagePreset,
-                       monthly_employee_no_tax_limit: f32,
-                       monthly_employer_no_tax_limit: f32)
-                       -> Self {
-
+    fn new_wage_preset(
+        wage_preset: &WagePreset,
+        monthly_employee_no_tax_limit: f32,
+        monthly_employer_no_tax_limit: f32,
+    ) -> Self {
         WagePresetOptimized {
             name: wage_preset.name.clone(),
             currency: wage_preset.currency.clone(),
             monthly_employee_no_tax_limit: monthly_employee_no_tax_limit,
             monthly_employer_no_tax_limit: monthly_employer_no_tax_limit,
-            health_insurance_employee_tax_multiplicand:
-            wage_preset.health_insurance_employee_tax_pct / 100.0,
-            social_insurance_employee_tax_multiplicand:
-            wage_preset.social_insurance_employee_tax_pct / 100.0,
-            health_insurance_employer_tax_multiplicand:
-            wage_preset.health_insurance_employer_tax_pct / 100.0,
-            social_insurance_employer_tax_multiplicand:
-            wage_preset.social_insurance_employer_tax_pct / 100.0,
+            health_insurance_employee_tax_multiplicand: wage_preset
+                .health_insurance_employee_tax_pct
+                / 100.0,
+            social_insurance_employee_tax_multiplicand: wage_preset
+                .social_insurance_employee_tax_pct
+                / 100.0,
+            health_insurance_employer_tax_multiplicand: wage_preset
+                .health_insurance_employer_tax_pct
+                / 100.0,
+            social_insurance_employer_tax_multiplicand: wage_preset
+                .social_insurance_employer_tax_pct
+                / 100.0,
             min_hourly_wage: wage_preset.min_hourly_wage,
             min_monthly_hpp_salary: wage_preset.min_monthly_hpp_salary,
         }
@@ -102,36 +100,29 @@ fn compute_monthly_dpp_or_dpc_wage(
     pink_paper_signed: bool,
     wanted_workdays_info: &WorkdaysInfo,
     preset: &WagePresetOptimized,
-    related_workdays_tax_base: f32)
-    -> DetailedWage {
-
+    related_workdays_tax_base: f32,
+) -> DetailedWage {
     let mut monthly_wage = DetailedWage::default();
 
     // Employee's monthly tax base across **all** timesheets.
-    let monthly_total_tax_base
-        = wanted_workdays_info.tax_base
-        + related_workdays_tax_base;
+    let monthly_total_tax_base = wanted_workdays_info.tax_base + related_workdays_tax_base;
 
     monthly_wage.worked_hours = wanted_workdays_info.total_hours;
 
     if monthly_total_tax_base >= preset.monthly_employee_no_tax_limit {
-        monthly_wage.employee_health_insurance
-            = wanted_workdays_info.tax_base
-            * preset.health_insurance_employee_tax_multiplicand;
+        monthly_wage.employee_health_insurance =
+            wanted_workdays_info.tax_base * preset.health_insurance_employee_tax_multiplicand;
 
-        monthly_wage.employee_social_insurance
-            = wanted_workdays_info.tax_base
-            * preset.social_insurance_employee_tax_multiplicand;
+        monthly_wage.employee_social_insurance =
+            wanted_workdays_info.tax_base * preset.social_insurance_employee_tax_multiplicand;
     }
 
     if monthly_total_tax_base >= preset.monthly_employer_no_tax_limit {
-        monthly_wage.employer_health_insurance
-            = wanted_workdays_info.tax_base
-            * preset.health_insurance_employer_tax_multiplicand;
+        monthly_wage.employer_health_insurance =
+            wanted_workdays_info.tax_base * preset.health_insurance_employer_tax_multiplicand;
 
-        monthly_wage.employer_social_insurance
-            = wanted_workdays_info.tax_base
-            * preset.social_insurance_employer_tax_multiplicand;
+        monthly_wage.employer_social_insurance =
+            wanted_workdays_info.tax_base * preset.social_insurance_employer_tax_multiplicand;
     }
 
     monthly_wage.tax_base = wanted_workdays_info.tax_base;
@@ -140,9 +131,8 @@ fn compute_monthly_dpp_or_dpc_wage(
     monthly_wage.net_wage = monthly_wage.tax_base;
 
     if !pink_paper_signed {
-        monthly_wage.net_wage
-            -= monthly_wage.employee_health_insurance
-            + monthly_wage.employee_social_insurance;
+        monthly_wage.net_wage -=
+            monthly_wage.employee_health_insurance + monthly_wage.employee_social_insurance;
     }
 
     monthly_wage
@@ -150,8 +140,8 @@ fn compute_monthly_dpp_or_dpc_wage(
 
 fn compute_tax_base_of_workdays(
     related_timesheets: &Vec<TimesheetWithClassifiedWorkdays>,
-    year_month: &YearAndMonth) -> f32 {
-
+    year_month: &YearAndMonth,
+) -> f32 {
     let mut total_tax_base = 0.0;
     for sheet in related_timesheets.iter() {
         if let Some(workdays_info) = sheet.date_to_workdays_info.get(year_month) {
@@ -167,75 +157,68 @@ fn compute_dpp_or_dpc_wage(
     date_to_wage_presets: &HashMap<YearAndMonth, Option<WagePreset>>,
     hourly_wage: f32,
     employment_type: EmploymentContract,
-    related_timesheets: &Vec<TimesheetWithClassifiedWorkdays>)
-    -> Result<TimesheetWageDetailed, String> {
-
-    let mut total_wage_output: TimesheetWageDetailed
-        = TimesheetWageDetailed::default();
+    related_timesheets: &Vec<TimesheetWithClassifiedWorkdays>,
+) -> Result<TimesheetWageDetailed, String> {
+    let mut total_wage_output: TimesheetWageDetailed = TimesheetWageDetailed::default();
 
     // Go through each month of `wanted timesheet`
     for (year_month, wanted_workdays_info) in &wanted_timesheet.date_to_workdays_info {
-
-        let wage_preset = date_to_wage_presets.get(year_month).unwrap().clone().unwrap();
+        let wage_preset = date_to_wage_presets
+            .get(year_month)
+            .unwrap()
+            .clone()
+            .unwrap();
         let monthly_employee_no_tax_limit;
         let monthly_employer_no_tax_limit;
 
         match employment_type {
             EmploymentContract::Dpp => {
-
                 if hourly_wage < wage_preset.min_hourly_wage {
                     return Err(
-                        "The hourly_wage of DPP agreement is below a required minimum."
-                            .to_string());
+                        "The hourly_wage of DPP agreement is below a required minimum.".to_string(),
+                    );
                 }
-                monthly_employee_no_tax_limit
-                    = wage_preset.monthly_dpp_employee_no_tax_limit;
-                monthly_employer_no_tax_limit
-                    = wage_preset.monthly_dpp_employer_no_tax_limit
+                monthly_employee_no_tax_limit = wage_preset.monthly_dpp_employee_no_tax_limit;
+                monthly_employer_no_tax_limit = wage_preset.monthly_dpp_employer_no_tax_limit
             }
             EmploymentContract::Dpc => {
-
-                monthly_employee_no_tax_limit
-                    = wage_preset.monthly_dpc_employee_no_tax_limit;
-                monthly_employer_no_tax_limit
-                    = wage_preset.monthly_dpc_employer_no_tax_limit
-            },
-            EmploymentContract::Hpp => unreachable!("Bug in code.")
+                monthly_employee_no_tax_limit = wage_preset.monthly_dpc_employee_no_tax_limit;
+                monthly_employer_no_tax_limit = wage_preset.monthly_dpc_employer_no_tax_limit
+            }
+            EmploymentContract::Hpp => unreachable!("Bug in code."),
         }
 
-        let wage_preset_optimized
-            = WagePresetOptimized::new_wage_preset(
-                &wage_preset,
-                monthly_employee_no_tax_limit,
-                monthly_employer_no_tax_limit,
-            );
+        let wage_preset_optimized = WagePresetOptimized::new_wage_preset(
+            &wage_preset,
+            monthly_employee_no_tax_limit,
+            monthly_employer_no_tax_limit,
+        );
 
-        let related_workdays_tax_base
-            = compute_tax_base_of_workdays(&related_timesheets, year_month);
+        let related_workdays_tax_base =
+            compute_tax_base_of_workdays(&related_timesheets, year_month);
 
-
-        let monthly_wage_output
-            = compute_monthly_dpp_or_dpc_wage(
-                pink_paper_signed,
-                &wanted_workdays_info,
-                &wage_preset_optimized,
-                related_workdays_tax_base
-            );
+        let monthly_wage_output = compute_monthly_dpp_or_dpc_wage(
+            pink_paper_signed,
+            &wanted_workdays_info,
+            &wage_preset_optimized,
+            related_workdays_tax_base,
+        );
 
         total_wage_output.total_wage.tax_base += monthly_wage_output.tax_base;
         total_wage_output.total_wage.net_wage += monthly_wage_output.net_wage;
         total_wage_output.total_wage.worked_hours += monthly_wage_output.worked_hours;
-        total_wage_output.total_wage.employee_social_insurance
-            += monthly_wage_output.employee_social_insurance;
-        total_wage_output.total_wage.employee_health_insurance
-            += monthly_wage_output.employee_health_insurance;
-        total_wage_output.total_wage.employer_social_insurance
-            += monthly_wage_output.employer_social_insurance;
-        total_wage_output.total_wage.employer_health_insurance
-            += monthly_wage_output.employer_health_insurance;
+        total_wage_output.total_wage.employee_social_insurance +=
+            monthly_wage_output.employee_social_insurance;
+        total_wage_output.total_wage.employee_health_insurance +=
+            monthly_wage_output.employee_health_insurance;
+        total_wage_output.total_wage.employer_social_insurance +=
+            monthly_wage_output.employer_social_insurance;
+        total_wage_output.total_wage.employer_health_insurance +=
+            monthly_wage_output.employer_health_insurance;
 
-        total_wage_output.month_to_detailed_wage.insert(
-            year_month.clone(), monthly_wage_output);
+        total_wage_output
+            .month_to_detailed_wage
+            .insert(year_month.clone(), monthly_wage_output);
     }
 
     Ok(total_wage_output)
@@ -245,8 +228,7 @@ fn compute_dpp_or_dpc_wage(
 // Divides workdays into equivalence classes where all elems have a same
 // year and month.
 //
-fn classify_workdays(workdays: &Vec<Workday>)
-                     -> HashMap::<YearAndMonth, WorkdaysInfo> {
+fn classify_workdays(workdays: &Vec<Workday>) -> HashMap<YearAndMonth, WorkdaysInfo> {
     let mut date_to_workdays_info = HashMap::<YearAndMonth, WorkdaysInfo>::new();
 
     for workday in workdays.iter() {
@@ -256,7 +238,7 @@ fn classify_workdays(workdays: &Vec<Workday>)
             workdays_info.workdays.push(workday.clone());
         } else {
             let workdays_info = WorkdaysInfo {
-                workdays: vec![ workday.clone() ],
+                workdays: vec![workday.clone()],
                 // Note: Gets computed later.
                 total_hours: 0.0,
                 tax_base: 0.0,
@@ -274,9 +256,8 @@ pub fn calculate_hpp_or_dpp_or_dpc_wage(
     date_to_wage_presets: &HashMap<YearAndMonth, Option<WagePreset>>,
     hourly_wage: f32,
     employment_type: EmploymentContract,
-    related_timesheets: &Vec<TimesheetWithClassifiedWorkdays>)
-    -> Result<TimesheetWageDetailed, String> {
-
+    related_timesheets: &Vec<TimesheetWithClassifiedWorkdays>,
+) -> Result<TimesheetWageDetailed, String> {
     match employment_type {
         EmploymentContract::Dpp => (),
         EmploymentContract::Dpc => (),
@@ -289,7 +270,8 @@ pub fn calculate_hpp_or_dpp_or_dpc_wage(
         date_to_wage_presets,
         hourly_wage,
         employment_type,
-        related_timesheets)
+        related_timesheets,
+    )
 }
 
 //
@@ -317,15 +299,14 @@ pub fn calculate_timesheet_wage(
     timesheets_extended: &TimesheetsWithWorkdaysExtended,
     wanted_timesheet_id: Uuid,
 ) -> Result<TimesheetWageDetailed, String> {
-
     let mut detailed_wage_output = TimesheetWageDetailed::default();
 
     // Check all wage presets are valid.
     for preset in timesheets_extended.date_to_wage_presets.values() {
         if preset.is_none() {
-            detailed_wage_output.error_option = Some(
-                "Some workday was missing a wage preset".to_string());
-            return Ok(detailed_wage_output)
+            detailed_wage_output.error_option =
+                Some("Some workday was missing a wage preset".to_string());
+            return Ok(detailed_wage_output);
         }
     }
 
@@ -354,11 +335,10 @@ pub fn calculate_timesheet_wage(
             workdays_info.compute_tax_base(timesheets_extended.hourly_wage as f32);
         }
 
-        let timesheet_with_classified_workdays
-            = TimesheetWithClassifiedWorkdays {
-                timesheet: timesheet.timesheet.clone(),
-                date_to_workdays_info,
-            };
+        let timesheet_with_classified_workdays = TimesheetWithClassifiedWorkdays {
+            timesheet: timesheet.timesheet.clone(),
+            date_to_workdays_info,
+        };
 
         // If it's a timesheet we compute wage for.
         if timesheet.timesheet.id == wanted_timesheet_id {
@@ -369,8 +349,7 @@ pub fn calculate_timesheet_wage(
     }
 
     if wanted_timesheet.is_none() {
-        return Err("No timesheet with 'wanted_timesheet_id' was found."
-                   .to_string())
+        return Err("No timesheet with 'wanted_timesheet_id' was found.".to_string());
     }
 
     let wage_output_result = calculate_hpp_or_dpp_or_dpc_wage(
@@ -379,7 +358,8 @@ pub fn calculate_timesheet_wage(
         &timesheets_extended.date_to_wage_presets,
         timesheets_extended.hourly_wage as f32,
         timesheets_extended.employment_type.clone(),
-        &related_timesheets);
+        &related_timesheets,
+    );
 
     match wage_output_result {
         Err(msg) => detailed_wage_output.error_option = Some(msg),

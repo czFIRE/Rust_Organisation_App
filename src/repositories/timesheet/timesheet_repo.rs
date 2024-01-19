@@ -2,22 +2,19 @@ use crate::common::DbResult;
 use crate::models::ApprovalStatus;
 use crate::repositories::timesheet::models::{
     TimesheetCreateData, TimesheetReadAllData, TimesheetStructureData, TimesheetUpdateData,
-    TimesheetWithEvent, TimesheetWithWorkdays, Workday, TimesheetsWithWorkdaysExtended,
+    TimesheetWithEvent, TimesheetWithWorkdays, TimesheetsWithWorkdaysExtended, Workday,
 };
 
-use crate::repositories::wage_preset::{
-    models::WagePreset,
-    wage_preset_repo,
-};
+use crate::repositories::wage_preset::{models::WagePreset, wage_preset_repo};
 
 use crate::repositories::employment::employment_repo;
 
 use crate::utils::year_and_month::YearAndMonth;
 
-use std::collections::HashMap;
-use chrono::{Duration, NaiveDate, Datelike, Months};
+use chrono::{Datelike, Duration, Months, NaiveDate};
 use sqlx::postgres::PgPool;
 use sqlx::{Postgres, Transaction};
+use std::collections::HashMap;
 use std::ops::DerefMut;
 use std::sync::Arc;
 use uuid::Uuid;
@@ -27,9 +24,8 @@ async fn read_some_timesheet_workdays_db_using_tx(
     tx: &mut Transaction<'_, sqlx::Postgres>,
     timesheet_id: Uuid,
     date_from: NaiveDate,
-    date_to: NaiveDate)
-    -> DbResult<Vec<Workday>> {
-
+    date_to: NaiveDate,
+) -> DbResult<Vec<Workday>> {
     sqlx::query_as!(
         Workday,
         r#"
@@ -51,15 +47,14 @@ async fn read_some_timesheet_workdays_db_using_tx(
         date_to,
     )
     .fetch_all(tx.deref_mut())
-        .await
+    .await
 }
 
 /// Reads all workdays of a specific timesheet.
 async fn read_all_timesheet_workdays_db_using_tx(
     tx: &mut Transaction<'_, sqlx::Postgres>,
-    timesheet: &TimesheetWithEvent)
-    -> DbResult<Vec<Workday>> {
-
+    timesheet: &TimesheetWithEvent,
+) -> DbResult<Vec<Workday>> {
     //
     // Pass timesheet's start and end date respectively
     // in order to get all its workdays.
@@ -69,7 +64,8 @@ async fn read_all_timesheet_workdays_db_using_tx(
         timesheet.id,
         timesheet.start_date,
         timesheet.end_date,
-    ).await
+    )
+    .await
 }
 
 ///
@@ -84,7 +80,6 @@ pub async fn read_all_with_date_from_to_per_employment_db_using_tx(
     date_to: NaiveDate,
     omit_workdays_outside_of_date_range: bool,
 ) -> DbResult<Vec<TimesheetWithWorkdays>> {
-
     if date_from > date_to {
         //
         // todo later: Return a meaningful error type, sqlx::error::Error
@@ -124,8 +119,8 @@ pub async fn read_all_with_date_from_to_per_employment_db_using_tx(
         date_to,
         date_from,
     )
-        .fetch_all(tx.deref_mut())
-        .await?;
+    .fetch_all(tx.deref_mut())
+    .await?;
 
     let mut timesheets_with_workdays = vec![];
 
@@ -137,25 +132,16 @@ pub async fn read_all_with_date_from_to_per_employment_db_using_tx(
     for timesheet in timesheets.iter() {
         let workdays = match omit_workdays_outside_of_date_range {
             true => {
-                read_some_timesheet_workdays_db_using_tx(
-                    tx, timesheet.id,
-                    date_from, date_to)
-                    .await?
-
-            },
-            false => {
-                read_all_timesheet_workdays_db_using_tx(
-                    tx, &timesheet.clone())
+                read_some_timesheet_workdays_db_using_tx(tx, timesheet.id, date_from, date_to)
                     .await?
             }
+            false => read_all_timesheet_workdays_db_using_tx(tx, &timesheet.clone()).await?,
         };
 
-        timesheets_with_workdays.push(
-            TimesheetWithWorkdays{
-                timesheet: timesheet.clone(),
-                workdays,
-            }
-        );
+        timesheets_with_workdays.push(TimesheetWithWorkdays {
+            timesheet: timesheet.clone(),
+            workdays,
+        });
     }
 
     Ok(timesheets_with_workdays)
@@ -312,8 +298,7 @@ impl TimesheetRepository {
 
         let sheet_clone = timesheet.clone().unwrap();
 
-        let workdays = read_all_timesheet_workdays_db_using_tx(
-            &mut tx, &sheet_clone).await?;
+        let workdays = read_all_timesheet_workdays_db_using_tx(&mut tx, &sheet_clone).await?;
 
         let result = TimesheetWithWorkdays {
             timesheet: timesheet.expect("Should be valid here."),
@@ -670,10 +655,13 @@ impl TimesheetRepository {
         // This is for redis.
 
         self.read_all_with_date_from_to_per_employment_db(
-            user_id, company_id,
-            date_from, date_to,
+            user_id,
+            company_id,
+            date_from,
+            date_to,
             omit_workdays_outside_of_date_range,
-        ).await
+        )
+        .await
     }
 
     pub async fn read_all_with_date_from_to_per_employment_db(
@@ -686,15 +674,15 @@ impl TimesheetRepository {
     ) -> DbResult<Vec<TimesheetWithWorkdays>> {
         let mut tx = self.pool.begin().await?;
 
-        let timesheets_with_workdays
-            = read_all_with_date_from_to_per_employment_db_using_tx(
-                &mut tx,
-                user_id,
-                company_id,
-                date_from,
-                date_to,
-                omit_workdays_outside_of_date_range)
-            .await?;
+        let timesheets_with_workdays = read_all_with_date_from_to_per_employment_db_using_tx(
+            &mut tx,
+            user_id,
+            company_id,
+            date_from,
+            date_to,
+            omit_workdays_outside_of_date_range,
+        )
+        .await?;
 
         tx.commit().await?;
 
@@ -715,18 +703,14 @@ impl TimesheetRepository {
     ) -> DbResult<TimesheetsWithWorkdaysExtended> {
         let mut tx = self.pool.begin().await?;
 
-        let timesheets_with_workdays: Vec<TimesheetWithWorkdays>
-            = self.read_all_with_date_from_to_per_employment_db(
-                user_id,
-                company_id,
-                date_from,
-                date_to,
-                true,
-            ).await?;
-
-        let employment_lite = employment_repo::read_one_lite_db_using_tx(
-                &mut tx, user_id, company_id)
+        let timesheets_with_workdays: Vec<TimesheetWithWorkdays> = self
+            .read_all_with_date_from_to_per_employment_db(
+                user_id, company_id, date_from, date_to, true,
+            )
             .await?;
+
+        let employment_lite =
+            employment_repo::read_one_lite_db_using_tx(&mut tx, user_id, company_id).await?;
 
         let mut date_to_wage_presets = HashMap::<YearAndMonth, Option<WagePreset>>::new();
 
@@ -734,12 +718,12 @@ impl TimesheetRepository {
         // Go through each timesheet and compute which wage presets it requires.
         //
         for timesheet in timesheets_with_workdays.iter() {
-            let (date_from, date_to)
-                = match timesheet.workdays.is_empty() {
-                    true => (timesheet.timesheet.start_date,
-                             timesheet.timesheet.end_date),
-                    false => (timesheet.workdays[0].date,
-                              timesheet.workdays.last().unwrap().date)
+            let (date_from, date_to) = match timesheet.workdays.is_empty() {
+                true => (timesheet.timesheet.start_date, timesheet.timesheet.end_date),
+                false => (
+                    timesheet.workdays[0].date,
+                    timesheet.workdays.last().unwrap().date,
+                ),
             };
 
             //
@@ -753,20 +737,20 @@ impl TimesheetRepository {
                 let year_and_month = cur_date.into();
                 if !date_to_wage_presets.contains_key(&year_and_month) {
                     //
-                // todo later: Try to find a preset in `date_to_wage_presets`
-                //             first as its faster than seeking it DB.
-                //
-                let preset_optional
-                        = wage_preset_repo::read_optional_matching_date_db_using_tx(
-                            &mut tx, &cur_date)
+                    // todo later: Try to find a preset in `date_to_wage_presets`
+                    //             first as its faster than seeking it DB.
+                    //
+                    let preset_optional =
+                        wage_preset_repo::read_optional_matching_date_db_using_tx(
+                            &mut tx, &cur_date,
+                        )
                         .await?;
 
                     date_to_wage_presets.insert(year_and_month, preset_optional);
                 }
 
-                if let Some(cur_date_incremented)
-                    = cur_date.checked_add_months(Months::new(1)) {
-                        cur_date = cur_date_incremented;
+                if let Some(cur_date_incremented) = cur_date.checked_add_months(Months::new(1)) {
+                    cur_date = cur_date_incremented;
                 } else {
                     //
                     // Note: This can return None only when `cur_date` > the
