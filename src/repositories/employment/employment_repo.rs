@@ -1,12 +1,15 @@
 use crate::common::DbResult;
 use async_trait::async_trait;
 use sqlx::postgres::PgPool;
+use sqlx::Transaction;
 use std::sync::Arc;
 use uuid::Uuid;
 
+use std::ops::DerefMut;
+
 use super::models::{
-    Employment, EmploymentData, EmploymentExtended, EmploymentFilter,
-    EmploymentUserCompanyFlattened, NewEmployment,
+    Employment, EmploymentContractAndHourlyWage, EmploymentData, EmploymentExtended,
+    EmploymentFilter, EmploymentUserCompanyFlattened, NewEmployment,
 };
 
 use crate::models::{EmployeeLevel, EmploymentContract, Gender, UserRole, UserStatus};
@@ -28,6 +31,30 @@ impl crate::repositories::repository::DbRepository for EmploymentRepository {
     async fn disconnect(&mut self) -> () {
         self.pool.close().await;
     }
+}
+
+// Read one lite employment using an existing transaction handle.
+pub async fn read_one_lite_db_using_tx(
+    tx: &mut Transaction<'_, sqlx::Postgres>,
+    user_id: Uuid,
+    company_id: Uuid,
+) -> DbResult<EmploymentContractAndHourlyWage> {
+    let employment_lite = sqlx::query_as!(
+        EmploymentContractAndHourlyWage,
+        r#"
+            SELECT hourly_wage,
+                   type AS "employment_type!: EmploymentContract"
+            FROM employment
+            WHERE user_id = $1
+              AND company_id = $2;
+            "#,
+        user_id,
+        company_id
+    )
+    .fetch_one(tx.deref_mut())
+    .await;
+
+    employment_lite
 }
 
 impl EmploymentRepository {

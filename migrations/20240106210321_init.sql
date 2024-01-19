@@ -351,69 +351,61 @@ CREATE TABLE comment
 
 );
 
-
 --
--- Functions
+-- todo later: Once this special table gets finilized, put it into ERD as well.
 --
-CREATE FUNCTION update_timesheet_total_hours_after_insert()
-RETURNS TRIGGER AS $$
-BEGIN
-    UPDATE timesheet
-    -- increase it by `total_hours` of added `workday` row
-    SET total_hours = total_hours + NEW.total_hours
-    WHERE id = NEW.timesheet_id;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE FUNCTION compute_timesheet_total_hours()
-RETURNS TRIGGER AS $$
-BEGIN
-    UPDATE timesheet
-    --
-    -- Set total_hours by summing all `workday.total_hours`
-    -- belonging to this `timesheet` instance.
-    --
-    -- Note: The `OLD` ident refers to a modified `workday` row value.
-    --
-    SET total_hours = (
-	    -- Note: `COALESCE()` substitutes a NULL value when no rows are fetched.
-        SELECT COALESCE(SUM(total_hours), 0.0)
-        FROM workday
-        -- Request just workdays which has a right `timesheet_id`.
-        WHERE timesheet_id = OLD.timesheet_id
-    )
-    WHERE id = OLD.timesheet_id;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-
+-- todo later: We should enforce only one row has valid_to=NULL
+--             and no two (valid_from, valid_to) ranges intersect.
 --
--- Triggers
---
-CREATE TRIGGER trigger_update_timesheet_total_hours_after_insert
-  AFTER INSERT ON workday
-  FOR EACH ROW
-  EXECUTE PROCEDURE update_timesheet_total_hours_after_insert();
-
---
--- Note: As we work with FPU, we cannt simply:
---
---       a) subtract removed `workday.total_hours` (in case of DELETE)
---       b) or subtract OLD `total_hours` then add NEW `total_hours`
---          (in case of UPDATE)
---
---       as this could lead to imprecise results. Thus we always solve
---       this by summing `total_hours` of all relevant `workdays`.
---
-CREATE TRIGGER trigger_update_timesheet_total_hours_after_update
-    AFTER UPDATE OF total_hours ON workday
-    FOR EACH ROW
-    WHEN (OLD.total_hours != NEW.total_hours)
-    EXECUTE PROCEDURE compute_timesheet_total_hours();
-
-CREATE TRIGGER trigger_update_timesheet_total_hours_after_delete
-  AFTER DELETE ON workday
-  FOR EACH ROW
-  EXECUTE PROCEDURE compute_timesheet_total_hours();
+CREATE TABLE wage_preset
+(
+	name TEXT PRIMARY KEY,
+    -------------------------------------------------------
+    valid_from  DATE NOT NULL,
+    valid_to    DATE,
+    description TEXT NOT NULL DEFAULT '',
+    currency    TEXT NOT NULL,
+	monthly_dpp_employee_no_tax_limit REAL NOT NULL,
+	monthly_dpp_employer_no_tax_limit REAL NOT NULL,
+	monthly_dpc_employee_no_tax_limit REAL NOT NULL,
+	monthly_dpc_employer_no_tax_limit REAL NOT NULL,
+	health_insurance_employee_tax_pct REAL NOT NULL,
+	social_insurance_employee_tax_pct REAL NOT NULL,
+	health_insurance_employer_tax_pct REAL NOT NULL,
+	social_insurance_employer_tax_pct REAL NOT NULL,
+	min_hourly_wage REAL NOT NULL,
+	min_monthly_hpp_salary REAL NOT NULL, -- note: not utilized ATM
+    -------------------------------------------------------
+    created_at  TIMESTAMP NOT NULL DEFAULT now(),
+    edited_at   TIMESTAMP NOT NULL DEFAULT now(),
+    deleted_at  TIMESTAMP,
+    -------------------------------------------------------
+    CONSTRAINT check_wage_preset_description_len
+        CHECK (char_length(description) >= 1),
+    CONSTRAINT check_wage_preset_currency_len
+        CHECK (char_length(currency) >= 1),
+    CONSTRAINT check_wage_preset_monthly_dpp_employee_no_tax_limit_gte_0
+        CHECK (monthly_dpp_employee_no_tax_limit >= 0.0),
+    CONSTRAINT check_wage_preset_monthly_dpp_employer_no_tax_limit_gte_0
+        CHECK (monthly_dpp_employer_no_tax_limit >= 0.0),
+    CONSTRAINT check_wage_preset_monthly_dpc_employee_no_tax_limit_gte_0
+        CHECK (monthly_dpc_employee_no_tax_limit >= 0.0),
+    CONSTRAINT check_wage_preset_monthly_dpc_employer_no_tax_limit_gte_0
+        CHECK (monthly_dpc_employer_no_tax_limit >= 0.0),
+    CONSTRAINT check_wage_preset_health_insurance_employee_tax_pct_gte_0
+        CHECK (health_insurance_employee_tax_pct >= 0.0),
+    CONSTRAINT check_wage_preset_social_insurance_employee_tax_pct_gte_0
+        CHECK (social_insurance_employee_tax_pct >= 0.0),
+    CONSTRAINT check_wage_preset_health_insurance_employer_tax_pct_gte_0
+        CHECK (health_insurance_employer_tax_pct >= 0.0),
+    CONSTRAINT check_wage_preset_social_insurance_employer_tax_pct_gte_0
+        CHECK (social_insurance_employer_tax_pct >= 0.0),
+    CONSTRAINT check_wage_preset_min_hourly_wage_gte_0
+        CHECK (min_hourly_wage >= 0.0),
+    CONSTRAINT check_wage_preset_min_monthly_hpp_salary_gte_0
+        CHECK (min_monthly_hpp_salary >= 0.0),
+    CONSTRAINT check_wage_preset_valid_from_le_valid_to
+        CHECK (valid_from < valid_to),
+    CONSTRAINT check_wage_preset_created_at_lte_edited_at
+        CHECK (edited_at >= created_at)
+);

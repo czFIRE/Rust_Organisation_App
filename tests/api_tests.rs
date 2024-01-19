@@ -2617,7 +2617,7 @@ mod api_tests {
         assert!(body.contains("134d5286-5f55-4637-9b98-223a5820a464"));
 
         // event ID
-        assert!(body.contains("3f152d12-0bbd-429a-a9c5-28967d6370cc"));
+        assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
     }
 
     #[actix_web::test]
@@ -2664,7 +2664,7 @@ mod api_tests {
         // company_id
         assert!(body.contains("134d5286-5f55-4637-9b98-223a5820a464"));
         // event_id
-        assert!(body.contains("3f152d12-0bbd-429a-a9c5-28967d6370cc"));
+        assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
     }
 
     #[actix_web::test]

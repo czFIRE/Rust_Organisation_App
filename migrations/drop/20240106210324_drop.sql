@@ -31,6 +31,7 @@ DROP TABLE IF EXISTS employment;
 DROP TABLE IF EXISTS company;
 DROP TABLE IF EXISTS user_record;
 DROP TABLE IF EXISTS event;
+DROP TABLE IF EXISTS wage_preset;
 
 -- Enums
 DROP TYPE IF EXISTS acceptance_status;

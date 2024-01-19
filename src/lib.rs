@@ -6,3 +6,4 @@ pub mod initialize;
 pub mod models;
 pub mod repositories;
 pub mod templates;
+pub mod utils;

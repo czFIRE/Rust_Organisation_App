@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO workday (timesheet_id, date)\n                 SELECT $1, curr_date\n                 FROM generate_series($2, $3, interval '1 day') as curr_date\n                 ON CONFLICT DO NOTHING;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "dd7cc72a7bc353941074a22791cdd828a35d53082208963e3f92d385fffed6ed"
+}

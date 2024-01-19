@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT hourly_wage,\n                   type AS \"employment_type!: EmploymentContract\"\n            FROM employment\n            WHERE user_id = $1\n              AND company_id = $2;\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "hourly_wage",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 1,
+        "name": "employment_type!: EmploymentContract",
+        "type_info": {
+          "Custom": {
+            "name": "employment_contract",
+            "kind": {
+              "Enum": [
+                "dpp",
+                "dpc",
+                "hpp"
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "a2153e28e2545b11e85fe12632a957b7cfc6c1a9e14735d2c98ce49b79d5d9c0"
+}
