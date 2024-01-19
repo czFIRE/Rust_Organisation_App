@@ -224,12 +224,11 @@ impl EventRepository {
             .await?;
 
             sqlx::query!(
-                r#"INSERT INTO workday (timesheet_id, date, is_editable)
-                 SELECT $1, curr_date, $2
-                 FROM generate_series($3, $4, interval '1 day') as curr_date
+                r#"INSERT INTO workday (timesheet_id, date)
+                 SELECT $1, curr_date
+                 FROM generate_series($2, $3, interval '1 day') as curr_date
                  ON CONFLICT DO NOTHING;"#,
                 sheet.id,
-                true,
                 start_date_time,
                 end_date_time,
             )

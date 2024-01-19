@@ -141,7 +141,6 @@ entity workday {
     ---
     *total_hours: float
     comment: text
-    *is_editable: boolean
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp

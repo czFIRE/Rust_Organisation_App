@@ -76,7 +76,6 @@ This table contains information about workdays that belong to timesheets.
 - (timesheet_id, work_date) - Primary Key, timesheet_id is a FK to timesheet
 - worked_hours - worked hours for a given day
 - commentary - user-added commentary just for some clarification for a manager that might be checking the timesheet
-- is_editable - ensuring that editability of a timesheet propagates to days
 
 ### Employment
 This table contains information about employments of users for companies. Hence, it also marks relationships between users and 

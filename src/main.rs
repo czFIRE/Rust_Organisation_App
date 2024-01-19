@@ -43,8 +43,19 @@ use crate::{
     repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository,
 };
 use actix_web::web;
+use serde::Deserialize;
 
-const HOST: &str = "localhost:8000";
+#[derive(Deserialize)]
+pub struct Config {
+    pub host: String,
+    pub port: u16,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        envy::from_env::<Config>().expect("HTTP: missing environment variables")
+    }
+}
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -52,9 +63,10 @@ async fn main() -> Result<()> {
     std::env::set_var("RUST_LOG", "debug");
     env_logger::Builder::from_env(Env::default().default_filter_or("debug")).init();
 
+    let config = Config::default();
+
     let pool = setup_db_pool().await;
     let arc_pool = Arc::new(pool);
-    // Add repositories here.
     let user_repository = UserRepository::new(arc_pool.clone());
     let company_repository = CompanyRepository::new(arc_pool.clone());
     let event_repository = EventRepository::new(arc_pool.clone());
@@ -77,7 +89,8 @@ async fn main() -> Result<()> {
     let timesheet_repo = web::Data::new(timesheet_repository);
     let comment_repo = web::Data::new(comment_repository);
 
-    println!("Starting server on {}", HOST);
+    println!("Starting server on http://{}:{}", config.host, config.port);
+
     HttpServer::new(move || {
         App::new()
             .app_data(user_repo.clone())
@@ -108,7 +121,7 @@ async fn main() -> Result<()> {
             // For serving css and static files overall
             .service(ActixFiles::new("/", "./src/static").prefer_utf8(true))
     })
-    .bind(HOST)?
+    .bind((config.host, config.port))?
     .run()
     .await
 }

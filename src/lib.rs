@@ -1,4 +1,3 @@
-// This is here for testing purposes!!!
 pub mod common;
 pub mod errors;
 pub mod handlers;
