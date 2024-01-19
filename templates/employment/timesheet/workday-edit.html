@@ -1,15 +1,16 @@
 <div
   id="workday-{{ date }}"
-  class="flex flex-row w-10/12 items-start align-middle rounded-md p-2 text-wrap overflow-hidden bg-foreground2"
+  class="flex flex-row w-10/12 space-x-2 items-start align-middle rounded-md p-2 text-wrap overflow-hidden bg-foreground2"
 >
   <form
+    id="workday-{{date}}-form"
     hx-patch="/timesheet/{{ timesheet_id }}/day/{{ date }}"
     hx-swap="outerHTML"
-    hx-vals='js:{ hourly_wage: parseFloat(document.getElementById("total_hours").value)}'
+    hx-vals='js:{ total_hours: parseFloat(document.getElementById("total_hours").value)}'
     hx-target="#workday-{{ date }}"
     hx-ext="json-enc"
     hx-confirm="Are you sure you want to update this workday?"
-    class="flex flex-row w-full items-start space-x-12 text-wrap overflow-hidden"
+    class="flex flex-row w-full items-start gap-4 text-wrap overflow-hidden"
   >
     <p class="font-mono text-txt font-bold text-lg">
       {{ date.format("%d.%m.%Y").to_string() }}
@@ -29,7 +30,7 @@
       />
     </div>
     <div class="flex flex-row space-x-1">
-      <label for="total_hours" class="font-mono text-txt text-lg"
+      <label for="comment" class="font-mono text-txt text-lg"
         >Comment:</label
       >
       <input
@@ -42,13 +43,14 @@
     </div>
     <input
       type="hidden"
+      class="hidden"
       id="timesheet_id"
       name="timesheet_id"
       value="{{ timesheet_id }}"
     />
-    <input type="hidden" id="date" name="date" value="{{ date }}" />
-    <button class="font-mono text-lg text-txthl">Save</button>
+    <input type="hidden" class="hidden" id="date" name="date" value="{{ date }}" />
   </form>
+  <button class="font-mono text-lg text-txthl" onclick='document.getElementById("workday-{{date}}-form").submit();'>Save</button>
   <button
     hx-get="/timesheet/{{ timesheet_id }}/day/{{ date }}"
     hx-swap="outerHTML"

@@ -12,7 +12,7 @@ use super::models::WagePreset;
 use async_trait::async_trait;
 
 // Reads a single preset from the DB using an existing transaction handler.
-pub async fn read_one_db_using_tx(
+pub async fn _read_one_db_using_tx(
     tx: &mut Transaction<'_, sqlx::Postgres>,
     preset_name: &String,
 ) -> DbResult<WagePreset> {
@@ -80,25 +80,25 @@ impl crate::repositories::repository::DbRepository for WagePresetRepository {
 
 impl WagePresetRepository {
     // Reads a single preset from the DB.
-    pub async fn read_one(&self, preset_name: &String) -> DbResult<WagePreset> {
+    pub async fn _read_one(&self, preset_name: &String) -> DbResult<WagePreset> {
         // TODO: Redis here
 
-        self.read_one_db(preset_name).await
+        self._read_one_db(preset_name).await
     }
 
-    async fn read_one_db(&self, preset_name: &String) -> DbResult<WagePreset> {
+    async fn _read_one_db(&self, preset_name: &String) -> DbResult<WagePreset> {
         let mut tx = self.pool.begin().await?;
 
-        read_one_db_using_tx(&mut tx, preset_name).await
+        _read_one_db_using_tx(&mut tx, preset_name).await
     }
 
-    pub async fn read_all(&self) -> DbResult<Vec<WagePreset>> {
+    pub async fn _read_all(&self) -> DbResult<Vec<WagePreset>> {
         // TODO: Redis here
 
-        self.read_all_db().await
+        self._read_all_db().await
     }
 
-    async fn read_all_db(&self) -> DbResult<Vec<WagePreset>> {
+    async fn _read_all_db(&self) -> DbResult<Vec<WagePreset>> {
         let executor = self.pool.as_ref();
 
         let wage_presets: Vec<WagePreset> = sqlx::query_as!(
@@ -115,16 +115,16 @@ impl WagePresetRepository {
         Ok(wage_presets)
     }
 
-    pub async fn read_optional_matching_date(
+    pub async fn _read_optional_matching_date(
         &self,
         date: &NaiveDate,
     ) -> DbResult<Option<WagePreset>> {
         // TODO: Redis here
 
-        self.read_optional_matching_date_db(date).await
+        self._read_optional_matching_date_db(date).await
     }
 
-    pub async fn read_optional_matching_date_db(
+    pub async fn _read_optional_matching_date_db(
         &self,
         date: &NaiveDate,
     ) -> DbResult<Option<WagePreset>> {

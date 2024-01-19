@@ -1,8 +1,9 @@
-use std::{collections::HashMap, str::FromStr};
+use std::str::FromStr;
 
 use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;
 use chrono::NaiveDate;
+use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::{
@@ -13,17 +14,23 @@ use crate::{
         employment::employment_repo::EmploymentRepository,
         timesheet::{
             models::{
-                TimesheetCreateData, TimesheetReadAllData, TimesheetUpdateData, WorkdayUpdateData,
+                TimesheetCreateData, TimesheetReadAllData, TimesheetUpdateData,
+                TimesheetWithWorkdays, WorkdayUpdateData,
             },
             timesheet_repo::TimesheetRepository,
         },
     },
     templates::timesheet::{
-        DetailedWage, TimesheetCalculateTemplate, TimesheetReviewTemplate, TimesheetTemplate,
-        TimesheetWageDetailed, TimesheetsReviewTemplate, TimesheetsTemplate, WorkdayEditTemplate,
-        WorkdayTemplate,
+        TimesheetCalculateTemplate, TimesheetReviewTemplate, TimesheetTemplate,
+        TimesheetsReviewTemplate, TimesheetsTemplate, WorkdayEditTemplate, WorkdayTemplate,
     },
+    utils::wage_calc::{calculate_wage::calculate_timesheet_wage, models::TimesheetWageDetailed},
 };
+
+#[derive(Deserialize)]
+pub struct TimesheetCalcQuery {
+    pub pink_paper_signed: bool,
+}
 
 #[get("/user/{user_id}/employment/{company_id}/sheet")]
 pub async fn get_all_timesheets_for_employment(
@@ -133,9 +140,35 @@ pub async fn get_timesheet(
     handle_database_error(result.expect_err("Should be error."))
 }
 
+async fn get_calculated_wage(
+    target_sheet: &TimesheetWithWorkdays,
+    pink_paper_signed: bool,
+    timesheet_repo: web::Data<TimesheetRepository>,
+) -> Result<TimesheetWageDetailed, String> {
+    let relevant_sheets_res = timesheet_repo
+        .read_all_with_date_from_to_per_employment_extended_db(
+            target_sheet.timesheet.user_id,
+            target_sheet.timesheet.company_id,
+            target_sheet.timesheet.start_date,
+            target_sheet.timesheet.end_date,
+        )
+        .await;
+    if relevant_sheets_res.is_err() {
+        return Err("Could not find the timesheets required.".to_string());
+    }
+    let relevant_sheets = relevant_sheets_res.expect("Should be okay");
+    Ok(calculate_timesheet_wage(
+        pink_paper_signed,
+        &relevant_sheets,
+        target_sheet.timesheet.id,
+    )?)
+}
+
+// The usage of a query for a simple parameter is a bit hacky. I admit.
 #[get("/timesheet/{timesheet_id}/expected-wage")]
 pub async fn get_expected_wage_calculation(
     timesheet_id: web::Path<String>,
+    query: web::Query<TimesheetCalcQuery>,
     timesheet_repo: web::Data<TimesheetRepository>,
 ) -> HttpResponse {
     let id_parse = Uuid::from_str(timesheet_id.into_inner().as_str());
@@ -148,32 +181,14 @@ pub async fn get_expected_wage_calculation(
     if sheet_res.is_err() {
         return handle_database_error(sheet_res.expect_err("Should be an error."));
     }
+    let sheet = sheet_res.expect("Should be some.");
 
-    //ToDo: Here we call the calculation function
-
-    //ToDo: Get rid of this mock data.
-    let detailed_wage = DetailedWage {
-        tax_base: 3000.0,
-        net_wage: 4235.52,
-        employer_social_insurance: 500.0,
-        employee_health_insurance: 250.0,
-        employer_health_insurance: 750.0,
-        employee_social_insurance: 200.0,
-    };
-
-    let mut wages_per_month: HashMap<String, DetailedWage> = HashMap::new();
-    wages_per_month.insert("February".to_string(), detailed_wage.clone());
-    wages_per_month.insert("Maruary".to_string(), detailed_wage.clone());
-
-    let wage = TimesheetWageDetailed {
-        total_wage: detailed_wage,
-        wage_currency: "Czk".to_string(),
-        month_to_detailed_wage: wages_per_month,
-        error_option: None,
-    };
-
+    let wage = get_calculated_wage(&sheet, query.pink_paper_signed, timesheet_repo).await;
+    if wage.is_err() {
+        return HttpResponse::BadRequest().body(wage.expect_err("Should be an error."));
+    }
     let template = TimesheetCalculateTemplate {
-        wage,
+        wage: wage.expect("Should be valid."),
         timesheet_id: parsed_id,
         in_submit_mode: false,
     };
@@ -190,6 +205,7 @@ pub async fn get_expected_wage_calculation(
 #[get("/timesheet/{timesheet_id}/submit-page")]
 pub async fn open_sheet_submit_page(
     timesheet_id: web::Path<String>,
+    query: web::Query<TimesheetCalcQuery>,
     timesheet_repo: web::Data<TimesheetRepository>,
 ) -> HttpResponse {
     let id_parse = Uuid::from_str(timesheet_id.into_inner().as_str());
@@ -203,31 +219,14 @@ pub async fn open_sheet_submit_page(
         return handle_database_error(sheet_res.expect_err("Should be an error."));
     }
 
-    //ToDo: Here we call the calculation function
+    let sheet = sheet_res.expect("Should be some.");
 
-    //ToDo: Get rid of this mock data.
-    let detailed_wage = DetailedWage {
-        tax_base: 3000.0,
-        net_wage: 4235.52,
-        employer_social_insurance: 500.0,
-        employee_health_insurance: 250.0,
-        employer_health_insurance: 750.0,
-        employee_social_insurance: 200.0,
-    };
-
-    let mut wages_per_month: HashMap<String, DetailedWage> = HashMap::new();
-    wages_per_month.insert("February".to_string(), detailed_wage.clone());
-    wages_per_month.insert("Maruary".to_string(), detailed_wage.clone());
-
-    let wage = TimesheetWageDetailed {
-        total_wage: detailed_wage,
-        wage_currency: "Czk".to_string(),
-        month_to_detailed_wage: wages_per_month,
-        error_option: None,
-    };
-
+    let wage = get_calculated_wage(&sheet, query.pink_paper_signed, timesheet_repo).await;
+    if wage.is_err() {
+        return HttpResponse::BadRequest().body(wage.expect_err("Should be an error."));
+    }
     let template = TimesheetCalculateTemplate {
-        wage,
+        wage: wage.expect("Should be valid."),
         timesheet_id: parsed_id,
         in_submit_mode: true,
     };

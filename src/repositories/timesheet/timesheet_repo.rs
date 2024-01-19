@@ -621,7 +621,7 @@ impl TimesheetRepository {
         Ok(edited_data)
     }
 
-    pub async fn read_all_with_date_from_to_per_employment(
+    pub async fn _read_all_with_date_from_to_per_employment(
         &self,
         user_id: Uuid,
         company_id: Uuid,

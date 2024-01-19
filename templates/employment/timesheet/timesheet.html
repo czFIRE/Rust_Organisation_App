@@ -1,6 +1,6 @@
 <div
   id="timesheet-{{ id }}"
-  class="flex flex-col px-10 space-y-6 w-full text-wrap"
+  class="flex flex-col px-10 space-y-6 w-full text-wrap overflow-auto"
 >
   <h2 class="font-mono text-4xl font-extrabold text-txthl">
     Timesheet: {{ event_name }}
@@ -73,10 +73,14 @@
     <div
       class="flex flex-row space-x-5 row-start-3 col-span-5 row-span-1 w-1/2"
     >
+      <input id="pink_paper_signed" name="pink_paper_signed" type="checkbox">
+      <label for="pink_paper_signed" class="font-mono text-txt text-lg">Signed pink paper</label>
       <button
         hx-get="/timesheet/{{ id }}/expected-wage"
         hx-swap="innerHTML"
         hx-target="#content"
+        hx-ext="path-params"
+        hx-vals='js:{"pink_paper_signed": document.getElementById("pink_paper_signed").checked}'
         class="bg-foreground1 rounded-md p-2 font-mono text-txthl text-lg"
       >
         Calculate Expected Wage

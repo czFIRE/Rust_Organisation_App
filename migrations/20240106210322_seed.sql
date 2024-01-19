@@ -56,34 +56,34 @@ BEGIN
     INSERT INTO company
         (id, name, description,
         website, crn, vatin,
-        phone, email, avatar_url,
+        phone, email,
         created_at, edited_at)
         VALUES
         (company0_id, 'AMD', 'Advanced Micro Devices, Inc.',
         'https://amd.com', 'crn_amd', 'vatin_amd',
-        '+1 408-749-4000', 'info@amd.com', 'amd.png',
+        '+1 408-749-4000', 'info@amd.com',
         '2023-12-22 08:38', '2023-12-22 08:38');
 
     INSERT INTO company
         (id, name, description,
         website, crn, vatin,
-        phone, email, avatar_url,
+        phone, email,
         created_at, edited_at)
         VALUES
         (company1_id, 'ReportLab', 'ReportLab Europe Ltd.',
         'https://reportlab.com', 'crn_reportlab', 'vatin_reportlab',
-        '+44 20 8191 7277', 'support@reportlab.com', 'reportlab.png',
+        '+44 20 8191 7277', 'support@reportlab.com',
         '2023-12-24 08:38', '2023-12-24 08:38');
 
     INSERT INTO company
         (id, name, description,
         website, crn, vatin,
-        phone, email, avatar_url,
+        phone, email,
         created_at, edited_at)
         VALUES
         (company2_id, 'Prusa Research', 'Prusa Research a.s.',
         'https://prusa3d.com', 'CRN_prusa', 'CZ06649114',
-        '123 456 789', 'info@prusa3d.com', 'prusa_design.png',
+        '123 456 789', 'info@prusa3d.com',
         '2023-12-24 15:55', '2023-12-24 19:38');
 
 --------------------------------------------------------------------------------
@@ -113,66 +113,66 @@ BEGIN
 
     INSERT INTO user_record
         (id, name, email,
-        birth, avatar_url,
+        birth,
         gender, role, status,
         created_at, edited_at)
         VALUES
         (user0_id, 'Dave Null', 'dave@null.com',
-        '1996-06-23', 'dave.jpg',
+        '1996-06-23',
         'male', 'admin', 'available',
         '2023-12-22 08:38', '2023-12-22 08:38');
 
     INSERT INTO user_record
         (id, name, email,
-        birth, avatar_url,
+        birth,
         gender, role, status,
         created_at, edited_at)
         VALUES
         (user1_id, 'Tana Smith', 't.smith@seznam.cz',
-        '1994-02-10', 'tana.jpg',
+        '1994-02-10',
         'female', 'user', 'available',
         '2023-12-26 07:33', '2023-12-26 07:33');
 
     INSERT INTO user_record
         (id, name, email,
-        birth, avatar_url,
+        birth,
         gender, role, status,
         created_at, edited_at)
         VALUES
         (user2_id, 'Anna Smeth', 'a.smeth@sezam.cz',
-        '1998-02-10', 'anna.jpg',
+        '1998-02-10',
         'female', 'user', 'available',
         '2023-12-27 07:33', '2023-12-27 07:33');
 
     INSERT INTO user_record
         (id, name, email,
-        birth, avatar_url,
+        birth, 
         gender, role, status,
         created_at, edited_at)
         VALUES
         (user3_id, 'Dee Scord', 'dee@lmao.com',
-        '1999-06-23', 'dee.jpg',
+        '1999-06-23',
         'male', 'user', 'available',
         '2023-12-20 08:38', '2023-12-20 08:38');
 
     INSERT INTO user_record
         (id, name, email,
-        birth, avatar_url,
+        birth,
         gender, role, status,
         created_at, edited_at)
         VALUES
         (user4_id, 'Joanna Dural', 'j.dural@centrum.cz',
-        '1995-08-10', 'joanna.jpg',
+        '1995-08-10',
         'female', 'user', 'unavailable',
         '2023-12-31 09:33', '2024-01-01 12:33');
 
     INSERT INTO user_record
         (id, name, email,
-        birth, avatar_url,
+        birth,
         gender, role, status,
         created_at, edited_at)
         VALUES
-        (user5_id, 'Alan Papalochus', 'alan@pap.cz', '1968-08-01', 'alan.jpg',
+        (user5_id, 'Alan Papalochus', 'alan@pap.cz', '1968-08-01',
         'male', 'user', 'available',
         '2024-01-01 10:33', '2024-01-01 10:33');
     
@@ -315,47 +315,47 @@ BEGIN
     INSERT INTO event
         (id, name, description,
         website, accepts_staff,
-        start_date, end_date, avatar_url,
+        start_date, end_date,
         created_at, edited_at)
         VALUES
         (event0_id, 'Woodstock', 'A legendary music festival.',
         'https://woodstock.com', true,
-        '1969-08-15', '1969-08-18', 'woodstock.png', 
+        '1969-08-15', '1969-08-18',
         '2023-05-03 10:38', '2023-12-01 14:30');
 
     INSERT INTO event
         (id, name, description,
         website, accepts_staff,
-        start_date, end_date, avatar_url,
+        start_date, end_date,
         created_at, edited_at)
         VALUES
         (event1_id, 'Darkness 2024', 'Norwegian festival for happy people.',
         'https://darkness2024.com', true,
-        '2024-01-01', '2024-01-03', 'darkness_2024.png',
+        '2024-01-01', '2024-01-03',
         '2023-06-06 06:06:6.66', '2023-06-06 16:26:6.66');
 
     INSERT INTO event
         (id, name, description,
         website, accepts_staff,
-        start_date, end_date, avatar_url,
+        start_date, end_date,
         created_at, edited_at)
         VALUES
         (event2_id, 'Beep Boop 2024', 'An event so controversial no companies associated with it. Please sponsor us?',
         'https://beepboop2024.com', true,
-        '2024-01-01', '2024-01-03', 'beep_boop_2024.png',
+        '2024-01-01', '2024-01-03',
         '2023-06-06 06:06:6.66', '2023-06-06 16:26:6.66');
 
     INSERT INTO event
         (id, name,
         description,
         website, accepts_staff,
-        start_date, end_date, avatar_url,
+        start_date, end_date,
         created_at, edited_at)
         VALUES
         (event3_id, 'Elvis revival',
         'A rock-n-roll event possibly ended with arrival of the king',
         'https://elvisforever.org', true,
-        '1969-07-28', '1969-08-18', 'elvis_revival.png',
+        '1969-07-28', '1969-08-18',
         '2023-09-01 09:06', '2023-09-01 09:06');
 
 --------------------------------------------------------------------------------
