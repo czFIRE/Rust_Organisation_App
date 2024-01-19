@@ -78,18 +78,18 @@ async fn get_many_companies(
             })
             .collect();
 
-        let body: Result<String, askama::Error>;
-        if !simple_view {
+        let body: Result<String, askama::Error> = if !simple_view {
             let template = CompaniesTemplate {
                 companies: lite_companies,
             };
-            body = template.render();
+            template.render()
         } else {
             let template = CompaniesInfoTemplate {
                 companies: lite_companies,
             };
-            body = template.render();
-        }
+            template.render()
+        };
+
         if body.is_err() {
             return HttpResponse::InternalServerError()
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
@@ -467,7 +467,7 @@ pub async fn upload_company_avatar(
         return HttpResponse::BadRequest().body("Invalid file type.");
     }
 
-    let image_res = store_image(parsed_id, ImageCategory::CompanyImage, form.file);
+    let image_res = store_image(parsed_id, ImageCategory::Company, form.file);
     if image_res.is_err() {
         return HttpResponse::InternalServerError()
             .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
@@ -511,7 +511,7 @@ pub async fn remove_company_avatar(
     }
 
     let parsed_id = id_parse.expect("Should be okay.");
-    if remove_image(parsed_id, ImageCategory::CompanyImage).is_err() {
+    if remove_image(parsed_id, ImageCategory::Company).is_err() {
         return HttpResponse::InternalServerError()
             .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
     }

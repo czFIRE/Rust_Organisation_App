@@ -325,7 +325,7 @@ async fn open_task_panel(
             .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
     }
 
-    return HttpResponse::Ok().body(body.expect("Should be valid."));
+    HttpResponse::Ok().body(body.expect("Should be valid."))
 }
 
 #[get("/event/staff/{staff_id}/task/{task_id}")]

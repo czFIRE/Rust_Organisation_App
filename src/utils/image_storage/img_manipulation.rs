@@ -7,9 +7,9 @@ use super::models::ImageCategory;
 
 fn get_dir_by_category(category: ImageCategory) -> String {
     match category {
-        ImageCategory::CompanyImage => "/img/company/".to_string(),
-        ImageCategory::EventImage => "/img/event/".to_string(),
-        ImageCategory::UserImage => "/img/user/".to_string(),
+        ImageCategory::Company => "/img/company/".to_string(),
+        ImageCategory::Event => "/img/event/".to_string(),
+        ImageCategory::User => "/img/user/".to_string(),
     }
 }
 

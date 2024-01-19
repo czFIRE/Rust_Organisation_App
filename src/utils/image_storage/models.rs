@@ -7,9 +7,9 @@ pub struct UploadForm {
 }
 
 pub enum ImageCategory {
-    UserImage,
-    CompanyImage,
-    EventImage,
+    User,
+    Company,
+    Event,
 }
 
 pub const MAX_FILE_SIZE: usize = 1024 * 1024 * 10;

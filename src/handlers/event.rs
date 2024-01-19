@@ -319,7 +319,7 @@ pub async fn upload_event_avatar(
         return HttpResponse::BadRequest().body("Invalid file type.");
     }
 
-    let image_res = store_image(parsed_id, ImageCategory::EventImage, form.file);
+    let image_res = store_image(parsed_id, ImageCategory::Event, form.file);
     if image_res.is_err() {
         return HttpResponse::InternalServerError()
             .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
@@ -352,7 +352,7 @@ pub async fn remove_event_avatar(
     }
 
     let parsed_id = id_parse.expect("Should be okay.");
-    if remove_image(parsed_id, ImageCategory::EventImage).is_err() {
+    if remove_image(parsed_id, ImageCategory::Event).is_err() {
         return HttpResponse::InternalServerError()
             .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
     }
