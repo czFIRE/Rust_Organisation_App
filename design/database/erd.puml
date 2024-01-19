@@ -108,7 +108,7 @@ entity user {
     *name: varchar(255)
     *email: varchar(45)
     *date_of_birth: date
-    *avatar_path: varchar(255)
+    *avatar_url: varchar(255)
     *gender: <<enum Gender>>
     *role: <<enum UserRole>>
     *status <<enum UserStatus>>
@@ -155,7 +155,7 @@ entity event {
     *accepts_staff: boolean
     *start_date: date
     *end_date: date
-    *avatar_path: varchar(255)
+    *avatar_url: varchar(255)
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
@@ -207,7 +207,7 @@ entity company {
     *VATIN: varchar(18)
     *phone: varchar(255)
     *email: varchar(255)
-    *avatar_path: varchar(255)
+    *avatar_url: varchar(255)
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
@@ -266,8 +266,6 @@ entity event_staff {
     *user_id: <<uuid>> (FK user, part of FK employment)
     *company_id: <<uuid>> (FK company, part of FK employment)
     *event_id: <<uuid>> (FK event)
-    *staff_level: <<enum EventRole>>
-    *acceptance_status: <<enum AcceptanceStatus>>
     decided_by: <<uuid>> (FK event_staff)
     *role: <<enum EventRole>>
     *acceptance_status: <<enum AcceptanceStatus>>

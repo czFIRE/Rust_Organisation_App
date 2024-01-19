@@ -1,0 +1,14 @@
+{% for timesheet in timesheets %}
+{{ timesheet.id }}, 
+{{ timesheet.user_id }}, 
+{{ timesheet.company_id }}, 
+{{ timesheet.event_id }},
+{{ timesheet.event_name }}, 
+{{ timesheet.start_date }}, 
+{{ timesheet.end_date }}, 
+{{ timesheet.is_editable }},
+{{ timesheet.status }}, 
+{{ timesheet.has_note }}, 
+{{ timesheet.created_at }}, 
+{{ timesheet.edited_at }}
+{% endfor %}

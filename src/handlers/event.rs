@@ -1,54 +1,184 @@
-use actix_web::{delete, get, patch, post, put, web, HttpResponse};
-use chrono::Utc;
-use serde::Deserialize;
+use std::str::FromStr;
 
-#[derive(Deserialize)]
-pub struct NewEventData {
-    name: String,
-    description: Option<String>,
-    website: Option<String>,
-    start_date: chrono::DateTime<Utc>,
-    end_date: chrono::DateTime<Utc>,
-}
+use actix_web::{delete, get, http, patch, post, put, web, HttpResponse};
+use askama::Template;
+use uuid::Uuid;
 
-#[derive(Deserialize)]
-pub struct EventData {
-    name: Option<String>,
-    description: Option<String>,
-    website: Option<String>,
-    start_date: Option<chrono::DateTime<Utc>>,
-    end_date: Option<chrono::DateTime<Utc>>,
-    accepts_staff: Option<bool>,
-}
+use crate::{
+    errors::{handle_database_error, parse_error},
+    repositories::event::{
+        event_repo::EventRepository,
+        models::{EventData, EventFilter, NewEvent},
+    },
+    templates::event::{EventLiteTemplate, EventTemplate, EventsTemplate},
+};
 
 #[get("/event")]
-pub async fn get_events() -> HttpResponse {
-    todo!()
+pub async fn get_events(
+    params: web::Query<EventFilter>,
+    event_repo: web::Data<EventRepository>,
+) -> HttpResponse {
+    let query_params = params.into_inner();
+
+    if (query_params.limit.is_some() && query_params.limit.unwrap() < 0)
+        || (query_params.offset.is_some() && query_params.offset.unwrap() < 0)
+    {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let result = event_repo.read_all(query_params).await;
+
+    if let Ok(events) = result {
+        let lite_events: Vec<EventLiteTemplate> =
+            events.into_iter().map(|event| event.into()).collect();
+
+        let template = EventsTemplate {
+            events: lite_events,
+        };
+
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Ok()
+            .content_type("text/html")
+            .body(body.expect("Should be okay now."));
+    }
+
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[get("/event/{event_id}")]
-pub async fn get_event(_id: web::Path<String>) -> HttpResponse {
-    todo!()
+pub async fn get_event(
+    event_id: web::Path<String>,
+    event_repo: web::Data<EventRepository>,
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(event_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let parsed_id = id_parse.expect("Should be valid.");
+
+    let result = event_repo.read_one(parsed_id).await;
+
+    if let Ok(event) = result {
+        let template: EventTemplate = event.into();
+
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Ok()
+            .content_type("text/html")
+            .body(body.expect("Should be valid."));
+    }
+
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[post("/event")]
-pub async fn create_event(_new_event: web::Form<NewEventData>) -> HttpResponse {
-    todo!()
+pub async fn create_event(
+    new_event: web::Json<NewEvent>,
+    event_repo: web::Data<EventRepository>,
+) -> HttpResponse {
+    if (new_event.website.is_some() && new_event.website.as_ref().unwrap().is_empty())
+        || (new_event.description.is_some() && new_event.description.as_ref().unwrap().is_empty())
+    {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let result = event_repo.create(new_event.into_inner()).await;
+
+    if let Ok(event) = result {
+        let template: EventTemplate = event.into();
+
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Created()
+            .content_type("text/html")
+            .body(body.expect("Should be valid."));
+    }
+
+    handle_database_error(result.expect_err("Should be error."))
+}
+
+fn is_update_data_empty(event_data: EventData) -> bool {
+    (event_data.name.is_none()
+        && event_data.description.is_none()
+        && event_data.website.is_none()
+        && event_data.start_date.is_none()
+        && event_data.end_date.is_none()
+        && event_data.avatar_url.is_none())
+        || (event_data.avatar_url.is_some() && event_data.avatar_url.unwrap().is_empty())
+        || (event_data.website.is_some() && event_data.website.unwrap().is_empty())
+        || (event_data.description.is_some() && event_data.description.unwrap().is_empty())
 }
 
 #[patch("/event/{event_id}")]
 pub async fn update_event(
-    _id: web::Path<String>,
-    _event_data: web::Form<EventData>,
+    event_id: web::Path<String>,
+    event_data: web::Json<EventData>,
+    event_repo: web::Data<EventRepository>,
 ) -> HttpResponse {
-    todo!()
+    if is_update_data_empty(event_data.clone()) {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let id_parse = Uuid::from_str(event_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let parsed_id = id_parse.expect("Should be valid.");
+    let result = event_repo.update(parsed_id, event_data.into_inner()).await;
+
+    if let Ok(event) = result {
+        let template: EventTemplate = event.into();
+
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::InternalServerError()
+                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+
+        return HttpResponse::Ok()
+            .content_type("text/html")
+            .body(body.expect("Should be valid now."));
+    }
+
+    handle_database_error(result.expect_err("Should be error."))
 }
 
 #[delete("/event/{event_id}")]
-pub async fn delete_event(_id: web::Path<String>) -> HttpResponse {
-    todo!()
+pub async fn delete_event(
+    event_id: web::Path<String>,
+    event_repo: web::Data<EventRepository>,
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(event_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    }
+
+    let parsed_id = id_parse.expect("Should be valid.");
+    let result = event_repo.delete(parsed_id).await;
+
+    if let Err(error) = result {
+        return handle_database_error(error);
+    }
+
+    HttpResponse::NoContent().finish()
 }
 
+//TODO: Once file store/load is done.
 #[get("/event/{event_id}/avatar")]
 pub async fn get_event_avatar(_id: web::Path<String>) -> HttpResponse {
     todo!()

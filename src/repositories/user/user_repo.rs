@@ -42,7 +42,7 @@ impl UserRepository {
                 name, 
                 email, 
                 birth, 
-                avatar_path, 
+                avatar_url, 
                 gender AS "gender!: Gender", 
                 role AS "role!: UserRole", 
                 status AS "status!: UserStatus", 
@@ -84,7 +84,7 @@ impl UserRepository {
                 name, 
                 email, 
                 birth, 
-                avatar_path, 
+                avatar_url, 
                 gender AS "gender!: Gender", 
                 role AS "role!: UserRole", 
                 status AS "status!: UserStatus", 
@@ -93,8 +93,8 @@ impl UserRepository {
                 deleted_at 
             FROM 
                 user_record 
-            WHERE 
-                id = $1
+            WHERE id = $1
+              AND deleted_at IS NULL
             "#,
             user_id,
         )
@@ -104,13 +104,13 @@ impl UserRepository {
         Ok(user)
     }
 
-    pub async fn read_all(&self) -> DbResult<Vec<User>> {
+    pub async fn _read_all(&self) -> DbResult<Vec<User>> {
         // TODO: Redis here
 
-        self.read_all_db().await
+        self._read_all_db().await
     }
 
-    async fn read_all_db(&self) -> DbResult<Vec<User>> {
+    async fn _read_all_db(&self) -> DbResult<Vec<User>> {
         let executor = self.pool.as_ref();
 
         let user: Vec<User> = sqlx::query_as!(
@@ -120,7 +120,7 @@ impl UserRepository {
                 name, 
                 email, 
                 birth, 
-                avatar_path, 
+                avatar_url, 
                 gender AS "gender!: Gender", 
                 role AS "role!: UserRole", 
                 status AS "status!: UserStatus", 
@@ -142,7 +142,7 @@ impl UserRepository {
         // TODO - this should support transactions
         let executor = self.pool.as_ref();
 
-        if data.avatar_path.is_none()
+        if data.avatar_url.is_none()
             && data.birth.is_none()
             && data.email.is_none()
             && data.gender.is_none()
@@ -171,7 +171,7 @@ impl UserRepository {
                 birth = COALESCE($3, birth), 
                 gender = COALESCE($4, gender), 
                 role = COALESCE($5, role), 
-                avatar_path = COALESCE($6, avatar_path),
+                avatar_url = COALESCE($6, avatar_url),
                 edited_at = NOW() 
             WHERE 
                 id = $7 
@@ -180,7 +180,7 @@ impl UserRepository {
                 name, 
                 email, 
                 birth, 
-                avatar_path, 
+                avatar_url, 
                 gender AS "gender!: Gender", 
                 role AS "role!: UserRole", 
                 status AS "status!: UserStatus", 
@@ -193,7 +193,7 @@ impl UserRepository {
             data.birth,
             data.gender as Option<Gender>,
             data.role as Option<UserRole>,
-            data.avatar_path,
+            data.avatar_url,
             user_id,
         )
         .fetch_one(executor)

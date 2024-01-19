@@ -1,16 +1,17 @@
+use serde::Deserialize;
 use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
 
 // TODO needs to be kept the same as in staff/models.rs => StaffUserCompanyFlattened
 // TODO needs to be kept the same as in employment/models.rs => EmploymentUserCompanyFlattened
-#[derive(Debug, FromRow, Clone)]
+#[derive(Debug, FromRow, Deserialize, Clone)]
 pub struct Company {
     pub id: Uuid,
     pub name: String,
     pub description: Option<String>,
     pub phone: String,
     pub email: String,
-    pub avatar_path: Option<String>,
+    pub avatar_url: String,
     pub website: Option<String>,
     pub crn: String,
     pub vatin: String,
@@ -27,7 +28,7 @@ pub struct CompanyExtended {
     pub description: Option<String>,
     pub phone: String,
     pub email: String,
-    pub avatar_path: Option<String>,
+    pub avatar_url: String,
     pub website: Option<String>,
     pub crn: String,
     pub vatin: String,
@@ -61,7 +62,7 @@ pub struct CompanyData {
     pub description: Option<String>,
     pub phone: Option<String>,
     pub email: Option<String>,
-    pub avatar_path: Option<String>,
+    pub avatar_url: Option<String>,
     pub website: Option<String>,
     pub crn: Option<String>,
     pub vatin: Option<String>,
@@ -92,4 +93,14 @@ pub struct AddressData {
     pub postal_code: String,
     pub street: String,
     pub street_number: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct AddressUpdateData {
+    pub country: Option<String>,
+    pub region: Option<String>,
+    pub city: Option<String>,
+    pub postal_code: Option<String>,
+    pub street: Option<String>,
+    pub street_number: Option<String>,
 }

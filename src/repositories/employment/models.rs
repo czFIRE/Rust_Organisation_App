@@ -1,13 +1,14 @@
 use chrono::NaiveDate;
+use serde::Deserialize;
 use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
 
 use crate::{
-    models::{EmploymentContract, EmployeeLevel, Gender, UserRole, UserStatus},
+    models::{EmployeeLevel, EmploymentContract, Gender, UserRole, UserStatus},
     repositories::{company::models::Company, user::models::User},
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct NewEmployment {
     pub user_id: Uuid,
     pub company_id: Uuid,
@@ -38,7 +39,6 @@ pub struct Employment {
 
 #[derive(Debug, Clone)]
 pub struct EmploymentExtended {
-    // User hopefully knows his own data
     pub user_id: Uuid,
     pub company: Company,
     pub manager: Option<User>,
@@ -53,7 +53,7 @@ pub struct EmploymentExtended {
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct EmploymentData {
     pub manager_id: Option<Uuid>,
     pub hourly_wage: Option<f64>,
@@ -64,7 +64,7 @@ pub struct EmploymentData {
     pub level: Option<EmployeeLevel>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct EmploymentFilter {
     pub limit: Option<i64>,
     pub offset: Option<i64>,
@@ -94,7 +94,7 @@ pub struct EmploymentUserCompanyFlattened {
     pub manager_name: Option<String>,
     pub manager_email: Option<String>,
     pub manager_birth: Option<NaiveDate>,
-    pub manager_avatar_path: Option<String>, // TODO: Now is the same as in INIT.SQL but do we want this?
+    pub manager_avatar_url: Option<String>,
     pub manager_gender: Option<Gender>,
     pub manager_role: Option<UserRole>,
     pub manager_status: Option<UserStatus>,
@@ -107,7 +107,7 @@ pub struct EmploymentUserCompanyFlattened {
     pub company_description: Option<String>,
     pub company_phone: String,
     pub company_email: String,
-    pub company_avatar_path: Option<String>,
+    pub company_avatar_url: String,
     pub company_website: Option<String>,
     pub company_crn: String,
     pub company_vatin: String,
@@ -124,7 +124,7 @@ impl From<EmploymentUserCompanyFlattened> for EmploymentExtended {
             description: value.company_description,
             phone: value.company_phone,
             email: value.company_email,
-            avatar_path: value.company_avatar_path,
+            avatar_url: value.company_avatar_url,
             website: value.company_website,
             crn: value.company_crn,
             vatin: value.company_vatin,
@@ -140,7 +140,7 @@ impl From<EmploymentUserCompanyFlattened> for EmploymentExtended {
                 name: value.manager_name.unwrap(),
                 email: value.manager_email.unwrap(),
                 birth: value.manager_birth.unwrap(),
-                avatar_path: value.manager_avatar_path,
+                avatar_url: value.manager_avatar_url.unwrap(),
                 gender: value.manager_gender.unwrap(),
                 role: value.manager_role.unwrap(),
                 status: value.manager_status.unwrap(),

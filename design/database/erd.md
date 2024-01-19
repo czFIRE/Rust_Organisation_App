@@ -12,7 +12,7 @@ This table contains basic information about users within the system.
 - user_status - The availability of a user in regards to tasks.
 - email - User's email address
 - date_of_birth - Speaks for itself.
-- avatar_path - path to the user's avatar picture.
+- avatar_url - path / url to the user's avatar picture.
 - sex - speaks for itself
 
 ### Company
@@ -26,7 +26,7 @@ This table contains basic information about companies registered within the syst
 - CRN / VATIN - company registration and tax information
 - contact_phone - phone number
 - contact_email - email
-- avatar_path - path to the company's avatar picture.
+- avatar_url - path / url to the company's avatar picture.
 
 ### Company_address
 Stores a compound address for a company.
@@ -51,7 +51,7 @@ This table contains information about events registered within the system.
 - accepts_staff - this boolean value denotes whether users (employees of associated companies) may register for possible work on the event.
 - work_start - denotes the start of work on the event
 - work_end - denotes the end of work on the event
-- avatar_path - path to the event's avatar
+- avatar_url - path / url to the event's avatar
 
 ### Timesheet
 This table contains information about timesheets that users may access within the system.

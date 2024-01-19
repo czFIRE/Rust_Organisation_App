@@ -33,7 +33,7 @@ BEGIN
     INSERT INTO company
         (id, name, description,
         website, crn, vatin,
-        phone, email, avatar_path,
+        phone, email, avatar_url,
         created_at, edited_at)
         VALUES
         (company0_id, 'AMD', 'Advanced Micro Devices, Inc.',
@@ -44,7 +44,7 @@ BEGIN
     INSERT INTO company
         (id, name, description,
         website, crn, vatin,
-        phone, email, avatar_path,
+        phone, email, avatar_url,
         created_at, edited_at)
         VALUES
         (company1_id, 'ReportLab', 'ReportLab Europe Ltd.',
@@ -55,7 +55,7 @@ BEGIN
     INSERT INTO company
         (id, name, description,
         website, crn, vatin,
-        phone, email, avatar_path,
+        phone, email, avatar_url,
         created_at, edited_at)
         VALUES
         (company2_id, 'Prusa Research', 'Prusa Research a.s.',
@@ -86,7 +86,7 @@ BEGIN
 
 
     INSERT INTO user_record
-        (id, name, email, birth, avatar_path,
+        (id, name, email, birth, avatar_url,
         gender, role, status,
         created_at, edited_at)
         VALUES
@@ -95,7 +95,7 @@ BEGIN
         '2023-12-22 08:38:20.288688', '2023-12-22 08:38:20.288688');
 
     INSERT INTO user_record
-        (id, name, email, birth, avatar_path,
+        (id, name, email, birth, avatar_url,
         gender, role, status,
         created_at, edited_at)
         VALUES
@@ -104,7 +104,7 @@ BEGIN
         '2023-12-26 07:33:20.288688', '2023-12-26 07:33:20.288688');
 
     INSERT INTO user_record
-        (id, name, email, birth, avatar_path,
+        (id, name, email, birth, avatar_url,
         gender, role, status,
         created_at, edited_at)
         VALUES
@@ -137,7 +137,7 @@ BEGIN
     INSERT INTO event
         (id, name, description,
         website, accepts_staff,
-        start_date, end_date, avatar_path,
+        start_date, end_date, avatar_url,
         created_at, edited_at)
         VALUES
         (event0_id, 'Woodstock', 'A legendary music festival.',
@@ -148,7 +148,7 @@ BEGIN
     INSERT INTO event
         (id, name, description,
         website, accepts_staff,
-        start_date, end_date, avatar_path,
+        start_date, end_date, avatar_url,
         created_at, edited_at)
         VALUES
         (event1_id, 'PyCon', 'The largest annual gathering for the community using and developing the open-source Python programming language.',
@@ -162,7 +162,7 @@ BEGIN
         created_at, edited_at)
         VALUES
         (event_staff0_id, user0_id, company0_id, event0_id,
-        NULL, 'organizer', 'accepted',
+        event_staff0_id, 'organizer', 'accepted',
         '2023-05-03 10:40:20.1', '2023-05-04 08:11:20.4');
 
     INSERT INTO event_staff
@@ -171,7 +171,7 @@ BEGIN
         created_at, edited_at)
         VALUES
         (event_staff1_id, user1_id, company1_id, event0_id,
-        event_staff0_id, 'staff', 'pending',
+        NULL, 'staff', 'pending',
         '2023-05-03 10:40:20.1', '2023-05-04 08:11:20.4');
 
     INSERT INTO task

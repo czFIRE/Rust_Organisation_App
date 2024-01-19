@@ -1,0 +1,16 @@
+{% for task in tasks %}^
+{{ task.id }}
+{{ task.event_id }},
+{{ task.creator.id }},
+{{ task.creator.name }},
+{{ task.creator.status }},
+{{ task.creator.age }},
+{{ task.creator.gender }},
+{{ task.creator.avatar_url }},
+{{ task.title }},
+{{ task.description }},
+{{ task.priority }},
+{{ task.accepts_staff }},
+{{ task.created_at }},
+{{ task.edited_at }}
+{% endfor %}

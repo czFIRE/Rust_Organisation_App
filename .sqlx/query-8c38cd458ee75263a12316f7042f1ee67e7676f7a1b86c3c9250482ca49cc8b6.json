@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE assigned_staff SET\n                deleted_at = now(),\n                edited_at = now()\n            WHERE\n                task_id = $1\n                AND status = 'rejected'\n                AND deleted_at IS NULL;\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8c38cd458ee75263a12316f7042f1ee67e7676f7a1b86c3c9250482ca49cc8b6"
+}

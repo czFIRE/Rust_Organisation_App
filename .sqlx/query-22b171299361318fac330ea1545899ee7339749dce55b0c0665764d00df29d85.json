@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": " INSERT INTO event_staff \n                ( user_id, company_id, event_id, role ) \n            VALUES \n                ($1, $2, $3, $4)\n            RETURNING id;\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        {
+          "Custom": {
+            "name": "event_role",
+            "kind": {
+              "Enum": [
+                "staff",
+                "organizer"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "22b171299361318fac330ea1545899ee7339749dce55b0c0665764d00df29d85"
+}

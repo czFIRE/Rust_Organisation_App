@@ -34,7 +34,7 @@ BEGIN
     INSERT INTO event
         (id, name, description,
         website, accepts_staff,
-        start_date, end_date, avatar_path,
+        start_date, end_date, avatar_url,
         created_at, edited_at)
         VALUES
         (event0_id, 'Woodstock', 'A legendary music festival.',
@@ -45,7 +45,7 @@ BEGIN
     INSERT INTO event
         (id, name, description,
         website, accepts_staff,
-        start_date, end_date, avatar_path,
+        start_date, end_date, avatar_url,
         created_at, edited_at)
         VALUES
         (event1_id, 'PyCon', 'The largest annual gathering for the community using and developing the open-source Python programming language.',
@@ -56,7 +56,7 @@ BEGIN
     INSERT INTO company
         (id, name, description,
         website, crn, vatin,
-        phone, email, avatar_path,
+        phone, email, avatar_url,
         created_at, edited_at)
         VALUES
         (company0_id, 'AMD', 'Advanced Micro Devices, Inc.',
@@ -67,7 +67,7 @@ BEGIN
     INSERT INTO company
         (id, name, description,
         website, crn, vatin,
-        phone, email, avatar_path,
+        phone, email, avatar_url,
         created_at, edited_at)
         VALUES
         (company1_id, 'ReportLab', 'ReportLab Europe Ltd.',
@@ -78,7 +78,7 @@ BEGIN
     INSERT INTO company
         (id, name, description,
         website, crn, vatin,
-        phone, email, avatar_path,
+        phone, email, avatar_url,
         created_at, edited_at)
         VALUES
         (company2_id, 'Prusa Research', 'Prusa Research a.s.',

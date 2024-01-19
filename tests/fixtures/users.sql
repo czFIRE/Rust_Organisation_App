@@ -7,7 +7,7 @@ DECLARE
 
 BEGIN
     INSERT INTO user_record
-        (id, name, email, birth, avatar_path,
+        (id, name, email, birth, avatar_url,
         gender, role, status,
         created_at, edited_at)
         VALUES
@@ -16,7 +16,7 @@ BEGIN
         '2023-12-22 08:38:20.288688', '2023-12-22 08:38:20.288688');
 
     INSERT INTO user_record
-        (id, name, email, birth, avatar_path,
+        (id, name, email, birth, avatar_url,
         gender, role, status,
         created_at, edited_at)
         VALUES
@@ -25,7 +25,7 @@ BEGIN
         '2023-12-26 07:33:20.288688', '2023-12-26 07:33:20.288688');
 
     INSERT INTO user_record
-        (id, name, email, birth, avatar_path,
+        (id, name, email, birth, avatar_url,
         gender, role, status,
         created_at, edited_at)
         VALUES

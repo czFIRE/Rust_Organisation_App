@@ -1,13 +1,11 @@
 use chrono::NaiveDate;
+use serde::Deserialize;
 use sqlx::{types::chrono::NaiveDateTime, FromRow};
 use uuid::Uuid;
 
 use crate::{
     models::Association,
-    repositories::{
-        company::{self, models::Company},
-        event::models::Event,
-    },
+    repositories::{company::models::Company, event::models::Event},
 };
 
 #[derive(Debug, FromRow, Clone)]
@@ -27,13 +25,13 @@ pub struct NewAssociatedCompany {
     pub association_type: Association,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct AssociatedCompanyData {
     pub association_type: Option<Association>,
 }
 
 #[derive(Debug, Clone)]
-pub struct AssociatedCompanyExtented {
+pub struct AssociatedCompanyExtended {
     pub company: Company,
     pub event: Event,
     pub association_type: Association,
@@ -49,7 +47,7 @@ pub struct AssociatedCompanyFlattened {
     pub company_description: Option<String>,
     pub company_phone: String,
     pub company_email: String,
-    pub company_avatar_path: Option<String>,
+    pub company_avatar_url: String,
     pub company_website: Option<String>,
     pub company_crn: String,
     pub company_vatin: String,
@@ -64,7 +62,7 @@ pub struct AssociatedCompanyFlattened {
     pub event_accepts_staff: bool,
     pub event_start_date: NaiveDate,
     pub event_end_date: NaiveDate,
-    pub event_avatar_path: Option<String>,
+    pub event_avatar_url: String,
     pub event_created_at: NaiveDateTime,
     pub event_edited_at: NaiveDateTime,
     pub event_deleted_at: Option<NaiveDateTime>,
@@ -75,13 +73,13 @@ pub struct AssociatedCompanyFlattened {
     pub deleted_at: Option<NaiveDateTime>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct AssociatedCompanyFilter {
     pub limit: Option<i64>,
     pub offset: Option<i64>,
 }
 
-impl From<AssociatedCompanyFlattened> for AssociatedCompanyExtented {
+impl From<AssociatedCompanyFlattened> for AssociatedCompanyExtended {
     fn from(value: AssociatedCompanyFlattened) -> Self {
         let company = Company {
             id: value.company_id,
@@ -89,7 +87,7 @@ impl From<AssociatedCompanyFlattened> for AssociatedCompanyExtented {
             description: value.company_description,
             phone: value.company_phone,
             email: value.company_email,
-            avatar_path: value.company_avatar_path,
+            avatar_url: value.company_avatar_url,
             website: value.company_website,
             crn: value.company_crn,
             vatin: value.company_vatin,
@@ -106,7 +104,7 @@ impl From<AssociatedCompanyFlattened> for AssociatedCompanyExtented {
             accepts_staff: value.event_accepts_staff,
             start_date: value.event_start_date,
             end_date: value.event_end_date,
-            avatar_path: value.event_avatar_path,
+            avatar_url: value.event_avatar_url,
             created_at: value.event_created_at,
             edited_at: value.event_edited_at,
             deleted_at: value.event_deleted_at,
