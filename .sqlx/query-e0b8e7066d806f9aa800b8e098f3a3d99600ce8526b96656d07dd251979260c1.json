@@ -1,0 +1,124 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT *\n            FROM wage_preset\n            WHERE\n                name = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "valid_from",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 2,
+        "name": "valid_to",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 3,
+        "name": "description",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "currency",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "monthly_dpp_employee_no_tax_limit",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 6,
+        "name": "monthly_dpp_employer_no_tax_limit",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 7,
+        "name": "monthly_dpc_employee_no_tax_limit",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 8,
+        "name": "monthly_dpc_employer_no_tax_limit",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 9,
+        "name": "health_insurance_employee_tax_pct",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 10,
+        "name": "social_insurance_employee_tax_pct",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 11,
+        "name": "health_insurance_employer_tax_pct",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 12,
+        "name": "social_insurance_employer_tax_pct",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 13,
+        "name": "min_hourly_wage",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 14,
+        "name": "min_monthly_hpp_salary",
+        "type_info": "Float4"
+      },
+      {
+        "ordinal": 15,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 16,
+        "name": "edited_at",
+        "type_info": "Timestamp"
+      },
+      {
+        "ordinal": 17,
+        "name": "deleted_at",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "e0b8e7066d806f9aa800b8e098f3a3d99600ce8526b96656d07dd251979260c1"
+}

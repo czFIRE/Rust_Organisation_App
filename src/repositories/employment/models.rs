@@ -70,6 +70,12 @@ pub struct EmploymentFilter {
     pub offset: Option<i64>,
 }
 
+#[derive(Debug, FromRow)]
+pub struct EmploymentContractAndHourlyWage {
+    pub hourly_wage: f64,
+    pub employment_type: EmploymentContract,
+}
+
 //////////////////////////////////////////
 
 // TODO needs to be kept the same as in user/models.rs => User

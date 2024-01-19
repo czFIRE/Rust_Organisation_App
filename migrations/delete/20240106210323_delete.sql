@@ -16,3 +16,4 @@ DELETE FROM employment; -- must be after `event_staff` and `timesheet`
 DELETE FROM company; -- must be after `address` and `associated_company`
 DELETE FROM user_record;
 DELETE FROM event; -- must be after `comment`
+DELETE FROM wage_preset;

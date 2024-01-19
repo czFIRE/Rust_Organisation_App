@@ -1,6 +1,6 @@
 {{ id }} , {{ user_id }}, {{ company_id }}, {{ event_id }},
 {{ event_avatar_url }}, {{ event_name }}, {{ start_date }},
-{{ end_date }}, {{ total_hours }}, {{ calculated_wage }}, {{ is_editable }},
+{{ end_date }}, {{ total_hours }}, {{ is_editable }},
 {{ status }}, {{ manager_note }}, {{ created_at }}, {{ edited_at }}
 
 {% for workday in work_days %}
@@ -8,7 +8,6 @@
 {{ workday.date }}
 {{ workday.total_hours }}
 {{ workday.comment }}
-{{ workday.is_editable }}
 {{ workday.created_at }}
 {{ workday.edited_at }}
 {% endfor %}

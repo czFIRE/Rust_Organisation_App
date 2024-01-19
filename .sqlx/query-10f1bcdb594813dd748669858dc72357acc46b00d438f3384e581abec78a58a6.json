@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n                INSERT INTO workday (timesheet_id,\n                                     date,\n                                     is_editable)\n                VALUES ($1, $2, $3)\n                RETURNING timesheet_id,\n                          date,\n                          total_hours,\n                          comment,\n                          is_editable,\n                          created_at,\n                          edited_at;\n                ",
+  "query": "\n        SELECT timesheet_id,\n               date,\n               total_hours,\n               comment AS \"comment?\",\n               created_at,\n               edited_at\n        FROM workday\n        WHERE timesheet_id = $1\n          AND date >= $2\n          AND date <= $3\n        ORDER BY date;\n        ",
   "describe": {
     "columns": [
       {
@@ -20,21 +20,16 @@
       },
       {
         "ordinal": 3,
-        "name": "comment",
+        "name": "comment?",
         "type_info": "Text"
       },
       {
         "ordinal": 4,
-        "name": "is_editable",
-        "type_info": "Bool"
-      },
-      {
-        "ordinal": 5,
         "name": "created_at",
         "type_info": "Timestamp"
       },
       {
-        "ordinal": 6,
+        "ordinal": 5,
         "name": "edited_at",
         "type_info": "Timestamp"
       }
@@ -43,7 +38,7 @@
       "Left": [
         "Uuid",
         "Date",
-        "Bool"
+        "Date"
       ]
     },
     "nullable": [
@@ -52,9 +47,8 @@
       false,
       true,
       false,
-      false,
       false
     ]
   },
-  "hash": "39ff539535c5e9d07c53549765aee234cb29e3bb860f0c7bf5095bd16f382029"
+  "hash": "10f1bcdb594813dd748669858dc72357acc46b00d438f3384e581abec78a58a6"
 }

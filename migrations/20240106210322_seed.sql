@@ -6,7 +6,7 @@ DO $$
 -- Note: We could also generate UUID values automatically using
 --       `DEFAULT` constraint and then assign UUID to a variable with the use
 --       of `RETURNING id into <variable>`, but this is more convenient
---       as UUIDs will stay same after each execution of this SQL scriopt.
+--       as UUIDs will stay same after each execution of this SQL script.
 --
 DECLARE
   company0_id UUID := 'b5188eda-528d-48d4-8cee-498e0971f9f5';
@@ -23,6 +23,7 @@ DECLARE
   event0_id UUID := 'b71fd7ce-c891-410a-9bb4-70fc5c7748f8';
   event1_id UUID := '3f152d12-0bbd-429a-a9c5-28967d6370cc';
   event2_id UUID := '3f152dad-0bbd-4e9a-aec5-2a567d6370cc';
+  event3_id UUID := '2321154f-8c57-4ee2-9493-c9243ae7426a';
 
   timesheet0_id UUID := 'd47e8141-a77e-4d55-a2d5-4a77de24b6d0';
   timesheet1_id UUID := '0f0f0ff5-0073-47cc-bd1f-540a04fee9ea';
@@ -35,6 +36,7 @@ DECLARE
   event_staff2_id UUID := 'aa7f3d0e-ab48-473b-ac69-b84cb74f34f7';
   event_staff3_id UUID := 'ae228dfb-7265-4059-98c4-c4a1e6233cf4';
   event_staff4_id UUID := '31020fa2-7a24-4d8f-927b-98e26d2929b0';
+  event_staff5_id UUID := 'e1b266b8-607f-46d0-9027-2a2d28637f15';
 
   task0_id UUID := '7ae0c017-fe31-4aac-b767-100d18a8877b';
   task1_id UUID := 'bd9b422d-33c1-42a2-88bf-a56ce6cc55a6';
@@ -273,6 +275,19 @@ BEGIN
         '2024-01-01', '2024-01-03', 'beep_boop_2024.png',
         '2023-06-06 06:06:6.66', '2023-06-06 16:26:6.66');
 
+    INSERT INTO event
+        (id, name,
+        description,
+        website, accepts_staff,
+        start_date, end_date, avatar_url,
+        created_at, edited_at)
+        VALUES
+        (event3_id, 'Elvis revival',
+        'A rock-n-roll event possibly ended with arrival of the king',
+        'https://elvisforever.org', true,
+        '1969-07-28', '1969-08-18', 'elvis_revival.png',
+        '2023-09-01 09:06', '2023-09-01 09:06');
+
 --------------------------------------------------------------------------------
 
     INSERT INTO associated_company
@@ -295,6 +310,13 @@ BEGIN
         VALUES
         (company1_id, event1_id, 'other',
         '2023-12-12 07:38', '2023-12-12 07:38');
+
+    INSERT INTO associated_company
+        (company_id, event_id, type,
+        created_at, edited_at)
+        VALUES
+        (company1_id, event3_id, 'organizer',
+        '2023-09-02 12:38', '2023-12-01 15:32');
 
     INSERT INTO associated_company
         (company_id, event_id, type,
@@ -326,7 +348,7 @@ BEGIN
         created_at, edited_at)
         VALUES
         (timesheet0_id, user2_id, company1_id, event1_id,
-        '1969-08-15', '1969-08-16', 22,
+        '1969-08-16', '1969-08-17', DEFAULT,
         true, 'not_requested', NULL,
         '1969-08-15 18:26', '1969-08-16 20:00');
 
@@ -337,7 +359,7 @@ BEGIN
         created_at, edited_at)
         VALUES
         (timesheet1_id, user1_id, company1_id, event0_id,
-        '1969-08-14', '1969-08-17', 24,
+        '1969-08-14', '1969-08-17', DEFAULT,
         false, 'accepted', 'Everything seems all righty. Good job.',
         '2023-05-05 10:39', '2023-05-09 13:39');
 
@@ -348,60 +370,113 @@ BEGIN
         created_at, edited_at)
         VALUES
         (timesheet2_id, user3_id, company2_id, event1_id,
-        '2024-01-01', '2024-01-02', 15,
+        '2024-01-01', '2024-01-02', DEFAULT,
         false, 'pending', NULL,
         '2024-01-03 18:26', '2024-01-03 18:29');
+
+    INSERT INTO timesheet
+        (id, user_id, company_id, event_id,
+        start_date, end_date, total_hours,
+        is_editable, status, manager_note,
+        created_at, edited_at)
+        VALUES
+        (timesheet3_id, user1_id, company1_id, event3_id,
+        '1969-07-28', '1969-08-18', 68,
+        false, 'accepted', 'Outstanding performance. As always.',
+        '2023-11-05 11:39', '2023-11-05 11:39');
 
 --------------------------------------------------------------------------------
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet0_id, '1969-08-15', 12, '', true,
+        (timesheet0_id, '1969-08-15', 12, '',
         '1969-08-16 18:28', '1969-08-17 08:22');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet0_id, '1969-08-16', 10, '', true,
+        (timesheet0_id, '1969-08-16', 10, '',
         '1969-08-17 20:00', '1969-08-17 20:00');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet1_id, '1969-08-14', 10, '', false,
+        (timesheet1_id, '1969-08-14', 10, '',
         '1969-08-17 19:58', '1969-08-17 19:59');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet1_id, '1969-08-15', 4.5, 'I was overworked as a mule!', false,
+        (timesheet1_id, '1969-08-15', 4.5, 'I was overworked as a mule!',
         '1969-08-17 20:00', '1969-08-17 20:00');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet1_id, '1969-08-16', 9.5, '', false,
+        (timesheet1_id, '1969-08-16', 9.5, '',
         '1969-08-17 20:40', '1969-08-17 21:00');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet2_id, '2024-01-01', 8, '', false,
+        (timesheet2_id, '2024-01-01', 8, '',
         '2024-01-01 22:33', '2024-01-01 22:33');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet2_id, '2024-01-02', 7, '', false,
+        (timesheet2_id, '2024-01-02', 7, '',
         '2024-01-02 20:10', '2024-01-02 21:12');
+
+    INSERT INTO workday
+        (timesheet_id, date, total_hours, comment,
+        created_at, edited_at)
+        VALUES
+        (timesheet3_id, '1969-07-28', 11.5, '',
+        '1969-07-28 23:00', '1969-07-28 23:00');
+
+    INSERT INTO workday
+        (timesheet_id, date, total_hours, comment,
+        created_at, edited_at)
+        VALUES
+        (timesheet3_id, '1969-07-30', 11.5, '',
+        '1969-07-30 23:00', '1969-07-30 23:00');
+
+    INSERT INTO workday
+        (timesheet_id, date, total_hours, comment,
+        created_at, edited_at)
+        VALUES
+        (timesheet3_id, '1969-08-10', 14, '',
+        '1969-08-10 23:00', '1969-08-10 23:00');
+
+    INSERT INTO workday
+        (timesheet_id, date, total_hours, comment,
+        created_at, edited_at)
+        VALUES
+        (timesheet3_id, '1969-08-11', 12, '',
+        '1969-08-11 23:00', '1969-08-11 23:00');
+
+    INSERT INTO workday
+        (timesheet_id, date, total_hours, comment,
+        created_at, edited_at)
+        VALUES
+        (timesheet3_id, '1969-08-12', 12, '',
+        '1969-08-12 23:00', '1969-08-12 23:00');
+
+    INSERT INTO workday
+        (timesheet_id, date, total_hours, comment,
+        created_at, edited_at)
+        VALUES
+        (timesheet3_id, '1969-08-13', 14, '',
+        '1969-08-13 23:00', '1969-08-13 23:00');
 
 --------------------------------------------------------------------------------
 
@@ -449,6 +524,15 @@ BEGIN
         (event_staff4_id, user5_id, company1_id, event1_id,
         event_staff2_id, 'staff', 'accepted',
         '2024-01-01 11:45', '2024-01-01 11:45');
+
+    INSERT INTO event_staff
+        (id, user_id, company_id, event_id,
+        decided_by, role, status,
+        created_at, edited_at)
+        VALUES
+        (event_staff5_id, user1_id, company1_id, event3_id,
+        event_staff5_id, 'organizer', 'accepted',
+        '2023-09-03 12:38', '2023-09-03 12:38');
 
 --------------------------------------------------------------------------------
 
@@ -523,6 +607,101 @@ BEGIN
         (comment2_id, event1_id, NULL, user2_id,
         'This gets organized for the 3rd time ;)',
         '2023-05-03 10:00', '2023-05-03 10:05');
+
+--------------------------------------------------------------------------------
+
+    INSERT INTO wage_preset
+        (name,
+        valid_from,
+        valid_to,
+        description,
+        currency,
+        monthly_dpp_employee_no_tax_limit,
+        monthly_dpp_employer_no_tax_limit,
+        monthly_dpc_employee_no_tax_limit,
+        monthly_dpc_employer_no_tax_limit,
+        health_insurance_employee_tax_pct, social_insurance_employee_tax_pct,
+        health_insurance_employer_tax_pct, social_insurance_employer_tax_pct,
+        min_hourly_wage,
+        min_monthly_hpp_salary,
+        created_at, edited_at)
+    VALUES
+        ('cz_1966-01-01',
+        '1966-01-01',
+        '1992-12-31',
+        'An imaginary wage params valid for CSR starting from 1966/01/01',
+        'CSK',
+        5000,
+        5000,
+        2000,
+        2000,
+        4.5, 6.5,
+        24.8, 9.0,
+        60,
+        10000,
+        '2023-12-14 12:00', '2023-12-14 12:00');
+
+    INSERT INTO wage_preset
+        (name,
+        valid_from,
+        valid_to,
+        description,
+        currency,
+        monthly_dpp_employee_no_tax_limit,
+        monthly_dpp_employer_no_tax_limit,
+        monthly_dpc_employee_no_tax_limit,
+        monthly_dpc_employer_no_tax_limit,
+        health_insurance_employee_tax_pct, social_insurance_employee_tax_pct,
+        health_insurance_employer_tax_pct, social_insurance_employer_tax_pct,
+        min_hourly_wage,
+        min_monthly_hpp_salary,
+        created_at, edited_at)
+    VALUES
+        ('cz_2020-01-01',
+        '2020-01-01',
+        '2023-12-31',
+        'An imaginary wage params valid for Czech republic starting from 2020/01/01',
+        'CZK',
+        8000,
+        8000,
+        3500,
+        3500,
+        4.5, 6.5,
+        24.8, 9.0,
+        100.0,
+        15500,
+        '2023-12-16 08:00', '2023-12-16 08:00');
+
+    INSERT INTO wage_preset
+        (name,
+        valid_from,
+        valid_to,
+        description,
+        currency,
+        monthly_dpp_employee_no_tax_limit,
+        monthly_dpp_employer_no_tax_limit,
+        monthly_dpc_employee_no_tax_limit,
+        monthly_dpc_employer_no_tax_limit,
+        health_insurance_employee_tax_pct, social_insurance_employee_tax_pct,
+        health_insurance_employer_tax_pct, social_insurance_employer_tax_pct,
+        min_hourly_wage,
+        min_monthly_hpp_salary,
+        created_at, edited_at)
+    VALUES
+        ('cz_2024-01-01',
+        '2024-01-01',
+        NULL,
+        'A wage params valid for Czech republic starting from 2024/01/01',
+        'CZK',
+        10000,
+        10000,
+         4000,
+         4000,
+         4.5, 6.5,
+         24.8, 9.0,
+         118.13,
+         18900,
+        '2023-12-16 14:00', '2023-12-16 14:00');
 
 --------------------------------------------------------------------------------
 
