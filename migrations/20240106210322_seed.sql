@@ -28,6 +28,8 @@ DECLARE
   timesheet0_id UUID := 'd47e8141-a77e-4d55-a2d5-4a77de24b6d0';
   timesheet1_id UUID := '0f0f0ff5-0073-47cc-bd1f-540a04fee9ea';
   timesheet2_id UUID := 'c51e77aa-bd80-42c7-8b8a-003f018328f6';
+  timesheet3_id UUID := '8446b2ba-8223-4388-be5f-9efdfc4ea265';
+  timesheet4_id UUID := 'a19a0ac6-3bd2-4ebd-bc8d-ec111ec9f705';
 
   event_staff0_id UUID := '9281b570-4d02-4096-9136-338a613c71cd';
   event_staff1_id UUID := 'a96d1d99-93b5-469b-ac62-654b0cf7ebd3';
@@ -435,45 +437,45 @@ BEGIN
         '2024-01-02 20:10', '2024-01-02 21:12');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet3_id, '1969-07-28', 11.5, '', true,
+        (timesheet3_id, '1969-07-28', 11.5, '',
         '1969-07-28 23:00', '1969-07-28 23:00');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet3_id, '1969-07-30', 11.5, '', true,
+        (timesheet3_id, '1969-07-30', 11.5, '',
         '1969-07-30 23:00', '1969-07-30 23:00');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet3_id, '1969-08-10', 14, '', true,
+        (timesheet3_id, '1969-08-10', 14, '',
         '1969-08-10 23:00', '1969-08-10 23:00');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet3_id, '1969-08-11', 12, '', true,
+        (timesheet3_id, '1969-08-11', 12, '',
         '1969-08-11 23:00', '1969-08-11 23:00');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet3_id, '1969-08-12', 12, '', true,
+        (timesheet3_id, '1969-08-12', 12, '',
         '1969-08-12 23:00', '1969-08-12 23:00');
 
     INSERT INTO workday
-        (timesheet_id, date, total_hours, comment, is_editable,
+        (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet3_id, '1969-08-13', 14, '', true,
+        (timesheet3_id, '1969-08-13', 14, '',
         '1969-08-13 23:00', '1969-08-13 23:00');
 
 --------------------------------------------------------------------------------

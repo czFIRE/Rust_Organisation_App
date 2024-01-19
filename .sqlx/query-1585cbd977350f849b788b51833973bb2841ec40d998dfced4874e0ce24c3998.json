@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT timesheet_id,\n                    date, \n                    total_hours, \n                    comment, \n                    created_at,\n                    edited_at \n            FROM workday \n            WHERE timesheet_id = $1\n              AND date >= $2\n              AND date <= $3;",
+  "query": "\n            SELECT timesheet_id,\n                    date, \n                    total_hours, \n                    comment, \n                    created_at,\n                    edited_at \n            FROM workday \n            WHERE timesheet_id = $1\n            ORDER BY date;\n            ",
   "describe": {
     "columns": [
       {
@@ -36,9 +36,7 @@
     ],
     "parameters": {
       "Left": [
-        "Uuid",
-        "Date",
-        "Date"
+        "Uuid"
       ]
     },
     "nullable": [
@@ -50,5 +48,5 @@
       false
     ]
   },
-  "hash": "8827ff1a5ecc8caaa722af22b069c9575eb0a7e5deafc0a44cbbb1157664f4f6"
+  "hash": "1585cbd977350f849b788b51833973bb2841ec40d998dfced4874e0ce24c3998"
 }

@@ -72,8 +72,8 @@ impl WagePresetOptimized {
         WagePresetOptimized {
             name: wage_preset.name.clone(),
             currency: wage_preset.currency.clone(),
-            monthly_employee_no_tax_limit: monthly_employee_no_tax_limit,
-            monthly_employer_no_tax_limit: monthly_employer_no_tax_limit,
+            monthly_employee_no_tax_limit,
+            monthly_employer_no_tax_limit,
             health_insurance_employee_tax_multiplicand: wage_preset
                 .health_insurance_employee_tax_pct
                 / 100.0,
