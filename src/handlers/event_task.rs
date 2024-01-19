@@ -32,6 +32,28 @@ pub struct NewEventTaskData {
     priority: TaskPriority,
 }
 
+async fn get_tasks_per_event(
+    event_id: Uuid,
+    query: TaskFilter,
+    task_repo: web::Data<TaskRepository>,
+) -> HttpResponse {
+    let result = task_repo.read_all_for_event(event_id, query).await;
+
+    if let Ok(tasks) = result {
+        let task_vector: Vec<EventTask> = tasks.into_iter().map(|task| task.into()).collect();
+        let template = TasksTemplate { tasks: task_vector };
+        let body = template.render();
+        if body.is_err() {
+            return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        }
+        return HttpResponse::Ok()
+            .content_type("text/html")
+            .body(body.expect("Should be valid now."));
+    }
+
+    handle_database_error(result.expect_err("Should be error."))
+}
+
 #[get("/event/{event_id}/task")]
 pub async fn get_event_tasks(
     event_id: web::Path<String>,
@@ -49,23 +71,7 @@ pub async fn get_event_tasks(
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
     let parsed_id = id_parse.expect("Should be valid.");
-    let result = task_repo
-        .read_all_for_event(parsed_id, query.into_inner())
-        .await;
-
-    if let Ok(tasks) = result {
-        let task_vector: Vec<EventTask> = tasks.into_iter().map(|task| task.into()).collect();
-        let template = TasksTemplate { tasks: task_vector };
-        let body = template.render();
-        if body.is_err() {
-            return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
-        }
-        return HttpResponse::Ok()
-            .content_type("text/html")
-            .body(body.expect("Should be valid now."));
-    }
-
-    handle_database_error(result.expect_err("Should be error."))
+    get_tasks_per_event(parsed_id, query.into_inner(), task_repo).await
 }
 
 // #[get("/event/task/{task_id}")]
@@ -106,13 +112,11 @@ pub async fn create_task(
     if id_parse.is_err() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
-
     if (new_task.title.is_empty())
         || (new_task.description.is_some() && new_task.description.clone().unwrap().is_empty())
     {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
-
     let parsed_id = id_parse.expect("Should be valid.");
     let data = NewTask {
         event_id: parsed_id,
@@ -125,7 +129,6 @@ pub async fn create_task(
     if let Ok(task) = result {
         return open_task_panel(task.creator_id, task, assigned_repo).await;
     }
-
     handle_database_error(result.expect_err("Should be error."))
 }
 
@@ -202,12 +205,18 @@ pub async fn delete_task(
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
     let parsed_id = id_parse.expect("Should be valid.");
+
     let result = task_repo.delete(parsed_id).await;
     if let Err(error) = result {
         return handle_database_error(error);
     }
 
-    HttpResponse::NoContent().finish()
+    let query = TaskFilter {
+        limit: None,
+        offset: None,
+    };
+
+    get_tasks_per_event(parsed_id, query, task_repo).await
 }
 
 /* It's difficult to decide whether this should be in event-staff

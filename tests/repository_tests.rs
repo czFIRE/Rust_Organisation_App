@@ -144,11 +144,11 @@ pub mod user_repo_tests {
 
             let user2 = &users[1];
 
-            assert_eq!(user2.name, "Tana Smith");
+            assert_eq!(user2.name, "John Doe");
 
             let user3 = &users[2];
 
-            assert_eq!(user3.name, "John Doe");
+            assert_eq!(user3.name, "Tana Smith");
         }
 
         user_repo.disconnect().await;
@@ -492,11 +492,11 @@ pub mod company_repo_tests {
 
             let company2 = &companies[1];
 
-            assert_eq!(company2.name, "ReportLab");
+            assert_eq!(company2.name, "Prusa Research");
 
             let company3 = &companies[2];
 
-            assert_eq!(company3.name, "Prusa Research");
+            assert_eq!(company3.name, "ReportLab");
         }
 
         company_repo.disconnect().await;
@@ -927,11 +927,11 @@ pub mod event_repo_tests {
 
             let event = &events[0];
 
-            assert_eq!(event.name, "Woodstock");
+            assert_eq!(event.name, "PyCon");
 
             let event = &events[1];
 
-            assert_eq!(event.name, "PyCon");
+            assert_eq!(event.name, "Woodstock");
         }
 
         {
@@ -1313,11 +1313,11 @@ pub mod associated_company_repo_tests {
 
             let associated_company = &associated_companies[0];
 
-            assert_eq!(associated_company.event.name, "Woodstock");
+            assert_eq!(associated_company.event.name, "PyCon");
 
             let associated_company = &associated_companies[1];
 
-            assert_eq!(associated_company.event.name, "PyCon");
+            assert_eq!(associated_company.event.name, "Woodstock");
         }
 
         associated_company_repo.disconnect().await;
@@ -1716,13 +1716,13 @@ pub mod employment_repo_tests {
 
         assert_eq!(employment.company_id, company_id);
         assert_eq!(employment.manager_id, test_constants::USER0_ID);
-        assert_eq!(employment.user_id, test_constants::USER1_ID);
+        assert_eq!(employment.user_id, test_constants::USER2_ID);
 
         let employment = &employments[1];
 
         assert_eq!(employment.company_id, company_id);
         assert_eq!(employment.manager_id, test_constants::USER0_ID);
-        assert_eq!(employment.user_id, test_constants::USER2_ID);
+        assert_eq!(employment.user_id, test_constants::USER1_ID);
 
         employment_repo.disconnect().await;
 

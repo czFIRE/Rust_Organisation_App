@@ -9,7 +9,6 @@ use crate::{
         EmploymentCreateTemplate, EmploymentEditTemplate, EmploymentLite, EmploymentTemplate,
         SubordinatesTemplate,
     },
-    utils::deserialize_str_float::deserialize_float::de_f64_from_opt_string,
 };
 use actix_web::{delete, get, http, patch, post, web, HttpResponse};
 use askama::Template;
@@ -27,7 +26,6 @@ use crate::{
 pub struct EmploymentUpdateData {
     pub editor_id: Uuid,
     pub manager_id: Option<Uuid>,
-    #[serde(deserialize_with = "de_f64_from_opt_string")]
     pub hourly_wage: Option<f64>,
     pub start_date: Option<NaiveDate>,
     pub end_date: Option<NaiveDate>,

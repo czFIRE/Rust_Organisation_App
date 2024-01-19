@@ -9,6 +9,7 @@ mod api_tests {
     use chrono::NaiveDate;
     use dotenv::dotenv;
     use organization::handlers::associated_company::get_all_associated_companies_per_event_and_user;
+    use organization::models::{EmployeeLevel, EmploymentContract};
     use organization::repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository;
     use organization::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
     use organization::repositories::comment::comment_repo::CommentRepository;
@@ -17,6 +18,7 @@ mod api_tests {
     use organization::repositories::event::event_repo::EventRepository;
     use organization::repositories::event_staff::event_staff_repo::StaffRepository;
     use organization::repositories::repository::DbRepository;
+    use organization::repositories::task::models::TaskFilter;
     use organization::repositories::task::task_repo::TaskRepository;
     use organization::repositories::timesheet::timesheet_repo::TimesheetRepository;
     use organization::repositories::user::user_repo::UserRepository;
@@ -300,29 +302,6 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    // TODO: Once the functionality is implemented.
-
-    // #[actix_web::test]
-    // async fn get_user_avatar_test() {
-    //     let _app =
-    //         test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-    //     todo!()
-    // }
-
-    // #[actix_web::test]
-    // async fn upload_user_avatar_test() {
-    //     let _app =
-    //         test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-    //     todo!()
-    // }
-
-    // #[actix_web::test]
-    // async fn remove_user_avatar_test() {
-    //     let _app =
-    //         test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-    //     todo!()
-    // }
-
     #[actix_web::test]
     async fn get_all_companies_test() {
         let arc_pool = get_db_pool().await;
@@ -600,28 +579,6 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    // TODO: Once the functionality is implemented.
-    // #[actix_web::test]
-    // async fn get_company_avatar_test() {
-    //     let _app =
-    //         test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-    //     todo!()
-    // }
-
-    // #[actix_web::test]
-    // async fn upload_company_avatar_test() {
-    //     let _app =
-    //         test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-    //     todo!()
-    // }
-
-    // #[actix_web::test]
-    // async fn remove_company_avatar_test() {
-    //     let _app =
-    //         test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-    //     todo!()
-    // }
-
     #[actix_web::test]
     async fn get_events_test() {
         let arc_pool = get_db_pool().await;
@@ -868,28 +825,6 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    // TODO: Once the functionality is implemented.
-    // #[actix_web::test]
-    // async fn get_event_avatar_test() {
-    //     let _app =
-    //         test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-    //     todo!()
-    // }
-
-    // #[actix_web::test]
-    // async fn upload_event_avatar_test() {
-    //     let _app =
-    //         test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-    //     todo!()
-    // }
-
-    // #[actix_web::test]
-    // async fn remove_event_avatar_test() {
-    //     let _app =
-    //         test::init_service(App::new().configure(organization::initialize::configure_app)).await;
-    //     todo!()
-    // }
-
     #[actix_web::test]
     async fn get_all_tasks_per_event() {
         let arc_pool = get_db_pool().await;
@@ -933,7 +868,7 @@ mod api_tests {
         let arc_pool = get_db_pool().await;
         let repository = TaskRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
-        let assigned_repo = web::Data::new(TaskRepository::new(arc_pool.clone()));
+        let assigned_repo = web::Data::new(AssignedStaffRepository::new(arc_pool.clone()));
         let app = test::init_service(
             App::new()
                 .app_data(repo.clone())
@@ -946,7 +881,8 @@ mod api_tests {
         let data = json!({
             "creator_id": "9281b570-4d02-4096-9136-338a613c71cd",
             "title": "Stock the wood pile.",
-            "priority": "High"
+            "description": "Get 1 item of wood, put it on the pile of X items of wood. Repeat.",
+            "priority": "High",
         });
 
         let req = test::TestRequest::post()
@@ -963,12 +899,33 @@ mod api_tests {
         assert!(body.contains("Stock the wood pile."));
         assert!(body.contains("High"));
 
-        let uuid_regex = Regex::new(
-            r"[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}",
-        )
-        .unwrap();
-        let uuid_caps = uuid_regex.find(body).unwrap();
-        let task_id = uuid_caps.as_str();
+        let creator_id =
+            Uuid::from_str("9281b570-4d02-4096-9136-338a613c71cd").expect("Valid uuid");
+        let event_id = Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").expect("Valid uuid");
+        let tasks = repo
+            .read_all_for_event(
+                event_id,
+                TaskFilter {
+                    limit: None,
+                    offset: None,
+                },
+            )
+            .await;
+        assert!(tasks.is_ok());
+        let tasks_ok = tasks.expect("Should be okay.");
+        let task = tasks_ok.into_iter().find(|t| {
+            t.creator_id == creator_id
+                && t.title == "Stock the wood pile.".to_string()
+                && t.description
+                    == Some(
+                        "Get 1 item of wood, put it on the pile of X items of wood. Repeat."
+                            .to_string(),
+                    )
+        });
+
+        assert!(task.is_some());
+
+        let task_id = task.expect("Should be some").task_id.to_string();
 
         let data = json!({
             "title": "Help do stuff."
@@ -1667,7 +1624,7 @@ mod api_tests {
             "user_id": "ac9bf689-a713-4b66-a3d0-41faaf0f8d0c",
             "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
             "manager_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
-            "hourly_wage": "200.0",
+            "hourly_wage": 200.0,
             "start_date": "2022-12-23",
             "end_date": "2022-12-26",
             "description": "A person.",
@@ -1684,6 +1641,17 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::CREATED);
+
+        let user_uuid = Uuid::from_str("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c").expect("Valid uuid");
+        let company_uuid =
+            Uuid::from_str("b5188eda-528d-48d4-8cee-498e0971f9f5").expect("Valid uuid");
+        let employment_res = employment_repo.read_one(user_uuid, company_uuid).await;
+        assert!(employment_res.is_ok());
+        let employment = employment_res.expect("Should be okay");
+
+        assert!(employment.manager.is_some());
+        assert_eq!(employment.level, EmployeeLevel::Basic);
+        assert_eq!(employment.employment_type, EmploymentContract::Hpp);
 
         let req = test::TestRequest::post()
             .uri("/employment")
@@ -1724,7 +1692,7 @@ mod api_tests {
                             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
-        assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
+        assert_eq!(res.status(), http::StatusCode::OK);
 
         let req = test::TestRequest::delete()
                             .uri("/user/ac9bf689-a713-4b66-a3d0-41faaf0f8d0c/employment/b5188eda-528d-48d4-8cee-498e0971f9f5")
@@ -1752,7 +1720,7 @@ mod api_tests {
             "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
             "manager_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
             "employment_type": "Hpp",
-            "hourly_rate": "200.0",
+            "hourly_wage": 200.0,
             "employee_level": "Basic",
             "start_date": "2022-12-23",
             "end_date": "2022-12-26",
@@ -1771,7 +1739,7 @@ mod api_tests {
             "user_id": "0465041f-fe64-461f-9f71-71e3b97ca85f",
             "manager_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
             "employment_type": "Hpp",
-            "hourly_rate": "200.0",
+            "hourly_rate": 200.0,
             "employee_level": "Basic",
             "start_date": "2022-12-23",
             "end_date": "2022-12-26",

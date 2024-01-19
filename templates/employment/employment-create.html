@@ -8,6 +8,7 @@
       hx-post="/employment"
       hx-swap="innerHTML"
       hx-target="#content"
+      hx-vals='js:{ hourly_wage: parseFloat(document.getElementById("hourly_wage").value)}'
       hx-ext="json-enc"
       class="grid grid-cols-4 grid-rows-4 gap-4"
     >

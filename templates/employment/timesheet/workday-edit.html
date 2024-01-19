@@ -5,6 +5,7 @@
   <form
     hx-patch="/timesheet/{{ timesheet_id }}/day/{{ date }}"
     hx-swap="outerHTML"
+    hx-vals='js:{ hourly_wage: parseFloat(document.getElementById("total_hours").value)}'
     hx-target="#workday-{{ date }}"
     hx-ext="json-enc"
     hx-confirm="Are you sure you want to update this workday?"
