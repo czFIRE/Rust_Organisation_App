@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            UPDATE workday\n            SET total_hours = COALESCE($1, total_hours),\n                comment = COALESCE($2, comment),\n                is_editable = COALESCE($3, is_editable),\n                edited_at = NOW()\n            WHERE timesheet_id = $4\n              AND date = $5\n              AND deleted_at IS NULL\n            RETURNING timesheet_id,\n                      date,\n                      total_hours,\n                      comment,\n                      is_editable,\n                      created_at,\n                      edited_at;",
+  "query": "\n            UPDATE workday\n            SET total_hours = COALESCE($1, total_hours),\n                comment = COALESCE($2, comment),\n                edited_at = NOW()\n            WHERE timesheet_id = $3\n              AND date = $4\n              AND deleted_at IS NULL\n            RETURNING timesheet_id,\n                      date,\n                      total_hours,\n                      comment,\n                      created_at,\n                      edited_at;",
   "describe": {
     "columns": [
       {
@@ -25,16 +25,11 @@
       },
       {
         "ordinal": 4,
-        "name": "is_editable",
-        "type_info": "Bool"
-      },
-      {
-        "ordinal": 5,
         "name": "created_at",
         "type_info": "Timestamp"
       },
       {
-        "ordinal": 6,
+        "ordinal": 5,
         "name": "edited_at",
         "type_info": "Timestamp"
       }
@@ -43,7 +38,6 @@
       "Left": [
         "Float4",
         "Text",
-        "Bool",
         "Uuid",
         "Date"
       ]
@@ -54,9 +48,8 @@
       false,
       true,
       false,
-      false,
       false
     ]
   },
-  "hash": "076f0afbe0b4e6687d3477ebb5aeac474ca2c74f06a7a00629961c723e4f5b7e"
+  "hash": "55d0604f0146505a4499edfd4612c5c006c9503426e42ff0483b700561dcf3f1"
 }
