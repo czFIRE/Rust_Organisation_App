@@ -29,9 +29,6 @@ pub mod test_constants {
 
     pub const COMMENT0_ID: Uuid = uuid!("0d6cec6a-4fe8-4e44-bf68-e33de0ed121b");
     pub const COMMENT1_ID: Uuid = uuid!("daac23ec-fb36-434a-823b-49716ed2002c");
-
-    // a delta for float comparisons
-    pub const DELTA: f32 = 0.0000001;
 }
 
 #[cfg(test)]
@@ -3636,13 +3633,44 @@ mod timesheet_repo_tests {
             assert_eq!(result.len(), 0);
         }
     }
+
+    #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
+    async fn read_all_with_date_from_to_per_employment_extended(pool: PgPool) {
+        let arc_pool = Arc::new(pool);
+
+        let timesheet_repo = TimesheetRepository::new(arc_pool);
+
+        {
+            let user_id = USER1_ID;
+            let company_id = COMPANY1_ID;
+            let date_from = NaiveDate::from_ymd_opt(1969, 07, 28).unwrap();
+            let date_to = NaiveDate::from_ymd_opt(1969, 08, 18).unwrap();
+
+            //
+            // Check 2 timesheet are returned.
+            //
+            {
+            let timesheets_extended
+                = timesheet_repo.read_all_with_date_from_to_per_employment_extended_db(
+                    user_id,
+                    company_id,
+                    date_from,
+                    date_to)
+                .await
+                .expect("Should succeed");
+
+                assert_eq!(timesheets_extended.timesheets.len(), 2);
+                assert_eq!(timesheets_extended.date_to_wage_presets.len(), 2);
+            }
+        }
+    }
 }
 
 #[cfg(test)]
 mod wage_preset_repo_tests {
     use std::sync::Arc;
 
-    use crate::test_constants::DELTA;
+    use organization::common::DELTA;
 
     use chrono::NaiveDate;
     use organization::{
