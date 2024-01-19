@@ -1,3 +1,19 @@
+
+-- Triggers
+DROP TRIGGER IF EXISTS
+    trigger_update_timesheet_total_hours_after_insert
+    ON workday;
+DROP TRIGGER IF EXISTS
+    trigger_update_timesheet_total_hours_after_update
+    On workday;
+DROP TRIGGER IF EXISTS
+    trigger_update_timesheet_total_hours_after_delete
+    On workday;
+
+-- Functions
+DROP FUNCTION IF EXISTS update_timesheet_total_hours_after_insert;
+DROP FUNCTION IF EXISTS compute_timesheet_total_hours;
+
 --
 -- Tables
 --

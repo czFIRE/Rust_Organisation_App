@@ -226,7 +226,6 @@ CREATE TABLE workday
     --------------------------------------------------------
     total_hours  REAL NOT NULL DEFAULT 0.0,
     comment      TEXT,
-    is_editable  BOOLEAN NOT NULL DEFAULT true,
     --------------------------------------------------------
     created_at   TIMESTAMP NOT NULL DEFAULT now(),
     edited_at    TIMESTAMP NOT NULL DEFAULT now(),
@@ -351,3 +350,70 @@ CREATE TABLE comment
         CHECK (edited_at >= created_at)
 
 );
+
+
+--
+-- Functions
+--
+CREATE FUNCTION update_timesheet_total_hours_after_insert()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE timesheet
+    -- increase it by `total_hours` of added `workday` row
+    SET total_hours = total_hours + NEW.total_hours
+    WHERE id = NEW.timesheet_id;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE FUNCTION compute_timesheet_total_hours()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE timesheet
+    --
+    -- Set total_hours by summing all `workday.total_hours`
+    -- belonging to this `timesheet` instance.
+    --
+    -- Note: The `OLD` ident refers to a modified `workday` row value.
+    --
+    SET total_hours = (
+	    -- Note: `COALESCE()` substitutes a NULL value when no rows are fetched.
+        SELECT COALESCE(SUM(total_hours), 0.0)
+        FROM workday
+        -- Request just workdays which has a right `timesheet_id`.
+        WHERE timesheet_id = OLD.timesheet_id
+    )
+    WHERE id = OLD.timesheet_id;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+--
+-- Triggers
+--
+CREATE TRIGGER trigger_update_timesheet_total_hours_after_insert
+  AFTER INSERT ON workday
+  FOR EACH ROW
+  EXECUTE PROCEDURE update_timesheet_total_hours_after_insert();
+
+--
+-- Note: As we work with FPU, we cannt simply:
+--
+--       a) subtract removed `workday.total_hours` (in case of DELETE)
+--       b) or subtract OLD `total_hours` then add NEW `total_hours`
+--          (in case of UPDATE)
+--
+--       as this could lead to imprecise results. Thus we always solve
+--       this by summing `total_hours` of all relevant `workdays`.
+--
+CREATE TRIGGER trigger_update_timesheet_total_hours_after_update
+    AFTER UPDATE OF total_hours ON workday
+    FOR EACH ROW
+    WHEN (OLD.total_hours != NEW.total_hours)
+    EXECUTE PROCEDURE compute_timesheet_total_hours();
+
+CREATE TRIGGER trigger_update_timesheet_total_hours_after_delete
+  AFTER DELETE ON workday
+  FOR EACH ROW
+  EXECUTE PROCEDURE compute_timesheet_total_hours();

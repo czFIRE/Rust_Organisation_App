@@ -500,4 +500,109 @@ BEGIN
 
 --------------------------------------------------------------------------------
 
+	INSERT INTO user_record
+		(id, name, email, birth, avatar_path,
+		gender, role, status,
+		created_at, edited_at)
+		VALUES
+		(user0_id, 'Dave Null', 'dave@null.com', '1996-06-23', 'dave.jpg',
+		'male', 'admin', 'available',
+		'2023-12-22 08:38:20.288688', '2023-12-22 08:38:20.288688');
+	
+	INSERT INTO user_record
+		(id, name, email, birth, avatar_path,
+		gender, role, status,
+		created_at, edited_at)
+		VALUES
+		(user1_id, 'Tana Smith', 't.smith@seznam.cz', '1994-02-10', 'tana.jpg',
+		'female', 'user', 'available',
+		'2023-12-26 07:33:20.288688', '2023-12-26 07:33:20.288688');
+	
+	INSERT INTO employment
+		(user_id, company_id, manager_id, hourly_wage,
+		start_date, end_date, description,
+		type, level,
+		created_at, edited_at)
+		VALUES
+		(user0_id, company0_id, NULL, 300,
+		'2023-01-01', '2025-01-01', '-',
+		'hpp', 'company_administrator',
+		'2022-12-29 12:38:20.4', '2023-12-10 14:52:20.1');
+	
+	INSERT INTO event
+		(id, name, description,
+		website, accepts_staff,
+		start_date, end_date, avatar_path,
+		created_at, edited_at)
+		VALUES
+		(event0_id, 'Woodstock', 'A legendary music festival.',
+		'https://woodstock.com', true,
+		'1969-08-15', '1969-08-18', 'woodstock.png', 
+		'2023-05-03 10:38:20.4', '2023-12-01 14:30:20.1');
+	
+	INSERT INTO associated_company
+		(company_id, event_id, type,
+		created_at, edited_at)
+		VALUES
+		(company0_id, event0_id, 'organizer',
+		'2023-05-03 10:38:20.4', '2023-12-01 14:30:20.1');
+	
+	INSERT INTO timesheet
+		(id, user_id, company_id, event_id,
+		start_date, end_date, total_hours,
+		is_editable, status, manager_note,
+		created_at, edited_at)
+		VALUES
+		(timesheet0_id, user0_id, company0_id, event0_id,
+		'1969-08-16', '1969-08-17', 22,
+		true, 'not_requested', NULL,
+		'1969-08-16 18:26:0.0', '1969-08-17 20:00:0.0');
+	
+	INSERT INTO workday
+		(timesheet_id, date, total_hours, comment,
+		created_at, edited_at)
+		VALUES
+		(timesheet0_id, '1969-08-15', 12, '', true,
+		'1969-08-16 18:28:5.4', '1969-08-17 08:22:32.4');
+	
+	INSERT INTO workday
+		(timesheet_id, date, total_hours, comment,
+		created_at, edited_at)
+		VALUES
+		(timesheet0_id, '1969-08-16', 10, '', true,
+		'1969-08-17 20:00:0.0', '1969-08-17 20:00:0.0');
+	
+	INSERT INTO event_staff
+		(id, user_id, company_id, event_id,
+		decided_by, role, status,
+		created_at, edited_at)
+		VALUES
+		(event_staff0_id, user0_id, company0_id, event0_id,
+		event_staff0_id, 'organizer', 'accepted',
+		'2023-05-03 10:40:20.1', '2023-05-04 08:11:20.4');
+	
+	INSERT INTO task
+		(id, event_id, creator_id, title,
+		description, finished_at, priority,
+		accepts_staff, created_at, edited_at)
+		VALUES
+		(task0_id, event0_id, event_staff0_id, 'Prepare stage for Joe Cocker',
+		NULL, NULL, 'medium', true,
+		'2023-05-03 10:42:10.4', '2023-05-03 10:42:10.4');
+	
+	INSERT INTO assigned_staff
+		(task_id, staff_id, decided_by, status,
+		created_at, edited_at)
+		VALUES
+		(task0_id, event_staff0_id, event_staff0_id, 'accepted',
+		'2023-05-03 11:45:10.4', '2023-05-03 11:45:10.4');
+	
+	INSERT INTO comment
+		(id, event_id, task_id, author_id,
+		content,
+		created_at, edited_at)
+		VALUES
+		(comment0_id, NULL, task0_id, user0_id,
+		'Joe will need 3 guitars on stage.',
+		'2023-05-03 11:55:10.4', '2023-05-03 11:55:10.4');
 END $$;

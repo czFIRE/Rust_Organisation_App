@@ -50,7 +50,6 @@ pub struct WorkdayUpdateData {
     pub date: NaiveDate,
     pub total_hours: Option<f32>,
     pub comment: Option<String>,
-    pub is_editable: Option<bool>,
 }
 
 #[derive(Debug, Clone, Deserialize, FromRow)]
@@ -76,7 +75,6 @@ pub struct Workday {
     pub date: NaiveDate,
     pub total_hours: f32,
     pub comment: Option<String>,
-    pub is_editable: bool,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
 }

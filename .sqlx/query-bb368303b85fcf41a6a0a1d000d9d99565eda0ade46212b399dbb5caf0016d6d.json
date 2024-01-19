@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT timesheet_id,\n                    date, \n                    total_hours, \n                    comment AS \"comment?\", \n                    is_editable,\n                    created_at,\n                    edited_at \n            FROM workday \n            WHERE timesheet_id = $1\n              AND date >= $2\n              AND date <= $3;",
+  "query": "\n            SELECT timesheet_id,\n                    date, \n                    total_hours, \n                    comment, \n                    created_at,\n                    edited_at \n            FROM workday \n            WHERE timesheet_id = $1;",
   "describe": {
     "columns": [
       {
@@ -20,30 +20,23 @@
       },
       {
         "ordinal": 3,
-        "name": "comment?",
+        "name": "comment",
         "type_info": "Text"
       },
       {
         "ordinal": 4,
-        "name": "is_editable",
-        "type_info": "Bool"
-      },
-      {
-        "ordinal": 5,
         "name": "created_at",
         "type_info": "Timestamp"
       },
       {
-        "ordinal": 6,
+        "ordinal": 5,
         "name": "edited_at",
         "type_info": "Timestamp"
       }
     ],
     "parameters": {
       "Left": [
-        "Uuid",
-        "Date",
-        "Date"
+        "Uuid"
       ]
     },
     "nullable": [
@@ -52,9 +45,8 @@
       false,
       true,
       false,
-      false,
       false
     ]
   },
-  "hash": "ff27896098a4c2986ab6ad0b6434bf01bbd3aba4e62f0670b359a045063d1f9c"
+  "hash": "bb368303b85fcf41a6a0a1d000d9d99565eda0ade46212b399dbb5caf0016d6d"
 }
