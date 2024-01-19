@@ -91,6 +91,7 @@ pub struct TimesheetWithWorkdays {
     pub workdays: Vec<Workday>,
 }
 
+#[derive(Debug)]
 pub struct TimesheetsWithWorkdaysExtended {
     pub timesheets: Vec<TimesheetWithWorkdays>,
     pub hourly_wage: f64,
