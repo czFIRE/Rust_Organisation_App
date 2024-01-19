@@ -35,15 +35,15 @@ pub mod test_constants {
 mod calculate_wage_tests {
     use std::sync::Arc;
 
-    use organization::common::DELTA;
     use organization::models::EmploymentContract;
+    use organization::utils::wage_calc::models::DetailedWage;
+    use organization::{common::DELTA, utils::wage_calc::models::TimesheetWageDetailed};
 
     use chrono::NaiveDate;
     use organization::common::DbResult;
     use organization::repositories::timesheet::timesheet_repo::TimesheetRepository;
-    use organization::templates::timesheet::{DetailedWage, TimesheetWageDetailed};
-    use organization::utils::calculate_wage::calculate_timesheet_wage;
 
+    use organization::utils::wage_calc::calculate_wage::calculate_timesheet_wage;
     use sqlx::PgPool;
 
     use crate::test_constants::{

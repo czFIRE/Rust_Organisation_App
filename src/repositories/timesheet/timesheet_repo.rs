@@ -8,8 +8,7 @@ use crate::repositories::timesheet::models::{
 use crate::repositories::wage_preset::{models::WagePreset, wage_preset_repo};
 
 use crate::repositories::employment::employment_repo;
-
-use crate::utils::year_and_month::YearAndMonth;
+use crate::utils::wage_calc::models::YearAndMonth;
 
 use chrono::{Datelike, Duration, Months, NaiveDate};
 use sqlx::postgres::PgPool;
@@ -18,6 +17,8 @@ use std::collections::HashMap;
 use std::ops::DerefMut;
 use std::sync::Arc;
 use uuid::Uuid;
+
+use super::models::WorkdayUpdateData;
 
 /// Reads workdays of a specific timesheet that match a requested date range.
 async fn read_some_timesheet_workdays_db_using_tx(
@@ -420,7 +421,6 @@ impl TimesheetRepository {
                    date,
                    total_hours,
                    comment,
-                   is_editable,
                    created_at,
                    edited_at
             FROM workday
@@ -451,21 +451,18 @@ impl TimesheetRepository {
             UPDATE workday
             SET total_hours = COALESCE($1, total_hours),
                 comment = COALESCE($2, comment),
-                is_editable = COALESCE($3, is_editable),
                 edited_at = NOW()
-            WHERE timesheet_id = $4
-              AND date = $5
+            WHERE timesheet_id = $3
+              AND date = $4
               AND deleted_at IS NULL
             RETURNING timesheet_id,
                       date,
                       total_hours,
                       comment,
-                      is_editable,
                       created_at,
                       edited_at;"#,
             data.total_hours,
             data.comment,
-            data.is_editable,
             timesheet_id,
             date
         )

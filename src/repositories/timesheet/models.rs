@@ -1,6 +1,6 @@
 use crate::models::{ApprovalStatus, EmploymentContract};
 use crate::repositories::wage_preset::models::WagePreset;
-use crate::utils::year_and_month::YearAndMonth;
+use crate::utils::wage_calc::models::YearAndMonth;
 use chrono::{NaiveDate, NaiveDateTime};
 use serde::Deserialize;
 use sqlx::prelude::FromRow;

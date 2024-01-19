@@ -46,7 +46,7 @@ pub async fn get_all_timesheets_for_employment(
 
     let (user_id, company_id) = parsed_ids.unwrap();
     let result = timesheet_repo
-        .read_all_per_employment(user_id, company_id, query_params)
+        .read_all_timesheets_per_employment(user_id, company_id, query_params)
         .await;
 
     if let Ok(timesheets) = result {

@@ -8,8 +8,8 @@ use uuid::Uuid;
 use std::ops::DerefMut;
 
 use super::models::{
-    Employment, EmploymentData, EmploymentExtended, EmploymentFilter,
-    EmploymentUserCompanyFlattened, NewEmployment, Subordinate,
+    Employment, EmploymentContractAndHourlyWage, EmploymentData, EmploymentExtended,
+    EmploymentFilter, EmploymentUserCompanyFlattened, NewEmployment, Subordinate,
 };
 
 use crate::models::{EmployeeLevel, EmploymentContract, Gender, UserRole, UserStatus};

@@ -4,17 +4,16 @@
 
 use crate::repositories::wage_preset::models::WagePreset;
 
-use crate::templates::timesheet::{DetailedWage, TimesheetWageDetailed};
-
 use crate::models::EmploymentContract;
 use crate::repositories::timesheet::models::{
     TimesheetWithEvent, TimesheetsWithWorkdaysExtended, Workday,
 };
-use crate::utils::year_and_month::YearAndMonth;
 
 use uuid::Uuid;
 
 use std::collections::HashMap;
+
+use super::models::{DetailedWage, TimesheetWageDetailed, YearAndMonth};
 
 /// Info about workdays aggregated to months (belonging to a same timesheet).
 #[derive(Debug, Clone)]
