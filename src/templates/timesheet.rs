@@ -16,7 +16,6 @@ pub struct WorkdayTemplate {
     pub date: NaiveDate,
     pub total_hours: f32,
     pub comment: String,
-    pub is_editable: bool,
     pub created_at: NaiveDateTime,
     pub edited_at: NaiveDateTime,
 }
@@ -56,7 +55,6 @@ impl From<TimesheetWithWorkdays> for TimesheetTemplate {
                 date: workday.date,
                 total_hours: workday.total_hours,
                 comment: workday.comment.unwrap_or("No comment.".to_string()),
-                is_editable: workday.is_editable,
                 created_at: workday.created_at,
                 edited_at: workday.edited_at,
             })

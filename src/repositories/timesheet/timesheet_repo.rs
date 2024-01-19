@@ -33,7 +33,6 @@ async fn read_some_timesheet_workdays_db_using_tx(
                date,
                total_hours,
                comment AS "comment?",
-               is_editable,
                created_at,
                edited_at
         FROM workday
@@ -172,20 +171,17 @@ impl TimesheetRepository {
                 Workday,
                 r#"
                 INSERT INTO workday (timesheet_id,
-                                     date,
-                                     is_editable)
-                VALUES ($1, $2, $3)
+                                     date)
+                VALUES ($1, $2)
                 RETURNING timesheet_id,
                           date,
                           total_hours,
                           comment,
-                          is_editable,
                           created_at,
                           edited_at;
                 "#,
                 timesheet_id,
-                workdate,
-                true
+                workdate
             )
             .fetch_one(tx.deref_mut())
             .await?;
@@ -502,14 +498,12 @@ impl TimesheetRepository {
                     UPDATE workday
                     SET total_hours = COALESCE($1, total_hours),
                         comment = COALESCE($2, comment),
-                        is_editable = COALESCE($3, is_editable),
                         edited_at = NOW()
-                    WHERE timesheet_id = $4
-                      AND date = $5
+                    WHERE timesheet_id = $3
+                      AND date = $4
                       AND deleted_at IS NULL;"#,
                     workday.total_hours,
                     workday.comment,
-                    workday.is_editable,
                     workday.timesheet_id,
                     workday.date
                 )
@@ -531,8 +525,7 @@ impl TimesheetRepository {
             SELECT timesheet_id,
                     date, 
                     total_hours, 
-                    comment AS "comment?", 
-                    is_editable,
+                    comment, 
                     created_at,
                     edited_at 
             FROM workday 
@@ -626,7 +619,6 @@ impl TimesheetRepository {
                       date,
                       total_hours,
                       comment,
-                      is_editable,
                       created_at,
                       edited_at;"#,
             timesheet_id

@@ -226,7 +226,6 @@ CREATE TABLE workday
     --------------------------------------------------------
     total_hours  REAL NOT NULL DEFAULT 0.0,
     comment      TEXT,
-    is_editable  BOOLEAN NOT NULL DEFAULT true,
     --------------------------------------------------------
     created_at   TIMESTAMP NOT NULL DEFAULT now(),
     edited_at    TIMESTAMP NOT NULL DEFAULT now(),
