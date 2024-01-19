@@ -1,0 +1,10 @@
+pub mod assigned_staff_config;
+pub mod associated_company_config;
+pub mod comment_config;
+pub mod company_config;
+pub mod employment_config;
+pub mod event_config;
+pub mod staff_config;
+pub mod task_config;
+pub mod timesheet_config;
+pub mod user_config;

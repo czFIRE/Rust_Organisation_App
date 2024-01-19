@@ -1,4 +1,5 @@
 mod common;
+mod configs;
 mod errors;
 mod handlers;
 mod models;
@@ -15,38 +16,18 @@ use std::io::Result;
 
 use std::sync::Arc;
 
-use crate::handlers::assigned_staff::initialize_assigned_staff_management_panel;
-use crate::handlers::associated_company::get_associated_company_edit_form;
-use crate::handlers::associated_company::get_editable_associated_companies;
-use crate::handlers::associated_company::get_editable_associated_company;
-use crate::handlers::associated_company::open_associated_company_management_panel;
-use crate::handlers::comment::get_comment;
-use crate::handlers::comment::open_comment_update_mode;
-use crate::handlers::comment::open_event_comments_for_user;
-use crate::handlers::company::get_company_edit_mode;
-use crate::handlers::company::get_company_information;
-use crate::handlers::employment::toggle_employment_create;
-use crate::handlers::employment::toggle_employment_edit;
-use crate::handlers::event::switch_event_accepts_staff;
-use crate::handlers::event::toggle_event_creation_mode;
-use crate::handlers::event::toggle_event_edit_mode;
-use crate::handlers::event_staff::initialize_staff_management_panel;
-use crate::handlers::event_staff::initialize_staff_panel;
-use crate::handlers::event_task::open_single_task_panel;
-use crate::handlers::event_task::open_task_creation_panel;
-use crate::handlers::event_task::open_task_edit_panel;
-use crate::handlers::event_task::open_tasks_panel;
-use crate::handlers::event_task::update_task_completion;
-use crate::handlers::timesheet::get_expected_wage_calculation;
-use crate::handlers::timesheet::get_timesheets_for_review;
-use crate::handlers::timesheet::get_work_day;
-use crate::handlers::timesheet::open_sheet_submit_page;
-use crate::handlers::timesheet::open_timesheet_for_review;
-use crate::handlers::timesheet::toggle_work_day_edit_mode;
-use crate::handlers::timesheet::update_work_day;
-use crate::handlers::user::get_users;
-use crate::handlers::user::open_admin_panel;
-use crate::handlers::user::toggle_user_edit;
+use crate::configs::assigned_staff_config::configure_assigned_staff_endpoints;
+use crate::configs::associated_company_config::configure_associated_company_endpoints;
+use crate::configs::comment_config::configure_comment_endpoints;
+use crate::configs::company_config::configure_company_endpoints;
+use crate::configs::employment_config::configure_employment_endpoints;
+use crate::configs::event_config::configure_event_endpoints;
+use crate::configs::staff_config::configure_staff_endpoints;
+use crate::configs::task_config::configure_task_endpoints;
+use crate::configs::timesheet_config::configure_timesheet_endpoints;
+use crate::configs::user_config::configure_user_endpoints;
+
+use crate::handlers::index::index;
 use crate::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
 use crate::repositories::comment::comment_repo::CommentRepository;
 use crate::repositories::company::company_repo::CompanyRepository;
@@ -62,46 +43,6 @@ use crate::{
     repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository,
 };
 use actix_web::web;
-
-use crate::handlers::{
-    assigned_staff::{
-        create_assigned_staff, delete_all_rejected_assigned_staff, delete_assigned_staff,
-        get_all_assigned_staff, get_assigned_staff, update_assigned_staff,
-    },
-    associated_company::{
-        create_associated_company, delete_associated_company, get_all_associated_companies,
-        get_all_associated_companies_per_event_and_user, update_associated_company,
-    },
-    comment::{
-        create_event_comment, create_task_comment, delete_comment, open_task_comments_for_user,
-        update_comment,
-    },
-    company::{
-        create_company, delete_company, get_all_companies, get_company, remove_company_avatar,
-        update_company, upload_company_avatar,
-    },
-    employment::{
-        create_employment, delete_employment, get_employment, get_employments_per_user,
-        get_subordinates, update_employment,
-    },
-    event::{
-        create_event, delete_event, get_event, get_events, remove_event_avatar, update_event,
-        upload_event_avatar,
-    },
-    event_staff::{
-        create_event_staff, delete_all_rejected_event_staff, delete_event_staff,
-        get_all_event_staff, get_event_staff, update_event_staff,
-    },
-    event_task::{create_task, delete_task, get_event_tasks, update_task},
-    index::index,
-    timesheet::{
-        create_timesheet, get_all_timesheets_for_employment, get_timesheet, reset_timesheet_data,
-        update_timesheet,
-    },
-    user::{
-        create_user, delete_user, get_user, remove_user_avatar, update_user, upload_user_avatar,
-    },
-};
 
 const HOST: &str = "localhost:8000";
 
@@ -152,95 +93,16 @@ async fn main() -> Result<()> {
             .wrap(Logger::default())
             .wrap(Logger::new("%a %{User-Agent}i"))
             .service(index)
-            .service(get_user)
-            .service(get_users)
-            .service(toggle_user_edit)
-            .service(create_user)
-            .service(update_user)
-            .service(delete_user)
-            .service(upload_user_avatar)
-            .service(remove_user_avatar)
-            .service(get_company)
-            .service(get_all_companies)
-            .service(get_company_information)
-            .service(create_company)
-            .service(update_company)
-            .service(delete_company)
-            .service(get_company_edit_mode)
-            .service(upload_company_avatar)
-            .service(remove_company_avatar)
-            .service(get_events)
-            .service(get_event)
-            .service(create_event)
-            .service(update_event)
-            .service(delete_event)
-            .service(upload_event_avatar)
-            .service(remove_event_avatar)
-            .service(toggle_event_edit_mode)
-            .service(toggle_event_creation_mode)
-            .service(switch_event_accepts_staff)
-            .service(get_employment)
-            .service(get_employments_per_user)
-            .service(get_subordinates)
-            .service(create_employment)
-            .service(update_employment)
-            .service(delete_employment)
-            .service(toggle_employment_edit)
-            .service(toggle_employment_create)
-            .service(get_all_assigned_staff)
-            .service(get_assigned_staff)
-            .service(create_assigned_staff)
-            .service(update_assigned_staff)
-            .service(delete_all_rejected_assigned_staff)
-            .service(delete_assigned_staff)
-            .service(initialize_assigned_staff_management_panel)
-            .service(open_tasks_panel)
-            .service(open_single_task_panel)
-            .service(open_task_creation_panel)
-            .service(open_task_edit_panel)
-            .service(get_event_tasks)
-            .service(create_task)
-            .service(update_task)
-            .service(update_task_completion)
-            .service(delete_task)
-            .service(get_all_event_staff)
-            .service(get_event_staff)
-            .service(create_event_staff)
-            .service(update_event_staff)
-            .service(delete_all_rejected_event_staff)
-            .service(delete_event_staff)
-            .service(initialize_staff_panel)
-            .service(initialize_staff_management_panel)
-            .service(get_all_associated_companies)
-            .service(get_all_associated_companies_per_event_and_user)
-            .service(create_associated_company)
-            .service(update_associated_company)
-            .service(delete_associated_company)
-            .service(open_associated_company_management_panel)
-            .service(get_editable_associated_companies)
-            .service(get_editable_associated_company)
-            .service(get_associated_company_edit_form)
-            .service(open_event_comments_for_user)
-            .service(create_event_comment)
-            .service(open_task_comments_for_user)
-            .service(create_task_comment)
-            .service(open_comment_update_mode)
-            .service(get_comment)
-            .service(update_comment)
-            .service(delete_comment)
-            .service(get_all_timesheets_for_employment)
-            .service(get_timesheet)
-            .service(create_timesheet)
-            .service(update_timesheet)
-            .service(reset_timesheet_data)
-            .service(toggle_work_day_edit_mode)
-            .service(update_work_day)
-            .service(get_work_day)
-            .service(open_timesheet_for_review)
-            .service(get_timesheets_for_review)
-            .service(get_expected_wage_calculation)
-            .service(open_sheet_submit_page)
-            .service(open_admin_panel)
+            .configure(configure_user_endpoints)
+            .configure(configure_company_endpoints)
+            .configure(configure_event_endpoints)
+            .configure(configure_employment_endpoints)
+            .configure(configure_assigned_staff_endpoints)
+            .configure(configure_task_endpoints)
+            .configure(configure_staff_endpoints)
+            .configure(configure_associated_company_endpoints)
+            .configure(configure_comment_endpoints)
+            .configure(configure_timesheet_endpoints)
             // Temporary
             .service(get_users_login)
             // For serving css and static files overall
