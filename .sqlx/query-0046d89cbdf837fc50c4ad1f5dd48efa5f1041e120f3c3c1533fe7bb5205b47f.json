@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": " SELECT * \n                        FROM event\n                        WHERE deleted_at IS NULL \n                        LIMIT $1 \n                        OFFSET $2;",
+  "query": "SELECT * FROM company \n             WHERE deleted_at IS NULL \n               AND name LIKE $3\n             ORDER BY name\n             LIMIT $1 OFFSET $2;",
   "describe": {
     "columns": [
       {
@@ -25,36 +25,41 @@
       },
       {
         "ordinal": 4,
-        "name": "accepts_staff",
-        "type_info": "Bool"
+        "name": "crn",
+        "type_info": "Varchar"
       },
       {
         "ordinal": 5,
-        "name": "start_date",
-        "type_info": "Date"
+        "name": "vatin",
+        "type_info": "Varchar"
       },
       {
         "ordinal": 6,
-        "name": "end_date",
-        "type_info": "Date"
+        "name": "phone",
+        "type_info": "Varchar"
       },
       {
         "ordinal": 7,
-        "name": "avatar_url",
+        "name": "email",
         "type_info": "Varchar"
       },
       {
         "ordinal": 8,
+        "name": "avatar_url",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
         "name": "created_at",
         "type_info": "Timestamp"
       },
       {
-        "ordinal": 9,
+        "ordinal": 10,
         "name": "edited_at",
         "type_info": "Timestamp"
       },
       {
-        "ordinal": 10,
+        "ordinal": 11,
         "name": "deleted_at",
         "type_info": "Timestamp"
       }
@@ -62,14 +67,16 @@
     "parameters": {
       "Left": [
         "Int8",
-        "Int8"
+        "Int8",
+        "Text"
       ]
     },
     "nullable": [
       false,
       false,
+      false,
       true,
-      true,
+      false,
       false,
       false,
       false,
@@ -79,5 +86,5 @@
       true
     ]
   },
-  "hash": "4ab9ab590c33feb647fee6c9e8aab940d9feb73553e57547c2787091a6c970e9"
+  "hash": "0046d89cbdf837fc50c4ad1f5dd48efa5f1041e120f3c3c1533fe7bb5205b47f"
 }

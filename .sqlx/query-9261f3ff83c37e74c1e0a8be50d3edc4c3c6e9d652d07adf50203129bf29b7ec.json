@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT  \n                company_id,\n                name,\n                description,\n                phone,\n                email,\n                avatar_url,\n                website,\n                crn,\n                vatin,\n                company.created_at,\n                company.edited_at,\n                company.deleted_at,\n                country,\n                region,\n                city,\n                street,\n                postal_code,\n                street_number\n            FROM company INNER JOIN address on company.id = address.company_id LIMIT $1 OFFSET $2;",
+  "query": "SELECT  \n                company_id,\n                name,\n                description,\n                phone,\n                email,\n                avatar_url,\n                website,\n                crn,\n                vatin,\n                company.created_at,\n                company.edited_at,\n                company.deleted_at,\n                country,\n                region,\n                city,\n                street,\n                postal_code,\n                street_number\n            FROM company INNER JOIN address on company.id = address.company_id \n            ORDER BY name\n            LIMIT $1 OFFSET $2;",
   "describe": {
     "columns": [
       {
@@ -121,5 +121,5 @@
       false
     ]
   },
-  "hash": "c0efe11563c0ac75a4daeb8918ca85d662a0cc72f4b61043e5bdbf7b5853ee01"
+  "hash": "9261f3ff83c37e74c1e0a8be50d3edc4c3c6e9d652d07adf50203129bf29b7ec"
 }

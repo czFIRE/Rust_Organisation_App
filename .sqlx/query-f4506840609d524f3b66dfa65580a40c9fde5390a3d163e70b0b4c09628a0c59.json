@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": " UPDATE event SET \n                name = COALESCE($1, name), \n                description = COALESCE($2, description), \n                website = COALESCE($3, website), \n                start_date = COALESCE($4, start_date), \n                end_date = COALESCE($5, end_date), \n                accepts_staff = COALESCE($6, accepts_staff),\n                edited_at = NOW() \n                WHERE id = $7\n                  AND deleted_at IS NULL \n                RETURNING id, \n                name, \n                description, \n                website, \n                accepts_staff, \n                start_date, \n                end_date, \n                avatar_url, \n                created_at, \n                edited_at, \n                deleted_at;\n            ",
+  "query": " UPDATE event SET \n                name = COALESCE($1, name), \n                description = COALESCE($2, description), \n                website = COALESCE($3, website), \n                start_date = COALESCE($4, start_date), \n                end_date = COALESCE($5, end_date), \n                accepts_staff = COALESCE($6, accepts_staff),\n                avatar_url = COALESCE($7, avatar_url),\n                edited_at = NOW() \n                WHERE id = $8\n                  AND deleted_at IS NULL \n                RETURNING id, \n                name, \n                description, \n                website, \n                accepts_staff, \n                start_date, \n                end_date, \n                avatar_url, \n                created_at, \n                edited_at, \n                deleted_at;\n            ",
   "describe": {
     "columns": [
       {
@@ -67,6 +67,7 @@
         "Date",
         "Date",
         "Bool",
+        "Varchar",
         "Uuid"
       ]
     },
@@ -84,5 +85,5 @@
       true
     ]
   },
-  "hash": "c25b54c10a6f0abe86cc4a9306b35c763acffe1b40b788606150671625c5d38c"
+  "hash": "f4506840609d524f3b66dfa65580a40c9fde5390a3d163e70b0b4c09628a0c59"
 }
