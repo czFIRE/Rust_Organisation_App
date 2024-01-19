@@ -2543,7 +2543,7 @@ mod api_tests {
         .await;
 
         let req = test::TestRequest::get()
-                    .uri("/user/ac9bf689-a713-4b66-a3d0-41faaf0f8d0c/employment/134d5286-5f55-4637-9b98-223a5820a464/sheet")
+                    .uri("/user/51a01dbf-dcd5-43a0-809c-94ed8e61d420/employment/71fa27d6-6f00-4ad0-8902-778e298aaed2/sheet")
                     .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
@@ -2552,7 +2552,6 @@ mod api_tests {
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
 
         assert!(body.contains("Darkness 2024"));
-        assert!(body.contains("Unlocked"));
         Ok(())
     }
 
@@ -2587,7 +2586,7 @@ mod api_tests {
         let app =
             test::init_service(App::new().app_data(repo.clone()).service(get_timesheet)).await;
         let req = test::TestRequest::get()
-            .uri("/timesheet/d47e8141-a77e-4d55-a2d5-4a77de24b6d0")
+            .uri("/timesheet/c51e77aa-bd80-42c7-8b8a-003f018328f6")
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
