@@ -23,41 +23,12 @@ use uuid::Uuid;
 
 use crate::repositories::user::user_repo::UserRepository;
 
-// This function is a little redundant, but html returns
-// the unfilled input as "", which messes with the query.
-fn parse_query(query: UsersQuery) -> UsersQuery {
-    let name = match query.name {
-        Some(query_name) => {
-            if query_name.is_empty() {
-                None
-            } else {
-                Some(query_name)
-            }
-        }
-        None => None,
-    };
-
-    let email = match query.email {
-        Some(query_email) => {
-            if query_email.is_empty() {
-                None
-            } else {
-                Some(query_email)
-            }
-        }
-        None => None,
-    };
-
-    UsersQuery { name, email }
-}
-
 #[get("/user")]
 pub async fn get_users(
     query: web::Query<UsersQuery>,
     user_repo: web::Data<UserRepository>,
 ) -> HttpResponse {
-    let parsed_query = parse_query(query.into_inner());
-    let result = user_repo._read_all(parsed_query).await;
+    let result = user_repo._read_all(query.into_inner()).await;
     if let Ok(users) = result {
         let user_info_vec: Vec<UserInfo> = users.into_iter().map(|user| user.into()).collect();
         let template = UserInfoTemplate { user_info_vec };

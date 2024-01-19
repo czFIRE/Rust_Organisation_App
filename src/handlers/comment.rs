@@ -136,7 +136,7 @@ pub async fn create_event_comment(
             return HttpResponse::InternalServerError()
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
-        return HttpResponse::Ok()
+        return HttpResponse::Created()
             .content_type("text/html")
             .body(body.expect("Should be valid now."));
     }
@@ -246,7 +246,7 @@ pub async fn create_task_comment(
             return HttpResponse::InternalServerError()
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
         }
-        return HttpResponse::Ok()
+        return HttpResponse::Created()
             .content_type("text/html")
             .body(body.expect("Should be valid now."));
     }

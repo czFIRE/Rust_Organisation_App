@@ -114,6 +114,20 @@ impl UserRepository {
     async fn _read_all_db(&self, filter: UsersQuery) -> DbResult<Vec<User>> {
         let executor = self.pool.as_ref();
 
+        let mut name_filter = if filter.name.is_some() {
+            filter.name.expect("Should be some").clone()
+        } else {
+            "".to_string()
+        };
+        name_filter.push('%');
+
+        let mut email_filter = if filter.email.is_some() {
+            filter.email.expect("Should be some").clone()
+        } else {
+            "".to_string()
+        };
+        email_filter.push('%');
+
         let users: Vec<User> = sqlx::query_as!(
             User,
             r#"SELECT 
@@ -131,12 +145,12 @@ impl UserRepository {
             FROM 
                 user_record
             WHERE deleted_at IS NULL
-              AND name = COALESCE($1, name)
-              AND email = COALESCE($2, email)
+              AND name LIKE $1
+              AND email LIKE $2
             ORDER BY name
             "#,
-            filter.name,
-            filter.email
+            name_filter,
+            email_filter,
         )
         .fetch_all(executor)
         .await?;
@@ -146,7 +160,6 @@ impl UserRepository {
 
     // Update a user in the DB.
     pub async fn update_user(&self, user_id: Uuid, data: UserData) -> DbResult<User> {
-        // TODO - this should support transactions
         let executor = self.pool.as_ref();
 
         if data.avatar_url.is_none()

@@ -1,7 +1,7 @@
 use actix_web::{get, http, HttpResponse};
 use askama::Template;
 
-use crate::{errors::parse_error, templates::index::IndexTemplate};
+use crate::{errors::parse_error, templates::common::IndexTemplate};
 
 #[get("/")]
 pub async fn index() -> HttpResponse {

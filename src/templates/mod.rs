@@ -1,9 +1,9 @@
 pub mod avatar;
 pub mod comment;
+pub mod common;
 pub mod company;
 pub mod employment;
 pub mod event;
-pub mod index;
 pub mod staff;
 pub mod task;
 pub mod timesheet;

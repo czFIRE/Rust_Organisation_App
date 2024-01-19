@@ -31,6 +31,7 @@ pub struct NewAssociatedCompanyData {
 async fn retrieve_associated_companies_per_event(
     event_id: Uuid,
     editable: bool,
+    created: bool,
     query: AssociatedCompanyFilter,
     associated_repo: web::Data<AssociatedCompanyRepository>,
 ) -> HttpResponse {
@@ -51,6 +52,9 @@ async fn retrieve_associated_companies_per_event(
         if body.is_err() {
             return HttpResponse::InternalServerError()
                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        }
+        if created {
+            return HttpResponse::Created().body(body.expect("Should be valid now."));
         }
         return HttpResponse::Ok().body(body.expect("Should be valid now."));
     }
@@ -76,8 +80,14 @@ pub async fn get_all_associated_companies(
     }
 
     let parsed_id = id_parse.expect("Should be valid.");
-    retrieve_associated_companies_per_event(parsed_id, false, query.into_inner(), associated_repo)
-        .await
+    retrieve_associated_companies_per_event(
+        parsed_id,
+        false,
+        false,
+        query.into_inner(),
+        associated_repo,
+    )
+    .await
 }
 
 #[get("/event/{event_id}/user/{user_id}/company")]
@@ -175,7 +185,7 @@ pub async fn create_associated_company(
         limit: None,
         offset: None,
     };
-    retrieve_associated_companies_per_event(parsed_id, true, query, associated_repo).await
+    retrieve_associated_companies_per_event(parsed_id, true, true, query, associated_repo).await
 }
 
 //ToDo: Consider removing Option from the struct. It only has one item.
@@ -298,7 +308,7 @@ pub async fn get_editable_associated_companies(
         limit: None,
         offset: None,
     };
-    retrieve_associated_companies_per_event(event_id, true, query, associated_repo).await
+    retrieve_associated_companies_per_event(event_id, false, true, query, associated_repo).await
 }
 
 #[get("/event/{event_id}/company/{company_id}/editable")]

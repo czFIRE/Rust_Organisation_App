@@ -55,7 +55,8 @@ mod api_tests {
     use regex::Regex;
     use serde_json::json;
     use sqlx::{Pool, Postgres};
-    use std::str;
+    use std::str::{self, FromStr};
+    use uuid::Uuid;
 
     async fn get_db_pool() -> Arc<Pool<Postgres>> {
         dotenv().ok();
@@ -443,7 +444,8 @@ mod api_tests {
             "number": "nmbr",
             "postal_code": "pstl",
             "phone": "+0 123456789",
-            "email": "meet@the.quota"
+            "email": "meet@the.quota",
+            "employee_id": "4a799b2c-3b5f-41ec-a6e3-442cef915051",
         });
 
         let req = test::TestRequest::post()
@@ -697,10 +699,11 @@ mod api_tests {
         let arc_pool = get_db_pool().await;
         let event_repository = EventRepository::new(arc_pool.clone());
         let event_repo = web::Data::new(event_repository);
-
+        let employment_repo = web::Data::new(EmploymentRepository::new(arc_pool.clone()));
         let app = test::init_service(
             App::new()
                 .app_data(event_repo.clone())
+                .app_data(employment_repo.clone())
                 .service(create_event)
                 .service(update_event)
                 .service(delete_event),
@@ -715,6 +718,8 @@ mod api_tests {
             "description": "Return of the best bitcoin app, BitConneeeeeeeeect!",
             "start_date": start_date.clone().to_string(),
             "end_date": end_date.clone().to_string(),
+            "creator_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
+            "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5"
         });
 
         let req = test::TestRequest::post()
@@ -736,7 +741,6 @@ mod api_tests {
 
         assert!(body.contains("BitConnect Charitative Concert"));
         assert!(body.contains("Return of the best bitcoin app, BitConneeeeeeeeect!"));
-        assert!(body.contains("true"));
 
         let data = json!({
             "name": "BitConnect Charitative Event"
@@ -924,71 +928,16 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
     }
 
-    // #[actix_web::test]
-    // async fn get_one_task() {
-    //     let arc_pool = get_db_pool().await;
-    //     let repository = TaskRepository::new(arc_pool.clone());
-    //     let repo = web::Data::new(repository);
-
-    //     let app =
-    //         test::init_service(App::new().app_data(repo.clone()).service(get_event_task)).await;
-
-    //     let req = test::TestRequest::get()
-    //         .uri("/event/task/7ae0c017-fe31-4aac-b767-100d18a8877b")
-    //         .to_request();
-    //     let res = test::call_service(&app, req).await;
-    //     assert!(res.status().is_success());
-    //     assert_eq!(res.status(), http::StatusCode::OK);
-
-    //     let body_bytes = test::read_body(res).await;
-    //     let body = str::from_utf8(body_bytes.borrow()).unwrap();
-
-    //     assert!(body.contains("Prepare stage for Joe Cocker"));
-    //     assert!(body.contains("7ae0c017-fe31-4aac-b767-100d18a8877b"));
-    //     assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
-    // }
-
-    // #[actix_web::test]
-    // async fn get_non_existent_task() {
-    //     let arc_pool = get_db_pool().await;
-    //     let repository = TaskRepository::new(arc_pool.clone());
-    //     let repo = web::Data::new(repository);
-
-    //     let app =
-    //         test::init_service(App::new().app_data(repo.clone()).service(get_event_task)).await;
-    //     let req = test::TestRequest::get()
-    //         .uri("/event/task/a96d1d99-93b5-469b-ac62-654b0cf7ebd3")
-    //         .to_request();
-    //     let res = test::call_service(&app, req).await;
-    //     assert!(res.status().is_client_error());
-    //     assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
-    // }
-
-    // #[actix_web::test]
-    // async fn get_one_task_invalid_uuid_format() {
-    //     let arc_pool = get_db_pool().await;
-    //     let repository = TaskRepository::new(arc_pool.clone());
-    //     let repo = web::Data::new(repository);
-
-    //     let app =
-    //         test::init_service(App::new().app_data(repo.clone()).service(get_event_task)).await;
-    //     let req = test::TestRequest::get()
-    //         .uri("/event/task/nowaythiscanbeavalidUUIDbrotherrr")
-    //         .to_request();
-    //     let res = test::call_service(&app, req).await;
-    //     assert!(res.status().is_client_error());
-    //     assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
-    // }
-
     #[actix_web::test]
     async fn create_update_delete_task_test() {
         let arc_pool = get_db_pool().await;
         let repository = TaskRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
-
+        let assigned_repo = web::Data::new(TaskRepository::new(arc_pool.clone()));
         let app = test::init_service(
             App::new()
                 .app_data(repo.clone())
+                .app_data(assigned_repo.clone())
                 .service(create_task)
                 .service(delete_task)
                 .service(update_task),
@@ -1006,15 +955,13 @@ mod api_tests {
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
-        assert_eq!(res.status(), http::StatusCode::CREATED);
+        assert_eq!(res.status(), http::StatusCode::OK);
 
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
 
-        assert!(body.contains("true"));
         assert!(body.contains("Stock the wood pile."));
-        assert!(body.contains("9281b570-4d02-4096-9136-338a613c71cd"));
-        assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
+        assert!(body.contains("High"));
 
         let uuid_regex = Regex::new(
             r"[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}",
@@ -1038,10 +985,7 @@ mod api_tests {
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
 
-        assert!(body.contains("true"));
         assert!(body.contains("Help do stuff."));
-        assert!(body.contains("9281b570-4d02-4096-9136-338a613c71cd"));
-        assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
 
         let req = test::TestRequest::patch()
             .uri(format!("/event/task/{}", task_id).as_str())
@@ -1056,7 +1000,7 @@ mod api_tests {
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
-        assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
+        assert_eq!(res.status(), http::StatusCode::OK);
 
         let req = test::TestRequest::delete()
             .uri(format!("/event/task/{}", task_id).as_str())
@@ -1071,8 +1015,14 @@ mod api_tests {
         let arc_pool = get_db_pool().await;
         let repository = TaskRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
-
-        let app = test::init_service(App::new().app_data(repo.clone()).service(update_task)).await;
+        let assigned_repo = web::Data::new(AssignedStaffRepository::new(arc_pool.clone()));
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .app_data(assigned_repo.clone())
+                .service(update_task),
+        )
+        .await;
 
         let data = json!({
             "title": "Help do stuff."
@@ -1092,8 +1042,14 @@ mod api_tests {
         let arc_pool = get_db_pool().await;
         let repository = TaskRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
-
-        let app = test::init_service(App::new().app_data(repo.clone()).service(update_task)).await;
+        let assigned_repo = web::Data::new(AssignedStaffRepository::new(arc_pool.clone()));
+        let app = test::init_service(
+            App::new()
+                .app_data(repo.clone())
+                .app_data(assigned_repo.clone())
+                .service(update_task),
+        )
+        .await;
 
         let data = json!({
             "title": "Help do stuff."
@@ -1129,10 +1085,12 @@ mod api_tests {
         let arc_pool = get_db_pool().await;
         let repository = CommentRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
+        let staff_repo = web::Data::new(StaffRepository::new(arc_pool.clone()));
 
         let app = test::init_service(
             App::new()
                 .app_data(repo.clone())
+                .app_data(staff_repo.clone())
                 .service(open_event_comments_for_user),
         )
         .await;
@@ -1150,9 +1108,11 @@ mod api_tests {
         let repository = CommentRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
 
+        let staff_repo = web::Data::new(StaffRepository::new(arc_pool.clone()));
         let app = test::init_service(
             App::new()
                 .app_data(repo.clone())
+                .app_data(staff_repo.clone())
                 .service(open_event_comments_for_user),
         )
         .await;
@@ -1193,7 +1153,6 @@ mod api_tests {
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
 
-        assert!(body.contains("35341253-da20-40b6-96d8-ce069b1ba5d4"));
         assert!(body.contains("Cool event, maaaaan!"));
 
         let uuid_regex = Regex::new(
@@ -1208,7 +1167,7 @@ mod api_tests {
             "content": "Chill event, maaaaan!",
         });
 
-        let req = test::TestRequest::put()
+        let req = test::TestRequest::patch()
             .uri(format!("/comment/{}", comment_id).as_str())
             .set_json(data)
             .to_request();
@@ -1218,13 +1177,12 @@ mod api_tests {
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
 
-        assert!(body.contains(comment_id));
         assert!(body.contains("Chill event, maaaaan!"));
 
         // Empty Data Test
         let data = json!({});
 
-        let req = test::TestRequest::put()
+        let req = test::TestRequest::patch()
             .uri(format!("/comment/{}", comment_id).as_str())
             .set_json(data)
             .to_request();
@@ -1237,7 +1195,8 @@ mod api_tests {
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
-        assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
+        // OK because of HTMX
+        assert_eq!(res.status(), http::StatusCode::OK);
 
         // Deleting an already deleted comment.
         let req = test::TestRequest::delete()
@@ -1313,11 +1272,10 @@ mod api_tests {
         let app =
             test::init_service(App::new().app_data(repo.clone()).service(update_comment)).await;
         let data = json!({
-            "author_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
             "content": "One of the events of all time, maaaaan!",
         });
 
-        let req = test::TestRequest::put()
+        let req = test::TestRequest::patch()
             .uri("/comment/uuidied-writingthis")
             .set_json(data)
             .to_request();
@@ -1331,24 +1289,20 @@ mod api_tests {
         let arc_pool = get_db_pool().await;
         let repository = CommentRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
-
+        let assigned_repo = web::Data::new(AssignedStaffRepository::new(arc_pool.clone()));
         let app = test::init_service(
             App::new()
                 .app_data(repo.clone())
+                .app_data(assigned_repo.clone())
                 .service(open_task_comments_for_user),
         )
         .await;
         let req = test::TestRequest::get()
-            .uri("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/comment")
+            .uri("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/comment-panel/9281b570-4d02-4096-9136-338a613c71cd")
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::OK);
-
-        let body_bytes = test::read_body(res).await;
-        let body = str::from_utf8(body_bytes.borrow()).unwrap();
-
-        assert!(body.contains("7ae0c017-fe31-4aac-b767-100d18a8877b"));
     }
 
     #[actix_web::test]
@@ -1356,15 +1310,16 @@ mod api_tests {
         let arc_pool = get_db_pool().await;
         let repository = CommentRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
-
+        let assigned_repo = web::Data::new(AssignedStaffRepository::new(arc_pool.clone()));
         let app = test::init_service(
             App::new()
                 .app_data(repo.clone())
+                .app_data(assigned_repo.clone())
                 .service(open_task_comments_for_user),
         )
         .await;
         let req = test::TestRequest::get()
-            .uri("/task/INVALIDUUIDFORMATZZZ/comment")
+            .uri("/task/7ae0c01zzzyyy4aac-b767-10zzz877b/comment-panel/3534zzzzzzzzzzZZZ5d4")
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
@@ -1400,7 +1355,6 @@ mod api_tests {
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
 
-        assert!(body.contains("35341253-da20-40b6-96d8-ce069b1ba5d4"));
         assert!(body.contains("Cool task, maaaaan!"));
 
         let uuid_regex = Regex::new(
@@ -1415,7 +1369,7 @@ mod api_tests {
             "content": "Chill task, maaaaan!",
         });
 
-        let req = test::TestRequest::put()
+        let req = test::TestRequest::patch()
             .uri(format!("/comment/{}", comment_id).as_str())
             .set_json(data)
             .to_request();
@@ -1425,13 +1379,12 @@ mod api_tests {
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
 
-        assert!(body.contains("35341253-da20-40b6-96d8-ce069b1ba5d4"));
         assert!(body.contains("Chill task, maaaaan!"));
 
         // Empty Data Test
         let data = json!({});
 
-        let req = test::TestRequest::put()
+        let req = test::TestRequest::patch()
             .uri(format!("/comment/{}", comment_id).as_str())
             .set_json(data)
             .to_request();
@@ -1444,7 +1397,7 @@ mod api_tests {
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
-        assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
+        assert_eq!(res.status(), http::StatusCode::OK);
 
         // Deleting an already deleted comment.
         let req = test::TestRequest::delete()
@@ -1714,7 +1667,7 @@ mod api_tests {
             "user_id": "ac9bf689-a713-4b66-a3d0-41faaf0f8d0c",
             "company_id": "b5188eda-528d-48d4-8cee-498e0971f9f5",
             "manager_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
-            "hourly_wage": 200.0,
+            "hourly_wage": "200.0",
             "start_date": "2022-12-23",
             "end_date": "2022-12-26",
             "description": "A person.",
@@ -1722,6 +1675,8 @@ mod api_tests {
             "level": "Basic"
         });
 
+        // Can't check for the internal data here because we return
+        // the manager's view instead. This call is purely for the frotend.
         let req = test::TestRequest::post()
             .uri("/employment")
             .set_json(data.clone())
@@ -1729,14 +1684,6 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::CREATED);
-        let body_bytes = test::read_body(res).await;
-        let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        assert!(body.contains("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c"));
-        assert!(body.contains("b5188eda-528d-48d4-8cee-498e0971f9f5"));
-        assert!(body.contains("Hpp"));
-        assert!(body.contains("Basic"));
-        assert!(body.contains("200"));
-        //ToDo: check for manager ID
 
         let req = test::TestRequest::post()
             .uri("/employment")
@@ -1749,7 +1696,8 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::BAD_REQUEST);
 
         let data = json!({
-            "level": "Manager"
+            "editor_id": "35341253-da20-40b6-96d8-ce069b1ba5d4",
+            "level": "Manager",
         });
 
         let req = test::TestRequest::patch()
@@ -1759,13 +1707,6 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::OK);
-        let body_bytes = test::read_body(res).await;
-        let body = str::from_utf8(body_bytes.borrow()).unwrap();
-
-        assert!(body.contains("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c"));
-        assert!(body.contains("b5188eda-528d-48d4-8cee-498e0971f9f5"));
-        assert!(body.contains("Hpp"));
-        assert!(body.contains("Manager"));
 
         let data = json!({});
 
@@ -1991,16 +1932,16 @@ mod api_tests {
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
 
-        assert!(body.contains("51a01dbf-dcd5-43a0-809c-94ed8e61d420"));
-        assert!(body.contains("71fa27d6-6f00-4ad0-8902-778e298aaed2"));
-        assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
+        assert!(body.contains("Your application is still under review."));
 
-        let uuid_regex = Regex::new(
-            r"[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}",
-        )
-        .unwrap();
-        let uuid_caps = uuid_regex.find(body).unwrap();
-        let staff_id = uuid_caps.as_str();
+        let event_id = Uuid::from_str("b71fd7ce-c891-410a-9bb4-70fc5c7748f8").expect("Valid uuid");
+        let user_id = Uuid::from_str("51a01dbf-dcd5-43a0-809c-94ed8e61d420").expect("Valid uuid");
+        let staff_res = staff_repo
+            .read_by_event_and_user_id(event_id, user_id)
+            .await;
+        assert!(staff_res.is_ok());
+        let staff = staff_res.expect("Should be some.");
+        let staff_id = staff.id;
 
         // No data.
         let req = test::TestRequest::patch()
@@ -2107,20 +2048,29 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        assert!(body.contains("51a01dbf-dcd5-43a0-809c-94ed8e61d420"));
-        assert!(body.contains("71fa27d6-6f00-4ad0-8902-778e298aaed2"));
-        assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
         assert!(body.contains("Organizer"));
 
         let req = test::TestRequest::delete()
-            .uri(format!("/event/staff/{}", staff_id.to_string()).as_str())
+            .uri(
+                format!(
+                    "/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff/{}",
+                    staff_id.to_string()
+                )
+                .as_str(),
+            )
             .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
-        assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
+        assert_eq!(res.status(), http::StatusCode::OK);
 
         let req = test::TestRequest::delete()
-            .uri(format!("/event/staff/{}", staff_id.to_string()).as_str())
+            .uri(
+                format!(
+                    "/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/staff/{}",
+                    staff_id.to_string()
+                )
+                .as_str(),
+            )
             .to_request();
         let res = test::call_service(&app, req).await;
         // Duplicate delete
@@ -2150,7 +2100,7 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::OK);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        assert!(body.contains("7ae0c017-fe31-4aac-b767-100d18a8877b"));
+        assert!(body.contains("Dave Null"));
     }
 
     #[actix_web::test]
@@ -2265,7 +2215,6 @@ mod api_tests {
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         assert!(body.contains("7ae0c017-fe31-4aac-b767-100d18a8877b"));
         assert!(body.contains("Pending") || body.contains("pending"));
-        assert!(body.contains("a96d1d99-93b5-469b-ac62-654b0cf7ebd3"));
 
         let data = json!({
             "status": "Rejected",
@@ -2284,7 +2233,6 @@ mod api_tests {
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         assert!(body.contains("7ae0c017-fe31-4aac-b767-100d18a8877b"));
         assert!(body.contains("Rejected") || body.contains("rejected"));
-        assert!(body.contains("a96d1d99-93b5-469b-ac62-654b0cf7ebd3"));
 
         let data = json!({
             "status": "Accepted",
@@ -2306,7 +2254,8 @@ mod api_tests {
 
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
-        assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
+        // OK because of HTMX. If we put no-content, no frontend updates would happen.
+        assert_eq!(res.status(), http::StatusCode::OK);
 
         let req = test::TestRequest::delete()
         .uri("/task/7ae0c017-fe31-4aac-b767-100d18a8877b/staff/a96d1d99-93b5-469b-ac62-654b0cf7ebd3")
@@ -2316,6 +2265,8 @@ mod api_tests {
         // Trying to delete a non-existing entry.
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
+
+        //ToDo: Permanent Delete Here.
     }
 
     //ToDo:
@@ -2385,7 +2336,8 @@ mod api_tests {
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
 
-        assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
+        assert!(body.contains("AMD"));
+        assert!(body.contains("Prusa Research"));
     }
 
     #[actix_web::test]
@@ -2505,8 +2457,7 @@ mod api_tests {
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         assert!(body.contains("Sponsor"));
-        assert!(body.contains("134d5286-5f55-4637-9b98-223a5820a464"));
-        assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
+        assert!(body.contains("ReportLab"));
 
         //Duplicate creation should fail
         let req = test::TestRequest::post()
@@ -2540,8 +2491,7 @@ mod api_tests {
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
         assert!(body.contains("Other"));
-        assert!(body.contains("134d5286-5f55-4637-9b98-223a5820a464"));
-        assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
+        assert!(body.contains("ReportLab"));
 
         let data = json!({});
 
@@ -2570,7 +2520,7 @@ mod api_tests {
                     .to_request();
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_success());
-        assert_eq!(res.status(), http::StatusCode::NO_CONTENT);
+        assert_eq!(res.status(), http::StatusCode::OK);
 
         let req = test::TestRequest::delete()
                     .uri("/event/b71fd7ce-c891-410a-9bb4-70fc5c7748f8/company/134d5286-5f55-4637-9b98-223a5820a464")
@@ -2602,17 +2552,8 @@ mod api_tests {
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
 
-        // timesheet ID, should be there since only 1 timesheet exists for user.
-        assert!(body.contains("d47e8141-a77e-4d55-a2d5-4a77de24b6d0"));
-
-        // user ID
-        assert!(body.contains("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c"));
-
-        // company ID
-        assert!(body.contains("134d5286-5f55-4637-9b98-223a5820a464"));
-
-        // event ID
-        assert!(body.contains("3f152d12-0bbd-429a-a9c5-28967d6370cc"));
+        assert!(body.contains("Darkness 2024"));
+        assert!(body.contains("Unlocked"));
     }
 
     #[actix_web::test]
@@ -2653,13 +2594,7 @@ mod api_tests {
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
 
-        assert!(body.contains("d47e8141-a77e-4d55-a2d5-4a77de24b6d0"));
-        // user id
-        assert!(body.contains("ac9bf689-a713-4b66-a3d0-41faaf0f8d0c"));
-        // company_id
-        assert!(body.contains("134d5286-5f55-4637-9b98-223a5820a464"));
-        // event_id
-        assert!(body.contains("3f152d12-0bbd-429a-a9c5-28967d6370cc"));
+        assert!(body.contains("Darkness 2024"));
     }
 
     #[actix_web::test]
@@ -2699,10 +2634,11 @@ mod api_tests {
         let arc_pool = get_db_pool().await;
         let repository = TimesheetRepository::new(arc_pool.clone());
         let repo = web::Data::new(repository);
-
+        let employment_repo = web::Data::new(EmploymentRepository::new(arc_pool.clone()));
         let app = test::init_service(
             App::new()
                 .app_data(repo.clone())
+                .app_data(employment_repo.clone())
                 .service(create_timesheet)
                 .service(update_timesheet),
         )
@@ -2726,9 +2662,7 @@ mod api_tests {
         assert_eq!(res.status(), http::StatusCode::CREATED);
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        assert!(body.contains("3f152d12-0bbd-429a-a9c5-28967d6370cc"));
-        assert!(body.contains("0465041f-fe64-461f-9f71-71e3b97ca85f"));
-        assert!(body.contains("134d5286-5f55-4637-9b98-223a5820a464"));
+        assert!(body.contains("Darkness 2024"));
 
         let uuid_regex = Regex::new(
             r"[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}",
@@ -2748,10 +2682,6 @@ mod api_tests {
 
         assert!(res.status().is_success());
         assert_eq!(res.status(), http::StatusCode::OK);
-        let body_bytes = test::read_body(res).await;
-        let body = str::from_utf8(body_bytes.borrow()).unwrap();
-
-        assert!(body.contains("Hey, fill out your sheet."));
 
         let data = json!({});
         let req = test::TestRequest::patch()
