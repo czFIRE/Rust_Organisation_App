@@ -31,6 +31,11 @@ pub struct WorkdaysInfo {
 }
 
 impl WorkdaysInfo {
+    fn compute_total_hours(&mut self) {
+        for workday in self.workdays.iter() {
+            self.total_hours += workday.total_hours;
+        }
+    }
     fn compute_tax_base(&mut self,
                         hourly_wage: f32) {
         self.tax_base = self.total_hours * hourly_wage;
@@ -107,6 +112,8 @@ fn compute_monthly_dpp_or_dpc_wage(
         = wanted_workdays_info.tax_base
         + related_workdays_tax_base;
 
+    monthly_wage.worked_hours = wanted_workdays_info.total_hours;
+
     if monthly_total_tax_base >= preset.monthly_employee_no_tax_limit {
         monthly_wage.employee_health_insurance
             = wanted_workdays_info.tax_base
@@ -126,6 +133,8 @@ fn compute_monthly_dpp_or_dpc_wage(
             = wanted_workdays_info.tax_base
             * preset.social_insurance_employer_tax_multiplicand;
     }
+
+    monthly_wage.tax_base = wanted_workdays_info.tax_base;
 
     // Initialize the `net wage`.
     monthly_wage.net_wage = monthly_wage.tax_base;
@@ -228,7 +237,6 @@ fn compute_dpp_or_dpc_wage(
         total_wage_output.month_to_detailed_wage.insert(
             year_month.clone(), monthly_wage_output);
     }
-    // todo: at the end, compute total timesheet's wage.
 
     Ok(total_wage_output)
 }
@@ -246,12 +254,11 @@ fn classify_workdays(workdays: &Vec<Workday>)
 
         if let Some(workdays_info) = date_to_workdays_info.get_mut(&year_month) {
             workdays_info.workdays.push(workday.clone());
-            workdays_info.total_hours += workday.total_hours;
         } else {
             let workdays_info = WorkdaysInfo {
                 workdays: vec![ workday.clone() ],
-                total_hours: workday.total_hours,
                 // Note: Gets computed later.
+                total_hours: 0.0,
                 tax_base: 0.0,
             };
             date_to_workdays_info.insert(year_month, workdays_info);
@@ -343,6 +350,7 @@ pub fn calculate_timesheet_wage(
 
         // Compute individual `tax_base` values.
         for workdays_info in date_to_workdays_info.values_mut() {
+            workdays_info.compute_total_hours();
             workdays_info.compute_tax_base(timesheets_extended.hourly_wage as f32);
         }
 
