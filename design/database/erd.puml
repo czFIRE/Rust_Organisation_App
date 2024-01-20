@@ -179,8 +179,8 @@ entity task {
 entity assigned_staff {
     *<u>task_id</u>: <<uuid>> (FK task)
     *<u>staff_id</u>: <<uuid>> (FK event_staff)
-    decided_by: <<uuid>> (FK event_staff)
     ---
+    decided_by: <<uuid>> (FK event_staff)
     *status: <<enum AcceptanceStatus>>
     *created_at: timestamp
     *edited_at: timestamp
