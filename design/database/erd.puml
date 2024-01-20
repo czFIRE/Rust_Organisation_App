@@ -107,7 +107,7 @@ entity user {
     ' Full name. They will log in using their email.
     *name: varchar(255)
     *email: varchar(45)
-    *date_of_birth: date
+    *birth: date
     *avatar_url: varchar(255)
     *gender: <<enum Gender>>
     *role: <<enum UserRole>>
@@ -137,7 +137,7 @@ entity timesheet {
 
 entity workday {
     *<u>timesheet_id</u>: <<uuid>> (also FK timesheet)
-    *<u>work_date</u>: date
+    *<u>date</u>: date
     ---
     *total_hours: float
     comment: text
@@ -233,7 +233,7 @@ entity associated_company {
     *<u>company_id</u>: <<uuid>>
     *<u>event_id</u>: <<uuid>>
     ---
-    *association_type: <<enum Association>>
+    *type: <<enum Association>>
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
@@ -253,8 +253,8 @@ entity employment {
     *end_date: date
     ' Allows for descriptions of the employment's purpose.
     description: text
-    *employment_type: <<enum EmploymentContract>>
-    *employee_level: <<enum EmployeeLevel>>
+    *type: <<enum EmploymentContract>>
+    *level: <<enum EmployeeLevel>>
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
@@ -268,7 +268,7 @@ entity event_staff {
     *event_id: <<uuid>> (FK event)
     decided_by: <<uuid>> (FK event_staff)
     *role: <<enum EventRole>>
-    *acceptance_status: <<enum AcceptanceStatus>>
+    *status: <<enum AcceptanceStatus>>
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
