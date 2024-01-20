@@ -355,7 +355,7 @@ CREATE TABLE comment
 --
 CREATE TABLE wage_preset
 (
-	name VARCHAR(32) PRIMARY KEY,
+    name VARCHAR(32) PRIMARY KEY,
     -------------------------------------------------------
     valid_from  DATE NOT NULL,
     --
@@ -366,16 +366,16 @@ CREATE TABLE wage_preset
     valid_to    DATE,
     description TEXT NOT NULL DEFAULT '',
     currency    VARCHAR(8) NOT NULL,
-	monthly_dpp_employee_no_tax_limit REAL NOT NULL,
-	monthly_dpp_employer_no_tax_limit REAL NOT NULL,
-	monthly_dpc_employee_no_tax_limit REAL NOT NULL,
-	monthly_dpc_employer_no_tax_limit REAL NOT NULL,
-	health_insurance_employee_tax_pct REAL NOT NULL,
-	social_insurance_employee_tax_pct REAL NOT NULL,
-	health_insurance_employer_tax_pct REAL NOT NULL,
-	social_insurance_employer_tax_pct REAL NOT NULL,
-	min_hourly_wage REAL NOT NULL,
-	min_monthly_hpp_salary REAL NOT NULL, -- note: not utilized ATM
+    monthly_dpp_employee_no_tax_limit REAL NOT NULL,
+    monthly_dpp_employer_no_tax_limit REAL NOT NULL,
+    monthly_dpc_employee_no_tax_limit REAL NOT NULL,
+    monthly_dpc_employer_no_tax_limit REAL NOT NULL,
+    health_insurance_employee_tax_pct REAL NOT NULL,
+    social_insurance_employee_tax_pct REAL NOT NULL,
+    health_insurance_employer_tax_pct REAL NOT NULL,
+    social_insurance_employer_tax_pct REAL NOT NULL,
+    min_hourly_wage REAL NOT NULL,
+    min_monthly_hpp_salary REAL NOT NULL, -- note: not utilized ATM
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
