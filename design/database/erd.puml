@@ -296,7 +296,7 @@ entity comment {
   A class for representing presets for calculating wage statistics.
 '/
 entity wage_preset {
-    *name: varchar(32)
+    *<u>name</u>: varchar(32)
     ---
     *valid_from: date
     /'
