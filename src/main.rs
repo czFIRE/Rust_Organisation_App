@@ -1,3 +1,4 @@
+mod auth;
 mod common;
 mod configs;
 mod errors;
@@ -7,12 +8,18 @@ mod repositories;
 mod templates;
 mod utils;
 
+use actix_web::http::header::{CONTENT_TYPE, HeaderValue};
+use reqwest::Client;
+use crate::auth::models::{Login, Register};
+use crate::auth::openid::get_token;
+
 use actix_files::Files as ActixFiles;
 use actix_web::{middleware::Logger, App, HttpServer};
+use auth::models::{Token, AccessToken};
 use dotenv::dotenv;
 use env_logger::Env;
+use serde_json::json;
 use sqlx::{Pool, Postgres};
-use std::io::Result;
 
 use std::sync::Arc;
 
@@ -42,7 +49,7 @@ use crate::{
     handlers::user::get_users_login,
     repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository,
 };
-use actix_web::web;
+use actix_web::{web, post, HttpResponse, Responder};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -57,8 +64,100 @@ impl Default for Config {
     }
 }
 
+
+#[post("/register")]
+async fn register(
+    web::Form(form): web::Form<Register>,
+    user_repository: web::Data<UserRepository>
+) -> HttpResponse {
+    // Get admin console token for registration purposes.
+    let path = "http://localhost:8080/realms/master/protocol/openid-connect/token";
+
+    let payload = json!({
+        "username": std::env::var("KEYCLOAK_ADMIN").expect("Should be set"),
+        "password": std::env::var("KEYCLOAK_PASSWORD").expect("Should be set"),
+        "grant_type": "password",
+        "client_id": std::env::var("KEYCLOAK_REG_CLIENT").expect("Should be set"),
+    });
+
+    let result = get_token(path, payload).await;
+    if result.is_err() {
+        return HttpResponse::InternalServerError().finish();
+    }
+    // We kinda juggle the token around to get the data. This doesn't work yet.
+    let token = result.expect("Should be okay.");
+    let token_json = serde_json::to_string(&token);
+    if token_json.is_err() {
+        return HttpResponse::InternalServerError().finish();
+    }
+    let token_str = token_json.expect("Should be okay");
+    let access_json: Result<AccessToken, serde_json::Error> = serde_json::from_str(&token_str);
+    if access_json.is_err() {
+        return HttpResponse::InternalServerError().finish();
+    }
+    let access = access_json.expect("Should be valid");
+
+    let path = "http://localhost:8080/admin/realms/Orchestrate/users";
+
+    let payload = json!({
+        "firstName": form.name,
+        "lastName": form.name,
+        "email": form.email,
+        "enabled": "true",
+        "username": form.email
+    });
+
+
+    
+    // "error": "The content-type header value did not match the value in @Consumes"
+
+    let request = Client::new()
+        .post(path)
+        .header(CONTENT_TYPE, HeaderValue::from_static("application/json"))
+        .form(&payload)
+        .bearer_auth(access.access_token);
+    let response = request.send().await;
+
+    if response.is_err() {
+        return HttpResponse::BadRequest().finish();
+    }
+    let text = response.expect("Should be valid").text().await;
+    if text.is_err() {
+        return HttpResponse::InternalServerError().finish();
+    }
+    HttpResponse::Created().body(text.expect("Should be valid."))
+}
+
+#[post("/login")]
+async fn login(web::Form(form): web::Form<Login>) -> impl Responder  {
+    // The path variable stores the URL of the authentication server
+    let path = "http://localhost:8080/realms/Orchestrate/protocol/openid-connect/token";
+
+    // The payload variable stores the JSON object with the login credentials and the client information
+    let payload = json!({
+            "username": form.username,
+            "password": form.password,
+            "client_id": "orchestrate",
+            "client_secret": "0a396b26-401e-49ad-a7c4-049ffe69c03e",
+            "grant_type": "password"
+        });
+
+    // The result variable stores the result of calling the get_token function with the path and payload as arguments
+    let result = get_token(path, payload).await;
+
+    if result.is_err() {
+        return HttpResponse::BadRequest().finish();
+    }
+
+    let serialized = serde_json::to_string(&result.expect("Should be valid")).unwrap();
+
+    // The function returns an HTTP response with status code 200 and the serialized result as the body
+    HttpResponse::Ok().body(serialized)
+}
+
+
 #[tokio::main]
-async fn main() -> Result<()> {
+async fn main() -> std::io::Result<()> {
     dotenv().expect("Failed to load .env file");
     std::env::set_var("RUST_LOG", "debug");
     env_logger::Builder::from_env(Env::default().default_filter_or("debug")).init();
@@ -106,6 +205,8 @@ async fn main() -> Result<()> {
             .wrap(Logger::default())
             .wrap(Logger::new("%a %{User-Agent}i"))
             .service(index)
+            .service(login)
+            .service(register)
             .configure(configure_user_endpoints)
             .configure(configure_company_endpoints)
             .configure(configure_event_endpoints)
