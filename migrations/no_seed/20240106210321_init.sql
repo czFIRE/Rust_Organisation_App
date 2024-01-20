@@ -362,6 +362,11 @@ CREATE TABLE wage_preset
 	name VARCHAR(32) PRIMARY KEY,
     -------------------------------------------------------
     valid_from  DATE NOT NULL,
+    --
+    -- Denotes preset's applicability has not expired yet.
+    --
+    -- Note: At most only one column may have this set to NULL.
+    --
     valid_to    DATE,
     description TEXT NOT NULL DEFAULT '',
     currency    VARCHAR(8) NOT NULL,
