@@ -83,7 +83,7 @@ BEGIN
         VALUES
         (company2_id, 'Prusa Research', 'Prusa Research a.s.',
         'https://prusa3d.com', 'CRN_prusa', 'CZ06649114',
-        '123 456 789', 'info@prusa3d.com', 'prusa_design.png',
+        DEFAULT, 'info@prusa3d.com', 'prusa_design.png',
         '2023-12-24 15:55', '2023-12-24 19:38');
 
 --------------------------------------------------------------------------------

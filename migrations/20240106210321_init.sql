@@ -53,7 +53,7 @@ CREATE TABLE company
     website     VARCHAR(255),
     crn         VARCHAR(16) NOT NULL UNIQUE,
     vatin       VARCHAR(18) NOT NULL UNIQUE,
-    phone       VARCHAR(255) NOT NULL UNIQUE,
+    phone       VARCHAR(255) NOT NULL DEFAULT '',
     email       VARCHAR(255) NOT NULL UNIQUE,
     avatar_url  VARCHAR(255) NOT NULL DEFAULT 'img/default/company.jpg',
     -------------------------------------------------------
@@ -67,8 +67,6 @@ CREATE TABLE company
         CHECK (char_length(crn) >= 1),
     CONSTRAINT check_company_vatin_len
         CHECK (char_length(vatin) >= 1),
-    CONSTRAINT check_company_phone_len
-        CHECK (char_length(phone) >= 2),
     CONSTRAINT check_company_email_len
         CHECK (char_length(email) >= 3),
     CONSTRAINT check_company_created_at_lte_edited_at
