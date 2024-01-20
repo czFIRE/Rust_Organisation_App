@@ -386,6 +386,8 @@ CREATE TABLE wage_preset
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at  TIMESTAMP,
     -------------------------------------------------------
+    CONSTRAINT check_wage_preset_name_len
+        CHECK (char_length(name) >= 1),
     CONSTRAINT check_wage_preset_description_len
         CHECK (char_length(description) >= 1),
     CONSTRAINT check_wage_preset_currency_len
