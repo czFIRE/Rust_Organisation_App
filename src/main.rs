@@ -9,9 +9,16 @@ mod templates;
 mod utils;
 
 use actix_web::http::header::{CONTENT_TYPE, HeaderValue};
+use askama::Template;
+use chrono::NaiveDate;
+use organization::errors::handle_database_error;
 use reqwest::Client;
 use crate::auth::models::{Login, Register};
 use crate::auth::openid::get_token;
+use crate::errors::parse_error;
+use crate::models::{Gender, UserRole};
+use crate::repositories::user::models::NewUser;
+use crate::templates::common::IndexTemplate;
 
 use actix_files::Files as ActixFiles;
 use actix_web::{middleware::Logger, App, HttpServer};
@@ -49,7 +56,7 @@ use crate::{
     handlers::user::get_users_login,
     repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository,
 };
-use actix_web::{web, post, HttpResponse, Responder};
+use actix_web::{web, post, HttpResponse, Responder, http};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -108,24 +115,47 @@ async fn register(
     });
 
 
-    
-    // "error": "The content-type header value did not match the value in @Consumes"
+    let payload_str = serde_json::to_string(&payload);
+    if payload_str.is_err() {
+        return HttpResponse::InternalServerError().finish();
+    }
 
     let request = Client::new()
         .post(path)
         .header(CONTENT_TYPE, HeaderValue::from_static("application/json"))
-        .form(&payload)
+        .body(payload_str.expect("Should be valid."))
         .bearer_auth(access.access_token);
     let response = request.send().await;
 
     if response.is_err() {
         return HttpResponse::BadRequest().finish();
     }
-    let text = response.expect("Should be valid").text().await;
-    if text.is_err() {
-        return HttpResponse::InternalServerError().finish();
+
+    let response_exp = response.expect("Should be valid here.");
+    if response_exp.status() != http::StatusCode::CREATED {
+        return HttpResponse::BadRequest().finish();
     }
-    HttpResponse::Created().body(text.expect("Should be valid."))
+    let user_data = NewUser {
+        name: form.name,
+        email: form.email,
+        birth: NaiveDate::from_ymd_opt(1999, 02, 20).expect("Should be some"),
+        gender: Gender::Male,
+        role: UserRole::User,
+    };
+    let user_res = user_repository.create(user_data).await;
+
+    if user_res.is_err() {
+        return handle_database_error(user_res.expect_err("Should be an error."));
+    }
+    let template = IndexTemplate {
+        landing_title: "Log in to your new account!".to_string(),
+    };
+    let body = template.render();
+    if body.is_err() {
+        return HttpResponse::InternalServerError().body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+    }
+
+    HttpResponse::Created().body(body.expect("Should be valid"))
 }
 
 #[post("/login")]
@@ -137,12 +167,11 @@ async fn login(web::Form(form): web::Form<Login>) -> impl Responder  {
     let payload = json!({
             "username": form.username,
             "password": form.password,
-            "client_id": "orchestrate",
-            "client_secret": "0a396b26-401e-49ad-a7c4-049ffe69c03e",
+            "client_id": std::env::var("CLIENT_ID").expect("Should be set"),
+            "client_secret": std::env::var("CLIENT_SECRET").expect("Should be set"),
             "grant_type": "password"
         });
 
-    // The result variable stores the result of calling the get_token function with the path and payload as arguments
     let result = get_token(path, payload).await;
 
     if result.is_err() {
