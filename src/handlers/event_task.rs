@@ -21,7 +21,7 @@ use crate::{
     templates::task::{
         EventTask, TaskCreationTemplate, TaskEditTemplate, TaskPanelTemplate, TasksPanelTemplate,
         TasksTemplate,
-    },
+    }, common::{calculate_new_offsets, PAGINATION_LIMIT},
 };
 
 #[derive(Deserialize)]
@@ -37,11 +37,38 @@ async fn get_tasks_per_event(
     query: TaskFilter,
     task_repo: web::Data<TaskRepository>,
 ) -> HttpResponse {
-    let result = task_repo.read_all_for_event(event_id, query).await;
+    let (prev_offset, next_offset) = calculate_new_offsets(query.offset);
+    // We read one ahead to determine if we have reached the end before we actually do.
+    let modified_query_params = TaskFilter {
+        limit: if query.limit.is_some() {
+            Some(query.limit.expect("Should be some") + 1)
+        } else {
+            None
+        },
+        offset: query.offset,
+    };
+    
+    let result = task_repo.read_all_for_event(event_id, modified_query_params).await;
 
     if let Ok(tasks) = result {
-        let task_vector: Vec<EventTask> = tasks.into_iter().map(|task| task.into()).collect();
-        let template = TasksTemplate { tasks: task_vector };
+        let mut task_vector: Vec<EventTask> = tasks.into_iter().map(|task| task.into()).collect();
+        let next_offset_final: Option<i64>;
+        // This should be PAGINATION_LIMIT instead. ToDo convert.
+        if task_vector.len() <= 5 {
+            next_offset_final = None;
+        } else {
+            next_offset_final = next_offset;
+            if next_offset.is_some() {
+                task_vector.pop();
+            }
+        }
+        let template = TasksTemplate { 
+            tasks: task_vector,
+            next_offset: next_offset_final,
+            prev_offset,
+            limit: PAGINATION_LIMIT,
+            event_id
+        };
         let body = template.render();
         if body.is_err() {
             return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
@@ -61,7 +88,7 @@ pub async fn get_event_tasks(
     task_repo: web::Data<TaskRepository>,
 ) -> HttpResponse {
     if (query.limit.is_some() && query.limit.unwrap() <= 0)
-        || (query.offset.is_some() && query.offset.unwrap() <= 0)
+        || (query.offset.is_some() && query.offset.unwrap() < 0)
     {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
@@ -73,33 +100,6 @@ pub async fn get_event_tasks(
     let parsed_id = id_parse.expect("Should be valid.");
     get_tasks_per_event(parsed_id, query.into_inner(), task_repo).await
 }
-
-// #[get("/event/task/{task_id}")]
-// pub async fn get_event_task(
-//     task_id: web::Path<String>,
-//     task_repo: web::Data<TaskRepository>,
-// ) -> HttpResponse {
-//     let id_parse = Uuid::from_str(task_id.into_inner().as_str());
-//     if id_parse.is_err() {
-//         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
-//     }
-//     let parsed_id = id_parse.expect("Should be valid.");
-
-//     let result = task_repo.read_one(parsed_id).await;
-//     if let Ok(task) = result {
-//         let template: TaskTemplate = task.into();
-//         let body = template.render();
-//         if body.is_err() {
-//             return HttpResponse::InternalServerError()
-//                 .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
-//         }
-//         return HttpResponse::Ok()
-//             .content_type("text/html")
-//             .body(body.expect("Should be valid now."));
-//     }
-
-//     handle_database_error(result.expect_err("Should be error."))
-// }
 
 #[post("/event/{event_id}/task")]
 pub async fn create_task(
