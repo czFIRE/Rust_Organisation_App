@@ -392,12 +392,6 @@ impl AssociatedCompanyRepository {
     ) -> DbResult<AssociatedCompanyExtended> {
         let mut tx = self.pool.begin().await?;
 
-        if data.association_type.is_none() {
-            return Err(sqlx::Error::TypeNotFound {
-                type_name: "User Error".to_string(),
-            });
-        }
-
         let associated_company: Option<AssociatedCompany> = sqlx::query_as!(
             AssociatedCompany,
             r#" UPDATE associated_company SET 
@@ -413,7 +407,7 @@ impl AssociatedCompanyRepository {
                 edited_at, 
                 deleted_at;
             "#,
-            data.association_type.unwrap() as Association,
+            data.association_type as Association,
             company_id,
             event_id,
         )

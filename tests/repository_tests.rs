@@ -1345,7 +1345,7 @@ pub mod associated_company_repo_tests {
                 .expect("Read should succeed");
 
             let new_associated_company_data = AssociatedCompanyData {
-                association_type: Some(Association::Media),
+                association_type: Association::Media,
             };
 
             let updated_associated_company = associated_company_repo
@@ -1363,7 +1363,7 @@ pub mod associated_company_repo_tests {
             );
             assert_eq!(
                 updated_associated_company.association_type,
-                new_associated_company_data.association_type.unwrap()
+                new_associated_company_data.association_type
             );
 
             let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
@@ -1373,26 +1373,13 @@ pub mod associated_company_repo_tests {
             assert!(updated_associated_company.deleted_at.is_none());
         }
 
-        // All are none
-
-        {
-            let new_associated_company_data = AssociatedCompanyData {
-                association_type: None,
-            };
-
-            let _updated_associated_company = associated_company_repo
-                .update(company_id, event_id, new_associated_company_data)
-                .await
-                .expect_err("Update should fail - all fields are none");
-        }
-
         // Non existent
 
         {
             let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f9");
 
             let new_associated_company_data = AssociatedCompanyData {
-                association_type: Some(Association::Media),
+                association_type: Association::Media,
             };
 
             let _updated_associated_company = associated_company_repo
@@ -1422,7 +1409,7 @@ pub mod associated_company_repo_tests {
                 .expect_err("Read should not succeed");
 
             let new_associated_company_data = AssociatedCompanyData {
-                association_type: Some(Association::Media),
+                association_type: Association::Media,
             };
 
             let _updated_associated_company = associated_company_repo

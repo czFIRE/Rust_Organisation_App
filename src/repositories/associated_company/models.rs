@@ -27,7 +27,7 @@ pub struct NewAssociatedCompany {
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct AssociatedCompanyData {
-    pub association_type: Option<Association>,
+    pub association_type: Association,
 }
 
 #[derive(Debug, Clone)]
