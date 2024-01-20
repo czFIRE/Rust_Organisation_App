@@ -4,13 +4,14 @@
       Account Edit
     </h2>
   </div>
-  <div id="user-content" class="flex flex-col space-y-5">
+  <div id="user-content" class="flex flex-col space-y-5" hx-ext="response-targets">
     <form
       hx-patch="/user/{{ id }}"
       hx-ext="json-enc"
       class="grid grid-cols-4 grid-rows-2 gap-4 bg-foreground1 rounded-md p-2"
       hx-swap="innerHTML"
       hx-target="#content"
+      hx-target-error="#error"
     >
       <div class="col-start-1 col-end-2 row-start-1 row-end-1 flex flex-col">
         <label class="font-mono text-lg text-txt" for="name">Name</label>
@@ -25,14 +26,7 @@
       </div>
       <div class="col-start-3 col-end-4 row-start-1 row-end-1 flex flex-col">
         <label class="font-mono text-lg text-txt" for="email">Email</label>
-        <input
-          class="font-mono text-lg bg-foreground2 text-txt p-1 rounded-md"
-          type="email"
-          id="email"
-          name="email"
-          placeholder="new email"
-          value="{{ email }}"
-        />
+        <p class="font-mono text-lg bg-foreground2 text-txt p-1 rounded-md">{{email}}</p>
       </div>
       <div class="col-start-1 col-end-2 row-start-2 row-end-2 flex flex-col">
         <label class="font-mono text-lg text-txt" for="name">Birth Date</label>
@@ -67,6 +61,11 @@
         </button>
       </div>
     </form>
+    <script>
+      document.body.addEventListener("htmx:responseError", function(e) {
+        alert("The data entered was incorrect.");
+      });
+    </script>
     <div class="flex flex-row space-x-5 bg-foreground1 rounded-md p-2">
       <form hx-encoding='multipart/form-data' 
             hx-put='/user/{{ id }}/avatar'
@@ -101,6 +100,6 @@
     >
       Cancel
     </button>
+    <div id="error"></div>
   </div>
 </div>
-<div id="error"></div>

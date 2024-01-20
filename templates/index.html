@@ -15,8 +15,6 @@
     <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
     <!-- HTMX Path Params Extension -->
     <script src="https://unpkg.com/htmx.org/dist/ext/path-params.js"></script>
-    <!-- HTMX Response Targets Extension -->
-    <script src="https://unpkg.com/htmx.org/dist/ext/response-targets.js"></script>
   </head>
 
   <body class="bg-background">
@@ -49,7 +47,7 @@
       </div>
     </nav>
 
-    <div id="content" class="flex flex-col space-y-5 items-center mt-10 w-full">
+    <div id="content" hx-ext="response-targets" class="flex flex-col space-y-5 items-center mt-10 w-full">
       {% block content %}
       <div id="title">
         <h1 class="font-mono text-4xl font-extrabold text-txthl">
