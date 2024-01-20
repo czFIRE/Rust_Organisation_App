@@ -353,8 +353,6 @@ CREATE TABLE comment
 );
 
 --
--- todo later: Once this special table gets finilized, put it into ERD as well.
---
 -- todo later: We should enforce only one row has valid_to=NULL
 --             and no two (valid_from, valid_to) ranges intersect.
 --
