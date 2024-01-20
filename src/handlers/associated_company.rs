@@ -211,8 +211,7 @@ pub async fn update_associated_company(
 
         let body = template.render();
         if body.is_err() {
-            return HttpResponse::InternalServerError()
-                .body("Internal Server Error.".to_string());
+            return HttpResponse::InternalServerError().body("Internal Server Error.".to_string());
         }
 
         return HttpResponse::Ok()
@@ -280,8 +279,7 @@ pub async fn open_associated_company_management_panel(
     };
     let body = template.render();
     if body.is_err() {
-        return HttpResponse::InternalServerError()
-            .body("Internal Server Error".to_string());
+        return HttpResponse::InternalServerError().body("Internal Server Error".to_string());
     }
     HttpResponse::Ok()
         .content_type("text/html")
@@ -326,8 +324,7 @@ pub async fn get_editable_associated_company(
 
         let body = template.render();
         if body.is_err() {
-            return HttpResponse::InternalServerError()
-                .body("Internal Server Error.");
+            return HttpResponse::InternalServerError().body("Internal Server Error.");
         }
 
         return HttpResponse::Ok()
@@ -358,8 +355,7 @@ pub async fn get_associated_company_edit_form(
 
         let body = template.render();
         if body.is_err() {
-            return HttpResponse::InternalServerError()
-                .body("Internal Server Error.");
+            return HttpResponse::InternalServerError().body("Internal Server Error.");
         }
         return HttpResponse::Ok()
             .content_type("text/html")

@@ -10,14 +10,13 @@ use crate::{
         SubordinatesTemplate,
     },
 };
-use actix_web::{delete, get, http, patch, post, web, HttpResponse};
+use actix_web::{delete, get, patch, post, web, HttpResponse};
 use askama::Template;
 use chrono::NaiveDate;
 use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::{
-    errors::parse_error,
     repositories::employment::{employment_repo::EmploymentRepository, models::EmploymentFilter},
     templates::employment::EmploymentsTemplate,
 };
@@ -44,12 +43,12 @@ pub async fn get_employments_per_user(
     if (query_params.limit.is_some() && query_params.limit.unwrap() < 0)
         || (query_params.offset.is_some() && query_params.offset.unwrap() < 0)
     {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Incorrect query parameters.".to_string());
     }
 
     let id_parse = Uuid::from_str(user_id.into_inner().as_str());
     if id_parse.is_err() {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Invalid ID format".to_string());
     }
 
     let parsed_id = id_parse.expect("Should be valid.");
@@ -68,8 +67,7 @@ pub async fn get_employments_per_user(
 
         let body = template.render();
         if body.is_err() {
-            return HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+            return HttpResponse::InternalServerError().body("Internal Server Error.".to_string());
         }
 
         return HttpResponse::Ok()
@@ -91,8 +89,7 @@ async fn get_full_employment(
 
         let body = template.render();
         if body.is_err() {
-            return HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+            return HttpResponse::InternalServerError().body("Internal Server Error".to_string());
         }
 
         return if is_created {
@@ -116,7 +113,7 @@ pub async fn get_employment(
 ) -> HttpResponse {
     let parsed_ids = extract_path_tuple_ids(path.into_inner());
     if parsed_ids.is_err() {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Invalid ID format.".to_string());
     }
 
     let (user_id, company_id) = parsed_ids.unwrap();
@@ -134,12 +131,12 @@ pub async fn get_subordinates(
     if (query_params.limit.is_some() && query_params.limit.unwrap() < 0)
         || (query_params.offset.is_some() && query_params.offset.unwrap() < 0)
     {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Incorrect query parameters.".to_string());
     }
 
     let parsed_ids = extract_path_tuple_ids(path.into_inner());
     if parsed_ids.is_err() {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Invalid ID format.".to_string());
     }
 
     let (user_id, company_id) = parsed_ids.unwrap();
@@ -155,8 +152,7 @@ pub async fn get_subordinates(
 
         let body = template.render();
         if body.is_err() {
-            return HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+            return HttpResponse::InternalServerError().body("Internal Server Error.".to_string());
         }
 
         return HttpResponse::Ok()
@@ -172,18 +168,20 @@ pub async fn create_employment(
     new_employment: web::Json<NewEmployment>,
     employment_repo: web::Data<EmploymentRepository>,
 ) -> HttpResponse {
+    println!("Open1");
     let company_id = new_employment.company_id;
 
     let result = employment_repo.create(new_employment.into_inner()).await;
-
+    println!("Open2");
     if let Err(error) = result {
         return handle_database_error(error);
     }
-
+    println!("Open3");
     let employee = result.expect("Should be valid");
 
     // We don't want to show the manager the employee's view, so we re-render their view.
     if employee.manager_id.is_some() {
+        println!("Open4");
         return get_full_employment(
             employee.manager_id.expect("Should be some"),
             company_id,
@@ -192,7 +190,7 @@ pub async fn create_employment(
         )
         .await;
     }
-
+    println!("Open5");
     // This is for the case when the first employee is created. We don't want to redirect the admin to them.
     HttpResponse::NoContent().finish()
 }
@@ -204,7 +202,7 @@ pub async fn toggle_employment_edit(
 ) -> HttpResponse {
     let parsed_ids = extract_path_triple_ids(path.into_inner());
     if parsed_ids.is_err() {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Invalid ID format.".to_string());
     }
 
     let (user_id, company_id, editor_id) = parsed_ids.unwrap();
@@ -214,7 +212,8 @@ pub async fn toggle_employment_edit(
         if employment.manager.is_none()
             || employment.manager.is_some() && employment.manager.unwrap().id != editor_id
         {
-            return HttpResponse::Forbidden().body(parse_error(http::StatusCode::FORBIDDEN));
+            return HttpResponse::Forbidden()
+                .body("Not the manager for this employee.".to_string());
         }
         let template: EmploymentEditTemplate = EmploymentEditTemplate {
             editor_id,
@@ -230,8 +229,7 @@ pub async fn toggle_employment_edit(
 
         let body = template.render();
         if body.is_err() {
-            return HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+            return HttpResponse::InternalServerError().body("Internal Server Error.".to_string());
         }
 
         return HttpResponse::Ok()
@@ -249,7 +247,7 @@ pub async fn toggle_employment_create(
 ) -> HttpResponse {
     let parsed_ids = extract_path_tuple_ids(path.into_inner());
     if parsed_ids.is_err() {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Invalid ID format.".to_string());
     }
 
     let (creator_id, company_id) = parsed_ids.unwrap();
@@ -257,7 +255,8 @@ pub async fn toggle_employment_create(
     if let Ok(employment) = result {
         // Only a manager or a company admin may create new employments
         if employment.level == EmployeeLevel::Basic {
-            return HttpResponse::Forbidden().body(parse_error(http::StatusCode::FORBIDDEN));
+            return HttpResponse::Forbidden()
+                .body("Your employee level is unable to create new employments.".to_string());
         }
         let template: EmploymentCreateTemplate = EmploymentCreateTemplate {
             company_id,
@@ -267,8 +266,7 @@ pub async fn toggle_employment_create(
 
         let body = template.render();
         if body.is_err() {
-            return HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+            return HttpResponse::InternalServerError().body("Internal Server Error.".to_string());
         }
 
         return HttpResponse::Ok()
@@ -279,17 +277,32 @@ pub async fn toggle_employment_create(
     handle_database_error(result.expect_err("Should be error."))
 }
 
-fn is_data_invalid(data: EmploymentUpdateData) -> bool {
-    data.manager_id.is_none()
-        && (data.hourly_wage.is_none() || data.hourly_wage.unwrap() <= 0.0) // This should likely check against minimum wage instead.
+fn is_data_invalid(data: EmploymentUpdateData) -> Option<String> {
+    if data.manager_id.is_none()
+        && data.hourly_wage.is_none()
         && data.start_date.is_none()
         && data.end_date.is_none()
         && data.description.is_none()
         && data.employment_type.is_none()
         && data.level.is_none()
-        || (data.start_date.is_some()
-            && data.end_date.is_some()
-            && data.start_date.unwrap() > data.end_date.unwrap())
+        && data.start_date.is_none()
+        && data.end_date.is_none()
+    {
+        return Some("No data provided.".to_string());
+    }
+
+    if data.start_date.is_some()
+        && data.end_date.is_some()
+        && data.start_date.unwrap() > data.end_date.unwrap()
+    {
+        return Some("Start date can't exceed end date.".to_string());
+    }
+
+    if data.hourly_wage.is_some() && data.hourly_wage.expect("Should be some.") <= 0.0 {
+        return Some("Hourly wage can't be 0 or less.".to_string());
+    }
+
+    None
 }
 
 #[patch("/user/{user_id}/employment/{company_id}")]
@@ -298,12 +311,14 @@ pub async fn update_employment(
     employment_data: web::Json<EmploymentUpdateData>,
     employment_repo: web::Data<EmploymentRepository>,
 ) -> HttpResponse {
-    if is_data_invalid(employment_data.clone()) {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    let validation_err = is_data_invalid(employment_data.clone());
+
+    if validation_err.is_some() {
+        return HttpResponse::BadRequest().body(validation_err.expect("Should be some"));
     }
     let parsed_ids = extract_path_tuple_ids(path.into_inner());
     if parsed_ids.is_err() {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Invalid ID format.".to_string());
     }
 
     let (user_id, company_id) = parsed_ids.unwrap();
@@ -321,13 +336,15 @@ pub async fn update_employment(
         if employment_data.start_date.is_some()
             && employment_data.start_date.unwrap() > current.end_date
         {
-            return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+            return HttpResponse::BadRequest()
+                .body("New start date can't be later than the current end date.".to_string());
         }
 
         if employment_data.end_date.is_some()
             && employment_data.end_date.unwrap() < current.start_date
         {
-            return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+            return HttpResponse::BadRequest()
+                .body("New end date can't be earlier than the current start date.".to_string());
         }
     }
 
@@ -365,7 +382,7 @@ pub async fn delete_employment(
 ) -> HttpResponse {
     let parsed_ids = extract_path_tuple_ids(path.into_inner());
     if parsed_ids.is_err() {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Invalid ID format.".to_string());
     }
 
     let (user_id, company_id) = parsed_ids.unwrap();
