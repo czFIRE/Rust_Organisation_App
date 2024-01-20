@@ -87,4 +87,49 @@
     </div>
   </button>
   {% endfor %}
+  <div class="flex flex-row gap-4 bg-foreground1 rounded-md p-1 items-center">
+    {% if prev_offset.is_some() %}
+    <button
+      hx-get='/event?limit=5&offset={{prev_offset.expect("Should be some")}}'
+      hx-target="#content"
+      hx-swap="innerHTML"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="w-6 h-6 text-txthl"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="m18.75 4.5-7.5 7.5 7.5 7.5m-6-15L5.25 12l7.5 7.5"
+        />
+      </svg>
+    </button>
+    {% endif %} {% if next_offset.is_some() %}
+    <button
+      hx-get='/event?limit=5&offset={{next_offset.expect("Should be some")}}'
+      hx-target="#content"
+      hx-swap="innerHTML"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke-width="1.5"
+        stroke="currentColor"
+        class="w-6 h-6 text-txthl"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="m5.25 4.5 7.5 7.5-7.5 7.5m6-15 7.5 7.5-7.5 7.5"
+        />
+      </svg>
+    </button>
+    {% endif %}
+  </div>
 </div>

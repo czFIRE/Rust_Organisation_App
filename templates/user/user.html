@@ -137,7 +137,7 @@
       <p class="font-mono text-xl text-txthl">Administration</p>
     </button>
     {% endif %}
-    <button hx-get="/event" hx-target="#content">
+    <button hx-get="/event?limit=5&offset=0" hx-target="#content">
       <p class="font-mono text-xl text-txthl">Events</p>
     </button>
     <button hx-get="/user/{{ id }}/employment" hx-target="#content">
