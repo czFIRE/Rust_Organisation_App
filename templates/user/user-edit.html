@@ -61,6 +61,7 @@
         </button>
       </div>
     </form>
+    <div id="error" class="font-mono text-lg text-rej p-1 bg-foreground1 rounded-md"></div>
     <script>
       document.body.addEventListener("htmx:responseError", function(e) {
         alert("The data entered was incorrect.");
@@ -100,6 +101,5 @@
     >
       Cancel
     </button>
-    <div id="error"></div>
   </div>
 </div>
