@@ -333,12 +333,12 @@ entity wage_preset {
 
         This seems to be undocumented, but it works.
 '/
-user||..|{employment
-timesheet}o..||employment
-timesheet||.l.o{workday : can\nhave\n <
-timesheet}o.r.||event
+user||..|{employment : is formed by <
+timesheet}o..||employment : is\nrepresented\nby\n <
+timesheet||.l.o{workday : has\n <
+timesheet}o.r.||event : belongs\nto\n >
 employment||..o{event_staff
-employment}o..||company
+employment}o..||company : is held at >
 employment|o..o{employment : manages
 event||.o{associated_company
 company||.r.o{associated_company
@@ -349,7 +349,7 @@ event|o...o{comment : can\nhave >
 task|o...o{comment : can\nhave >
 comment}o..||user : is sent by >
 task||..||event_staff : was\ncreated\nby >
-task||..o{assigned_staff
+task||..o{assigned_staff : is\nsolved\nby\n >
 assigned_staff}o..||event_staff
 assigned_staff||..||event_staff : is\ndecided\nby >
 event_staff}o..||event_staff : appointed\n as an\n organizer
