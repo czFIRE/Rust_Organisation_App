@@ -360,12 +360,12 @@ CREATE TABLE comment
 --
 CREATE TABLE wage_preset
 (
-	name TEXT PRIMARY KEY,
+	name VARCHAR(32) PRIMARY KEY,
     -------------------------------------------------------
     valid_from  DATE NOT NULL,
     valid_to    DATE,
     description TEXT NOT NULL DEFAULT '',
-    currency    TEXT NOT NULL,
+    currency    VARCHAR(8) NOT NULL,
 	monthly_dpp_employee_no_tax_limit REAL NOT NULL,
 	monthly_dpp_employer_no_tax_limit REAL NOT NULL,
 	monthly_dpc_employee_no_tax_limit REAL NOT NULL,
