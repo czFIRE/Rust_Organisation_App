@@ -1,9 +1,10 @@
-<div id="task-edit" class="flex flex-col space-y-5 m-5 items-center w-10/12">
+<div id="task-edit" class="flex flex-col space-y-5 m-5 items-center w-10/12" hx-ext="response-targets">
   <h2 class="font-mono font-bold text-txthl text-3xl">Task Edit</h2>
   <form
     hx-patch="/event/task/{{ task.id }}"
     hx-swap="innerHTML"
     hx-target="#content"
+    hx-target-error="#error"
     hx-ext="json-enc"
     id="task-edit-form"
     class="flex flex-col space-y-5 items-center w-full bg-foreground1 p-3"
@@ -55,6 +56,10 @@
       Submit Changes
     </button>
   </form>
+  <div
+    id="error"
+    class="w-8/12 text-center items-center self-center font-mono text-lg text-rej p-1 bg-foreground1 rounded-md"
+  ></div>
   {% if task.finished_at.is_none() %}
   <button
     class="rounded-md p-1 text-acc text-lg bg-foreground2"

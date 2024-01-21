@@ -169,16 +169,16 @@ pub async fn get_company(
 }
 
 fn validate_creation_data(data: NewCompanyData) -> Option<String> {
-    if data.name.is_empty()
-        || data.phone.is_empty()
-        || data.email.is_empty()
-        || data.crn.is_empty()
-        || data.vatin.is_empty()
-        || data.region.is_empty()
-        || data.country.is_empty()
-        || data.city.is_empty()
-        || data.postal_code.is_empty()
-        || data.street.is_empty()
+    if data.name.trim().is_empty()
+        || data.phone.trim().is_empty()
+        || data.email.trim().is_empty()
+        || data.crn.trim().is_empty()
+        || data.vatin.trim().is_empty()
+        || data.region.trim().is_empty()
+        || data.country.trim().is_empty()
+        || data.city.trim().is_empty()
+        || data.postal_code.trim().is_empty()
+        || data.street.trim().is_empty()
     {
         return Some("No data provided.".to_string());
     }
@@ -269,19 +269,24 @@ fn is_data_empty(company_data: &CompanyUpdateData) -> bool {
  * Similarly, postal codes could vary for different locations.
  */
 fn any_formatless_string_empty(company_data: &CompanyUpdateData) -> bool {
-    (company_data.name.is_some() && company_data.name.as_ref().unwrap().is_empty())
+    (company_data.name.is_some() && company_data.name.as_ref().unwrap().trim().is_empty())
         || (company_data.description.is_some()
-            && company_data.description.as_ref().unwrap().is_empty())
-        || (company_data.website.is_some() && company_data.website.as_ref().unwrap().is_empty())
-        || (company_data.crn.is_some() && company_data.crn.as_ref().unwrap().is_empty())
-        || (company_data.vatin.is_some() && company_data.vatin.as_ref().unwrap().is_empty())
-        || (company_data.country.is_some() && company_data.country.as_ref().unwrap().is_empty())
-        || (company_data.region.is_some() && company_data.region.as_ref().unwrap().is_empty())
-        || (company_data.city.is_some() && company_data.city.as_ref().unwrap().is_empty())
-        || (company_data.street.is_some() && company_data.street.as_ref().unwrap().is_empty())
-        || (company_data.number.is_some() && company_data.number.as_ref().unwrap().is_empty())
+            && company_data.description.as_ref().unwrap().trim().is_empty())
+        || (company_data.website.is_some()
+            && company_data.website.as_ref().unwrap().trim().is_empty())
+        || (company_data.crn.is_some() && company_data.crn.as_ref().unwrap().trim().is_empty())
+        || (company_data.vatin.is_some() && company_data.vatin.as_ref().unwrap().trim().is_empty())
+        || (company_data.country.is_some()
+            && company_data.country.as_ref().unwrap().trim().is_empty())
+        || (company_data.region.is_some()
+            && company_data.region.as_ref().unwrap().trim().is_empty())
+        || (company_data.city.is_some() && company_data.city.as_ref().unwrap().trim().is_empty())
+        || (company_data.street.is_some()
+            && company_data.street.as_ref().unwrap().trim().is_empty())
+        || (company_data.number.is_some()
+            && company_data.number.as_ref().unwrap().trim().is_empty())
         || (company_data.postal_code.is_some()
-            && company_data.postal_code.as_ref().unwrap().is_empty())
+            && company_data.postal_code.as_ref().unwrap().trim().is_empty())
 }
 
 fn validate_update_data(company_data: CompanyUpdateData) -> Option<String> {

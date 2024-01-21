@@ -139,7 +139,7 @@ pub async fn toggle_user_edit(
 }
 
 fn validate_new_user(new_user: NewUser) -> Option<String> {
-    if new_user.name.is_empty() || new_user.email.is_empty() {
+    if new_user.name.trim().is_empty() || new_user.email.trim().is_empty() {
         return Some("Username or Email empty.".to_string());
     }
 
@@ -193,7 +193,7 @@ fn validate_edit_data(user_data: UserData) -> Option<String> {
         return Some("No data provided.".to_string());
     }
 
-    if user_data.name.is_some() && user_data.name.unwrap().is_empty() {
+    if user_data.name.is_some() && user_data.name.unwrap().trim().is_empty() {
         return Some("Username empty.".to_string());
     }
 
@@ -201,7 +201,7 @@ fn validate_edit_data(user_data: UserData) -> Option<String> {
         return Some("Invalid email format.".to_string());
     }
 
-    if user_data.avatar_url.is_some() && user_data.avatar_url.unwrap().is_empty() {
+    if user_data.avatar_url.is_some() && user_data.avatar_url.unwrap().trim().is_empty() {
         return Some("Empty avatar url.".to_string());
     }
 

@@ -99,7 +99,7 @@ pub async fn create_event_comment(
 
     let parsed_id = id_parse.expect("Should be valid.");
 
-    if new_comment.content.clone().is_empty() {
+    if new_comment.content.clone().trim().is_empty() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
@@ -209,7 +209,7 @@ pub async fn create_task_comment(
 
     let parsed_id = id_parse.expect("Should be valid.");
 
-    if new_comment.content.clone().is_empty() {
+    if new_comment.content.clone().trim().is_empty() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
@@ -287,7 +287,7 @@ pub async fn update_comment(
     comment_data: web::Json<CommentData>,
     comment_repo: web::Data<CommentRepository>,
 ) -> HttpResponse {
-    if comment_data.content.clone().is_empty() {
+    if comment_data.content.clone().trim().is_empty() {
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 

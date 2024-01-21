@@ -168,20 +168,16 @@ pub async fn create_employment(
     new_employment: web::Json<NewEmployment>,
     employment_repo: web::Data<EmploymentRepository>,
 ) -> HttpResponse {
-    println!("Open1");
     let company_id = new_employment.company_id;
 
     let result = employment_repo.create(new_employment.into_inner()).await;
-    println!("Open2");
     if let Err(error) = result {
         return handle_database_error(error);
     }
-    println!("Open3");
     let employee = result.expect("Should be valid");
 
     // We don't want to show the manager the employee's view, so we re-render their view.
     if employee.manager_id.is_some() {
-        println!("Open4");
         return get_full_employment(
             employee.manager_id.expect("Should be some"),
             company_id,
@@ -190,7 +186,6 @@ pub async fn create_employment(
         )
         .await;
     }
-    println!("Open5");
     // This is for the case when the first employee is created. We don't want to redirect the admin to them.
     HttpResponse::NoContent().finish()
 }

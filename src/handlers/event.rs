@@ -126,8 +126,33 @@ pub async fn create_event(
     event_repo: web::Data<EventRepository>,
     employment_repo: web::Data<EmploymentRepository>,
 ) -> HttpResponse {
+    if new_event.name.trim().is_empty() {
+        return HttpResponse::BadRequest().body("Name can't be empty.");
+    }
+
+    if new_event.description.is_some()
+        && new_event
+            .description
+            .clone()
+            .expect("Should be some")
+            .trim()
+            .is_empty()
+    {
+        return HttpResponse::BadRequest().body("Description can't be set as blank.");
+    }
+
+    if new_event.website.is_some()
+        && new_event
+            .website
+            .clone()
+            .expect("Should be some")
+            .trim()
+            .is_empty()
+    {
+        return HttpResponse::BadRequest().body("Website can't be set as blank.");
+    }
     if new_event.start_date > new_event.end_date {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Start date can't be later than end date.");
     }
 
     let employee_res = employment_repo

@@ -113,13 +113,17 @@ pub async fn create_task(
 ) -> HttpResponse {
     let id_parse = Uuid::from_str(event_id.into_inner().as_str());
     if id_parse.is_err() {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Incorrect ID format.".to_string());
     }
-    if (new_task.title.is_empty())
-        || (new_task.description.is_some() && new_task.description.clone().unwrap().is_empty())
-    {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+
+    if new_task.title.is_empty() {
+        return HttpResponse::BadRequest().body("Please provide a non-empty title.".to_string());
     }
+
+    if new_task.description.is_some() && new_task.description.clone().unwrap().is_empty() {
+        return HttpResponse::BadRequest().body("The description can't be empty.".to_string());
+    }
+
     let parsed_id = id_parse.expect("Should be valid.");
     let data = NewTask {
         event_id: parsed_id,
@@ -135,13 +139,28 @@ pub async fn create_task(
     handle_database_error(result.expect_err("Should be error."))
 }
 
-fn is_data_invalid(data: TaskData) -> bool {
-    (data.title.is_none() || (data.title.is_some() && data.title.unwrap().is_empty()))
-        && (data.description.is_none()
-            || (data.description.is_some() && data.description.unwrap().is_empty()))
+fn is_data_empty(data: &TaskData) -> bool {
+    data.title.is_none()
+        && data.description.is_none()
         && data.finished_at.is_none()
         && data.priority.is_none()
         && data.accepts_staff.is_none()
+}
+
+fn validate_data(data: TaskData) -> Option<String> {
+    if is_data_empty(&data) {
+        return Some("No data provided.".to_string());
+    }
+
+    if data.title.is_some() && data.title.expect("Should be some").trim().is_empty() {
+        return Some("The title can't be empty.".to_string());
+    }
+
+    if data.description.is_some() && data.description.expect("Should be some").trim().is_empty() {
+        return Some("The description can't be empty.".to_string());
+    }
+
+    None
 }
 
 #[patch("/event/task/{task_id}")]
@@ -151,13 +170,14 @@ pub async fn update_task(
     task_repo: web::Data<TaskRepository>,
     assigned_repo: web::Data<AssignedStaffRepository>,
 ) -> HttpResponse {
-    if is_data_invalid(task_data.clone()) {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    let validation_error = validate_data(task_data.clone());
+    if validation_error.is_some() {
+        return HttpResponse::BadRequest().body(validation_error.expect("Should be some."));
     }
 
     let id_parse = Uuid::from_str(task_id.into_inner().as_str());
     if id_parse.is_err() {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Incorrect ID format.".to_string());
     }
     let parsed_id = id_parse.expect("Should be valid.");
 
@@ -178,7 +198,7 @@ pub async fn update_task_completion(
 ) -> HttpResponse {
     let id_parse = Uuid::from_str(task_id.into_inner().as_str());
     if id_parse.is_err() {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Incorrect ID format.".to_string());
     }
     let parsed_id = id_parse.expect("Should be valid.");
 
@@ -215,7 +235,7 @@ pub async fn delete_task(
     }
 
     let query = TaskFilter {
-        limit: None,
+        limit: Some(PAGINATION_LIMIT),
         offset: None,
     };
 
