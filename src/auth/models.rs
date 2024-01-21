@@ -35,7 +35,10 @@ pub struct AccessToken {
 
 #[derive(Serialize, Deserialize)]
 pub struct Register {
-    pub name: String,
+    pub first_name: String,
+    pub last_name: String,
     pub email: String,
     pub password: String,
+    pub birth: NaiveDate,
+    pub gender: Gender,
 }

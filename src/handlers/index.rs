@@ -4,7 +4,7 @@ use chrono::{serde::ts_seconds, DateTime, Utc};
 use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::{errors::parse_error, templates::common::IndexTemplate};
+use crate::{errors::parse_error, templates::common::{IndexTemplate, RegistrationTemplate}};
 
 use actix_web_middleware_keycloak_auth::{DecodingKey, KeycloakAuth, KeycloakClaims};
 
@@ -21,6 +21,16 @@ pub async fn index() -> HttpResponse {
     HttpResponse::Ok()
         .content_type("text/html")
         .body(body.expect("Should be valid now."))
+}
+
+#[get("/registration")]
+pub async fn registration_page() -> HttpResponse {
+    let template = RegistrationTemplate {};
+    let body = template.render();
+    if body.is_err() {
+        return HttpResponse::InternalServerError().body("Internal server error.");
+    }
+    HttpResponse::Ok().body(body.expect("Should be some."))
 }
 
 // http://localhost:9090/realms/Orchestrate/account/#/

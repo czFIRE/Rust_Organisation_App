@@ -7,6 +7,11 @@ pub struct IndexTemplate {
 }
 
 #[derive(Template)]
+#[template(path = "register.html")]
+pub struct RegistrationTemplate {
+}
+
+#[derive(Template)]
 #[template(path = "error/error.html")]
 pub struct ErrorTemplate {
     pub message: String,
