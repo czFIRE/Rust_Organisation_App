@@ -7,6 +7,7 @@ use serde::Deserialize;
 use uuid::Uuid;
 
 use crate::{
+    common::{calculate_new_offsets, PAGINATION_LIMIT},
     errors::{handle_database_error, parse_error},
     handlers::common::extract_path_tuple_ids,
     models::{EventRole, TaskPriority},
@@ -21,7 +22,7 @@ use crate::{
     templates::task::{
         EventTask, TaskCreationTemplate, TaskEditTemplate, TaskPanelTemplate, TasksPanelTemplate,
         TasksTemplate,
-    }, common::{calculate_new_offsets, PAGINATION_LIMIT},
+    },
 };
 
 #[derive(Deserialize)]
@@ -47,8 +48,10 @@ async fn get_tasks_per_event(
         },
         offset: query.offset,
     };
-    
-    let result = task_repo.read_all_for_event(event_id, modified_query_params).await;
+
+    let result = task_repo
+        .read_all_for_event(event_id, modified_query_params)
+        .await;
 
     if let Ok(tasks) = result {
         let mut task_vector: Vec<EventTask> = tasks.into_iter().map(|task| task.into()).collect();
@@ -62,12 +65,12 @@ async fn get_tasks_per_event(
                 task_vector.pop();
             }
         }
-        let template = TasksTemplate { 
+        let template = TasksTemplate {
             tasks: task_vector,
             next_offset: next_offset_final,
             prev_offset,
             limit: PAGINATION_LIMIT,
-            event_id
+            event_id,
         };
         let body = template.render();
         if body.is_err() {

@@ -43,6 +43,7 @@
         <input
           type="tel"
           id="phone"
+          pattern="^[\+]?[0-9]{3}[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{3}$"
           name="phone"
           value="{{ phone }}"
           class="font-mono text-lg text-txt bg-foreground2 rounded-md"
@@ -53,6 +54,7 @@
         <input
           type="email"
           id="email"
+          pattern="^[A-Za-z0-9.,-]+@([A-Za-z0-9]+[.])+[A-Za-z]{2,4}$"
           name="email"
           value="{{ email }}"
           class="font-mono text-lg text-txt bg-foreground2 rounded-md"
@@ -168,7 +170,7 @@
   </form>
   <div
     id="error"
-    class="w-full font-mono text-lg text-rej p-1 bg-foreground1 rounded-md"
+    class="w-8/12 text-center items-center self-center font-mono text-lg text-rej p-1 bg-foreground1 rounded-md"
   ></div>
   <div class="flex flex-row space-x-5">
     <form
