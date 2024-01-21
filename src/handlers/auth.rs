@@ -1,10 +1,11 @@
-use crate::auth::models::{AccessToken, Login, Register};
+use crate::auth::models::{AccessToken, Login, Register, Token};
 use crate::auth::openid::get_token;
 use crate::errors::{handle_database_error, parse_error};
 use crate::models::{Gender, UserRole};
 use crate::repositories::user::models::NewUser;
 use crate::repositories::user::user_repo::UserRepository;
 use crate::templates::common::IndexTemplate;
+use actix_web::cookie::Cookie;
 use actix_web::http::header::{HeaderValue, CONTENT_TYPE};
 use askama::Template;
 use chrono::NaiveDate;
@@ -124,8 +125,12 @@ async fn login(web::Form(form): web::Form<Login>) -> HttpResponse {
     });
 
     let client = reqwest::Client::new();
-    let res = client.post(path)
-        .header(CONTENT_TYPE, HeaderValue::from_static("application/x-www-form-urlencoded"))
+    let res = client
+        .post(path)
+        .header(
+            CONTENT_TYPE,
+            HeaderValue::from_static("application/x-www-form-urlencoded"),
+        )
         .form(&payload)
         .send()
         .await;
@@ -136,9 +141,12 @@ async fn login(web::Form(form): web::Form<Login>) -> HttpResponse {
 
     let result = res.expect("Should be some.");
 
+    log::debug!("{:?}", result);
+
     let result_status = result.status();
 
-    let text_form = result.text().await;
+    /*let text_form = result.text().await;
+
     if text_form.is_err() {
         return HttpResponse::InternalServerError().body("Internal server error.");
     }
@@ -147,9 +155,39 @@ async fn login(web::Form(form): web::Form<Login>) -> HttpResponse {
         return HttpResponse::InternalServerError().body("Internal server error.");
     }
     let serialized_text = serialized.expect("Should be some.");
-    println!("{}: {}", result_status, serialized_text);
+    println!("{}: {}", result_status, serialized_text.clone());*/
+
+    let token = result.json::<Token>().await;
+
+    if token.is_err() {
+        return HttpResponse::InternalServerError().body(format!(
+            "Internal server error with token: {}.",
+            token.err().unwrap()
+        ));
+    }
+
+    let token = token.expect("Should be some.");
+
+    log::error!("{:?}", token);
+
+    let tmp = serde_json::to_string(&token);
+
+    if tmp.is_err() {
+        return HttpResponse::InternalServerError()
+            .body("Internal server error with token serialization.".to_string());
+    }
+
+    let serialized_text = tmp.expect("Should be some.");
+
     match result_status {
-        StatusCode::OK => HttpResponse::Ok().body(serialized_text),
+        StatusCode::OK => {
+            let cookie = Cookie::build("access_token", token.access_token)
+                .path("/login")
+                .http_only(true)
+                .finish();
+
+            HttpResponse::Ok().cookie(cookie).body(serialized_text)
+        }
         StatusCode::BAD_REQUEST => HttpResponse::BadRequest().body(serialized_text),
         StatusCode::UNAUTHORIZED => HttpResponse::Unauthorized().body(serialized_text),
         _ => HttpResponse::InternalServerError().body("Internal Server Error.".to_string()),

@@ -629,7 +629,6 @@
     "enabled" : true,
     "alwaysDisplayInConsole" : false,
     "clientAuthenticatorType" : "client-secret",
-    "secret" : "ONVz4XrdWENphMqEaKw7iMqDrjf3gMry",
     "redirectUris" : [ "http://localhost:8000/callback" ],
     "webOrigins" : [ "http://localhost:8000" ],
     "notBefore" : 0,
@@ -639,7 +638,7 @@
     "implicitFlowEnabled" : false,
     "directAccessGrantsEnabled" : true,
     "serviceAccountsEnabled" : false,
-    "publicClient" : false,
+    "publicClient" : true,
     "frontchannelLogout" : true,
     "protocol" : "openid-connect",
     "attributes" : {

@@ -4,7 +4,10 @@ use chrono::{serde::ts_seconds, DateTime, Utc};
 use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::{errors::parse_error, templates::common::{IndexTemplate, RegistrationTemplate}};
+use crate::{
+    errors::parse_error,
+    templates::common::{IndexTemplate, RegistrationTemplate},
+};
 
 use actix_web_middleware_keycloak_auth::{DecodingKey, KeycloakAuth, KeycloakClaims};
 

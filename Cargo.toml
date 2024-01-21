@@ -19,8 +19,9 @@ chrono = { version = "0.4.31", features = ["serde"] }
 dotenv = "0.15.0"
 env_logger = "0.10.1"
 envy = "0.4.2"
+log = "0.4.20"
 regex = "1.10.2"
-reqwest = "0.11.23"
+reqwest = { version = "0.11.23", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.108"
 sqlx = { version = "0.7.3", features = [

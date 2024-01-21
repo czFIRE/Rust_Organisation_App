@@ -109,6 +109,11 @@ async fn main() -> std::io::Result<()> {
     println!("Starting server on http://{}:{}", config.host, config.port);
 
     HttpServer::new(move || {
+        let keycloak_auth = KeycloakAuth::default_with_pk(
+            DecodingKey::from_rsa_pem(std::fs::read_to_string(".cert.pem").unwrap().as_bytes())
+                .expect("Failed to read .cert.pem"),
+        );
+
         App::new()
             .app_data(user_repo.clone())
             .app_data(company_repo.clone())
@@ -126,16 +131,20 @@ async fn main() -> std::io::Result<()> {
             .service(registration_page)
             .service(login)
             .service(register)
-            .configure(configure_user_endpoints)
-            .configure(configure_company_endpoints)
-            .configure(configure_event_endpoints)
-            .configure(configure_employment_endpoints)
-            .configure(configure_assigned_staff_endpoints)
-            .configure(configure_task_endpoints)
-            .configure(configure_staff_endpoints)
-            .configure(configure_associated_company_endpoints)
-            .configure(configure_comment_endpoints)
-            .configure(configure_timesheet_endpoints)
+            .service(
+                web::scope("/protected")
+                    .wrap(keycloak_auth)
+                    .configure(configure_user_endpoints)
+                    .configure(configure_company_endpoints)
+                    .configure(configure_event_endpoints)
+                    .configure(configure_employment_endpoints)
+                    .configure(configure_assigned_staff_endpoints)
+                    .configure(configure_task_endpoints)
+                    .configure(configure_staff_endpoints)
+                    .configure(configure_associated_company_endpoints)
+                    .configure(configure_comment_endpoints)
+                    .configure(configure_timesheet_endpoints),
+            )
             // Temporary
             .service(get_users_login)
             // For serving css and static files overall

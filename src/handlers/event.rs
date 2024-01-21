@@ -2,12 +2,15 @@ use std::str::FromStr;
 
 use actix_multipart::form::MultipartForm;
 use actix_web::{delete, get, http, patch, post, put, web, HttpResponse};
+use actix_web_middleware_keycloak_auth::KeycloakClaims;
 use askama::Template;
+use log;
 use uuid::Uuid;
 
 use crate::{
+    auth::models::FullClaims,
     errors::{handle_database_error, parse_error},
-    handlers::common::extract_path_tuple_ids,
+    handlers::{common::extract_path_tuple_ids, index::ClaimsWithEmail},
     models::{EmployeeLevel, EventRole},
     repositories::{
         employment::employment_repo::EmploymentRepository,
@@ -30,7 +33,10 @@ use crate::{
 pub async fn get_events(
     params: web::Query<EventFilter>,
     event_repo: web::Data<EventRepository>,
+    claims: KeycloakClaims<FullClaims>,
 ) -> HttpResponse {
+    log::debug!("Claims: {:?}", claims);
+
     let query_params = params.into_inner();
 
     if (query_params.limit.is_some() && query_params.limit.unwrap() < 0)
