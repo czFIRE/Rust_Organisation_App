@@ -183,11 +183,14 @@ async fn login(
     match result_status {
         StatusCode::OK => {
             let cookie = Cookie::build("access_token", token.access_token)
-                .path("/auth/login")
+                .path("/protected")
+                .secure(true)
                 .http_only(true)
                 .finish();
 
-            HttpResponse::Ok().cookie(cookie).body(body.expect("Should be some."))
+            HttpResponse::Ok()
+                .cookie(cookie)
+                .body(body.expect("Should be some."))
         }
         StatusCode::BAD_REQUEST => HttpResponse::BadRequest().body(serialized_text),
         StatusCode::UNAUTHORIZED => HttpResponse::Unauthorized().body(serialized_text),

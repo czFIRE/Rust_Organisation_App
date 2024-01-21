@@ -14,17 +14,13 @@
           <div class="flex flex-row space-x-4">
             <div class="flex flex-col">
               <p class="font-mono text-lg text-txthl">Name</p>
-              <p
-                class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md"
-              >
+              <p class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md">
                 {{ name }}
               </p>
             </div>
             <div class="flex flex-col">
               <p class="font-mono text-lg text-txthl">Birth Date</p>
-              <p
-                class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md"
-              >
+              <p class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md">
                 {{ birth.format("%d.%m.%Y").to_string() }}
               </p>
             </div>
@@ -32,17 +28,13 @@
           <div class="flex flex-row space-x-4">
             <div class="flex flex-col">
               <p class="font-mono text-lg text-txthl">Email</p>
-              <p
-                class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md"
-              >
+              <p class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md">
                 {{ email }}
               </p>
             </div>
             <div class="flex flex-col">
               <p class="font-mono text-lg text-txthl">Gender</p>
-              <p
-                class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md"
-              >
+              <p class="font-mono text-lg text-txt bg-foreground1 p-1 rounded-md">
                 {{ gender }}
               </p>
             </div>
@@ -66,121 +58,70 @@
     </div>
   </div>
   <div id="user-controls" class="flex flex-row space-x-10">
-    <button
-      title="Edit Account"
-      hx-get="/user/{{ id }}/mode"
-      hx-swap="innerHTML"
-      hx-target="#content"
-    >
-      <svg
-        class="h-8 w-8 text-txthl"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke-width="1.5"
-        stroke="currentColor"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
-        />
+    <button title="Edit Account" hx-get="/user/{{ id }}/mode" hx-swap="innerHTML" hx-target="#content">
+      <svg class="h-8 w-8 text-txthl" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+        stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
       </svg>
     </button>
-    <button
-      title="Delete Account"
-      hx-delete="/user/{{ id }}"
-      hx-confirm="Are you sure you wish to delete your account?"
-    >
-      <svg
-        class="h-8 w-8 text-rej"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke-width="1.5"
-        stroke="currentColor"
-        class="w-6 h-6"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
-        />
+    <button title="Delete Account" hx-delete="/user/{{ id }}"
+      hx-confirm="Are you sure you wish to delete your account?">
+      <svg class="h-8 w-8 text-rej" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+        stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
       </svg>
     </button>
   </div>
 </div>
 
-<nav
-  id="topbar"
-  hx-swap-oob="true"
-  class="flex flex-row justify-between items-center bg-foreground1 p-3"
->
-  <h1
-    class="col-start-1 col-span-3 col-end-4 font-mono text-4xl font-extrabold text-txt ml-5"
-  >
+<nav id="topbar" hx-swap-oob="true" class="flex flex-row justify-between items-center bg-foreground1 p-3">
+  <h1 class="col-start-1 col-span-3 col-end-4 font-mono text-4xl font-extrabold text-txt ml-5">
     Orchestrate
   </h1>
-  <div
-    class="col-start-5 col-span-5 col-end-10 space-x-5 flex flex-row items-end align-middle"
-  >
-    <input
-      hidden
-      class="invisible"
-      id="user_id"
-      name="user_id"
-      value="{{ id }}"
-    />
+  <!---->
+  <script>
+    function getCookie(name) {
+      var value = "; " + document.cookie;
+      var parts = value.split("; " + name + "=");
+      if (parts.length == 2) return parts.pop().split(";").shift();
+    }
+
+    var token = getCookie('access_token');
+    var headers = `{"Authorization": "Bearer ${token}"}`;
+  </script>
+  <!---->
+  <div class="col-start-5 col-span-5 col-end-10 space-x-5 flex flex-row items-end align-middle"
+    hx-headers=javascript:'headers'>
+    <input hidden class="invisible" id="user_id" name="user_id" value="{{ id }}" />
     <input hidden class="invisible" id="misc_info" name="misc_info" value="" />
     {% if role == UserRole::Admin %}
     <button hx-get="/admin" hx-target="#content">
       <p class="font-mono text-xl text-txthl">Administration</p>
     </button>
     {% endif %}
-    <button hx-get="/event" hx-target="#content">
+    <button hx-get="/protected/event" hx-target="#content">
       <p class="font-mono text-xl text-txthl">Events</p>
     </button>
-    <button hx-get="/user/{{ id }}/employment" hx-target="#content">
+    <button hx-get="/protected/user/{{ id }}/employment" hx-target="#content">
       <p class="font-mono text-xl text-txthl">Employments</p>
     </button>
-    <button hx-get="/company" hx-target="#content">
+    <button hx-get="/protected/company" hx-target="#content">
       <p class="font-mono text-xl text-txthl">Companies</p>
     </button>
-    <button
-      hx-get="/user/{{ id }}"
-      hx-target="#content"
-      hx-swap="innerHTML"
-      title="My Account"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke-width="1.5"
-        stroke="currentColor"
-        class="w-8 h-8 text-txthl"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-        />
+    <button hx-get="/protected/user/{{ id }}" hx-target="#content" hx-swap="innerHTML" title="My Account">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+        class="w-8 h-8 text-txthl">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
       </svg>
     </button>
     <button title="Log Out" hx-confirm="Are you sure you want to log out?">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke-width="1.5"
-        stroke="currentColor"
-        class="w-8 h-8 text-rej"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15"
-        />
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+        class="w-8 h-8 text-rej">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
       </svg>
     </button>
   </div>
