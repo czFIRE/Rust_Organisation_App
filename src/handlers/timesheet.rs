@@ -157,11 +157,11 @@ async fn get_calculated_wage(
         return Err("Could not find the timesheets required.".to_string());
     }
     let relevant_sheets = relevant_sheets_res.expect("Should be okay");
-    Ok(calculate_timesheet_wage(
+    calculate_timesheet_wage(
         pink_paper_signed,
         &relevant_sheets,
         target_sheet.timesheet.id,
-    )?)
+    )
 }
 
 // The usage of a query for a simple parameter is a bit hacky. I admit.

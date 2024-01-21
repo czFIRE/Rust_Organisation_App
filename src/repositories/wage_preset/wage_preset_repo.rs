@@ -39,7 +39,7 @@ pub async fn read_optional_matching_date_db_using_tx(
     tx: &mut Transaction<'_, sqlx::Postgres>,
     date: &NaiveDate,
 ) -> DbResult<Option<WagePreset>> {
-    let wage_preset_result = sqlx::query_as!(
+    sqlx::query_as!(
         WagePreset,
         r#"
         SELECT *
@@ -52,9 +52,7 @@ pub async fn read_optional_matching_date_db_using_tx(
         date,
     )
     .fetch_optional(tx.deref_mut())
-    .await;
-
-    wage_preset_result
+    .await
 }
 
 ////////////////////////////////////////////////////////////////////////////////
