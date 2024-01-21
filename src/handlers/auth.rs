@@ -183,9 +183,9 @@ async fn login(
     match result_status {
         StatusCode::OK => {
             let cookie = Cookie::build("access_token", token.access_token)
-                .path("/protected")
-                .secure(true)
-                .http_only(true)
+                .path("/")
+                .secure(false) // TODO BOTH SHOULD BE TRUE
+                .http_only(false)
                 .finish();
 
             HttpResponse::Ok()
