@@ -83,7 +83,7 @@ BEGIN
         VALUES
         (company2_id, 'Prusa Research', 'Prusa Research a.s.',
         'https://prusa3d.com', 'CRN_prusa', 'CZ06649114',
-        '123 456 789', 'info@prusa3d.com', 'prusa_design.png',
+        DEFAULT, 'info@prusa3d.com', 'prusa_design.png',
         '2023-12-24 15:55', '2023-12-24 19:38');
 
 --------------------------------------------------------------------------------
@@ -177,8 +177,8 @@ BEGIN
         '2024-01-01 10:33', '2024-01-01 10:33');
     
     INSERT INTO user_record 
-	    (id, name, email, birth, 
-	     gender, role, status) 
+        (id, name, email, birth, 
+         gender, role, status) 
     VALUES (user6_id, 'James Bean', 'jamesbean176@snailmail.com',
             '1999-07-02', 'male', 'user', 'available');
 
@@ -293,8 +293,8 @@ BEGIN
         (user_id, company_id, manager_id, hourly_wage,
         start_date, end_date, description, type, level)
     VALUES (user8_id, company1_id, user0_id, 200,
-	    '2024-01-01', '2025-12-31', 'RAII Ambassador',
-	    'dpp', 'basic');
+        '2024-01-01', '2025-12-31', 'RAII Ambassador',
+        'dpp', 'basic');
 
     INSERT INTO employment 
         (user_id, company_id, manager_id, hourly_wage,
