@@ -1,6 +1,8 @@
 //
-// todo: Some code parts was written in a rush, a bit of refactoring needed.
+// todo: Some code parts were written in a rush, a bit of refactoring needed.
 //
+#![allow(dead_code)]
+#![allow(unused_variables)]
 
 use crate::repositories::wage_preset::models::WagePreset;
 
