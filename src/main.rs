@@ -44,7 +44,7 @@ use crate::configs::task_config::configure_task_endpoints;
 use crate::configs::timesheet_config::configure_timesheet_endpoints;
 use crate::configs::user_config::configure_user_endpoints;
 
-use crate::handlers::index::{index, registration_page};
+use crate::handlers::index::{index, registration_page, login_page};
 use crate::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
 use crate::repositories::comment::comment_repo::CommentRepository;
 use crate::repositories::company::company_repo::CompanyRepository;
@@ -129,6 +129,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::new("%a %{User-Agent}i"))
             .service(index)
             .service(registration_page)
+            .service(login_page)
             .service(login)
             .service(register)
             .service(

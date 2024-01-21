@@ -5,6 +5,7 @@ use crate::models::{Gender, UserRole};
 use crate::repositories::user::models::NewUser;
 use crate::repositories::user::user_repo::UserRepository;
 use crate::templates::common::IndexTemplate;
+use crate::templates::user::UserTemplate;
 use actix_web::cookie::Cookie;
 use actix_web::http::header::{HeaderValue, CONTENT_TYPE};
 use askama::Template;
@@ -110,8 +111,11 @@ async fn register(
     HttpResponse::Created().body(body.expect("Should be valid"))
 }
 
-#[post("/login")]
-async fn login(web::Form(form): web::Form<Login>) -> HttpResponse {
+#[post("/auth/login")]
+async fn login(
+    web::Form(form): web::Form<Login>,
+    user_repo: web::Data<UserRepository>,
+) -> HttpResponse {
     // The path variable stores the URL of the authentication server
     let path = "http://localhost:9090/realms/Orchestrate/protocol/openid-connect/token";
 
@@ -136,27 +140,24 @@ async fn login(web::Form(form): web::Form<Login>) -> HttpResponse {
         .await;
 
     if res.is_err() {
-        return HttpResponse::BadRequest().body("Bad request on res".to_string());
+        return HttpResponse::BadRequest().body("Bad request".to_string());
     }
 
     let result = res.expect("Should be some.");
 
-    log::debug!("{:?}", result);
-
     let result_status = result.status();
 
-    /*let text_form = result.text().await;
+    let user_res = user_repo.read_one_with_email(form.username).await;
 
-    if text_form.is_err() {
-        return HttpResponse::InternalServerError().body("Internal server error.");
+    if user_res.is_err() {
+        return handle_database_error(user_res.expect_err("Should be an error."));
     }
-    let serialized = serde_json::to_string(&text_form.expect("Should be some."));
-    if serialized.is_err() {
-        return HttpResponse::InternalServerError().body("Internal server error.");
-    }
-    let serialized_text = serialized.expect("Should be some.");
-    println!("{}: {}", result_status, serialized_text.clone());*/
 
+    let template: UserTemplate = user_res.expect("Should be some.").into();
+    let body = template.render();
+    if body.is_err() {
+        return HttpResponse::InternalServerError().body("Internal server error.".to_string());
+    }
     let token = result.json::<Token>().await;
 
     if token.is_err() {
@@ -182,11 +183,11 @@ async fn login(web::Form(form): web::Form<Login>) -> HttpResponse {
     match result_status {
         StatusCode::OK => {
             let cookie = Cookie::build("access_token", token.access_token)
-                .path("/login")
+                .path("/auth/login")
                 .http_only(true)
                 .finish();
 
-            HttpResponse::Ok().cookie(cookie).body(serialized_text)
+            HttpResponse::Ok().cookie(cookie).body(body.expect("Should be some."))
         }
         StatusCode::BAD_REQUEST => HttpResponse::BadRequest().body(serialized_text),
         StatusCode::UNAUTHORIZED => HttpResponse::Unauthorized().body(serialized_text),

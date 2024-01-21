@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 use crate::{
     errors::parse_error,
-    templates::common::{IndexTemplate, RegistrationTemplate},
+    templates::common::{IndexTemplate, RegistrationTemplate, LoginTemplate},
 };
 
 use actix_web_middleware_keycloak_auth::{DecodingKey, KeycloakAuth, KeycloakClaims};
@@ -29,6 +29,16 @@ pub async fn index() -> HttpResponse {
 #[get("/registration")]
 pub async fn registration_page() -> HttpResponse {
     let template = RegistrationTemplate {};
+    let body = template.render();
+    if body.is_err() {
+        return HttpResponse::InternalServerError().body("Internal server error.");
+    }
+    HttpResponse::Ok().body(body.expect("Should be some."))
+}
+
+#[get("/login")]
+pub async fn login_page() -> HttpResponse {
+    let template = LoginTemplate {};
     let body = template.render();
     if body.is_err() {
         return HttpResponse::InternalServerError().body("Internal server error.");

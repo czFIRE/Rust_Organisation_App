@@ -1,0 +1,50 @@
+<div
+  id="login"
+  class="flex flex-col space-y-5 items-center mt-10 w-full"
+  hx-ext="response-targets"
+>
+  <h2 class="font-mono text-4xl font-bold text-txthl">Login</h2>
+
+  <form class="flex flex-col items-center space-y-3"
+        hx-post="/auth/login"
+        hx-swap="innerHTML"
+        hx-target="#content"
+        hx-target-error="#error">
+    <div class="flex flex-col">
+      <label for="username" class="font-mono text-txthl text-lg">Username (Email)</label>
+      <input
+        type="email"
+        id="username"
+        name="username"
+        class="font-mono text-txt text-lg bg-foreground1"
+      />
+    </div>
+    <div class="flex flex-col">
+      <label for="password" class="font-mono text-txthl text-lg">Password</label>
+      <input
+        type="password"
+        id="password"
+        name="password"
+        class="font-mono text-txt text-lg bg-foreground1"
+      />
+    </div>
+    <button
+      type="submit"
+      class="font-mono text-txthl text-lg p-1 bg-foreground1"
+    >
+      Log in
+    </button>
+  </form>
+  <div
+    id="error"
+    class="w-8/12 text-center items-center self-center font-mono text-lg text-rej p-1 bg-foreground1 rounded-md"
+  ></div>
+  <button
+    hx-swap="innerHTML"
+    hx-get="/"
+    hx-target="#body"
+    class="font-mono text-txthl text-lg p-1 bg-foreground1"
+  >
+    Cancel
+  </button>
+</div>
