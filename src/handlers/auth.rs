@@ -123,7 +123,6 @@ async fn login(
         "username": form.username,
         "password": form.password,
         "client_id": std::env::var("CLIENT_ID").expect("Should be set"),
-        "client_secret": std::env::var("CLIENT_SECRET").expect("Should be set"),
         "grant_type": "password"
     });
 

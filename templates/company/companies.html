@@ -4,7 +4,7 @@
   </div>
   {% for company in companies %}
   <button
-    hx-get="/company/{{ company.id }}"
+    hx-get="/protected/company/{{ company.id }}"
     hx-target="#content"
     hx-swap="innerHTML"
     class="w-full"

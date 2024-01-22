@@ -63,7 +63,7 @@
     class="flex flex-col space-y-5 items-center w-10/12"
   >
     <button
-      hx-patch="/timesheet/{{ sheet.id }}"
+      hx-patch="/protected/timesheet/{{ sheet.id }}"
       hx-swap="innerHTML"
       hx-target="#content"
       hx-ext="json-enc"
@@ -74,7 +74,7 @@
       Approve
     </button>
     <form
-      hx-patch="/timesheet/{{ sheet.id }}"
+      hx-patch="/protected/timesheet/{{ sheet.id }}"
       hx-swap="#innerHTML"
       hx-target="#content"
       hx-ext="json-enc"

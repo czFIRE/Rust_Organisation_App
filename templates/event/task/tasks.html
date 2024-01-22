@@ -11,7 +11,7 @@
                font-bold">Tasks</h2>
 
     {% for task in tasks %}
-    <button hx-get="/event/staff/{staff_id}/task/{{ task.id }}"
+    <button hx-get="/protected/event/staff/{staff_id}/task/{{ task.id }}"
             hx-vals='js:{"staff_id": document.getElementById("misc_info").value}''
             hx-swap="innerHTML"
             hx-target="#content"

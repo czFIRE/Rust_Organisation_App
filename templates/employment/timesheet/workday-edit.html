@@ -3,7 +3,7 @@
   class="flex flex-row w-10/12 items-start align-middle rounded-md p-2 text-wrap overflow-hidden bg-foreground2"
 >
   <form
-    hx-patch="/timesheet/{{ timesheet_id }}/day/{{ date }}"
+    hx-patch="/protected/timesheet/{{ timesheet_id }}/day/{{ date }}"
     hx-swap="outerHTML"
     hx-vals='js:{ hourly_wage: parseFloat(document.getElementById("total_hours").value)}'
     hx-target="#workday-{{ date }}"
@@ -50,7 +50,7 @@
     <button class="font-mono text-lg text-txthl">Save</button>
   </form>
   <button
-    hx-get="/timesheet/{{ timesheet_id }}/day/{{ date }}"
+    hx-get="/protected/timesheet/{{ timesheet_id }}/day/{{ date }}"
     hx-swap="outerHTML"
     hx-target="#workday-{{ date }}"
     class="font-mono text-lg text-txthl"

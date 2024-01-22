@@ -58,7 +58,7 @@
     </div>
   </div>
   <div id="user-controls" class="flex flex-row space-x-10">
-    <button title="Edit Account" hx-get="/user/{{ id }}/mode" hx-swap="innerHTML" hx-target="#content">
+    <button title="Edit Account" hx-get="/protected/user/{{ id }}/mode" hx-swap="innerHTML" hx-target="#content">
       <svg class="h-8 w-8 text-txthl" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
         stroke-width="1.5" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round"
@@ -84,7 +84,7 @@
     <input hidden class="invisible" id="user_id" name="user_id" value="{{ id }}" />
     <input hidden class="invisible" id="misc_info" name="misc_info" value="" />
     {% if role == UserRole::Admin %}
-    <button hx-get="/admin" hx-target="#content">
+    <button hx-get="/protected/admin" hx-target="#content">
       <p class="font-mono text-xl text-txthl">Administration</p>
     </button>
     {% endif %}
@@ -104,7 +104,7 @@
           d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
       </svg>
     </button>
-    <button title="Log Out" hx-confirm="Are you sure you want to log out?">
+    <button hx-get="/" hx-swap="outerHTML" hx-target="#body" title="Log Out" hx-confirm="Are you sure you want to log out?">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
         class="w-8 h-8 text-rej">
         <path stroke-linecap="round" stroke-linejoin="round"

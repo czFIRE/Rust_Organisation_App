@@ -59,7 +59,7 @@
                         <p class="font-mono
                                 text-lg
                                 text-pnd">Requesting to work as {{ staff_member.role }}</p>
-                        <form hx-patch="/event/{{ staff_member.event_id }}/staff/{{ staff_member.id}}"
+                        <form hx-patch="/protected/event/{{ staff_member.event_id }}/staff/{{ staff_member.id}}"
                               hx-vals='js:{"decided_by": document.getElementById("misc_info").value}''
                               hx-ext="json-enc"
                               hx-swap="innerHTML"
@@ -86,7 +86,7 @@
                                 </svg>
                             </button>
                         </form>
-                        <form hx-patch="/event/{{ staff_member.event_id }}/staff/{{ staff_member.id}}"
+                        <form hx-patch="/protected/event/{{ staff_member.event_id }}/staff/{{ staff_member.id}}"
                               hx-vals='js:{"decided_by": document.getElementById("misc_info").value}''
                               hx-ext="json-enc"
                               hx-swap="innerHTML"
@@ -127,7 +127,7 @@
                                             {% else %}
                                                 Unknown
                                             {% endif %}</p>
-                        <button hx-delete="/event/{{ staff_member.event_id }}/staff/{{ staff_member.id }}"
+                        <button hx-delete="/protected/event/{{ staff_member.event_id }}/staff/{{ staff_member.id }}"
                                 hx-swap="innerHTML"
                                 hx-target="#staff-members"
                                 hx-confirm="Are you sure you want to delete this rejected application?"
@@ -207,7 +207,7 @@
                             <p class="font-mono
                                       text-lg
                                     text-txt"><b>Role:</b> {{ staff_member.role }}</p>
-                            <form hx-patch="/event/{{ staff_member.event_id }}/staff/{{ staff_member.id}}"
+                            <form hx-patch="/protected/event/{{ staff_member.event_id }}/staff/{{ staff_member.id}}"
                                   hx-ext="json-enc"
                                   hx-swap="innerHTML"
                                   hx-target="#staff-members"

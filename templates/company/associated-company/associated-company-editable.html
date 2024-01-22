@@ -14,7 +14,7 @@
     <div class="flex flex-row space-x-5">
       <p class="text-txt text-lg">{{ company.association_type }}</p>
       <button
-        hx-get="/event/{{ company.event_id }}/company/{{ company.company.id }}/mode"
+        hx-get="/protected/event/{{ company.event_id }}/company/{{ company.company.id }}/mode"
         hx-swap="outerHTML"
         hx-target="#company-{{company.company.id}}"
       >
@@ -34,7 +34,7 @@
         </svg>
       </button>
       <button
-        hx-delete="/event/{{ company.event_id }}/company/{{ company.company.id }}"
+        hx-delete="/protected/event/{{ company.event_id }}/company/{{ company.company.id }}"
         hx-swap="delete"
         hx-target="#company-{{company.company.id}}"
         hx-confirm="Are you sure you want to delete this company's association with the event?"

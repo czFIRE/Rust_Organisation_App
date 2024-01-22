@@ -16,7 +16,7 @@ assigned_staff.as_ref().unwrap() %}
   <p class="font-mono text-xl text-acc">You are working on this task.</p>
   <div
     id="comments"
-    hx-get="task/{{ staff.task_id }}/comment-panel/{{ staff.staff.id }}"
+    hx-get="/protected/task/{{ staff.task_id }}/comment-panel/{{ staff.staff.id }}"
     hx-trigger="load"
     class="w-full"
   ></div>

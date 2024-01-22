@@ -1,7 +1,7 @@
 <div id="company-edit" class="flex flex-col space-y-10 w-full p-3 items-center">
   <h2 class="font-mono text-4xl text-txthl">Edit Company</h2>
   <form
-    hx-patch="/company/{{ id }}"
+    hx-patch="/protected/company/{{ id }}"
     hx-swap="innerHTML"
     hx-target="#content"
     hx-ext="json-enc"

@@ -7,7 +7,7 @@
     </div>
     <div class="flex flex-col space-y-4 items-start text-wrap">
       <button
-        hx-get="/company/{{ company.id }}"
+        hx-get="/protected/company/{{ company.id }}"
         hx-target="#content"
         hx-swap="innerHTML"
       >
@@ -73,7 +73,7 @@
         {%- endif %}
         <div></div>
         <button
-          hx-get="/user/{{ user_id }}/employment/{{ company.id }}/sheet"
+          hx-get="/protected/user/{{ user_id }}/employment/{{ company.id }}/sheet"
           hx-swap="innerHTML"
           hx-target="#content"
           class="font-mono text-xl text-txthl rounded-md bg-foreground1 p-3"
@@ -87,7 +87,7 @@
   Utc::now().naive_local().date() %} {% if level != EmployeeLevel::Basic -%}
   <div id="company-manager-opts" class="flex flex-row space-x-6">
     <button
-      hx-get="/user/{{ user_id }}/employment/{{ company.id }}/creation-mode"
+      hx-get="/protected/user/{{ user_id }}/employment/{{ company.id }}/creation-mode"
       hx-swap="innerHTML"
       hx-target="#content"
       class="rounded-md bg-foreground1 border-foreground2 border-2 font-mono text-lg p-2 text-txthl"
@@ -96,7 +96,7 @@
     </button>
     {% if level == EmployeeLevel::CompanyAdministrator %}
     <button
-      hx-get="/user/{{ user_id }}/employment/{{ company.id }}/event"
+      hx-get="/protected/user/{{ user_id }}/employment/{{ company.id }}/event"
       hx-swap="innerHTML"
       hx-target="#content"
       class="rounded-md bg-foreground1 border-foreground2 border-2 font-mono text-lg p-2 text-txthl"
@@ -104,7 +104,7 @@
       Create Event
     </button>
     <button
-      hx-get="/company/{{ company.id }}/mode/{{ user_id }}"
+      hx-get="/protected/company/{{ company.id }}/mode/{{ user_id }}"
       hx-swap="innerHTML"
       hx-target="#content"
       class="rounded-md bg-foreground1 border-foreground2 border-2 font-mono text-lg p-2 text-txthl"
@@ -116,7 +116,7 @@
   {%- endif %} {% if level != EmployeeLevel::Basic -%}
   <!-- When this gets loaded, it immediately fetches all subordinates. -->
   <div
-    hx-get="/user/{{ user_id }}/employment/{{ company.id }}/subordinates"
+    hx-get="/protected/user/{{ user_id }}/employment/{{ company.id }}/subordinates"
     hx-trigger="load"
     class="w-full"
   ></div>

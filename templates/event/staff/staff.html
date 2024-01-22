@@ -12,7 +12,7 @@
   </p>
   {%- endif %}
   <button
-    hx-get="/event/{{ event_id }}"
+    hx-get="/protected/event/{{ event_id }}"
     hx-swap="innerHTML"
     hx-target="#content"
     class="bg-foreground1 font-mono text-txthl text-xl p-3"
@@ -38,7 +38,7 @@
         class="flex flex-row space-x-5 content-between justify-center w-full"
       >
         <button
-          hx-get="/event/staff/{{ id }}/tasks-panel"
+          hx-get="/protected/event/staff/{{ id }}/tasks-panel"
           hx-swap="innerHTML"
           hx-target="#content"
           class="bg-foreground1 font-mono text-txthl text-xl p-3"
@@ -46,7 +46,7 @@
           View Tasks
         </button>
         <button
-          hx-get="/user/{{ user.id }}/employment/{{ company.id }}"
+          hx-get="/protected/user/{{ user.id }}/employment/{{ company.id }}"
           hx-swap="innerHTML"
           hx-target="#content"
           class="bg-foreground1 font-mono text-txthl text-xl p-3"
@@ -54,7 +54,7 @@
           Access Related Employment
         </button>
         <button
-          hx-get="/company/{{ company.id }}"
+          hx-get="/protected/company/{{ company.id }}"
           hx-swap="innerHTML"
           hx-target="#content"
           class="bg-foreground1 font-mono text-txthl text-xl p-3"
@@ -68,7 +68,7 @@
         class="flex flex-row space-x-5 justify-center content-between w-full"
       >
         <button
-          hx-get="/event/{{ event_id }}/staff/{{ id }}/management"
+          hx-get="/protected/event/{{ event_id }}/staff/{{ id }}/management"
           hx-swap="innerHTML"
           hx-target="#content"
           class="bg-foreground1 font-mono text-txthl text-xl p-3"
@@ -76,7 +76,7 @@
           Manage Staff
         </button>
         <button
-          hx-get="/event/{{ event_id }}/edit-mode/{{ id }}"
+          hx-get="/protected/event/{{ event_id }}/edit-mode/{{ id }}"
           hx-swap="innerHTML"
           hx-target="#content"
           class="bg-foreground1 font-mono text-txthl text-xl p-3"
@@ -84,7 +84,7 @@
           Edit Event
         </button>
         <button
-          hx-get="/event/{{ event_id}}/company-management"
+          hx-get="/protected/event/{{ event_id}}/company-management"
           hx-swap="innerHTML"
           hx-target="#content"
           class="bg-foreground1 font-mono text-txthl text-xl p-3"
@@ -92,7 +92,7 @@
           Manage Associated Companies
         </button>
         <button
-          hx-delete="/event/{{ event_id }}"
+          hx-delete="/protected/event/{{ event_id }}"
           hx-swap="innerHTML"
           hx-target="#content"
           hx-confirm="Are you sure you want to permanently delete the event?"
@@ -107,7 +107,7 @@
 
   <div
     id="comments"
-    hx-get="event/{{ event_id }}/comment-panel/{{ user.id }}"
+    hx-get="/protected/event/{{ event_id }}/comment-panel/{{ user.id }}"
     hx-trigger="load"
     class="w-full"
   ></div>
