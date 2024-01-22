@@ -1,4 +1,10 @@
-use std::{io::Error, path::PathBuf};
+use std::{
+    io::{
+        self, Error,
+    },
+    path::PathBuf,
+    fs,
+};
 
 use actix_multipart::form::tempfile::TempFile;
 use uuid::Uuid;
@@ -42,7 +48,30 @@ pub fn store_image(
     path.set_extension("jpg");
 
     let final_path = path.as_path();
-    image.file.persist(final_path)?;
+
+    // Get a `std::fs::File` representation.
+    let mut src_file = image.file.into_file();
+
+    //
+    // Write the temporary file content into a destination file.
+    //
+    // Note: This truncates the destination file if it already exists.
+    //
+    // Note: Beware that methods must be called in specific order:
+    //       https://github.com/rust-lang/rust/issues/90634
+    //
+    // Note: Do **not** use TempFile.file.persist() for this
+    //       as this method fails with OS error 18 (Invalid cross-device link)
+    //       when source and destination are not at same partition.
+    //
+    let mut dest_file = fs::OpenOptions::new()
+        .write(true)
+        .create(true)
+        .truncate(true)
+        .read(true)
+        .open(final_path.clone())?;
+
+    io::copy(&mut src_file, &mut dest_file)?;
 
     Ok(build_string_path(item_id, directory))
 }
