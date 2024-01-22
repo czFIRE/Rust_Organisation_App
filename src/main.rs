@@ -36,6 +36,7 @@ use crate::configs::timesheet_config::configure_timesheet_endpoints;
 use crate::configs::user_config::configure_user_endpoints;
 
 use crate::handlers::index::{index, login_page, registration_page};
+use crate::repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository;
 use crate::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
 use crate::repositories::comment::comment_repo::CommentRepository;
 use crate::repositories::company::company_repo::CompanyRepository;
@@ -46,10 +47,6 @@ use crate::repositories::repository::DbRepository;
 use crate::repositories::task::task_repo::TaskRepository;
 use crate::repositories::timesheet::timesheet_repo::TimesheetRepository;
 use crate::repositories::user::user_repo::UserRepository;
-use crate::{
-    handlers::user::get_users_login,
-    repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository,
-};
 
 use actix_web::{web, HttpResponse};
 use serde::Deserialize;
@@ -161,8 +158,6 @@ async fn main() -> std::io::Result<()> {
                     .configure(configure_comment_endpoints)
                     .configure(configure_timesheet_endpoints),
             )
-            // Temporary
-            .service(get_users_login)
             // For serving css and static files overall
             .service(ActixFiles::new("/", "./src/static").prefer_utf8(true))
     })

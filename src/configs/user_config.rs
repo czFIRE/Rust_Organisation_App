@@ -16,7 +16,6 @@ pub fn configure_user_endpoints(config: &mut web::ServiceConfig) {
     config.service(
         scope("/protected")
             .service(get_user)
-            .service(get_users)
             .service(toggle_user_edit)
             .service(create_user)
             .service(update_user)

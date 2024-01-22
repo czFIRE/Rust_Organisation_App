@@ -74,33 +74,6 @@ pub async fn get_user(
     handle_database_error(result.expect_err("Should be error."))
 }
 
-// Temporary workaround to the lack of auth.
-#[get("/users")]
-pub async fn get_users_login(user_repo: web::Data<UserRepository>) -> HttpResponse {
-    let result = user_repo
-        ._read_all(UsersQuery {
-            name: None,
-            email: None,
-        })
-        .await;
-    if let Ok(users) = result {
-        let lite_users: Vec<UserLiteTemplate> = users.into_iter().map(|user| user.into()).collect();
-        let template: UsersTemplate = UsersTemplate { users: lite_users };
-        let body = template.render();
-
-        if body.is_err() {
-            return HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
-        }
-
-        return HttpResponse::Ok()
-            .content_type("text/html")
-            .body(body.expect("Should be valid"));
-    }
-
-    handle_database_error(result.expect_err("Should be error."))
-}
-
 // For switching the user view into edit mode.
 #[get("/user/{user_id}/mode")]
 pub async fn toggle_user_edit(

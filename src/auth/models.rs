@@ -89,7 +89,7 @@ pub struct FullClaims {
 
 #[derive(Debug)]
 pub struct CookieAuthError {
-    message: String,
+    pub message: String,
 }
 
 impl Display for CookieAuthError {
