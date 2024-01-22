@@ -4,7 +4,7 @@
 >
   <form
     id="workday-{{date}}-form"
-    hx-patch="/timesheet/{{ timesheet_id }}/day/{{ date }}"
+    hx-patch="/protected/timesheet/{{ timesheet_id }}/day/{{ date }}"
     hx-swap="outerHTML"
     hx-vals='js:{ total_hours: parseFloat(document.getElementById("total_hours").value)}'
     hx-target="#workday-{{ date }}"
@@ -52,7 +52,7 @@
     <button class="font-mono text-lg text-txthl mx-5">Save</button>
   </form>
   <button
-    hx-get="/timesheet/{{ timesheet_id }}/day/{{ date }}"
+    hx-get="/protected/timesheet/{{ timesheet_id }}/day/{{ date }}"
     hx-swap="outerHTML"
     hx-target="#workday-{{ date }}"
     class="font-mono text-lg text-txthl mx-5"

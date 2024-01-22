@@ -18,8 +18,11 @@
     <script src="https://unpkg.com/htmx.org@1.9.10/dist/ext/response-targets.js"></script>
   </head>
 
-  <body class="bg-background">
-    <nav id="topbar" class="flex flex-row justify-between items-center bg-foreground1 p-3">
+  <body id="body" class="bg-background">
+    <nav
+      id="topbar"
+      class="flex flex-row justify-between items-center bg-foreground1 p-3"
+    >
       <h1 class="col-span-2 font-mono text-4xl font-extrabold text-txt ml-5">
         <a title="show index page" href="/">
           <img src="/img/application/logo_318.png" width="318" height="68" alt="logo Orchestrate">
@@ -27,12 +30,33 @@
         </a>
       </h1>
       <div class="flex flex-row space-x-5 mx-5">
-        <button hx-get="/user" hx-target="#content" class="txt-xl text-txthl" title="Log In">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8 text-txthl">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
-          </svg>          
+        <button
+          hx-get="/user"
+          hx-target="#content"
+          class="txt-xl text-txthl"
+          title="Log In"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="w-8 h-8 text-txthl"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"
+            />
+          </svg>
         </button>
-        <button hx-get="/user" hx-target="#content" class="txt-xl text-txthl" title="Sign Up">
+        <button
+          hx-get="/user"
+          hx-target="#content"
+          class="txt-xl text-txthl"
+          title="Sign Up"
+        >
           <svg
             class="h-8 w-8 text-txthl"
             xmlns="http://www.w3.org/2000/svg"
@@ -54,9 +78,9 @@
     <div id="content" hx-ext="response-targets" class="flex flex-col space-y-5 items-center mt-10 w-full">
       {% block content %}
       <div id="title">
-        <h1 class="font-mono text-4xl font-extrabold text-txthl">
+        <h2 class="font-mono text-4xl font-extrabold text-txthl">
           {{ landing_title }}
-        </h1>
+        </h2>
       </div>
       <div class="text-wrap flex flex-col space-y-1 items-center mt-10 w-full">
         <p class="text-txt text-xl text-center">
@@ -68,7 +92,7 @@
         <p class="text-txt text-xl">
           Already using Orchestrate?
           <button
-            hx-get="/users"
+            hx-get="/login"
             hx-target="#content"
             class="txt-xl text-txthl"
           >
@@ -78,7 +102,7 @@
         <p class="text-txt text-xl">
           Not yet signed up?
           <button
-            hx-get="/users"
+            hx-get="/registration"
             hx-target="#content"
             class="txt-xl text-txthl"
           >

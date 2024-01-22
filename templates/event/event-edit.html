@@ -1,7 +1,7 @@
 <div id="event" class="flex flex-col space-y-5 items-center w-full" hx-ext="response-targets">
   <h2 class="font-mono text-4xl text-txthl">Edit Event</h2>
   <form
-    hx-patch="/event/{{ event.id }}"
+    hx-patch="/protected/event/{{ event.id }}"
     hx-swap="innerHTML"
     hx-target="#content"
     hx-target-error="#error"
@@ -74,7 +74,7 @@
   ></div>
   {% if event.accepts_staff %}
   <button
-    hx-patch="/event/{{ event.id }}"
+    hx-patch="/protected/event/{{ event.id }}"
     hx-vals='{"accepts_staff": false}'
     hx-swap="innerHTML"
     hx-target="#content"
@@ -85,7 +85,7 @@
   </button>
   {% else %}
   <button
-    hx-patch="/event/{{ event.id }}"
+    hx-patch="/protected/event/{{ event.id }}"
     hx-vals='{"accepts_staff": true}'
     hx-swap="innerHTML"
     hx-target="#content"
@@ -98,7 +98,7 @@
   <div class="flex flex-row space-x-5">
     <form
       hx-encoding="multipart/form-data"
-      hx-put="/event/{{ event.id }}/avatar"
+      hx-put="/protected/event/{{ event.id }}/avatar"
       hx-swap="innerHTML"
       hx-target="#result-text"
       class="grid grid-cols-4 grid-rows-1 gap-4 bg-foreground1 rounded-md p-2"
@@ -119,7 +119,7 @@
       </button>
     </form>
     <button
-      hx-delete="/event/{{ event.id }}/avatar"
+      hx-delete="/protected/event/{{ event.id }}/avatar"
       hx-swap="innerHTML"
       hx-target="#result-text"
       hx-confirm="Truly delete image?"
@@ -130,7 +130,7 @@
     <p id="result-text" class="font-mono text-txt text-lg"></p>
   </div>
   <button
-    hx-get="/event/{{ editor.event_id }}/staff-panel/{{ editor.user.id }}"
+    hx-get="/protected/event/{{ editor.event_id }}/staff-panel/{{ editor.user.id }}"
     hx-swap="innerHTML"
     hx-target="#content"
     class="font-mono text-xl text-txthl bg-foreground1 rounded-md p-1"

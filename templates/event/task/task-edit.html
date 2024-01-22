@@ -1,7 +1,7 @@
 <div id="task-edit" class="flex flex-col space-y-5 m-5 items-center w-10/12" hx-ext="response-targets">
   <h2 class="font-mono font-bold text-txthl text-3xl">Task Edit</h2>
   <form
-    hx-patch="/event/task/{{ task.id }}"
+    hx-patch="/protected/event/task/{{ task.id }}"
     hx-swap="innerHTML"
     hx-target="#content"
     hx-target-error="#error"
@@ -63,7 +63,7 @@
   {% if task.finished_at.is_none() %}
   <button
     class="rounded-md p-1 text-acc text-lg bg-foreground2"
-    hx-patch="/event/task/{{ task.id }}/completion"
+    hx-patch="/protected/event/task/{{ task.id }}/completion"
     hx-swap="innerHTML"
     hx-confirm="Are you sure? This is an irreversible action."
     hx-target="#content"
@@ -73,7 +73,7 @@
   {% endif %} {% if task.accepts_staff %}
   <button
     class="rounded-md p-1 text-txthl text-lg bg-foreground2"
-    hx-patch="/event/task/{{ task.id }}"
+    hx-patch="/protected/event/task/{{ task.id }}"
     hx-vals='js:{"accepts_staff": false}'
     hx-swap="innerHTML"
     hx-ext="json-enc"
@@ -84,7 +84,7 @@
   {% else %}
   <button
     class="rounded-md p-1 text-txthl text-lg bg-foreground2"
-    hx-patch="/event/task/{{ task.id }}"
+    hx-patch="/protected/event/task/{{ task.id }}"
     hx-vals='js:{"accepts_staff": true}'
     hx-swap="innerHTML"
     hx-ext="json-enc"
@@ -96,7 +96,7 @@
   <!-- TODO -->
   <button
     class="rounded-md p-1 text-txthl text-lg bg-foreground2"
-    hx-get="/event/staff/{{ editor_id }}/task/{{ task.id }}"
+    hx-get="/protected/event/staff/{{ editor_id }}/task/{{ task.id }}"
     hx-swap="innerHTML"
     hx-target="#content"
   >

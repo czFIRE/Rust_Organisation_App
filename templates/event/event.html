@@ -73,7 +73,7 @@
       </div>
       <!-- We can use -some- javascript, right? -->
       <button
-        hx-get="/event/{{ id }}/staff-panel/{user_id}"
+        hx-get="/protected/event/{{ id }}/staff-panel/{user_id}"
         hx-vals='js:{"user_id": document.getElementById("user_id").value}'
         hx-swap="innerHTML"
         hx-ext="path-params"
@@ -106,6 +106,6 @@
     </div>
   </div>
   <div>
-    <div hx-get="/event/{{ id }}/company" hx-trigger="load"></div>
+    <div hx-get="/protected/event/{{ id }}/company" hx-trigger="load"></div>
   </div>
 </div>

@@ -20,7 +20,7 @@
     {%- endif %} 
     {% if requester_id == comment.author.id %}
     <button
-      hx-get="/comment/{{ comment.id }}/edit-mode"
+      hx-get="/protected/comment/{{ comment.id }}/edit-mode"
       hx-swap="innerHTML"
       hx-target="#comment-{{ comment.id }}"
       title="Edit"
@@ -41,7 +41,7 @@
       </svg>
     </button>
     <button
-      hx-delete="/comment/{{ comment.id }}"
+      hx-delete="/protected/comment/{{ comment.id }}"
       hx-swap="delete"
       hx-target="#comment-{{ comment.id }}"
       title="Delete"

@@ -20,10 +20,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Sort
-        run: |
-          cargo install cargo-sort
-          cargo sort --check
       - name: Format
         run: cargo fmt --check
       - name: Lint

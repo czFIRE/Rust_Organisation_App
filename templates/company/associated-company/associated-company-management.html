@@ -4,7 +4,7 @@
   hx-ext="response-targets"
 >
   <button
-    hx-get="/event/{{ event_id}}/staff-panel/{user_id}"
+    hx-get="/protected/event/{{ event_id}}/staff-panel/{user_id}"
     hx-swap="innerHTML"
     hx-target="#content"
     hx-vals='js:{"user_id": document.getElementById("user_id").value}'
@@ -19,7 +19,7 @@
   >
     <h2 class="font-mono font-bold text-txthl text-2xl">Add Company</h2>
     <form
-      hx-post="/event/{{event_id}}/company"
+      hx-post="/protected/event/{{event_id}}/company"
       hx-swap="#innerHTML"
       hx-target="#associated-container"
       hx-target-error="#error"
@@ -66,14 +66,16 @@
       </button>
     </form>
   </div>
+
   <div
   id="error"
   class="font-mono text-lg text-rej p-1 bg-foreground1 rounded-md"
   ></div>
+
   <div>
     <div
       id="associated-companies-editable"
-      hx-get="/event/{{ event_id }}/company/editable"
+      hx-get="/protected/event/{{ event_id }}/company/editable"
       hx-trigger="load"
     ></div>
   </div>

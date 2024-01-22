@@ -5,7 +5,7 @@
 >
   <h2 class="font-mono font-bold text-txthl text-2xl">Task Creation</h2>
   <form
-    hx-post="/event/{{ event_id }}/task"
+    hx-post="/protected/event/{{ event_id }}/task"
     hx-swap="innerHTML"
     hx-target="#content"
     hx-target-error="#error"
@@ -65,7 +65,7 @@
     class="w-8/12 text-center items-center self-center font-mono text-lg text-rej p-1 bg-foreground1 rounded-md"
   ></div>
   <button
-    hx-get="/event/{{ event_id }}/staff/{{ creator_id }}/tasks-panel"
+    hx-get="/protected/event/{{ event_id }}/staff/{{ creator_id }}/tasks-panel"
     hx-swap="innerHTML"
     hx-target="#content"
     class="font-mono text-txthl text-lg bg-foreground2 rounded-md p-1"

@@ -10,7 +10,7 @@
   >
     {% if requester.role == EventRole::Organizer %}
     <button
-      hx-get="/event/staff/{{ requester.id }}/task-creation"
+      hx-get="/protected/event/staff/{{ requester.id }}/task-creation"
       hx-swap="innerHTML"
       hx-target="#content"
       class="p-2 rounded-md bg-foreground2 font-mono text-txthl text-lg"
@@ -19,7 +19,7 @@
     </button>
     {% endif %}
     <button
-      hx-get="/event/{{ requester.event_id }}/staff-panel/{{ requester.user.id }}"
+      hx-get="/protected/event/{{ requester.event_id }}/staff-panel/{{ requester.user.id }}"
       hx-swap="innerHTML"
       hx-target="#content"
       class="p-2 rounded-md bg-foreground2 font-mono text-txthl text-lg"
@@ -29,7 +29,7 @@
   </div>
   <div
     id="tasks"
-    hx-get="/event/{{ requester.event_id }}/task?limit=5&offset=0"
+    hx-get="/protected/event/{{ requester.event_id }}/task?limit=5&offset=0"
     hx-trigger="load"
     class="w-full m-5"
   ></div>

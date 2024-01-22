@@ -10,7 +10,7 @@
     class="flex flex-row justify-between rounded-md space-x-10 p-3 m-3 w-full bg-foreground1"
   >
     <button
-      hx-get="/event/staff/{{ requester_id }}/tasks-panel"
+      hx-get="/protected/event/staff/{{ requester_id }}/tasks-panel"
       hx-swap="innerHTML"
       hx-target="#content"
       class="p-2 rounded-md bg-foreground2 font-mono text-txthl text-lg"
@@ -19,7 +19,7 @@
     </button>
     {% if task.creator_id == requester_id %}
     <button
-      hx-get="/event/staff/{{ requester_id }}/task-edit/{{ task.id }}"
+      hx-get="/protected/event/staff/{{ requester_id }}/task-edit/{{ task.id }}"
       hx-swap="innerHTML"
       hx-target="#content"
       class="p-2 rounded-md bg-foreground2 font-mono text-txthl text-lg"
@@ -27,7 +27,7 @@
       Edit Task
     </button>
     <button
-      hx-delete="/event/task/{{ task.id }}"
+      hx-delete="/protected/event/task/{{ task.id }}"
       hx-swap="innerHTML"
       hx-target="#content"
       hx-confirm="Are you sure you want to delete this task?"
@@ -36,7 +36,7 @@
       Delete Task
     </button>
     <button
-      hx-get="/task/{{task.id}}/staff/{{requester_id}}/management"
+      hx-get="/protected/task/{{task.id}}/staff/{{requester_id}}/management"
       hx-swap="innerHTML"
       hx-target="#content"
       class="p-2 rounded-md bg-foreground2 font-mono text-txthl text-lg"
@@ -56,7 +56,7 @@
         You have not yet applied for this task.
       </p>
       <form
-        hx-post="/task/{{ task.id }}/staff"
+        hx-post="/protected/task/{{ task.id }}/staff"
         hx-ext="json-enc"
         hx-swap="outerHTML"
         hx-target="#registration-prompt"

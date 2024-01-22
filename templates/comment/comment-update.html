@@ -25,7 +25,7 @@
     </div>
     <form
       id="form-{{ comment.id}}"
-      hx-patch="/comment/{{ comment.id }}"
+      hx-patch="/protected/comment/{{ comment.id }}"
       hx-swap="#outerHTML"
       hx-target="#comment-{{ comment.id }}"
       hx-ext="json-enc"
@@ -43,7 +43,7 @@
   </div>
   <div id="comment-actions" class="flex flex-row space-x-3">
     <button
-      hx-patch="/comment/{{ comment.id }}"
+      hx-patch="/protected/comment/{{ comment.id }}"
       hx-swap="#outerHTML"
       hx-target="#comment-{{ comment.id }}"
       hx-ext="json-enc"
@@ -66,7 +66,7 @@
       </svg>
     </button>
     <button
-      hx-get="/comment/{{ comment.id }}"
+      hx-get="/protected/comment/{{ comment.id }}"
       hx-swap="innerHTML"
       hx-target="#comment-{{ comment.id }}"
       title="Cancel"

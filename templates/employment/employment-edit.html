@@ -6,7 +6,7 @@
   <h2 class="font-mono font-bold text-2xl text-txthl">Employee Editing</h2>
 
   <form
-    hx-patch="/user/{{ user_id }}/employment/{{ company_id }}"
+    hx-patch="/protected/user/{{ user_id }}/employment/{{ company_id }}"
     hx-swap="innerHTML"
     hx-target="#content"
     hx-target-error="#error"
@@ -108,7 +108,7 @@
   </form>
   <!-- Return to the editor's page, not the user's page. -->
   <button
-    hx-get="/user/{{ editor_id }}/employment/{{ company_id }}"
+    hx-get="/protected/user/{{ editor_id }}/employment/{{ company_id }}"
     hx-swap="innerHTML"
     hx-target="#content"
     class="font-mono text-xl text-txthl bg-foreground1 rounded-md p-2"

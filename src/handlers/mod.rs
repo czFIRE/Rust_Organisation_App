@@ -1,5 +1,6 @@
 pub mod assigned_staff;
 pub mod associated_company;
+pub mod auth;
 pub mod comment;
 pub mod common;
 pub mod company;

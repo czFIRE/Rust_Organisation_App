@@ -81,7 +81,7 @@
       class="flex flex-row space-x-5 row-start-4 col-span-5 row-span-1 w-1/2"
     >
       <button
-        hx-get="/timesheet/{{ id }}/hours"
+        hx-get="/protected/timesheet/{{ id }}/hours"
         hx-swap="innerHTML"
         hx-target="#worked-hours"
         class="bg-foreground1 rounded-md p-2 font-mono text-txthl text-lg"
@@ -89,7 +89,7 @@
         Recalculate Hours
       </button>
       <button
-        hx-get="/timesheet/{{ id }}/expected-wage"
+        hx-get="/protected/timesheet/{{ id }}/expected-wage"
         hx-swap="innerHTML"
         hx-target="#content"
         hx-ext="path-params"
@@ -100,7 +100,7 @@
       </button>
       {% if is_editable %}
       <button
-        hx-get="/timesheet/{{ id }}/submit-page"
+        hx-get="/protected/timesheet/{{ id }}/submit-page"
         hx-swap="innerHTML"
         hx-target="#content"
         hx-ext="path-params"
@@ -110,7 +110,7 @@
         Submit Sheet
       </button>
       <button
-        hx-delete="/timesheet/{{ id }}/days"
+        hx-delete="/protected/timesheet/{{ id }}/days"
         hx-swap="innerHTML"
         hx-target="#content"
         hx-confirm="Are you sure you want to clear all data on the sheet?"
@@ -142,7 +142,7 @@
         </p>
       </div>
       <button
-        hx-get="/timesheet/{{ id }}/day/{{ workday.date }}/edit-mode"
+        hx-get="/protected/timesheet/{{ id }}/day/{{ workday.date }}/edit-mode"
         hx-swap="#outerHTML"
         hx-target="#workday-{{ workday.date }}"
         class="font-mono text-lg text-txthl"
@@ -153,7 +153,7 @@
     {% endfor %}
   </div>
   <button
-    hx-get="/user/{{user_id}}/employment/{{company_id}}/sheet"
+    hx-get="/protected/user/{{user_id}}/employment/{{company_id}}/sheet"
     hx-swap="innerHTML"
     hx-target="#content"
     class="font-mono text-txthl text-lg bg-foreground1 rounded-md p-1"

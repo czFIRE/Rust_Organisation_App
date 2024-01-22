@@ -90,7 +90,7 @@
   <div class="flex flex-row space-x-5">
     {% if in_submit_mode && wage.error_option.is_none() %}
     <button
-      hx-patch="/timesheet/{{ timesheet_id}}"
+      hx-patch="/protected/timesheet/{{ timesheet_id}}"
       hx-vals='js:{
                                 "is_editable": false,
                                 "status": "Pending"
@@ -105,7 +105,7 @@
     </button>
     {% endif %}
     <button
-      hx-get="/timesheet/{{ timesheet_id}}"
+      hx-get="/protected/timesheet/{{ timesheet_id}}"
       hx-swap="innerHTML"
       hx-target="#content"
       class="font-mono text-txthl text-lg p-1 rounded-md bg-foreground1"
