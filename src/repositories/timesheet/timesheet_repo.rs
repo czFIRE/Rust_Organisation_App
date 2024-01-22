@@ -445,7 +445,7 @@ impl TimesheetRepository {
         data: WorkdayUpdateData,
     ) -> DbResult<Workday> {
         let mut tx = self.pool.begin().await?;
-
+        println!("BEFORE WORKDAY UPDATE");
         let workday = sqlx::query_as!(
             Workday,
             r#"
@@ -469,20 +469,20 @@ impl TimesheetRepository {
         )
         .fetch_one(tx.deref_mut())
         .await?;
-
+        println!("BEFORE SHEET UPDATE");
         sqlx::query!(
             r#"
             UPDATE timesheet 
             SET total_hours = (SELECT SUM(total_hours) 
                               FROM workday 
-                              WHERE workday.timesheet_id = timesheet_id
+                              WHERE workday.timesheet_id = $1
                               GROUP BY timesheet_id)
             WHERE id = $1 AND deleted_at IS NULL;"#,
             timesheet_id,
         )
         .execute(tx.deref_mut())
         .await?;
-
+        println!("BEFORE COMMIT");
         tx.commit().await?;
 
         Ok(workday)

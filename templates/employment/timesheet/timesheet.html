@@ -20,7 +20,7 @@
     <p class="font-mono text-txt text-lg">Not Submitted</p>
     {% endmatch %}
   </div>
-  <div id="sheet-panel" class="grid grid-cols-5 grid-rows-3 w-full text-wrap">
+  <div id="sheet-panel" class="grid grid-cols-5 grid-rows-4 w-full text-wrap">
     <div class="flex flex-row space-x-4 col-span-2">
       <svg
         class="w-6 h-6 text-txt"
@@ -57,7 +57,10 @@
         />
       </svg>
       <p class="font-mono text-lg text-txt">
-        <b>Worked Hours:</b> {{ total_hours }}
+        <b>Worked Hours:</b>
+      </p>
+      <p id="worked-hours" class="font-mono text-lg text-txt">
+        {{ total_hours }}
       </p>
     </div>
     {% if manager_note.is_some() %}
@@ -70,11 +73,21 @@
       </p>
     </div>
     {% endif %}
-    <div
-      class="flex flex-row space-x-5 row-start-3 col-span-5 row-span-1 w-1/2"
-    >
+    <div class="flex flex-row space-x-5 row-start-3 col-span-2">
       <input id="pink_paper_signed" name="pink_paper_signed" type="checkbox">
       <label for="pink_paper_signed" class="font-mono text-txt text-lg">Signed pink paper</label>
+    </div>
+    <div
+      class="flex flex-row space-x-5 row-start-4 col-span-5 row-span-1 w-1/2"
+    >
+      <button
+        hx-get="/timesheet/{{ id }}/hours"
+        hx-swap="innerHTML"
+        hx-target="#worked-hours"
+        class="bg-foreground1 rounded-md p-2 font-mono text-txthl text-lg"
+      >
+        Recalculate Hours
+      </button>
       <button
         hx-get="/timesheet/{{ id }}/expected-wage"
         hx-swap="innerHTML"
@@ -90,6 +103,8 @@
         hx-get="/timesheet/{{ id }}/submit-page"
         hx-swap="innerHTML"
         hx-target="#content"
+        hx-ext="path-params"
+        hx-vals='js:{"pink_paper_signed": document.getElementById("pink_paper_signed").checked}'
         class="bg-foreground1 rounded-md p-2 font-mono text-txthl text-lg"
       >
         Submit Sheet
@@ -99,7 +114,7 @@
         hx-swap="innerHTML"
         hx-target="#content"
         hx-confirm="Are you sure you want to clear all data on the sheet?"
-        class="bg-foreground1 rounded-md p-2 font-mono text-txthl text-lg"
+        class="bg-foreground1 rounded-md p-2 font-mono text-rej text-lg"
       >
         Clear Sheet
       </button>

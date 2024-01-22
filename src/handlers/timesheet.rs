@@ -202,6 +202,28 @@ pub async fn get_expected_wage_calculation(
     HttpResponse::Ok().body(body.expect("Should be valid."))
 }
 
+// A little hacky, I admit. But time is a precious commodity today.
+#[get("/timesheet/{timesheet_id}/hours")]
+pub async fn get_sheet_hours(
+    timesheet_id: web::Path<String>,
+    timesheet_repo: web::Data<TimesheetRepository>,
+) -> HttpResponse {
+    let id_parse = Uuid::from_str(timesheet_id.into_inner().as_str());
+    if id_parse.is_err() {
+        return HttpResponse::BadRequest().body("Invalid ID format".to_string());
+    }
+    let parsed_id = id_parse.expect("Should be valid.");
+
+    let sheet_res = timesheet_repo._read_one(parsed_id).await;
+    if let Err(error) = sheet_res {
+        return handle_database_error(error);
+    }
+
+    let sheet = sheet_res.expect("Should be some.");
+
+    return HttpResponse::Ok().body(format!("{}", sheet.timesheet.total_hours));
+}
+
 #[get("/timesheet/{timesheet_id}/submit-page")]
 pub async fn open_sheet_submit_page(
     timesheet_id: web::Path<String>,
@@ -215,15 +237,15 @@ pub async fn open_sheet_submit_page(
 
     let parsed_id = id_parse.expect("Should be valid.");
     let sheet_res = timesheet_repo._read_one(parsed_id).await;
-    if sheet_res.is_err() {
-        return handle_database_error(sheet_res.expect_err("Should be an error."));
+    if let Err(error) = sheet_res {
+        return handle_database_error(error);
     }
 
     let sheet = sheet_res.expect("Should be some.");
 
     let wage = get_calculated_wage(&sheet, query.pink_paper_signed, timesheet_repo).await;
-    if wage.is_err() {
-        return HttpResponse::BadRequest().body(wage.expect_err("Should be an error."));
+    if let Err(error) = wage {
+        return HttpResponse::BadRequest().body(error);
     }
     let template = TimesheetCalculateTemplate {
         wage: wage.expect("Should be valid."),

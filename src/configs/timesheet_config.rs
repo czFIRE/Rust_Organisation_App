@@ -4,7 +4,7 @@ use crate::handlers::timesheet::{
     create_timesheet, get_all_timesheets_for_employment, get_expected_wage_calculation,
     get_timesheet, get_timesheets_for_review, get_work_day, open_sheet_submit_page,
     open_timesheet_for_review, reset_timesheet_data, toggle_work_day_edit_mode, update_timesheet,
-    update_work_day,
+    update_work_day, get_sheet_hours,
 };
 
 pub fn configure_timesheet_endpoints(config: &mut web::ServiceConfig) {
@@ -20,5 +20,6 @@ pub fn configure_timesheet_endpoints(config: &mut web::ServiceConfig) {
         .service(open_timesheet_for_review)
         .service(get_timesheets_for_review)
         .service(get_expected_wage_calculation)
-        .service(open_sheet_submit_page);
+        .service(open_sheet_submit_page)
+        .service(get_sheet_hours);
 }
