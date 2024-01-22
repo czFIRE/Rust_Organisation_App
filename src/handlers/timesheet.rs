@@ -221,7 +221,7 @@ pub async fn get_sheet_hours(
 
     let sheet = sheet_res.expect("Should be some.");
 
-    return HttpResponse::Ok().body(format!("{}", sheet.timesheet.total_hours));
+    HttpResponse::Ok().body(format!("{}", sheet.timesheet.total_hours))
 }
 
 #[get("/timesheet/{timesheet_id}/submit-page")]
