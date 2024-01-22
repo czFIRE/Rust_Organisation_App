@@ -55,11 +55,15 @@ Of course, in such a case, you need to manually apply migrations using ``cargo s
 ### Available Users
 We have prepared several user accounts you can use to explore Orchestrate.
 
-Dave Null - Our most privileged user. Dave should be able to access the Administration Panel, manage Employments for AMD, manage AMD itself and also manage the Woodstock event.
+**Dave Null** - Our most privileged user. Dave should be able to access the Administration Panel, manage Employments for AMD, manage AMD itself and also manage the Woodstock event.
+
+
 Login: dave@null.com 
+
+
 Password: davenull
 
-Anna Smeth - A regular user. She should have an editable timesheet in her employment.
+**Anna Smeth** - A regular user. She should have an editable timesheet in her employment.
 Login: 
 Password:
 
@@ -105,6 +109,18 @@ Petr added onto the orchestration with Keycloak and its accompanying database.
 Work on the Database migration SQL was done by Michal, Matej and Slavomir, but mostly by
 Slavomir who ensured the SQL was consistent with the ERD after Michal's initial implementation.
 Slavomir also added important constraints and wrote most of the database seeding script.
+
+### Testing
+To ensure at least a decent level of correctness for the operations in our system, we wrote a large number of tests. These tests do not cover all of the functionality, but we tried our best to cover as much as we could.
+
+
+All in all, we have written around 133 tests. These test are separated into three categories.
+
+Repository Tests - 58 tests testing the functionality of database access repositories.
+
+API Tests - 74 tests testing the functionality of the REST API.
+
+Wage Calculation Test - 1 test testing the functionality of the wage calculation functionality.
 
 ### Database Repository Pattern
 For database access, we had chosen SQLX as everyone worked with it due to the
