@@ -240,7 +240,7 @@ impl EventRepository {
                 UPDATE timesheet 
                 SET total_hours = (SELECT SUM(total_hours) 
                                   FROM workday 
-                                  WHERE workday.timesheet_id = timesheet_id
+                                  WHERE workday.timesheet_id = $1
                                   GROUP BY timesheet_id)
                 WHERE id = $1 AND deleted_at IS NULL;"#,
                 sheet.id,
