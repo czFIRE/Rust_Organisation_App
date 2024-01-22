@@ -1,8 +1,8 @@
 use std::fmt::Display;
 
+use actix_web::http;
 use actix_web::HttpResponse;
 use actix_web::ResponseError;
-use actix_web::http;
 use chrono::NaiveDate;
 use reqwest::StatusCode;
 use serde::Deserialize;
@@ -60,6 +60,7 @@ pub struct ResourceAccess {
     account: RealmAccess,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct FullClaims {
     pub exp: i64,

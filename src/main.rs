@@ -11,7 +11,6 @@ mod utils;
 use crate::handlers::auth::{login, register};
 use actix_web::dev::Service;
 use actix_web::http::header::HeaderValue;
-use actix_web::middleware::ErrorHandlers;
 use log::trace;
 use reqwest::header;
 
@@ -23,7 +22,6 @@ use sqlx::{Pool, Postgres};
 
 use std::sync::Arc;
 
-use actix_web_httpauth::extractors::AuthenticationError;
 use actix_web_middleware_keycloak_auth::{DecodingKey, KeycloakAuth};
 
 use crate::configs::assigned_staff_config::configure_assigned_staff_endpoints;
@@ -53,7 +51,7 @@ use crate::{
     repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository,
 };
 
-use actix_web::{web, HttpResponse, ResponseError};
+use actix_web::{web, HttpResponse};
 use serde::Deserialize;
 
 #[derive(Deserialize)]

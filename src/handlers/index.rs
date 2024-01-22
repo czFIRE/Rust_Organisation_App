@@ -1,8 +1,5 @@
 use actix_web::{get, http, HttpResponse};
 use askama::Template;
-use chrono::{serde::ts_seconds, DateTime, Utc};
-use serde::Deserialize;
-use uuid::Uuid;
 
 use crate::{
     errors::parse_error,

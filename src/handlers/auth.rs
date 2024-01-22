@@ -60,7 +60,7 @@ pub async fn register(
     }
 
     let path = path_res.expect("Should be some.");
-  
+
     let payload = json!({
         "username": std::env::var("KEYCLOAK_ADMIN").expect("Should be set"),
         "password": std::env::var("KEYCLOAK_ADMIN_PASSWORD").expect("Should be set"),
@@ -85,7 +85,7 @@ pub async fn register(
         return HttpResponse::InternalServerError().finish();
     }
     let access = access_json.expect("Should be valid");
-  
+
     let path_res = build_path("/admin/realms/Orchestrate/users");
     if path_res.is_err() {
         return HttpResponse::InternalServerError().body("Internal server error.");
@@ -121,7 +121,6 @@ pub async fn register(
     if response.is_err() {
         return HttpResponse::BadRequest().finish();
     }
-
 
     let response_exp = response.expect("Should be valid here.");
     if response_exp.status() != http::StatusCode::CREATED {
@@ -169,7 +168,6 @@ pub async fn login(
     // The path variable stores the URL of the authentication server
     // let path = "http://localhost:9090/realms/Orchestrate/protocol/openid-connect/token";
 
-
     // The payload variable stores the JSON object with the login credentials and the client information
     let payload = json!({
         "username": form.username,
@@ -196,7 +194,6 @@ pub async fn login(
     let result = res.expect("Should be some.");
 
     let result_status = result.status();
-
 
     let user_res = user_repo.read_one_with_email(form.username).await;
 

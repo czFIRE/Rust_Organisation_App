@@ -133,7 +133,8 @@ impl UserRepository {
               AND deleted_at IS NULL
             "#,
             email
-        ).fetch_one(executor)
+        )
+        .fetch_one(executor)
         .await?;
 
         Ok(user)
