@@ -1,4 +1,4 @@
-use std::{io::Error, path::Path};
+use std::{io::Error, path::PathBuf};
 
 use actix_multipart::form::tempfile::TempFile;
 use uuid::Uuid;
@@ -7,10 +7,22 @@ use super::models::ImageCategory;
 
 fn get_dir_by_category(category: ImageCategory) -> String {
     match category {
-        ImageCategory::Company => "/img/company/".to_string(),
-        ImageCategory::Event => "/img/event/".to_string(),
-        ImageCategory::User => "/img/user/".to_string(),
+        ImageCategory::Company => "company".to_string(),
+        ImageCategory::Event => "event".to_string(),
+        ImageCategory::User => "user".to_string(),
     }
+}
+
+fn build_string_path(item_id: Uuid, category: String) -> String {
+    let mut directory = "/img/".to_string();
+    directory.push_str(category.as_str());
+    directory.push('/');
+    let mut user_file = item_id.to_string();
+    user_file.push_str(".jpg");
+
+    directory.push_str(user_file.as_str());
+
+    directory
 }
 
 pub fn store_image(
@@ -18,30 +30,34 @@ pub fn store_image(
     category: ImageCategory,
     image: TempFile,
 ) -> Result<String, Error> {
-    let mut user_file = item_id.to_string();
-    user_file.push_str(".jpg");
+    let mut path: PathBuf = PathBuf::new();
+    path.push(".");
+    path.push("src");
+    path.push("static");
+    path.push("img");
+    let user_file = item_id.to_string();
+    let directory = get_dir_by_category(category);
+    path.push(directory.clone());
+    path.push(user_file.clone());
+    path.set_extension("jpg");
 
-    let mut directory = get_dir_by_category(category);
-    directory.push_str(user_file.as_str());
+    let final_path = path.as_path();
+    image.file.persist(final_path)?;
 
-    let mut path_string = "./src/static".to_string();
-    path_string.push_str(directory.as_str());
-
-    let path = Path::new(path_string.as_str());
-    image.file.persist(path)?;
-    Ok(directory)
+    Ok(build_string_path(item_id, directory))
 }
 
 pub fn remove_image(item_id: Uuid, category: ImageCategory) -> Result<(), Error> {
-    let mut user_file = item_id.to_string();
-    user_file.push_str(".jpg");
-
-    let mut directory = get_dir_by_category(category);
-    directory.push_str(user_file.as_str());
-
-    let mut path_string = "./src/static".to_string();
-    path_string.push_str(directory.as_str());
-
-    let path = Path::new(path_string.as_str());
-    std::fs::remove_file(path)
+    let mut path: PathBuf = PathBuf::new();
+    path.push(".");
+    path.push("src");
+    path.push("static");
+    path.push("img");
+    let user_file = item_id.to_string();
+    let directory = get_dir_by_category(category);
+    path.push(directory.clone());
+    path.push(user_file.clone());
+    path.set_extension("jpg");
+    let final_path = path.as_path();
+    std::fs::remove_file(final_path)
 }
