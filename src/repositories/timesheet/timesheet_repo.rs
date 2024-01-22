@@ -20,6 +20,7 @@ use uuid::Uuid;
 
 use super::models::WorkdayUpdateData;
 
+// These functions outside of the repository were added by s_vlc
 /// Reads workdays of a specific timesheet that match a requested date range.
 async fn read_some_timesheet_workdays_db_using_tx(
     tx: &mut Transaction<'_, sqlx::Postgres>,

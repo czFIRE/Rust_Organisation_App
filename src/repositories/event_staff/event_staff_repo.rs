@@ -1,6 +1,6 @@
 use crate::common::DbResult;
 use async_trait::async_trait;
-use sqlx::{postgres::PgPool, Postgres, Transaction};
+use sqlx::postgres::PgPool;
 use std::{ops::DerefMut, sync::Arc};
 use uuid::Uuid;
 
@@ -49,19 +49,21 @@ impl StaffRepository {
         .fetch_one(tx.deref_mut())
         .await?;
 
-        let new_staff = self.read_one_tx(staff_info.id, tx).await?;
-
+        let new_staff = self.read_one_db(tx.deref_mut(), staff_info.id).await?;
+        tx.commit().await?;
         Ok(new_staff)
     }
 
     pub async fn read_one(&self, event_staff_id: Uuid) -> DbResult<StaffExtended> {
         // Redis here
-        self.read_one_db(event_staff_id).await
+        let executor = self.pool.as_ref();
+        self.read_one_db(executor, event_staff_id).await
     }
 
-    async fn read_one_db(&self, event_staff_id: Uuid) -> DbResult<StaffExtended> {
-        let executor = self.pool.as_ref();
-
+    async fn read_one_db<'e, E>(&self, db: E, event_staff_id: Uuid) -> DbResult<StaffExtended>
+    where
+        E: sqlx::Executor<'e, Database = sqlx::Postgres>,
+    {
         let staff: StaffUserCompanyFlattened = sqlx::query_as!(
             StaffUserCompanyFlattened,
             r#"
@@ -118,7 +120,7 @@ impl StaffRepository {
             "#,
             event_staff_id,
         )
-        .fetch_one(executor)
+        .fetch_one(db)
         .await?;
 
         Ok(staff.into())
@@ -204,75 +206,6 @@ impl StaffRepository {
         )
         .fetch_one(executor)
         .await?;
-
-        Ok(staff.into())
-    }
-
-    async fn read_one_tx(
-        &self,
-        event_staff_id: Uuid,
-        mut tx: Transaction<'_, Postgres>,
-    ) -> DbResult<StaffExtended> {
-        let staff: StaffUserCompanyFlattened = sqlx::query_as!(
-            StaffUserCompanyFlattened,
-            r#"
-            SELECT 
-                event_staff.id AS staff_id, 
-                event_staff.user_id AS staff_user_id, 
-                event_staff.company_id AS staff_company_id, 
-                event_staff.event_id AS staff_event_id, 
-                event_staff.role AS "staff_role!: EventRole", 
-                event_staff.status AS "staff_status!: AcceptanceStatus", 
-                event_staff.decided_by AS staff_decided_by, 
-                event_staff.created_at AS staff_created_at, 
-                event_staff.edited_at AS staff_edited_at, 
-                event_staff.deleted_at AS staff_deleted_at, 
-                user_record.id AS user_id, 
-                user_record.name AS user_name, 
-                user_record.email AS user_email, 
-                user_record.birth AS user_birth, 
-                user_record.avatar_url AS user_avatar_url, 
-                user_record.gender AS "user_gender!: Gender", 
-                user_record.role AS "user_role!: UserRole", 
-                user_record.status AS "user_status!: UserStatus", 
-                user_record.created_at AS user_created_at, 
-                user_record.edited_at AS user_edited_at, 
-                user_record.deleted_at AS user_deleted_at, 
-                decider.id AS "decider_id?",
-                decider.name AS "decider_name?",
-                decider.status AS "decider_status?: UserStatus",
-                decider.birth AS "decider_birth?",
-                decider.gender AS "decider_gender?: Gender",
-                decider.avatar_url AS "decider_avatar_url?",
-                company.id AS company_id, 
-                company.name AS company_name, 
-                company.description AS company_description, 
-                company.phone AS company_phone, 
-                company.email AS company_email, 
-                company.avatar_url AS company_avatar_url, 
-                company.website AS company_website, 
-                company.crn AS company_crn, 
-                company.vatin AS company_vatin, 
-                company.created_at AS company_created_at, 
-                company.edited_at AS company_edited_at, 
-                company.deleted_at AS company_deleted_at 
-            FROM 
-                event_staff 
-                INNER JOIN user_record ON event_staff.user_id = user_record.id 
-                INNER JOIN company ON event_staff.company_id = company.id
-                LEFT OUTER JOIN (event_staff AS decider_staff
-                INNER JOIN user_record AS decider ON decider_staff.user_id = decider.id)
-                ON event_staff.decided_by = decider_staff.id
-            WHERE 
-                event_staff.id = $1
-                AND event_staff.deleted_at IS NULL;
-            "#,
-            event_staff_id,
-        )
-        .fetch_one(tx.deref_mut())
-        .await?;
-
-        tx.commit().await?;
 
         Ok(staff.into())
     }
@@ -383,8 +316,10 @@ impl StaffRepository {
             return Err(sqlx::Error::RowNotFound);
         }
 
-        let updated_staff = self.read_one_tx(staff_info.unwrap().id, tx).await?;
-
+        let updated_staff = self
+            .read_one_db(tx.deref_mut(), staff_info.unwrap().id)
+            .await?;
+        tx.commit().await?;
         Ok(updated_staff)
     }
 

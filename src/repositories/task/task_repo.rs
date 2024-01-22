@@ -4,7 +4,7 @@ use crate::{
     repositories::{assigned_staff::models::AssignedStaffData, task::models::TaskUserFlattened},
 };
 use async_trait::async_trait;
-use sqlx::{postgres::PgPool, Postgres, Transaction};
+use sqlx::postgres::PgPool;
 use std::{ops::DerefMut, sync::Arc};
 use uuid::Uuid;
 
@@ -79,61 +79,22 @@ impl TaskRepository {
         .fetch_one(tx.deref_mut())
         .await?;
 
-        let new_task = self.read_one_tx(new_task.id, tx).await?;
+        let new_task = self.read_one_db(tx.deref_mut(), new_task.id).await?;
+        tx.commit().await?;
 
         Ok(new_task)
     }
 
     pub async fn read_one(&self, task_id: Uuid) -> DbResult<TaskExtended> {
         // Redis here
-        self.read_one_db(task_id).await
-    }
-
-    async fn read_one_db(&self, task_id: Uuid) -> DbResult<TaskExtended> {
         let executor = self.pool.as_ref();
-
-        let task_user_flattened: TaskUserFlattened = sqlx::query_as!(
-            TaskUserFlattened,
-            r#"SELECT 
-                task.id AS task_id, 
-                task.event_id AS task_event_id, 
-                task.creator_id AS task_creator_id, 
-                task.title AS task_title, 
-                task.description AS task_description, 
-                task.finished_at AS task_finished_at, 
-                task.priority AS "task_priority!: TaskPriority", 
-                task.accepts_staff AS task_accepts_staff, 
-                task.created_at AS task_created_at, 
-                task.edited_at AS task_edited_at, 
-                task.deleted_at AS task_deleted_at, 
-                user_record.id AS user_id, 
-                user_record.name AS user_name, 
-                user_record.email AS user_email, 
-                user_record.birth AS user_birth, 
-                user_record.avatar_url AS user_avatar_url, 
-                user_record.gender AS "user_gender!: Gender", 
-                user_record.role AS "user_role!: UserRole",
-                user_record.status AS "user_status!: UserStatus", 
-                user_record.created_at AS user_created_at, 
-                user_record.edited_at AS user_edited_at, 
-                user_record.deleted_at AS user_deleted_at
-            FROM task 
-            INNER JOIN event_staff ON task.creator_id=event_staff.id
-            INNER JOIN user_record ON event_staff.user_id=user_record.id 
-            WHERE task.id=$1"#,
-            task_id,
-        )
-        .fetch_one(executor)
-        .await?;
-
-        Ok(task_user_flattened.into())
+        self.read_one_db(executor, task_id).await
     }
 
-    async fn read_one_tx(
-        &self,
-        task_id: Uuid,
-        mut tx: Transaction<'_, Postgres>,
-    ) -> DbResult<TaskExtended> {
+    async fn read_one_db<'e, E>(&self, db: E, task_id: Uuid) -> DbResult<TaskExtended>
+    where
+        E: sqlx::Executor<'e, Database = sqlx::Postgres>,
+    {
         let task_user_flattened: TaskUserFlattened = sqlx::query_as!(
             TaskUserFlattened,
             r#"SELECT 
@@ -165,10 +126,8 @@ impl TaskRepository {
             WHERE task.id=$1"#,
             task_id,
         )
-        .fetch_one(tx.deref_mut())
+        .fetch_one(db)
         .await?;
-
-        tx.commit().await?;
 
         Ok(task_user_flattened.into())
     }
@@ -320,8 +279,9 @@ impl TaskRepository {
         }
 
         let task = self
-            .read_one_tx(task_res.expect("Should be some.").id, tx)
+            .read_one_db(tx.deref_mut(), task_res.expect("Should be some.").id)
             .await?;
+        tx.commit().await?;
 
         Ok(task)
     }

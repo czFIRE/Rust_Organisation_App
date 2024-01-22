@@ -33,6 +33,7 @@ impl crate::repositories::repository::DbRepository for EmploymentRepository {
     }
 }
 
+// Added by s_vlc
 // Read one lite employment using an existing transaction handle.
 pub async fn read_one_lite_db_using_tx(
     tx: &mut Transaction<'_, sqlx::Postgres>,

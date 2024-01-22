@@ -1155,9 +1155,6 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
-
-        let res = repo._hard_delete_deleted_comments().await;
-        assert!(res.is_ok());
     }
 
     #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
@@ -1362,9 +1359,6 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
-
-        let res = repo._hard_delete_deleted_comments().await;
-        assert!(res.is_ok());
         Ok(())
     }
 
