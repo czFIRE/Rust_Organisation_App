@@ -104,6 +104,41 @@ impl UserRepository {
         Ok(user)
     }
 
+    pub async fn read_one_with_email(&self, email: String) -> DbResult<User> {
+        // TODO: Redis here
+
+        self.read_one_with_email_db(email).await
+    }
+
+    async fn read_one_with_email_db(&self, email: String) -> DbResult<User> {
+        let executor = self.pool.as_ref();
+
+        let user = sqlx::query_as!(
+            User,
+            r#"SELECT 
+                id, 
+                name, 
+                email, 
+                birth, 
+                avatar_url, 
+                gender AS "gender!: Gender", 
+                role AS "role!: UserRole", 
+                status AS "status!: UserStatus", 
+                created_at, 
+                edited_at, 
+                deleted_at 
+            FROM 
+                user_record 
+            WHERE email = $1
+              AND deleted_at IS NULL
+            "#,
+            email
+        ).fetch_one(executor)
+        .await?;
+
+        Ok(user)
+    }
+
     pub async fn _read_all(&self, filter: UsersQuery) -> DbResult<Vec<User>> {
         // TODO: Redis here
 

@@ -8,30 +8,23 @@ mod repositories;
 mod templates;
 mod utils;
 
-use crate::auth::models::{Login, Register};
-use crate::auth::openid::get_token;
-use crate::errors::parse_error;
 use crate::handlers::auth::{login, register};
-use crate::models::{Gender, UserRole};
-use crate::repositories::user::models::NewUser;
-use crate::templates::common::IndexTemplate;
-use actix_web::http::header::{HeaderValue, CONTENT_TYPE};
-use askama::Template;
-use chrono::NaiveDate;
-use organization::errors::handle_database_error;
-use reqwest::Client;
+use actix_web::dev::Service;
+use actix_web::http::header::HeaderValue;
+use actix_web::middleware::ErrorHandlers;
+use log::trace;
+use reqwest::header;
 
 use actix_files::Files as ActixFiles;
 use actix_web::{middleware::Logger, App, HttpServer};
-use auth::models::{AccessToken, Token};
 use dotenv::dotenv;
 use env_logger::Env;
-use serde_json::json;
 use sqlx::{Pool, Postgres};
 
 use std::sync::Arc;
 
-use actix_web_middleware_keycloak_auth::{DecodingKey, KeycloakAuth, KeycloakClaims};
+use actix_web_httpauth::extractors::AuthenticationError;
+use actix_web_middleware_keycloak_auth::{DecodingKey, KeycloakAuth};
 
 use crate::configs::assigned_staff_config::configure_assigned_staff_endpoints;
 use crate::configs::associated_company_config::configure_associated_company_endpoints;
@@ -44,7 +37,7 @@ use crate::configs::task_config::configure_task_endpoints;
 use crate::configs::timesheet_config::configure_timesheet_endpoints;
 use crate::configs::user_config::configure_user_endpoints;
 
-use crate::handlers::index::{index, registration_page};
+use crate::handlers::index::{index, login_page, registration_page};
 use crate::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
 use crate::repositories::comment::comment_repo::CommentRepository;
 use crate::repositories::company::company_repo::CompanyRepository;
@@ -59,7 +52,8 @@ use crate::{
     handlers::user::get_users_login,
     repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository,
 };
-use actix_web::{http, post, web, HttpResponse, Responder};
+
+use actix_web::{web, HttpResponse, ResponseError};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -109,6 +103,12 @@ async fn main() -> std::io::Result<()> {
     println!("Starting server on http://{}:{}", config.host, config.port);
 
     HttpServer::new(move || {
+        // let cookie_transform = CookieTransform::new_transform()
+        let keycloak_auth = KeycloakAuth::default_with_pk(
+            DecodingKey::from_rsa_pem(std::fs::read_to_string(".cert.pem").unwrap().as_bytes())
+                .expect("Failed to read .cert.pem"),
+        );
+
         App::new()
             .app_data(user_repo.clone())
             .app_data(company_repo.clone())
@@ -124,18 +124,45 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::new("%a %{User-Agent}i"))
             .service(index)
             .service(registration_page)
+            .service(login_page)
             .service(login)
             .service(register)
-            .configure(configure_user_endpoints)
-            .configure(configure_company_endpoints)
-            .configure(configure_event_endpoints)
-            .configure(configure_employment_endpoints)
-            .configure(configure_assigned_staff_endpoints)
-            .configure(configure_task_endpoints)
-            .configure(configure_staff_endpoints)
-            .configure(configure_associated_company_endpoints)
-            .configure(configure_comment_endpoints)
-            .configure(configure_timesheet_endpoints)
+            .service(
+                web::scope("/protected")
+                    .wrap(keycloak_auth)
+                    .wrap_fn(|mut req, service| {
+                        trace!("Initialize Cookie Transform Middleware.");
+                        let cookie_val = req
+                            .cookie("bearer_token")
+                            .map(|cookie| cookie.value().to_owned())
+                            .ok_or_else(|| HttpResponse::Unauthorized().finish());
+                        // if cookie_val.is_err() {
+                        //     return CookieAuthError{ message: "Failed to parse cookie.".to_string() };
+                        // }
+                        let cookie = cookie_val.expect("Should be valid");
+                        let auth_header_value = format!("Bearer {}", cookie);
+                        let header_value = HeaderValue::from_str(auth_header_value.as_str());
+                        // if header_value.is_err() {
+                        //     return HttpResponse::InternalServerError().finish();
+                        // }
+                        req.headers_mut().insert(
+                            header::AUTHORIZATION,
+                            header_value.expect("Should be some."),
+                        );
+                        trace!("Initialize Cookie Transform Middleware.");
+                        service.call(req)
+                    })
+                    .configure(configure_user_endpoints)
+                    .configure(configure_company_endpoints)
+                    .configure(configure_event_endpoints)
+                    .configure(configure_employment_endpoints)
+                    .configure(configure_assigned_staff_endpoints)
+                    .configure(configure_task_endpoints)
+                    .configure(configure_staff_endpoints)
+                    .configure(configure_associated_company_endpoints)
+                    .configure(configure_comment_endpoints)
+                    .configure(configure_timesheet_endpoints),
+            )
             // Temporary
             .service(get_users_login)
             // For serving css and static files overall

@@ -59,7 +59,7 @@
                         <p class="font-mono
                                 text-lg
                                 text-pnd">Requesting to work on this task.</p>
-                        <form hx-patch="/task/{{ staff_member.task_id }}/staff/{{ staff_member.staff.id }}"
+                        <form hx-patch="/protected/task/{{ staff_member.task_id }}/staff/{{ staff_member.staff.id }}"
                               hx-vals='js:{"decided_by": document.getElementById("misc_info").value}''
                               hx-ext="json-enc"
                               hx-swap="innerHTML"
@@ -86,7 +86,7 @@
                                 </svg>
                             </button>
                         </form>
-                        <form hx-patch="/task/{{ staff_member.task_id }}/staff/{{ staff_member.staff.id }}"
+                        <form hx-patch="/protected/task/{{ staff_member.task_id }}/staff/{{ staff_member.staff.id }}"
                               hx-vals='js:{"decided_by": document.getElementById("misc_info").value}''
                               hx-ext="json-enc"
                               hx-swap="innerHTML"
@@ -127,7 +127,7 @@
                                             {% else %}
                                                 Unknown
                                             {% endif %}</p>
-                        <button hx-delete="/task/{{ staff_member.task_id }}/staff"
+                        <button hx-delete="/protected/task/{{ staff_member.task_id }}/staff"
                                 hx-swap="innerHTML"
                                 hx-target="#staff-members"
                                 hx-confirm="Are you sure you want to delete this rejected application?"

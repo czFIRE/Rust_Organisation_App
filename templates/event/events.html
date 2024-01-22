@@ -4,7 +4,7 @@
   </div>
   {% for event in events %}
   <button
-    hx-get="/event/{{ event.id }}"
+    hx-get="/protected/event/{{ event.id }}"
     hx-swap="innerHTML"
     hx-target="#content"
     class="w-full"

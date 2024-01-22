@@ -8,7 +8,7 @@
   <p class="font-mono text-rej text-2xl">No sheets found.</p>
   {% else %} {% for sheet in timesheets %}
   <button
-    hx-get="/timesheet/{{ sheet.id }}/review-mode"
+    hx-get="/protected/timesheet/{{ sheet.id }}/review-mode"
     hx-swap="innerHTML"
     hx-target="#content"
     class="w-full"
@@ -122,7 +122,7 @@
   </button>
   {% endfor %} {% endif %}
   <button
-    hx-get="/user/{{ manager_id }}/employment/{{ company_id }}"
+    hx-get="/protected/user/{{ manager_id }}/employment/{{ company_id }}"
     hx-target="#content"
     hx-swap="innerHTML"
     class="font-mono text-txthl text-lg bg-foreground2 rounded-md p-1"

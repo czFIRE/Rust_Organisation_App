@@ -4,9 +4,10 @@ use chrono::{serde::ts_seconds, DateTime, Utc};
 use serde::Deserialize;
 use uuid::Uuid;
 
-use crate::{errors::parse_error, templates::common::{IndexTemplate, RegistrationTemplate}};
-
-use actix_web_middleware_keycloak_auth::{DecodingKey, KeycloakAuth, KeycloakClaims};
+use crate::{
+    errors::parse_error,
+    templates::common::{IndexTemplate, LoginTemplate, RegistrationTemplate},
+};
 
 #[get("/")]
 pub async fn index() -> HttpResponse {
@@ -33,21 +34,12 @@ pub async fn registration_page() -> HttpResponse {
     HttpResponse::Ok().body(body.expect("Should be some."))
 }
 
-// http://localhost:9090/realms/Orchestrate/account/#/
-// https://stackoverflow.com/questions/61858077/keycloak-realm-login-page-is-not-appearing
-
-#[derive(Debug, Deserialize)]
-#[allow(dead_code)]
-pub struct ClaimsWithEmail {
-    // Standard claims, we choose the way they should be deserialized
-    sub: Uuid,
-    #[serde(with = "ts_seconds")]
-    exp: DateTime<Utc>,
-    // Custom claims
-    company_id: u32,
-}
-
-#[get("/private")]
-pub async fn protected(claims: KeycloakClaims<ClaimsWithEmail>) -> HttpResponse {
-    HttpResponse::Ok().body("You are in a protected area.")
+#[get("/login")]
+pub async fn login_page() -> HttpResponse {
+    let template = LoginTemplate {};
+    let body = template.render();
+    if body.is_err() {
+        return HttpResponse::InternalServerError().body("Internal server error.");
+    }
+    HttpResponse::Ok().body(body.expect("Should be some."))
 }

@@ -6,7 +6,7 @@
   </div>
   <div id="user-content" class="flex flex-col space-y-5">
     <form
-      hx-patch="/user/{{ id }}"
+      hx-patch="/protected/user/{{ id }}"
       hx-ext="json-enc"
       class="grid grid-cols-4 grid-rows-2 gap-4 bg-foreground1 rounded-md p-2"
       hx-swap="innerHTML"
@@ -69,7 +69,7 @@
     </form>
     <div class="flex flex-row space-x-5 bg-foreground1 rounded-md p-2">
       <form hx-encoding='multipart/form-data' 
-            hx-put='/user/{{ id }}/avatar'
+            hx-put='/protected/user/{{ id }}/avatar'
             hx-swap="innerHTML"
             hx-target="#result-text"
             hx-target-400="#error"
@@ -85,7 +85,7 @@
               Upload Image
           </button>
       </form>
-      <button hx-delete="/user/{{ id }}/avatar"
+      <button hx-delete="/protected/user/{{ id }}/avatar"
               hx-swap="innerHTML"
               hx-target="#result-text"
               hx-confirm="Truly delete image?"
@@ -93,7 +93,7 @@
       <p id="result-text" class="font-mono text-txt text-lg"></p>
     </div>
     <button
-      hx-get="/user/{{ id }}"
+      hx-get="/protected/user/{{ id }}"
       hx-swap="innerHTML"
       hx-target="#content"
       title="Cancel"

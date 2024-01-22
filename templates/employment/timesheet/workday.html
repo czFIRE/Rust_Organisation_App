@@ -13,7 +13,7 @@
     </p>
   </div>
   <button
-    hx-get="/timesheet/{{ timesheet_id }}/day/{{ date }}/edit-mode"
+    hx-get="/protected/timesheet/{{ timesheet_id }}/day/{{ date }}/edit-mode"
     hx-swap="#outerHTML"
     hx-target="#workday-{{ date }}"
     class="font-mono text-lg text-txthl"

@@ -8,7 +8,7 @@
   >
     <h2 class="font-mono font-bold text-txthl text-2xl">Add Company</h2>
     <form
-      hx-post="/event/{{event_id}}/company"
+      hx-post="/protected/event/{{event_id}}/company"
       hx-swap="#innerHTML"
       hx-target="#associated-container"
       hx-ext="json-enc"
@@ -57,7 +57,7 @@
 
   <div class="flex flex-row items-center w-full">
     <button
-      hx-get="/event/{{ event_id}}/staff-panel/{user_id}"
+      hx-get="/protected/event/{{ event_id}}/staff-panel/{user_id}"
       hx-swap="innerHTML"
       hx-target="#content"
       hx-vals='js:{"user_id": document.getElementById("user_id").value}'
@@ -71,7 +71,7 @@
   <div>
     <div
       id="associated-companies-editable"
-      hx-get="/event/{{ event_id }}/company/editable"
+      hx-get="/protected/event/{{ event_id }}/company/editable"
       hx-trigger="load"
     ></div>
   </div>

@@ -209,7 +209,7 @@ pub async fn delete_all_rejected_assigned_staff(
     get_staff_per_task(parsed_id, query, assigned_repo).await
 }
 
-#[delete("task/{task_id}/staff/{staff_id}")]
+#[delete("/task/{task_id}/staff/{staff_id}")]
 pub async fn delete_assigned_staff(
     path: web::Path<(String, String)>,
     assigned_repo: web::Data<AssignedStaffRepository>,

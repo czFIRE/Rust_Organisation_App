@@ -11,6 +11,7 @@ name = "organization"
 actix-files = "0.6.5"
 actix-multipart = "0.6.1"
 actix-web = "4.4.0"
+actix-web-httpauth = "0.8.1"
 actix-web-middleware-keycloak-auth = "0.4.2"
 anyhow = "1.0.75"
 askama = "0.12.1"
@@ -19,8 +20,11 @@ chrono = { version = "0.4.31", features = ["serde"] }
 dotenv = "0.15.0"
 env_logger = "0.10.1"
 envy = "0.4.2"
+futures = "0.3.30"
+futures-util = "0.3.30"
+log = "0.4.20"
 regex = "1.10.2"
-reqwest = "0.11.23"
+reqwest = { version = "0.11.23", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.108"
 sqlx = { version = "0.7.3", features = [
