@@ -234,6 +234,19 @@ impl EventRepository {
             )
             .execute(tx.deref_mut())
             .await?;
+
+            sqlx::query!(
+                r#"
+                UPDATE timesheet 
+                SET total_hours = (SELECT SUM(total_hours) 
+                                  FROM workday 
+                                  WHERE workday.timesheet_id = timesheet_id
+                                  GROUP BY timesheet_id)
+                WHERE id = $1 AND deleted_at IS NULL;"#,
+                sheet.id,
+            )
+            .execute(tx.deref_mut())
+            .await?;
         }
 
         tx.commit().await?;

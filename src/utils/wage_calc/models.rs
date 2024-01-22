@@ -5,8 +5,9 @@ use serde::Deserialize;
 
 #[derive(Hash, Eq, PartialEq, PartialOrd, Ord, Deserialize, Debug, Clone)]
 pub struct YearAndMonth {
-    year: u16,
-    month: u8,
+    pub year: u16,
+    pub month: u8,
+    pub text_form: String,
 }
 
 impl From<NaiveDate> for YearAndMonth {
@@ -14,6 +15,7 @@ impl From<NaiveDate> for YearAndMonth {
         YearAndMonth {
             year: date.year() as u16,
             month: date.month() as u8,
+            text_form: date.format("%B, %y").to_string(),
         }
     }
 }

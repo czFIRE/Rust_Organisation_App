@@ -1,9 +1,10 @@
-<div id="event-create" class="flex flex-col space-y-10 items-center w-full">
+<div id="event-create" class="flex flex-col space-y-10 items-center w-full" hx-ext="response-targets">
   <h2 class="font-mono text-txthl text-4xl">Create Event</h2>
   <form
     hx-post="/protected/event"
     hx-swap="innerHTML"
     hx-target="#content"
+    hx-target-error="#error"
     hx-ext="json-enc"
     class="flex flex-col space-y-5 p-3 items-center w-8/12 bg-foreground1 rounded-md"
   >
@@ -79,4 +80,8 @@
       Create Event
     </button>
   </form>
+  <div
+    id="error"
+    class="w-8/12 text-center items-center self-center font-mono text-lg text-rej p-1 bg-foreground1 rounded-md"
+  ></div>
 </div>

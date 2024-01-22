@@ -1,4 +1,8 @@
-<div id="employment-create" class="flex flex-col space-y-3 items-center w-full">
+<div
+  id="employment-create"
+  class="flex flex-col space-y-3 items-center w-full"
+  hx-ext="response-targets"
+>
   <div
     id="employee-creation"
     class="bg-foreground1 rounded-md w-full flex flex-col space-y-2 items-center m-5 p-5"
@@ -8,6 +12,7 @@
       hx-post="/protected/employment"
       hx-swap="innerHTML"
       hx-target="#content"
+      hx-target-error="#error"
       hx-vals='js:{ hourly_wage: parseFloat(document.getElementById("hourly_wage").value)}'
       hx-ext="json-enc"
       class="grid grid-cols-4 grid-rows-4 gap-4"
@@ -143,6 +148,10 @@
         </button>
       </div>
     </form>
+    <div
+      id="error"
+      class="font-mono text-lg text-rej p-1 bg-foreground1 rounded-md"
+    ></div>
   </div>
 
   {% include "../user/user-search.html" %}

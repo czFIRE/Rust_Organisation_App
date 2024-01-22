@@ -165,7 +165,7 @@ pub async fn create_associated_company(
 ) -> HttpResponse {
     let id_parse = Uuid::from_str(event_id.into_inner().as_str());
     if id_parse.is_err() {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Invalid ID format".to_string());
     }
 
     let parsed_id = id_parse.expect("Should be valid.");
@@ -188,20 +188,15 @@ pub async fn create_associated_company(
     retrieve_associated_companies_per_event(parsed_id, true, true, query, associated_repo).await
 }
 
-//ToDo: Consider removing Option from the struct. It only has one item.
 #[patch("/event/{event_id}/company/{company_id}")]
 pub async fn update_associated_company(
     path: web::Path<(String, String)>,
     associated_company_data: web::Json<AssociatedCompanyData>,
     associated_repo: web::Data<AssociatedCompanyRepository>,
 ) -> HttpResponse {
-    if associated_company_data.association_type.is_none() {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
-    }
-
     let parsed_ids = extract_path_tuple_ids(path.into_inner());
     if parsed_ids.is_err() {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Incorrect ID format.".to_string());
     }
 
     let (event_id, company_id) = parsed_ids.unwrap();
@@ -216,8 +211,7 @@ pub async fn update_associated_company(
 
         let body = template.render();
         if body.is_err() {
-            return HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+            return HttpResponse::InternalServerError().body("Internal Server Error.".to_string());
         }
 
         return HttpResponse::Ok()
@@ -235,7 +229,7 @@ pub async fn delete_associated_company(
 ) -> HttpResponse {
     let parsed_ids = extract_path_tuple_ids(path.into_inner());
     if parsed_ids.is_err() {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Incorrect ID format.".to_string());
     }
 
     let (event_id, company_id) = parsed_ids.unwrap();
@@ -254,7 +248,7 @@ pub async fn open_associated_company_management_panel(
 ) -> HttpResponse {
     let id_parse = Uuid::from_str(path.into_inner().as_str());
     if id_parse.is_err() {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Incorrect ID format.".to_string());
     }
 
     let event_id = id_parse.expect("Should be valid.");
@@ -285,8 +279,7 @@ pub async fn open_associated_company_management_panel(
     };
     let body = template.render();
     if body.is_err() {
-        return HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        return HttpResponse::InternalServerError().body("Internal Server Error".to_string());
     }
     HttpResponse::Ok()
         .content_type("text/html")
@@ -300,7 +293,7 @@ pub async fn get_editable_associated_companies(
 ) -> HttpResponse {
     let id_parse = Uuid::from_str(path.into_inner().as_str());
     if id_parse.is_err() {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Incorrect ID format.".to_string());
     }
 
     let event_id = id_parse.expect("Should be valid.");
@@ -318,7 +311,7 @@ pub async fn get_editable_associated_company(
 ) -> HttpResponse {
     let parsed_ids = extract_path_tuple_ids(path.into_inner());
     if parsed_ids.is_err() {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Incorrect ID format.".to_string());
     }
 
     let (event_id, company_id) = parsed_ids.expect("Should be valid now.");
@@ -331,8 +324,7 @@ pub async fn get_editable_associated_company(
 
         let body = template.render();
         if body.is_err() {
-            return HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+            return HttpResponse::InternalServerError().body("Internal Server Error.");
         }
 
         return HttpResponse::Ok()
@@ -350,7 +342,7 @@ pub async fn get_associated_company_edit_form(
 ) -> HttpResponse {
     let parsed_ids = extract_path_tuple_ids(path.into_inner());
     if parsed_ids.is_err() {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Incorrect ID format.".to_string());
     }
 
     let (event_id, company_id) = parsed_ids.unwrap();
@@ -363,8 +355,7 @@ pub async fn get_associated_company_edit_form(
 
         let body = template.render();
         if body.is_err() {
-            return HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+            return HttpResponse::InternalServerError().body("Internal Server Error.");
         }
         return HttpResponse::Ok()
             .content_type("text/html")

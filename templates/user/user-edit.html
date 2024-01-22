@@ -4,13 +4,18 @@
       Account Edit
     </h2>
   </div>
-  <div id="user-content" class="flex flex-col space-y-5">
+  <div
+    id="user-content"
+    class="flex flex-col space-y-5"
+    hx-ext="response-targets"
+  >
     <form
       hx-patch="/protected/user/{{ id }}"
       hx-ext="json-enc"
       class="grid grid-cols-4 grid-rows-2 gap-4 bg-foreground1 rounded-md p-2"
       hx-swap="innerHTML"
       hx-target="#content"
+      hx-target-error="#error"
     >
       <div class="col-start-1 col-end-2 row-start-1 row-end-1 flex flex-col">
         <label class="font-mono text-lg text-txt" for="name">Name</label>
@@ -25,14 +30,9 @@
       </div>
       <div class="col-start-3 col-end-4 row-start-1 row-end-1 flex flex-col">
         <label class="font-mono text-lg text-txt" for="email">Email</label>
-        <input
-          class="font-mono text-lg bg-foreground2 text-txt p-1 rounded-md"
-          type="email"
-          id="email"
-          name="email"
-          placeholder="new email"
-          value="{{ email }}"
-        />
+        <p class="font-mono text-lg bg-foreground2 text-txt p-1 rounded-md">
+          {{email}}
+        </p>
       </div>
       <div class="col-start-1 col-end-2 row-start-2 row-end-2 flex flex-col">
         <label class="font-mono text-lg text-txt" for="name">Birth Date</label>
@@ -57,7 +57,9 @@
           <option value="Other">Other</option>
         </select>
       </div>
-      <div class="col-start-1 col-end-4 row-start-3 row-end-3 flex-row space-x-2">
+      <div
+        class="col-start-1 col-end-4 row-start-3 row-end-3 flex-row space-x-2"
+      >
         <button
           type="submit"
           title="Submit Changes"
@@ -67,31 +69,48 @@
         </button>
       </div>
     </form>
+    <div
+      id="error"
+      class="font-mono text-lg text-rej p-1 bg-foreground1 rounded-md"
+    ></div>
     <div class="flex flex-row space-x-5 bg-foreground1 rounded-md p-2">
-      <form hx-encoding='multipart/form-data' 
-            hx-put='/protected/user/{{ id }}/avatar'
-            hx-swap="innerHTML"
-            hx-target="#result-text"
-            hx-target-400="#error"
-            class="grid grid-cols-4 grid-rows-1 gap-4">
-          <input type="file"
-                id="file"
-                required
-                name="file"
-                accept="image/jpeg"
-                class="col-start-1 col-end-1 row-start-1 row-end-1 text-txt bg-foreground2"
-                >
-          <button type="submit" class="col-start-2 col-end-2 row-start-1 row-end-1 text-txthl bg-foreground2 rounded-md p-1">
-              Upload Image
-          </button>
+      <form
+        hx-encoding="multipart/form-data"
+        hx-put="/protected/user/{{ id }}/avatar"
+        hx-swap="innerHTML"
+        hx-target="#result-text"
+        hx-target-400="#error"
+        class="grid grid-cols-4 grid-rows-1 gap-4"
+      >
+        <input
+          type="file"
+          id="file"
+          required
+          name="file"
+          accept="image/jpeg"
+          class="col-start-1 col-end-1 row-start-1 row-end-1 text-txt bg-foreground2"
+        />
+        <button
+          type="submit"
+          class="col-start-2 col-end-2 row-start-1 row-end-1 text-txthl bg-foreground2 rounded-md p-1"
+        >
+          Upload Image
+        </button>
       </form>
-      <button hx-delete="/protected/user/{{ id }}/avatar"
-              hx-swap="innerHTML"
-              hx-target="#result-text"
-              hx-confirm="Truly delete image?"
-              class="text-rej bg-foreground2 rounded-md p-1">Delete Image</button>
-      <p id="result-text" class="font-mono text-txt text-lg"></p>
+      <button
+        hx-delete="/protected/user/{{ id }}/avatar"
+        hx-swap="innerHTML"
+        hx-target="#result-text"
+        hx-confirm="Truly delete image?"
+        class="text-rej bg-foreground2 rounded-md p-1"
+      >
+        Delete Image
+      </button>
     </div>
+    <div
+      id="result-text"
+      class="font-mono text-lg text-txt p-1 bg-foreground1 rounded-md"
+    ></div>
     <button
       hx-get="/protected/user/{{ id }}"
       hx-swap="innerHTML"
@@ -103,4 +122,3 @@
     </button>
   </div>
 </div>
-<div id="error"></div>

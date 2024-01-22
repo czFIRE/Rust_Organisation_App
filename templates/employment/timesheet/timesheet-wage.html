@@ -1,5 +1,10 @@
 <div id="wages" class="flex flex-col space-y-5 items-center w-full">
   <h2 class="font-mono font-bold text-3xl text-txthl">Calculated Wage</h2>
+  {% if wage.error_option.is_some() %}
+  <p class="font-mono text-rej text-bold text-lg">
+    Error: {{ wage.error_option.clone().expect("Should be valid now.") }}
+  </p>
+  {% else %}
   <p class="font-mono text-rej text-bold text-lg">
     DISCLAIMER: Please note that this calculation is merely orientational. The
     final wage paid by your employer may vary!
@@ -49,10 +54,10 @@
     <h3 class="font-mono font-bold text-txthl text-xl">Monthly Breakdowns</h3>
     {% for (month, month_wage) in wage.month_to_detailed_wage %}
     <div
-      id="wage-{{month}}"
+      id="wage-{{month.month}}"
       class="flex flex-col w-full p-2 rounded-md items-center bg-foreground2"
     >
-      <h4 class="font-mono font-bold text-lg text-txthl">{{month}}</h4>
+      <h4 class="font-mono font-bold text-lg text-txthl">{{month.text_form}}</h4>
       <div class="flex flex-row w-full items-center text-wrap">
         <p class="font-mono text-lg text-txt">
           <b>Net Wage</b>: {{ month_wage.net_wage }} {{ wage.wage_currency}}
@@ -81,8 +86,9 @@
     </div>
     {% endfor %}
   </div>
+  {% endif %}
   <div class="flex flex-row space-x-5">
-    {% if in_submit_mode %}
+    {% if in_submit_mode && wage.error_option.is_none() %}
     <button
       hx-patch="/protected/timesheet/{{ timesheet_id}}"
       hx-vals='js:{

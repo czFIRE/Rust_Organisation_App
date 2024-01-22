@@ -1,9 +1,10 @@
-<div id="event" class="flex flex-col space-y-5 items-center w-full">
+<div id="event" class="flex flex-col space-y-5 items-center w-full" hx-ext="response-targets">
   <h2 class="font-mono text-4xl text-txthl">Edit Event</h2>
   <form
     hx-patch="/protected/event/{{ event.id }}"
     hx-swap="innerHTML"
     hx-target="#content"
+    hx-target-error="#error"
     hx-ext="json-enc"
     hx-confirm="Are you sure you want to make these changes to the event?"
     class="flex flex-col p-2 space-y-3 align-middle items-center rounded-md bg-foreground1"
@@ -67,6 +68,10 @@
       Submit Changes
     </button>
   </form>
+  <div
+    id="error"
+    class="w-8/12 text-center items-center self-center font-mono text-lg text-rej p-1 bg-foreground1 rounded-md"
+  ></div>
   {% if event.accepts_staff %}
   <button
     hx-patch="/protected/event/{{ event.id }}"

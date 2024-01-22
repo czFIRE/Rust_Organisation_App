@@ -1,4 +1,7 @@
 pub mod test_constants {
+    // a delta for float comparisons
+    pub const DELTA: f32 = 0.0000001;
+
     use uuid::{uuid, Uuid};
 
     pub const COMPANY0_ID: Uuid = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
@@ -37,7 +40,7 @@ mod calculate_wage_tests {
 
     use organization::models::EmploymentContract;
     use organization::utils::wage_calc::models::DetailedWage;
-    use organization::{common::DELTA, utils::wage_calc::models::TimesheetWageDetailed};
+    use organization::utils::wage_calc::models::TimesheetWageDetailed;
 
     use chrono::NaiveDate;
     use organization::common::DbResult;
@@ -46,6 +49,7 @@ mod calculate_wage_tests {
     use organization::utils::wage_calc::calculate_wage::calculate_timesheet_wage;
     use sqlx::PgPool;
 
+    use crate::test_constants::DELTA;
     use crate::test_constants::{
         COMPANY1_ID, COMPANY2_ID, TIMESHEET1_ID, TIMESHEET2_ID, TIMESHEET3_ID, USER1_ID, USER3_ID,
     };

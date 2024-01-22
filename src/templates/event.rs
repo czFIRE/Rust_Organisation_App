@@ -69,6 +69,9 @@ impl From<Event> for EventLite {
 #[template(path = "event/events.html")]
 pub struct EventsTemplate {
     pub events: Vec<EventLite>,
+    pub next_offset: Option<i64>,
+    pub prev_offset: Option<i64>,
+    pub limit: i64,
 }
 
 #[derive(Template, Debug)]

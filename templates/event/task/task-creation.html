@@ -1,12 +1,14 @@
 <div
   id="task-creation"
   class="flex flex-col space-y-2 items-center w-full rounded-md bg-foreground1"
+  hx-ext="response-targets"
 >
   <h2 class="font-mono font-bold text-txthl text-2xl">Task Creation</h2>
   <form
     hx-post="/protected/event/{{ event_id }}/task"
     hx-swap="innerHTML"
     hx-target="#content"
+    hx-target-error="#error"
     hx-ext="json-enc"
     class="flex flex-col space-y-2 w-full items-center"
   >
@@ -20,6 +22,7 @@
     <div class="flex flex-col space-x-2">
       <label for="title" class="font-mono font-lg text-txt">Title:</label>
       <input
+        required
         name="title"
         id="title"
         class="font-mono font-lg text-txt bg-foreground2 rounded-md p-1"
@@ -30,6 +33,7 @@
         >Description:</label
       >
       <input
+        required
         name="description"
         id="description"
         class="font-mono font-lg text-txt bg-foreground2 rounded-md p-1"
@@ -56,6 +60,10 @@
       Submit
     </button>
   </form>
+  <div
+    id="error"
+    class="w-8/12 text-center items-center self-center font-mono text-lg text-rej p-1 bg-foreground1 rounded-md"
+  ></div>
   <button
     hx-get="/protected/event/{{ event_id }}/staff/{{ creator_id }}/tasks-panel"
     hx-swap="innerHTML"

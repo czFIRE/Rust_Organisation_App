@@ -413,8 +413,8 @@ mod api_tests {
             "street": "strt",
             "number": "nmbr",
             "postal_code": "pstl",
-            "phone": "+0 123456789",
-            "email": "meet@the.quota",
+            "phone": "+420123456789",
+            "email": "meet@the.quota.com",
             "employee_id": "4a799b2c-3b5f-41ec-a6e3-442cef915051",
         });
 
@@ -438,8 +438,8 @@ mod api_tests {
         assert!(body.contains("Lethal Company"));
         assert!(body.contains("1234"));
         assert!(body.contains("123456"));
-        assert!(body.contains("+0 123456789"));
-        assert!(body.contains("meet@the.quota"));
+        assert!(body.contains("+420123456789"));
+        assert!(body.contains("meet@the.quota.com"));
         assert!(body.contains("nmbr"));
         assert!(body.contains("ctr"));
         assert!(body.contains("reg"));
@@ -836,7 +836,7 @@ mod api_tests {
 
         let body_bytes = test::read_body(res).await;
         let body = str::from_utf8(body_bytes.borrow()).unwrap();
-        assert!(body.contains("b71fd7ce-c891-410a-9bb4-70fc5c7748f8"));
+        assert!(body.contains("Prepare stage for Joe Cocker"));
     }
 
     #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
@@ -1155,9 +1155,6 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
-
-        let res = repo._hard_delete_deleted_comments().await;
-        assert!(res.is_ok());
     }
 
     #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
@@ -1362,9 +1359,6 @@ mod api_tests {
         let res = test::call_service(&app, req).await;
         assert!(res.status().is_client_error());
         assert_eq!(res.status(), http::StatusCode::NOT_FOUND);
-
-        let res = repo._hard_delete_deleted_comments().await;
-        assert!(res.is_ok());
         Ok(())
     }
 

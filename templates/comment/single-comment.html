@@ -6,7 +6,7 @@
 </div>
 <div
   id="{{ comment.id }}-content"
-  class="flex flex-col items-start w-10/12 h-min-24 space-y-1 p-2 rounded-sm bg-foreground2 text-wrap"
+  class="flex flex-col items-start w-10/12 h-min-24 space-y-1 p-2 rounded-sm bg-foreground2 text-wrap overflow-auto"
 >
   <div class="flex flex-row items-start p-1 space-x-5">
     <h4 class="font-mono text-lg font-bold text-txthl">
@@ -64,7 +64,7 @@
     </button>
     {% endif %}
   </div>
-  <div class="flex flex-row items-start p-2 space-x-5">
-    <p class="font-mono text-txt">{{ comment.content }}</p>
+  <div class="flex flex-row items-start p-2 space-x-5 w-full flex-wrap text-wrap overflow-auto break-words">
+    <p class="font-mono text-txt text-wrap overflow-auto break-all">{{ comment.content }}</p>
   </div>
 </div>

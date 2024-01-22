@@ -168,26 +168,30 @@ pub async fn get_company(
     handle_database_error(result.expect_err("Should be error."))
 }
 
-fn validate_creation_data(data: NewCompanyData) -> bool {
-    if data.name.is_empty()
-        || data.phone.is_empty()
-        || data.email.is_empty()
-        || data.crn.is_empty()
-        || data.vatin.is_empty()
-        || data.region.is_empty()
-        || data.country.is_empty()
-        || data.city.is_empty()
-        || data.postal_code.is_empty()
-        || data.street.is_empty()
+fn validate_creation_data(data: NewCompanyData) -> Result<(), String> {
+    if data.name.trim().is_empty()
+        || data.phone.trim().is_empty()
+        || data.email.trim().is_empty()
+        || data.crn.trim().is_empty()
+        || data.vatin.trim().is_empty()
+        || data.region.trim().is_empty()
+        || data.country.trim().is_empty()
+        || data.city.trim().is_empty()
+        || data.postal_code.trim().is_empty()
+        || data.street.trim().is_empty()
     {
-        return false;
+        return Err("No data provided.".to_string());
     }
 
     if !check_email_validity(data.email) {
-        return false;
+        return Err("Invalid email format.".to_string());
     }
 
-    check_phone_validity(data.phone)
+    if !check_phone_validity(data.phone) {
+        return Err("Invalid phone number format.".to_string());
+    }
+
+    Ok(())
 }
 
 #[post("/company")]
@@ -196,8 +200,9 @@ pub async fn create_company(
     company_repo: web::Data<CompanyRepository>,
 ) -> HttpResponse {
     let data = new_company.into_inner();
-    if !validate_creation_data(data.clone()) {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    let validation_res = validate_creation_data(data.clone());
+    if let Err(error_msg) = validation_res {
+        return HttpResponse::BadRequest().body(error_msg);
     }
 
     let company_data = NewCompany {
@@ -229,8 +234,7 @@ pub async fn create_company(
         let body = template.render();
 
         if body.is_err() {
-            return HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+            return HttpResponse::InternalServerError().body("Internal server error.".to_string());
         }
 
         return HttpResponse::Created()
@@ -265,38 +269,44 @@ fn is_data_empty(company_data: &CompanyUpdateData) -> bool {
  * Similarly, postal codes could vary for different locations.
  */
 fn any_formatless_string_empty(company_data: &CompanyUpdateData) -> bool {
-    (company_data.name.is_some() && company_data.name.as_ref().unwrap().is_empty())
+    (company_data.name.is_some() && company_data.name.as_ref().unwrap().trim().is_empty())
         || (company_data.description.is_some()
-            && company_data.description.as_ref().unwrap().is_empty())
-        || (company_data.website.is_some() && company_data.website.as_ref().unwrap().is_empty())
-        || (company_data.crn.is_some() && company_data.crn.as_ref().unwrap().is_empty())
-        || (company_data.vatin.is_some() && company_data.vatin.as_ref().unwrap().is_empty())
-        || (company_data.country.is_some() && company_data.country.as_ref().unwrap().is_empty())
-        || (company_data.region.is_some() && company_data.region.as_ref().unwrap().is_empty())
-        || (company_data.city.is_some() && company_data.city.as_ref().unwrap().is_empty())
-        || (company_data.street.is_some() && company_data.street.as_ref().unwrap().is_empty())
-        || (company_data.number.is_some() && company_data.number.as_ref().unwrap().is_empty())
+            && company_data.description.as_ref().unwrap().trim().is_empty())
+        || (company_data.website.is_some()
+            && company_data.website.as_ref().unwrap().trim().is_empty())
+        || (company_data.crn.is_some() && company_data.crn.as_ref().unwrap().trim().is_empty())
+        || (company_data.vatin.is_some() && company_data.vatin.as_ref().unwrap().trim().is_empty())
+        || (company_data.country.is_some()
+            && company_data.country.as_ref().unwrap().trim().is_empty())
+        || (company_data.region.is_some()
+            && company_data.region.as_ref().unwrap().trim().is_empty())
+        || (company_data.city.is_some() && company_data.city.as_ref().unwrap().trim().is_empty())
+        || (company_data.street.is_some()
+            && company_data.street.as_ref().unwrap().trim().is_empty())
+        || (company_data.number.is_some()
+            && company_data.number.as_ref().unwrap().trim().is_empty())
         || (company_data.postal_code.is_some()
-            && company_data.postal_code.as_ref().unwrap().is_empty())
+            && company_data.postal_code.as_ref().unwrap().trim().is_empty())
 }
 
-fn validate_update_data(company_data: CompanyUpdateData) -> bool {
+fn validate_update_data(company_data: CompanyUpdateData) -> Result<(), String> {
     if is_data_empty(&company_data) {
-        return false;
+        return Err("No data provided.".to_string());
     }
 
     if any_formatless_string_empty(&company_data) {
-        return false;
+        return Err("An empty field was found.".to_string());
     }
 
     if company_data.email.is_some() && !check_email_validity(company_data.email.unwrap()) {
-        return false;
+        return Err("Invalid email format.".to_string());
     }
 
     if company_data.phone.is_some() && !check_phone_validity(company_data.phone.unwrap()) {
-        return false;
+        return Err("Invalid phone number format.".to_string());
     }
-    true
+
+    Ok(())
 }
 
 #[patch("/company/{company_id}")]
@@ -307,13 +317,14 @@ pub async fn update_company(
 ) -> HttpResponse {
     let data = company_data.into_inner();
 
-    if !validate_update_data(data.clone()) {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    let validation_res = validate_update_data(data.clone());
+    if let Err(error_msg) = validation_res {
+        return HttpResponse::BadRequest().body(error_msg);
     }
 
     let id_parse = Uuid::from_str(company_id.into_inner().as_str());
     if id_parse.is_err() {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Incorrect ID format.".to_string());
     }
 
     let parsed_id = id_parse.expect("Should be valid.");
@@ -348,8 +359,7 @@ pub async fn update_company(
         let body = template.render();
 
         if body.is_err() {
-            return HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+            return HttpResponse::InternalServerError().body("Internal Server Error.".to_string());
         }
 
         return HttpResponse::Ok()
@@ -367,7 +377,7 @@ pub async fn delete_company(
 ) -> HttpResponse {
     let id_parse = Uuid::from_str(company_id.into_inner().as_str());
     if id_parse.is_err() {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Invalid ID format.".to_string());
     }
 
     let parsed_id = id_parse.expect("Should be valid.");
@@ -388,7 +398,7 @@ pub async fn get_company_edit_mode(
 ) -> HttpResponse {
     let parsed_ids = extract_path_tuple_ids(path.into_inner());
     if parsed_ids.is_err() {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Invalid ID format.".to_string());
     }
 
     let (company_id, user_id) = parsed_ids.unwrap();
@@ -400,7 +410,7 @@ pub async fn get_company_edit_mode(
     let employee = employee_res.expect("Should be valid now.");
 
     if employee.level != EmployeeLevel::CompanyAdministrator {
-        return HttpResponse::Forbidden().body(parse_error(http::StatusCode::FORBIDDEN));
+        return HttpResponse::Forbidden().body("Not a Company Administrator.");
     }
 
     let result = company_repo.read_one_extended(company_id).await;
@@ -426,8 +436,7 @@ pub async fn get_company_edit_mode(
         let body = template.render();
 
         if body.is_err() {
-            return HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+            return HttpResponse::InternalServerError().body("Internal Server Error".to_string());
         }
 
         return HttpResponse::Ok()
@@ -464,13 +473,12 @@ pub async fn upload_company_avatar(
             .subtype()
             != "jpeg"
     {
-        return HttpResponse::BadRequest().body("Invalid file type.");
+        return HttpResponse::BadRequest().body("Invalid file type, only .jpeg is allowed.");
     }
 
     let image_res = store_image(parsed_id, ImageCategory::Company, form.file);
     if image_res.is_err() {
-        return HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        return HttpResponse::InternalServerError().body("Internal Server Error.".to_string());
     }
     let image_path = image_res.expect("Should be valid.");
     let data = CompanyData {
@@ -512,8 +520,7 @@ pub async fn remove_company_avatar(
 
     let parsed_id = id_parse.expect("Should be okay.");
     if remove_image(parsed_id, ImageCategory::Company).is_err() {
-        return HttpResponse::InternalServerError()
-            .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+        return HttpResponse::InternalServerError().body("Internal Server Error".to_string());
     }
 
     let data = CompanyData {

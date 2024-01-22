@@ -1,6 +1,6 @@
 <div
   id="comments-container"
-  class="flex flex-col space-y-2 items-center bg-foreground1 rounded-md w-full"
+  class="flex flex-col space-y-2 items-center bg-foreground1 rounded-md w-fit m-5 p-5"
 >
   <h3 class="text-2xl text-txthl font-bold">Task Discussion</h3>
 
@@ -8,7 +8,7 @@
     {% for comment in comments %}
     <div
       id="comment-{{ comment.id }}"
-      class="flex flex-row space-x-3 items-start align-middle rounded-md m-2 w-10/12"
+      class="flex flex-row space-x-3 text-wrap flex-wrap items-start align-middle rounded-md m-2 w-full"
     >
         {% include "single-comment.html" %}
     </div>

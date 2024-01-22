@@ -1,5 +1,7 @@
 pub mod test_constants {
     use uuid::{uuid, Uuid};
+    // a delta for float comparisons
+    pub const DELTA: f32 = 0.0000001;
 
     pub const COMPANY0_ID: Uuid = uuid!("b5188eda-528d-48d4-8cee-498e0971f9f5");
     pub const COMPANY1_ID: Uuid = uuid!("134d5286-5f55-4637-9b98-223a5820a464");
@@ -1343,7 +1345,7 @@ pub mod associated_company_repo_tests {
                 .expect("Read should succeed");
 
             let new_associated_company_data = AssociatedCompanyData {
-                association_type: Some(Association::Media),
+                association_type: Association::Media,
             };
 
             let updated_associated_company = associated_company_repo
@@ -1361,7 +1363,7 @@ pub mod associated_company_repo_tests {
             );
             assert_eq!(
                 updated_associated_company.association_type,
-                new_associated_company_data.association_type.unwrap()
+                new_associated_company_data.association_type
             );
 
             let time = NaiveDateTime::from_timestamp_opt(Utc::now().timestamp(), 0).unwrap();
@@ -1371,26 +1373,13 @@ pub mod associated_company_repo_tests {
             assert!(updated_associated_company.deleted_at.is_none());
         }
 
-        // All are none
-
-        {
-            let new_associated_company_data = AssociatedCompanyData {
-                association_type: None,
-            };
-
-            let _updated_associated_company = associated_company_repo
-                .update(company_id, event_id, new_associated_company_data)
-                .await
-                .expect_err("Update should fail - all fields are none");
-        }
-
         // Non existent
 
         {
             let event_id = uuid!("b71fd7ce-c891-410a-9bb4-70fc5c7748f9");
 
             let new_associated_company_data = AssociatedCompanyData {
-                association_type: Some(Association::Media),
+                association_type: Association::Media,
             };
 
             let _updated_associated_company = associated_company_repo
@@ -1420,7 +1409,7 @@ pub mod associated_company_repo_tests {
                 .expect_err("Read should not succeed");
 
             let new_associated_company_data = AssociatedCompanyData {
-                association_type: Some(Association::Media),
+                association_type: Association::Media,
             };
 
             let _updated_associated_company = associated_company_repo
@@ -3548,7 +3537,7 @@ mod timesheet_repo_tests {
             //
             {
                 let result = timesheet_repo
-                    .read_all_with_date_from_to_per_employment(
+                    ._read_all_with_date_from_to_per_employment(
                         user_id,
                         company_id,
                         NaiveDate::from_ymd_opt(1969, 7, 28).unwrap(),
@@ -3568,7 +3557,7 @@ mod timesheet_repo_tests {
             //
             {
                 let result = timesheet_repo
-                    .read_all_with_date_from_to_per_employment(
+                    ._read_all_with_date_from_to_per_employment(
                         user_id,
                         company_id,
                         NaiveDate::from_ymd_opt(1969, 7, 28).unwrap(),
@@ -3584,7 +3573,7 @@ mod timesheet_repo_tests {
             // check two timesheets are returned
             {
                 let result = timesheet_repo
-                    .read_all_with_date_from_to_per_employment(
+                    ._read_all_with_date_from_to_per_employment(
                         user_id,
                         company_id,
                         NaiveDate::from_ymd_opt(1969, 7, 28).unwrap(),
@@ -3601,7 +3590,7 @@ mod timesheet_repo_tests {
             // check date range yielding nothing
             {
                 let result = timesheet_repo
-                    .read_all_with_date_from_to_per_employment(
+                    ._read_all_with_date_from_to_per_employment(
                         user_id,
                         company_id,
                         NaiveDate::from_ymd_opt(1969, 8, 26).unwrap(),
@@ -3623,7 +3612,7 @@ mod timesheet_repo_tests {
             let company_id = COMPANY1_ID;
 
             let result = timesheet_repo
-                .read_all_with_date_from_to_per_employment(
+                ._read_all_with_date_from_to_per_employment(
                     user_id,
                     company_id,
                     NaiveDate::from_ymd_opt(1969, 9, 1).unwrap(),
@@ -3670,8 +3659,6 @@ mod timesheet_repo_tests {
 mod wage_preset_repo_tests {
     use std::sync::Arc;
 
-    use organization::common::DELTA;
-
     use chrono::NaiveDate;
     use organization::{
         common::DbResult,
@@ -3680,6 +3667,8 @@ mod wage_preset_repo_tests {
         },
     };
     use sqlx::PgPool;
+
+    use crate::test_constants::DELTA;
 
     #[sqlx::test(fixtures("all_inclusive"), migrations = "migrations/no_seed")]
     async fn read_one(pool: PgPool) -> DbResult<()> {
@@ -3691,7 +3680,7 @@ mod wage_preset_repo_tests {
             let name = "cz_2024-01-01".to_string();
 
             let preset = wage_preset_repo
-                .read_one(&name)
+                ._read_one(&name)
                 .await
                 .expect("Should succeed");
             assert_eq!(preset.currency, "CZK");
@@ -3708,7 +3697,7 @@ mod wage_preset_repo_tests {
 
         let mut wage_preset_repo = WagePresetRepository::new(arc_pool);
 
-        let presets = wage_preset_repo.read_all().await.expect("Should succeed");
+        let presets = wage_preset_repo._read_all().await.expect("Should succeed");
         assert_eq!(presets.len(), 3);
 
         wage_preset_repo.disconnect().await;
@@ -3725,7 +3714,7 @@ mod wage_preset_repo_tests {
         // non-existent
         {
             let preset_optional = wage_preset_repo
-                .read_optional_matching_date(&NaiveDate::from_ymd_opt(1965, 12, 31).unwrap())
+                ._read_optional_matching_date(&NaiveDate::from_ymd_opt(1965, 12, 31).unwrap())
                 .await
                 .expect("Should succeed");
             assert!(preset_optional.is_none());
@@ -3733,7 +3722,7 @@ mod wage_preset_repo_tests {
 
         {
             let preset_optional = wage_preset_repo
-                .read_optional_matching_date(&NaiveDate::from_ymd_opt(2023, 06, 01).unwrap())
+                ._read_optional_matching_date(&NaiveDate::from_ymd_opt(2023, 06, 01).unwrap())
                 .await
                 .expect("Should succeed");
             assert!(preset_optional.is_some());
@@ -3742,7 +3731,7 @@ mod wage_preset_repo_tests {
 
         {
             let preset_optional = wage_preset_repo
-                .read_optional_matching_date(&NaiveDate::from_ymd_opt(2024, 01, 01).unwrap())
+                ._read_optional_matching_date(&NaiveDate::from_ymd_opt(2024, 01, 01).unwrap())
                 .await
                 .expect("Should succeed");
             assert!(preset_optional.is_some());
@@ -3751,7 +3740,7 @@ mod wage_preset_repo_tests {
 
         {
             let preset_optional = wage_preset_repo
-                .read_optional_matching_date(&NaiveDate::from_ymd_opt(2030, 06, 10).unwrap())
+                ._read_optional_matching_date(&NaiveDate::from_ymd_opt(2030, 06, 10).unwrap())
                 .await
                 .expect("Should succeed");
             assert!(preset_optional.is_some());

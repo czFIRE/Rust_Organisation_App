@@ -27,6 +27,15 @@
       Edit Task
     </button>
     <button
+      hx-delete="/protected/event/task/{{ task.id }}"
+      hx-swap="innerHTML"
+      hx-target="#content"
+      hx-confirm="Are you sure you want to delete this task?"
+      class="p-2 rounded-md bg-foreground2 font-mono text-txthl text-lg"
+    >
+      Delete Task
+    </button>
+    <button
       hx-get="/protected/task/{{task.id}}/staff/{{requester_id}}/management"
       hx-swap="innerHTML"
       hx-target="#content"
