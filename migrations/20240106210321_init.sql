@@ -53,7 +53,7 @@ CREATE TABLE company
     website     VARCHAR(255),
     crn         VARCHAR(16) NOT NULL UNIQUE,
     vatin       VARCHAR(18) NOT NULL UNIQUE,
-    phone       VARCHAR(255) NOT NULL UNIQUE,
+    phone       VARCHAR(255) NOT NULL DEFAULT '',
     email       VARCHAR(255) NOT NULL UNIQUE,
     avatar_url  VARCHAR(255) NOT NULL DEFAULT 'img/default/company.jpg',
     -------------------------------------------------------
@@ -67,8 +67,6 @@ CREATE TABLE company
         CHECK (char_length(crn) >= 1),
     CONSTRAINT check_company_vatin_len
         CHECK (char_length(vatin) >= 1),
-    CONSTRAINT check_company_phone_len
-        CHECK (char_length(phone) >= 2),
     CONSTRAINT check_company_email_len
         CHECK (char_length(email) >= 3),
     CONSTRAINT check_company_created_at_lte_edited_at
@@ -353,34 +351,39 @@ CREATE TABLE comment
 );
 
 --
--- todo later: Once this special table gets finilized, put it into ERD as well.
---
 -- todo later: We should enforce only one row has valid_to=NULL
 --             and no two (valid_from, valid_to) ranges intersect.
 --
 CREATE TABLE wage_preset
 (
-	name TEXT PRIMARY KEY,
+    name VARCHAR(32) PRIMARY KEY,
     -------------------------------------------------------
     valid_from  DATE NOT NULL,
+    --
+    -- Denotes preset's applicability has not expired yet.
+    --
+    -- Note: At most only one column may have this set to NULL.
+    --
     valid_to    DATE,
     description TEXT NOT NULL DEFAULT '',
-    currency    TEXT NOT NULL,
-	monthly_dpp_employee_no_tax_limit REAL NOT NULL,
-	monthly_dpp_employer_no_tax_limit REAL NOT NULL,
-	monthly_dpc_employee_no_tax_limit REAL NOT NULL,
-	monthly_dpc_employer_no_tax_limit REAL NOT NULL,
-	health_insurance_employee_tax_pct REAL NOT NULL,
-	social_insurance_employee_tax_pct REAL NOT NULL,
-	health_insurance_employer_tax_pct REAL NOT NULL,
-	social_insurance_employer_tax_pct REAL NOT NULL,
-	min_hourly_wage REAL NOT NULL,
-	min_monthly_hpp_salary REAL NOT NULL, -- note: not utilized ATM
+    currency    VARCHAR(8) NOT NULL,
+    monthly_dpp_employee_no_tax_limit REAL NOT NULL,
+    monthly_dpp_employer_no_tax_limit REAL NOT NULL,
+    monthly_dpc_employee_no_tax_limit REAL NOT NULL,
+    monthly_dpc_employer_no_tax_limit REAL NOT NULL,
+    health_insurance_employee_tax_pct REAL NOT NULL,
+    social_insurance_employee_tax_pct REAL NOT NULL,
+    health_insurance_employer_tax_pct REAL NOT NULL,
+    social_insurance_employer_tax_pct REAL NOT NULL,
+    min_hourly_wage REAL NOT NULL,
+    min_monthly_hpp_salary REAL NOT NULL, -- note: not utilized ATM
     -------------------------------------------------------
     created_at  TIMESTAMP NOT NULL DEFAULT now(),
     edited_at   TIMESTAMP NOT NULL DEFAULT now(),
     deleted_at  TIMESTAMP,
     -------------------------------------------------------
+    CONSTRAINT check_wage_preset_name_len
+        CHECK (char_length(name) >= 1),
     CONSTRAINT check_wage_preset_description_len
         CHECK (char_length(description) >= 1),
     CONSTRAINT check_wage_preset_currency_len
