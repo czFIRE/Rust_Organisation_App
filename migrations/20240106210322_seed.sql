@@ -61,7 +61,7 @@ BEGIN
         VALUES
         (company0_id, 'AMD', 'Advanced Micro Devices, Inc.',
         'https://amd.com', 'crn_amd', 'vatin_amd',
-        '+1 408-749-4000', 'info@amd.com',
+        '+420596789231', 'info@amd.com',
         '2023-12-22 08:38', '2023-12-22 08:38');
 
     INSERT INTO company
@@ -72,7 +72,7 @@ BEGIN
         VALUES
         (company1_id, 'ReportLab', 'ReportLab Europe Ltd.',
         'https://reportlab.com', 'crn_reportlab', 'vatin_reportlab',
-        '+44 20 8191 7277', 'support@reportlab.com',
+        '+442081917277', 'support@reportlab.com',
         '2023-12-24 08:38', '2023-12-24 08:38');
 
     INSERT INTO company
@@ -83,7 +83,7 @@ BEGIN
         VALUES
         (company2_id, 'Prusa Research', 'Prusa Research a.s.',
         'https://prusa3d.com', 'CRN_prusa', 'CZ06649114',
-        '123 456 789', 'info@prusa3d.com',
+        '123456789', 'info@prusa3d.com',
         '2023-12-24 15:55', '2023-12-24 19:38');
 
 --------------------------------------------------------------------------------
