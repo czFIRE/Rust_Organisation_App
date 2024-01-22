@@ -1,6 +1,10 @@
-pub struct AuthGuard;
+use std::fmt::Display;
 
+use actix_web::HttpResponse;
+use actix_web::ResponseError;
+use actix_web::http;
 use chrono::NaiveDate;
+use reqwest::StatusCode;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -80,4 +84,25 @@ pub struct FullClaims {
     pub given_name: String,
     pub family_name: String,
     pub email: String,
+}
+
+#[derive(Debug)]
+pub struct CookieAuthError {
+    message: String,
+}
+
+impl Display for CookieAuthError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.message)
+    }
+}
+
+impl ResponseError for CookieAuthError {
+    fn status_code(&self) -> http::StatusCode {
+        StatusCode::UNAUTHORIZED
+    }
+
+    fn error_response(&self) -> actix_web::HttpResponse<actix_web::body::BoxBody> {
+        HttpResponse::Unauthorized().body(self.message.clone())
+    }
 }

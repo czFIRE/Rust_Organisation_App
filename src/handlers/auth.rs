@@ -14,14 +14,34 @@ use reqwest::{Client, StatusCode};
 use serde_json::json;
 
 use actix_web::{http, post, web, HttpResponse};
+
+
+fn build_path(suffix: &str) -> Result<String, ()> {
+    let host = std::env::var("HOST");
+    let port = std::env::var("KC_PORT");
+    if host.is_err() || port.is_err() {
+        return Err(());
+    }
+
+    let mut path = "http://".to_string();
+    path.push_str(host.expect("Should be some").as_str());
+    path.push(':');
+    path.push_str(port.expect("Should be some").as_str());
+    path.push_str(suffix);
+    Ok(path)
+}
+
 #[post("/auth/register")]
-async fn register(
+pub async fn register(
     web::Form(form): web::Form<Register>,
     user_repository: web::Data<UserRepository>,
 ) -> HttpResponse {
-    // Get admin console token for registration purposes.
-    let path = "http://localhost:9090/realms/master/protocol/openid-connect/token";
-
+    let path_res = build_path("/realms/master/protocol/openid-connect/token");
+    if path_res.is_err() {
+        return HttpResponse::InternalServerError().body("Internal server error.");
+    }
+    let path = path_res.expect("Should be some.");
+    // let path = "http://localhost:9090/realms/master/protocol/openid-connect/token";
     let payload = json!({
         "username": std::env::var("KEYCLOAK_ADMIN").expect("Should be set"),
         "password": std::env::var("KEYCLOAK_ADMIN_PASSWORD").expect("Should be set"),
@@ -29,7 +49,7 @@ async fn register(
         "client_id": std::env::var("KEYCLOAK_REG_CLIENT").expect("Should be set"),
     });
 
-    let result = get_token(path, payload).await;
+    let result = get_token(&path, payload).await;
     if result.is_err() {
         return HttpResponse::InternalServerError().finish();
     }
@@ -46,7 +66,12 @@ async fn register(
     }
     let access = access_json.expect("Should be valid");
 
-    let path = "http://localhost:9090/admin/realms/Orchestrate/users";
+    let path_res = build_path("/admin/realms/Orchestrate/users");
+    if path_res.is_err() {
+        return HttpResponse::InternalServerError().body("Internal server error.");
+    }
+    let path = path_res.expect("Should be some.");
+    // let path = "http://localhost:9090/admin/realms/Orchestrate/users";
 
     let payload = json!({
         "firstName": form.first_name,
@@ -111,7 +136,7 @@ async fn register(
 }
 
 #[post("/auth/login")]
-async fn login(
+pub async fn login(
     web::Form(form): web::Form<Login>,
     user_repo: web::Data<UserRepository>,
 ) -> HttpResponse {

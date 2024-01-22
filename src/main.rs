@@ -8,9 +8,11 @@ mod repositories;
 mod templates;
 mod utils;
 
+use crate::auth::models::CookieAuthError;
 use crate::handlers::auth::{login, register};
 use actix_web::dev::Service;
 use actix_web::http::header::HeaderValue;
+use actix_web::middleware::ErrorHandlers;
 use log::trace;
 use reqwest::header;
 
@@ -23,6 +25,7 @@ use sqlx::{Pool, Postgres};
 use std::sync::Arc;
 
 use actix_web_middleware_keycloak_auth::{DecodingKey, KeycloakAuth};
+use actix_web_httpauth::extractors::AuthenticationError;
 
 use crate::configs::assigned_staff_config::configure_assigned_staff_endpoints;
 use crate::configs::associated_company_config::configure_associated_company_endpoints;
@@ -50,7 +53,7 @@ use crate::{
     handlers::user::get_users_login,
     repositories::assigned_staff::assigned_staff_repo::AssignedStaffRepository,
 };
-use actix_web::{web, HttpResponse};
+use actix_web::{web, HttpResponse, ResponseError};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -131,7 +134,7 @@ async fn main() -> std::io::Result<()> {
                         trace!("Initialize Cookie Transform Middleware.");
                         let cookie_val = req.cookie("bearer_token").map(|cookie| cookie.value().to_owned()).ok_or_else(|| HttpResponse::Unauthorized().finish());
                         // if cookie_val.is_err() {
-                        //     return cookie_val.expect_err("Should be an error.");
+                        //     return CookieAuthError{ message: "Failed to parse cookie.".to_string() };
                         // }
                         let cookie = cookie_val.expect("Should be valid");
                         let auth_header_value = format!("Bearer {}", cookie);
