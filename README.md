@@ -1,5 +1,11 @@
 # Organization app
 
+### Contents
+- Official Assignment
+- Project Deployment
+- Authors
+- Work Distribution
+
 ## Official Assignment
 
 A web application with several features that would facilitate the organization
@@ -75,7 +81,7 @@ TODO
 * Bc. Matej Vavrek - Swiftfeather
 * Michal Šoltis - jumpman23
 
-## Work Done
+## Work Distribution
 ### Database Design - ERD
 The database design was one of the first steps we took towards achieving our
 results.
@@ -83,14 +89,20 @@ results.
 The database was modelled as an ERD diagram in plant UML, and can be found in
 /design. This should be an up-to-date version.
 
-Most of it was performed by Slavomír and Matej. Matej provided the base for the
+Most of it was performed by **Slavomír** and **Matej**. Matej provided the base for the
 ERD, and Slavomír did a lot of work on further elaboration, ensuring the
 database model was consistent and logical in its design.
 
+### Event Storming
+We also tried to implement event storming, which we did not finish. Still, the work in progress workflows were useful in developing the frontend, database and api designs that were done simultaneously.
+You can find the event storming figma whiteboard we used [here](https://www.figma.com/file/wkLYbNLmuZt3n8VkvsprZH/Event-organization-app?type=whiteboard&node-id=0-1).
+
+The main organizer of Event Storming was **Petr**.
+
 ### Frontend Design 
 The first designs of the frontend side of the project were
-done in figma. These were done by Matej.  During frontend development, some of
-the designs have changed significantly, so currently, this design is outdated.
+done in figma. These were done by **Matej**. During frontend development, some of
+the designs have changed significantly, so currently, this design is somewhat outdated.
 
 You can find the early designs
 [here](https://www.figma.com/file/TdkpVqSw8VvE8rMivkN2xl/Orchestrate---Rust-App?type=design&node-id=74%3A1472&mode=design&t=zWLYTI86JcVkAUde-1).
@@ -161,8 +173,8 @@ was due to time constraints because of the failure to provide Auth on time.
 
 ### Auth
 The final (and, sadly, least) developed component is Auth. It was first assigned to Michal, but he
-was unable to implement this component and stopped working on it towards the very end of the project, 
-leaving others to handle the component. 
+was did not implement this feature and stopped working on it towards the very end of the project, 
+leaving others to handle it. 
 It was then picked up by Petr and Matej, who tried to implement this feature for the project deadline.
 
 For the implementation, we chose to go with Keycloak. We used the actix-web-keycloak-middleware
