@@ -1,9 +1,7 @@
 use std::{
-    io::{
-        self, Error,
-    },
-    path::PathBuf,
     fs,
+    io::{self, Error},
+    path::PathBuf,
 };
 
 use actix_multipart::form::tempfile::TempFile;
@@ -76,7 +74,10 @@ pub fn store_image(
     Ok(build_string_path(item_id, directory))
 }
 
-pub fn remove_image(item_id: Uuid, category: ImageCategory) -> Result<(), Error> {
+pub fn remove_image(
+    item_id: Uuid,
+    category: ImageCategory,
+) -> Result<(), Error> {
     let mut path: PathBuf = PathBuf::new();
     path.push(".");
     path.push("src");
