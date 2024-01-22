@@ -147,20 +147,20 @@ fn is_data_empty(data: &TaskData) -> bool {
         && data.accepts_staff.is_none()
 }
 
-fn validate_data(data: TaskData) -> Option<String> {
+fn validate_data(data: TaskData) -> Result<(), String> {
     if is_data_empty(&data) {
-        return Some("No data provided.".to_string());
+        return Err("No data provided.".to_string());
     }
 
     if data.title.is_some() && data.title.expect("Should be some").trim().is_empty() {
-        return Some("The title can't be empty.".to_string());
+        return Err("The title can't be empty.".to_string());
     }
 
     if data.description.is_some() && data.description.expect("Should be some").trim().is_empty() {
-        return Some("The description can't be empty.".to_string());
+        return Err("The description can't be empty.".to_string());
     }
 
-    None
+    Ok(())
 }
 
 #[patch("/event/task/{task_id}")]
@@ -170,9 +170,9 @@ pub async fn update_task(
     task_repo: web::Data<TaskRepository>,
     assigned_repo: web::Data<AssignedStaffRepository>,
 ) -> HttpResponse {
-    let validation_error = validate_data(task_data.clone());
-    if validation_error.is_some() {
-        return HttpResponse::BadRequest().body(validation_error.expect("Should be some."));
+    let validation_res = validate_data(task_data.clone());
+    if let Err(err_msg) = validation_res {
+        return HttpResponse::BadRequest().body(err_msg);
     }
 
     let id_parse = Uuid::from_str(task_id.into_inner().as_str());
@@ -211,8 +211,8 @@ pub async fn update_task_completion(
     };
 
     let result = task_repo.update(parsed_id, task_data).await;
-    if result.is_err() {
-        return handle_database_error(result.expect_err("Should be an error."));
+    if let Err(error) = result {
+        return handle_database_error(error);
     }
     let task = result.expect("Should be valid.");
 

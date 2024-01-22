@@ -418,9 +418,9 @@ BEGIN
         created_at, edited_at)
         VALUES
         (timesheet0_id, user2_id, company1_id, event1_id,
-        '1969-08-16', '1969-08-17', DEFAULT,
+        '2024-01-01', '2024-01-03', DEFAULT,
         true, 'not_requested', NULL,
-        '1969-08-15 18:26', '1969-08-16 20:00');
+        '2024-01-01 18:26', '2024-01-01 18:26');
 
     INSERT INTO timesheet
         (id, user_id, company_id, event_id,
@@ -461,15 +461,22 @@ BEGIN
         (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet0_id, '1969-08-15', 12, '',
-        '1969-08-16 18:28', '1969-08-17 08:22');
+        (timesheet0_id, '2024-01-01', 12, '',
+        '2024-01-01 18:28', '2024-01-02 08:22');
 
     INSERT INTO workday
         (timesheet_id, date, total_hours, comment,
         created_at, edited_at)
         VALUES
-        (timesheet0_id, '1969-08-16', 10, '',
-        '1969-08-17 20:00', '1969-08-17 20:00');
+        (timesheet0_id, '2024-01-02', 10, '',
+        '2024-01-01 18:28', '2024-01-02 08:25');
+
+    INSERT INTO workday
+        (timesheet_id, date, total_hours, comment,
+        created_at, edited_at)
+        VALUES
+        (timesheet0_id, '2024-01-03', 3, '',
+        '2024-01-01 18:28', '2024-01-03 08:25');
 
     INSERT INTO workday
         (timesheet_id, date, total_hours, comment,

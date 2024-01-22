@@ -49,13 +49,13 @@
       value="{{ timesheet_id }}"
     />
     <input type="hidden" class="hidden" id="date" name="date" value="{{ date }}" />
+    <button class="font-mono text-lg text-txthl mx-5">Save</button>
   </form>
-  <button class="font-mono text-lg text-txthl" onclick='document.getElementById("workday-{{date}}-form").submit();'>Save</button>
   <button
     hx-get="/timesheet/{{ timesheet_id }}/day/{{ date }}"
     hx-swap="outerHTML"
     hx-target="#workday-{{ date }}"
-    class="font-mono text-lg text-txthl"
+    class="font-mono text-lg text-txthl mx-5"
   >
     Cancel
   </button>

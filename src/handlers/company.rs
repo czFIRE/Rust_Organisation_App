@@ -168,7 +168,7 @@ pub async fn get_company(
     handle_database_error(result.expect_err("Should be error."))
 }
 
-fn validate_creation_data(data: NewCompanyData) -> Option<String> {
+fn validate_creation_data(data: NewCompanyData) -> Result<(), String> {
     if data.name.trim().is_empty()
         || data.phone.trim().is_empty()
         || data.email.trim().is_empty()
@@ -180,18 +180,18 @@ fn validate_creation_data(data: NewCompanyData) -> Option<String> {
         || data.postal_code.trim().is_empty()
         || data.street.trim().is_empty()
     {
-        return Some("No data provided.".to_string());
+        return Err("No data provided.".to_string());
     }
 
     if !check_email_validity(data.email) {
-        return Some("Invalid email format.".to_string());
+        return Err("Invalid email format.".to_string());
     }
 
     if !check_phone_validity(data.phone) {
-        return Some("Invalid phone number format.".to_string());
+        return Err("Invalid phone number format.".to_string());
     }
 
-    None
+    Ok(())
 }
 
 #[post("/company")]
@@ -200,9 +200,9 @@ pub async fn create_company(
     company_repo: web::Data<CompanyRepository>,
 ) -> HttpResponse {
     let data = new_company.into_inner();
-    let validation_err = validate_creation_data(data.clone());
-    if validation_err.is_some() {
-        return HttpResponse::BadRequest().body(validation_err.expect("Should be some."));
+    let validation_res = validate_creation_data(data.clone());
+    if let Err(error_msg) = validation_res {
+        return HttpResponse::BadRequest().body(error_msg);
     }
 
     let company_data = NewCompany {
@@ -289,24 +289,24 @@ fn any_formatless_string_empty(company_data: &CompanyUpdateData) -> bool {
             && company_data.postal_code.as_ref().unwrap().trim().is_empty())
 }
 
-fn validate_update_data(company_data: CompanyUpdateData) -> Option<String> {
+fn validate_update_data(company_data: CompanyUpdateData) -> Result<(), String> {
     if is_data_empty(&company_data) {
-        return Some("No data provided.".to_string());
+        return Err("No data provided.".to_string());
     }
 
     if any_formatless_string_empty(&company_data) {
-        return Some("An empty field was found.".to_string());
+        return Err("An empty field was found.".to_string());
     }
 
     if company_data.email.is_some() && !check_email_validity(company_data.email.unwrap()) {
-        return Some("Invalid email format.".to_string());
+        return Err("Invalid email format.".to_string());
     }
 
     if company_data.phone.is_some() && !check_phone_validity(company_data.phone.unwrap()) {
-        return Some("Invalid phone number format.".to_string());
+        return Err("Invalid phone number format.".to_string());
     }
 
-    None
+    Ok(())
 }
 
 #[patch("/company/{company_id}")]
@@ -317,9 +317,9 @@ pub async fn update_company(
 ) -> HttpResponse {
     let data = company_data.into_inner();
 
-    let validation_err = validate_update_data(data.clone());
-    if validation_err.is_some() {
-        return HttpResponse::BadRequest().body(validation_err.expect("Should be some"));
+    let validation_res = validate_update_data(data.clone());
+    if let Err(error_msg) = validation_res {
+        return HttpResponse::BadRequest().body(error_msg);
     }
 
     let id_parse = Uuid::from_str(company_id.into_inner().as_str());

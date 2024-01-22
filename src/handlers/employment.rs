@@ -272,7 +272,7 @@ pub async fn toggle_employment_create(
     handle_database_error(result.expect_err("Should be error."))
 }
 
-fn is_data_invalid(data: EmploymentUpdateData) -> Option<String> {
+fn is_data_invalid(data: EmploymentUpdateData) -> Result<(), String> {
     if data.manager_id.is_none()
         && data.hourly_wage.is_none()
         && data.start_date.is_none()
@@ -283,21 +283,21 @@ fn is_data_invalid(data: EmploymentUpdateData) -> Option<String> {
         && data.start_date.is_none()
         && data.end_date.is_none()
     {
-        return Some("No data provided.".to_string());
+        return Err("No data provided.".to_string());
     }
 
     if data.start_date.is_some()
         && data.end_date.is_some()
         && data.start_date.unwrap() > data.end_date.unwrap()
     {
-        return Some("Start date can't exceed end date.".to_string());
+        return Err("Start date can't exceed end date.".to_string());
     }
 
     if data.hourly_wage.is_some() && data.hourly_wage.expect("Should be some.") <= 0.0 {
-        return Some("Hourly wage can't be 0 or less.".to_string());
+        return Err("Hourly wage can't be 0 or less.".to_string());
     }
 
-    None
+    Ok(())
 }
 
 #[patch("/user/{user_id}/employment/{company_id}")]
@@ -306,10 +306,10 @@ pub async fn update_employment(
     employment_data: web::Json<EmploymentUpdateData>,
     employment_repo: web::Data<EmploymentRepository>,
 ) -> HttpResponse {
-    let validation_err = is_data_invalid(employment_data.clone());
+    let validation_res = is_data_invalid(employment_data.clone());
 
-    if validation_err.is_some() {
-        return HttpResponse::BadRequest().body(validation_err.expect("Should be some"));
+    if let Err(error_msg) = validation_res {
+        return HttpResponse::BadRequest().body(error_msg);
     }
     let parsed_ids = extract_path_tuple_ids(path.into_inner());
     if parsed_ids.is_err() {

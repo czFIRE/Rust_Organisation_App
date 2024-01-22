@@ -138,19 +138,19 @@ pub async fn toggle_user_edit(
     handle_database_error(result.expect_err("Should be error."))
 }
 
-fn validate_new_user(new_user: NewUser) -> Option<String> {
+fn validate_new_user(new_user: NewUser) -> Result<(), String> {
     if new_user.name.trim().is_empty() || new_user.email.trim().is_empty() {
-        return Some("Username or Email empty.".to_string());
+        return Err("Username or Email empty.".to_string());
     }
 
     if new_user.birth >= Utc::now().date_naive() {
-        return Some("You can't be younger than today!".to_string());
+        return Err("You can't be younger than today!".to_string());
     }
 
     if !check_email_validity(new_user.email) {
-        return Some("Invalid Email format.".to_string());
+        return Err("Invalid Email format.".to_string());
     }
-    None
+    Ok(())
 }
 
 #[post("/user")]
@@ -158,9 +158,9 @@ pub async fn create_user(
     new_user: web::Json<NewUser>,
     user_repo: web::Data<UserRepository>,
 ) -> HttpResponse {
-    let validation_err = validate_new_user(new_user.clone());
-    if validation_err.is_some() {
-        return HttpResponse::BadRequest().body(validation_err.expect("Should be some"));
+    let validation_res = validate_new_user(new_user.clone());
+    if let Err(err_msg) = validation_res {
+        return HttpResponse::BadRequest().body(err_msg);
     }
     let result = user_repo.create(new_user.into_inner()).await;
 
@@ -183,33 +183,33 @@ pub async fn create_user(
     handle_database_error(result.expect_err("Should be error."))
 }
 
-fn validate_edit_data(user_data: UserData) -> Option<String> {
+fn validate_edit_data(user_data: UserData) -> Result<(), String> {
     if user_data.name.is_none()
         && user_data.email.is_none()
         && user_data.birth.is_none()
         && user_data.avatar_url.is_none()
         && user_data.role.is_none()
     {
-        return Some("No data provided.".to_string());
+        return Err("No data provided.".to_string());
     }
 
     if user_data.name.is_some() && user_data.name.unwrap().trim().is_empty() {
-        return Some("Username empty.".to_string());
+        return Err("Username empty.".to_string());
     }
 
     if user_data.email.is_some() && !check_email_validity(user_data.email.clone().unwrap()) {
-        return Some("Invalid email format.".to_string());
+        return Err("Invalid email format.".to_string());
     }
 
     if user_data.avatar_url.is_some() && user_data.avatar_url.unwrap().trim().is_empty() {
-        return Some("Empty avatar url.".to_string());
+        return Err("Empty avatar url.".to_string());
     }
 
     if user_data.birth.is_some() && user_data.birth.unwrap() >= Utc::now().date_naive() {
-        return Some("Can't be older than today!".to_string());
+        return Err("Can't be older than today!".to_string());
     }
 
-    None
+    Ok(())
 }
 
 #[patch("/user/{user_id}")]
@@ -218,9 +218,9 @@ pub async fn update_user(
     user_data: web::Json<UserData>,
     user_repo: web::Data<UserRepository>,
 ) -> HttpResponse {
-    let validation_err = validate_edit_data(user_data.clone());
-    if validation_err.is_some() {
-        return HttpResponse::BadRequest().body(validation_err.expect("Should be some"));
+    let validation_res = validate_edit_data(user_data.clone());
+    if let Err(err_msg) = validation_res {
+        return HttpResponse::BadRequest().body(err_msg);
     }
 
     let id_parse = Uuid::from_str(user_id.into_inner().as_str());

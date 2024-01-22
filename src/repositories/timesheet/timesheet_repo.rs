@@ -443,7 +443,7 @@ impl TimesheetRepository {
         date: NaiveDate,
         data: WorkdayUpdateData,
     ) -> DbResult<Workday> {
-        let executor = self.pool.as_ref();
+        let mut tx = self.pool.begin().await?;
 
         let workday = sqlx::query_as!(
             Workday,
@@ -466,8 +466,23 @@ impl TimesheetRepository {
             timesheet_id,
             date
         )
-        .fetch_one(executor)
+        .fetch_one(tx.deref_mut())
         .await?;
+
+        sqlx::query!(
+            r#"
+            UPDATE timesheet 
+            SET total_hours = (SELECT SUM(total_hours) 
+                              FROM workday 
+                              WHERE workday.timesheet_id = timesheet_id
+                              GROUP BY timesheet_id)
+            WHERE id = $1 AND deleted_at IS NULL;"#,
+            timesheet_id,
+        )
+        .execute(tx.deref_mut())
+        .await?;
+
+        tx.commit().await?;
 
         Ok(workday)
     }
