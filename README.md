@@ -1,5 +1,7 @@
 # Organization app
 
+## Official Assignment
+
 A web application with several features that would facilitate the organization
 of music events and concerts. It would be an application with login (several
 different levels of rights), adding, removing, and editing employees,
@@ -59,6 +61,56 @@ beneath the Keycloak logo, there is a selection element. Select Orchestrate.
 
 From here, we need to extract the client secret.
 <TODO>
+
+
+## Development
+
+When developing the program, we highly recommend to build and run the ``Rust``
+program outside of a container. In order to do that, make sure your `.env` file
+has `hostspec` part of `DATABASE_URL` variable set to localhost, thus:
+
+```
+DATABASE_URL=postgres://admin:example@localhost:5432/pv281
+```
+
+Then start required docker containers from project's root:
+
+```sh
+docker compose up
+```
+
+At this point we need to prepare the database by running `sqlx-cli` command
+from project's root.
+
+```sh
+   # Create an empty DB by fetching `DATABASE_URL` from the `.env` file.
+   sqlx database create
+
+   #
+   # Run migrations by fetching `DATABASE_URL` from `.env` file and seeking
+   # SQL scripts in `./migrations/` directory (ignoring any subdirs) by default.
+   #
+   sqlx migrate run
+```
+
+In case you need to delete project's database and start over, use:
+
+
+```sh
+   # drop a whole DB without displaying confirmation prompt
+   sqlx database drop -y
+```
+
+Only now (after database was created) we can compile the program
+as it uses sqlx macros that probe DBMS during compilation.
+
+```sh
+cargo build
+```
+
+Then we can start the program locally (using ```cargo run```) and connect
+to the locally started HTTP server using some `web browser`.
+
 
 ## Authors 
 * Bc. Petr Kadlec - czFire
