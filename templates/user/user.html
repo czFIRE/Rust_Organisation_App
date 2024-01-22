@@ -80,22 +80,7 @@
   <h1 class="col-start-1 col-span-3 col-end-4 font-mono text-4xl font-extrabold text-txt ml-5">
     Orchestrate
   </h1>
-  <!---->
-  <script>
-    function getCookie(name) {
-      var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-      if (match) return match[2];
-    }
-
-    function getHeader() {
-      var token = getCookie('access_token');
-      var headers = `Bearer ${token}`;
-      return headers;
-    }
-  </script>
-  <!---->
-  <div class="col-start-5 col-span-5 col-end-10 space-x-5 flex flex-row items-end align-middle"
-    hx-headers="javascript:Authorization:getHeader()">
+  <div class="col-start-5 col-span-5 col-end-10 space-x-5 flex flex-row items-end align-middle">
     <input hidden class="invisible" id="user_id" name="user_id" value="{{ id }}" />
     <input hidden class="invisible" id="misc_info" name="misc_info" value="" />
     {% if role == UserRole::Admin %}

@@ -1,7 +1,7 @@
 use crate::auth::models::{AccessToken, Login, Register, Token};
 use crate::auth::openid::get_token;
 use crate::errors::{handle_database_error, parse_error};
-use crate::models::{Gender, UserRole};
+use crate::models::UserRole;
 use crate::repositories::user::models::NewUser;
 use crate::repositories::user::user_repo::UserRepository;
 use crate::templates::common::IndexTemplate;
@@ -9,7 +9,6 @@ use crate::templates::user::UserTemplate;
 use actix_web::cookie::Cookie;
 use actix_web::http::header::{HeaderValue, CONTENT_TYPE};
 use askama::Template;
-use chrono::NaiveDate;
 use reqwest::{Client, StatusCode};
 
 use serde_json::json;
@@ -169,8 +168,6 @@ async fn login(
 
     let token = token.expect("Should be some.");
 
-    log::error!("{:?}", token);
-
     let tmp = serde_json::to_string(&token);
 
     if tmp.is_err() {
@@ -182,14 +179,16 @@ async fn login(
 
     match result_status {
         StatusCode::OK => {
-            let cookie = Cookie::build("access_token", token.access_token)
+            let cookie = Cookie::build("bearer_token", token.access_token)
+                .domain("localhost")
                 .path("/")
-                .secure(false) // TODO BOTH SHOULD BE TRUE
-                .http_only(false)
+                .secure(true)
+                .http_only(true)
                 .finish();
 
             HttpResponse::Ok()
                 .cookie(cookie)
+                .insert_header(("Authorization", "Bearer"))
                 .body(body.expect("Should be some."))
         }
         StatusCode::BAD_REQUEST => HttpResponse::BadRequest().body(serialized_text),
