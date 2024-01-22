@@ -26,8 +26,7 @@ The example of a ``.env`` file can be found in ``.env.example``.
 
 For some of the values, even though they would not be used on a real production
 server, they can be kept as is.  The values that must be changed are
-``KEYCLOAK_PUBKEY``, ``CLIENT_SECRET``, ``KEYCLOAK_ADMIN``,
-``KEYCLOAK_ADMIN_PASSWORD``, ``KEYCLOAK_DB_USER``, ``KEYCLOAK_DB_PASSWORD``
+``KEYCLOAK_ADMIN``, ``KEYCLOAK_ADMIN_PASSWORD``, ``KEYCLOAK_DB_USER``, ``KEYCLOAK_DB_PASSWORD``
 and ``KEYCLOAK_DB_URL``.
 
 To start the docker compose, you need to set, ``KEYCLOAK_ADMIN``,
@@ -44,73 +43,27 @@ The command to start the project is:
 ```sh
 docker compose up --build
 ```
-However, for keycloak authentization to work, you will need to perform
-additional steps. 
 
-Once the keycloak container is fully intialized, it should load up the realm
-(tenant) for the application.  Log into the keycloak application on
-http://localhost:9090/ and open the administration console.  You will be
-prompted for a login, input KEYCLOAK_ADMIN and KEYCLOAK_ADMIN_PASSWORD and log
-in.
+The docker compilation can be quite lengthy, so it may be wise to enjoy a 5 minute side activity while you are waiting for the web container to start up.
+The web container may complain that if failed to connect to the database, but eventually, it should connect. It may take 3 - 4 tries.
 
-You should be shown the keycloak admin console interface. On the left side,
-beneath the Keycloak logo, there is a selection element. Select Orchestrate.
+### If Docker Fails
+Should the web container somehow fail, feel free to turn it off and ignore it. The application should still run if you keep postgres and keycloak running and do ``cargo run`` instead.
+Of course, in such a case, you need to manually apply migrations using ``cargo sqlx migrate run``. This should also apply the seeding script so you have data to interact with.
 
 
-![The selection](readme-content/image.png)
+### Available Users
+We have prepared several user accounts you can use to explore Orchestrate.
 
-From here, we need to extract the client secret.
-<TODO>
+Dave Null - Our most privileged user. Dave should be able to access the Administration Panel, manage Employments for AMD, manage AMD itself and also manage the Woodstock event.
+Login: dave@null.com 
+Password: davenull
 
+Anna Smeth - A regular user. She should have an editable timesheet in her employment.
+Login: 
+Password:
 
-## Development
-
-When developing the program, we highly recommend to build and run the ``Rust``
-program outside of a container. In order to do that, make sure your `.env` file
-has `hostspec` part of `DATABASE_URL` variable set to localhost, thus:
-
-```
-DATABASE_URL=postgres://admin:example@localhost:5432/pv281
-```
-
-Then start required docker containers from project's root:
-
-```sh
-docker compose up
-```
-
-At this point we need to prepare the database by running `sqlx-cli` command
-from project's root.
-
-```sh
-   # Create an empty DB by fetching `DATABASE_URL` from the `.env` file.
-   sqlx database create
-
-   #
-   # Run migrations by fetching `DATABASE_URL` from `.env` file and seeking
-   # SQL scripts in `./migrations/` directory (ignoring any subdirs) by default.
-   #
-   sqlx migrate run
-```
-
-In case you need to delete project's database and start over, use:
-
-
-```sh
-   # drop a whole DB without displaying confirmation prompt
-   sqlx database drop -y
-```
-
-Only now (after database was created) we can compile the program
-as it uses sqlx macros that probe DBMS during compilation.
-
-```sh
-cargo build
-```
-
-Then we can start the program locally (using ```cargo run```) and connect
-to the locally started HTTP server using some `web browser`.
-
+TODO
 
 ## Authors 
 * Bc. Petr Kadlec - czFire
@@ -130,7 +83,8 @@ Most of it was performed by Slavomír and Matej. Matej provided the base for the
 ERD, and Slavomír did a lot of work on further elaboration, ensuring the
 database model was consistent and logical in its design.
 
-### Frontend Design The first designs of the frontend side of the project were
+### Frontend Design 
+The first designs of the frontend side of the project were
 done in figma. These were done by Matej.  During frontend development, some of
 the designs have changed significantly, so currently, this design is outdated.
 
@@ -139,8 +93,8 @@ You can find the early designs
 
 ### API Design
 The first draft of the API design was done by Matej in Swagger. You can find it
-in /design.  This is an outdated version, as towards the end of development,
-many endpoints changed or were removed and there was no time to update it.
+in /design.  This is a highly outdated version, as towards the end of development,
+many endpoints changed or were removed and there was no time to update the swagger documentation.
 
 ### Containerization
 Most of the containerization work was performed by Michal and Petr. Michal
@@ -148,10 +102,9 @@ provided the orchestration for the website, pgadmin and postgres containers, and
 Petr added onto the orchestration with Keycloak and its accompanying database.
 
 ### Database SQL
-Work on the Database SQL was done by Michal, Matej and Slavomir, but mostly by
-Slavomir who ensured the SQL was consistent with the ERD, and added important
-triggers and constraints.  Slavomir was also responsible for the seeding script,
-and added most data to it.
+Work on the Database migration SQL was done by Michal, Matej and Slavomir, but mostly by
+Slavomir who ensured the SQL was consistent with the ERD after Michal's initial implementation.
+Slavomir also added important constraints and wrote most of the database seeding script.
 
 ### Database Repository Pattern
 For database access, we had chosen SQLX as everyone worked with it due to the
@@ -160,10 +113,11 @@ implemented access for all tables except for Timesheet and Wage Preset.
 
 Petr also implemented most of the tests for the repositories.
 
-The timesheet repository was first developed by Michal, but he was not up to the
-task and Matej picked it up after him, who also defined the tests for the
-timesheet repository.  The Wage Preset repository was developed Slavomir, who
-also defined tests for this repository.
+The timesheet repository was first developed by Michal, but he later decided that
+he did not want to do this task and Matej picked it up after him. Matej also defined 
+the tests for the timesheet repository. Later, Slavomir added some additional operations, as well.
+
+The Wage Preset repository was developed Slavomir, who also defined tests for this repository.
 
 ### Wage Calculation
 Wage calculation was developed by Slavomir, who created everything necessary for
@@ -190,10 +144,10 @@ application, as not everything is implemented as nicely as we would like. This
 was due to time constraints because of the failure to provide Auth on time.
 
 ### Auth
-The final developed component is Auth. It was first assigned to Michal, but he
-was unable to implement this component and stopped working on it towards the end
-of the project.  It was picked up by Petr and Matej, who tried to implement this
-feature for the project deadline.
+The final (and, sadly, least) developed component is Auth. It was first assigned to Michal, but he
+was unable to implement this component and stopped working on it towards the very end of the project, 
+leaving others to handle the component. 
+It was then picked up by Petr and Matej, who tried to implement this feature for the project deadline.
 
-For implementation, we chose Keycloak, as it was relatively simple to setup and
-work with.
+For the implementation, we chose to go with Keycloak. We used the actix-web-keycloak-middleware
+crate to help with the checking of bearer tokens.
