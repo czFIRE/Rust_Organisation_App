@@ -1,6 +1,7 @@
-use std::collections::HashMap;
-
-use crate::repositories::timesheet::models::{TimesheetWithEvent, Workday};
+use crate::{
+    repositories::timesheet::models::{TimesheetWithEvent, Workday},
+    utils::wage_calc::models::TimesheetWageDetailed,
+};
 use askama::Template;
 use chrono::{NaiveDate, NaiveDateTime};
 use serde::Deserialize;
@@ -157,35 +158,6 @@ pub struct TimesheetsTemplate {
     pub timesheets: Vec<TimesheetLite>,
     pub user_id: Uuid,
     pub company_id: Uuid,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-pub struct DetailedWage {
-    // A tax value which is used for computing employee's `net wage` and such.
-    pub tax_base: f32,
-    //
-    // A final wage an employee is supposed to be given.
-    //
-    pub net_wage: f32,
-
-    // Note: In `wage_currency` units.
-    pub employee_social_insurance: f32,
-    pub employee_health_insurance: f32,
-    pub employer_social_insurance: f32,
-    pub employer_health_insurance: f32,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct TimesheetWageDetailed {
-    // A total wage data for selected timesheet's work.
-    pub total_wage: DetailedWage,
-
-    pub wage_currency: String,
-
-    pub month_to_detailed_wage: HashMap<String, DetailedWage>,
-
-    // Note: Empty value means a wage computation went well and data are valid.
-    pub error_option: Option<String>,
 }
 
 #[derive(Template, Debug, Deserialize)]

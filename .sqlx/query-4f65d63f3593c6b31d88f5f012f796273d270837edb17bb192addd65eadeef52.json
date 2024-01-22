@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE timesheet \n            SET total_hours = (SELECT SUM(total_hours) \n                              FROM workday \n                              WHERE workday.timesheet_id = $1\n                              GROUP BY timesheet_id)\n            WHERE id = $1 AND deleted_at IS NULL;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4f65d63f3593c6b31d88f5f012f796273d270837edb17bb192addd65eadeef52"
+}

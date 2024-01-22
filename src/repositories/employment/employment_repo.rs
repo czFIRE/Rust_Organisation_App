@@ -33,13 +33,14 @@ impl crate::repositories::repository::DbRepository for EmploymentRepository {
     }
 }
 
+// Added by s_vlc
 // Read one lite employment using an existing transaction handle.
 pub async fn read_one_lite_db_using_tx(
     tx: &mut Transaction<'_, sqlx::Postgres>,
     user_id: Uuid,
     company_id: Uuid,
 ) -> DbResult<EmploymentContractAndHourlyWage> {
-    let employment_lite = sqlx::query_as!(
+    sqlx::query_as!(
         EmploymentContractAndHourlyWage,
         r#"
             SELECT hourly_wage,
@@ -52,9 +53,7 @@ pub async fn read_one_lite_db_using_tx(
         company_id
     )
     .fetch_one(tx.deref_mut())
-    .await;
-
-    employment_lite
+    .await
 }
 
 impl EmploymentRepository {

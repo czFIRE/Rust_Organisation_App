@@ -1,8 +1,6 @@
 use crate::common::DbResult;
 use async_trait::async_trait;
 use sqlx::postgres::PgPool;
-use sqlx::Postgres;
-use sqlx::Transaction;
 use std::ops::DerefMut;
 use std::sync::Arc;
 use uuid::Uuid;
@@ -67,19 +65,22 @@ impl CommentRepository {
         .fetch_one(tx.deref_mut())
         .await?;
 
-        let full_comment = self.read_one_tx(comment.id, tx).await?;
+        let full_comment = self.read_one_db(tx.deref_mut(), comment.id).await?;
+        tx.commit().await?;
 
         Ok(full_comment)
     }
 
     pub async fn read_one(&self, comment_id: Uuid) -> DbResult<CommentExtended> {
         // Redis here
-        self.read_one_db(comment_id).await
+        let executor = self.pool.as_ref();
+        self.read_one_db(executor, comment_id).await
     }
 
-    async fn read_one_db(&self, comment_id: Uuid) -> DbResult<CommentExtended> {
-        let executor = self.pool.as_ref();
-
+    async fn read_one_db<'e, E>(&self, db: E, comment_id: Uuid) -> DbResult<CommentExtended>
+    where
+        E: sqlx::Executor<'e, Database = sqlx::Postgres>,
+    {
         let comment: CommentUserFlattened = sqlx::query_as!(
             CommentUserFlattened,
             r#"
@@ -112,56 +113,8 @@ impl CommentRepository {
             "#,
             comment_id,
         )
-        .fetch_one(executor)
+        .fetch_one(db)
         .await?;
-
-        Ok(comment.into())
-    }
-
-    // ToDo: Can probably be written with less duplication
-    /* WARNING! The tx will be commited at the end of this function.
-     */
-    async fn read_one_tx(
-        &self,
-        comment_id: Uuid,
-        mut tx: Transaction<'_, Postgres>,
-    ) -> DbResult<CommentExtended> {
-        let comment: CommentUserFlattened = sqlx::query_as!(
-            CommentUserFlattened,
-            r#"
-            SELECT 
-                comment.id AS comment_id, 
-                comment.author_id AS comment_author_id, 
-                comment.event_id AS comment_event_id, 
-                comment.task_id AS comment_task_id, 
-                comment.content AS comment_content, 
-                comment.created_at AS comment_created_at, 
-                comment.edited_at AS comment_edited_at, 
-                comment.deleted_at AS comment_deleted_at, 
-                user_record.id AS user_id, 
-                user_record.name AS user_name, 
-                user_record.email AS user_email, 
-                user_record.birth AS user_birth, 
-                user_record.avatar_url AS user_avatar_url, 
-                user_record.gender AS "user_gender!: Gender", 
-                user_record.role AS "user_role!: UserRole", 
-                user_record.status AS "user_status!: UserStatus", 
-                user_record.created_at AS user_created_at, 
-                user_record.edited_at AS user_edited_at, 
-                user_record.deleted_at AS user_deleted_at 
-            FROM 
-                comment 
-                INNER JOIN user_record ON comment.author_id = user_record.id 
-            WHERE 
-                comment.id = $1
-                AND comment.deleted_at IS NULL     
-            "#,
-            comment_id,
-        )
-        .fetch_one(tx.deref_mut())
-        .await?;
-
-        tx.commit().await?;
 
         Ok(comment.into())
     }
@@ -290,7 +243,8 @@ impl CommentRepository {
         .fetch_one(tx.deref_mut())
         .await?;
 
-        let full_comment = self.read_one_tx(comment.id, tx).await?;
+        let full_comment = self.read_one_db(tx.deref_mut(), comment.id).await?;
+        tx.commit().await?;
 
         Ok(full_comment)
     }
@@ -314,19 +268,6 @@ impl CommentRepository {
             comment_id,
         )
         .fetch_one(executor)
-        .await?;
-
-        Ok(())
-    }
-
-    pub async fn _hard_delete_deleted_comments(&self) -> DbResult<()> {
-        let executor = self.pool.as_ref();
-
-        sqlx::query!(
-            "DELETE from comment
-             WHERE deleted_at IS NOT NULL"
-        )
-        .execute(executor)
         .await?;
 
         Ok(())

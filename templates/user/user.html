@@ -7,7 +7,7 @@
   <div id="user-content" class="flex flex-row gap-4 items-center">
     <div class="flex flex-col space-y-4">
       <div class="flex flex-row space-x-4">
-        <div id="user-img" class="w-32 h-32 bg-foreground1 rounded-md">
+        <div id="user-img" class="w-24 h-24 bg-foreground1 rounded-md">
           <img src="{{ avatar_url }}" class="rounded-md object-fill" />
         </div>
         <div class="flex flex-col space-y-4">
@@ -119,7 +119,10 @@
   <h1
     class="col-start-1 col-span-3 col-end-4 font-mono text-4xl font-extrabold text-txt ml-5"
   >
-    Orchestrate
+    <a title="show index page" href="/">
+      <img src="/img/application/logo_318.png" width="318" height="68" alt="logo Orchestrate">
+      </img>
+    </a>
   </h1>
   <div
     class="col-start-5 col-span-5 col-end-10 space-x-5 flex flex-row items-end align-middle"
@@ -137,7 +140,7 @@
       <p class="font-mono text-xl text-txthl">Administration</p>
     </button>
     {% endif %}
-    <button hx-get="/event" hx-target="#content">
+    <button hx-get="/event?limit=5&offset=0" hx-target="#content">
       <p class="font-mono text-xl text-txthl">Events</p>
     </button>
     <button hx-get="/user/{{ id }}/employment" hx-target="#content">

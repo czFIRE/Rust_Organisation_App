@@ -1,6 +1,8 @@
 //
-// todo: Some code parts was written in a rush, a bit of refactoring needed.
+// todo: Some code parts were written in a rush, a bit of refactoring needed.
 //
+#![allow(dead_code)]
+#![allow(unused_variables)]
 
 use crate::repositories::wage_preset::models::WagePreset;
 
@@ -138,7 +140,7 @@ fn compute_monthly_dpp_or_dpc_wage(
 }
 
 fn compute_tax_base_of_workdays(
-    related_timesheets: &Vec<TimesheetWithClassifiedWorkdays>,
+    related_timesheets: &[TimesheetWithClassifiedWorkdays],
     year_month: &YearAndMonth,
 ) -> f32 {
     let mut total_tax_base = 0.0;
@@ -156,7 +158,7 @@ fn compute_dpp_or_dpc_wage(
     date_to_wage_presets: &HashMap<YearAndMonth, Option<WagePreset>>,
     hourly_wage: f32,
     employment_type: EmploymentContract,
-    related_timesheets: &Vec<TimesheetWithClassifiedWorkdays>,
+    related_timesheets: &[TimesheetWithClassifiedWorkdays],
 ) -> Result<TimesheetWageDetailed, String> {
     let mut total_wage_output: TimesheetWageDetailed = TimesheetWageDetailed::default();
 
@@ -167,25 +169,24 @@ fn compute_dpp_or_dpc_wage(
             .unwrap()
             .clone()
             .unwrap();
-        let monthly_employee_no_tax_limit;
-        let monthly_employer_no_tax_limit;
-
-        match employment_type {
+        let (monthly_employee_no_tax_limit, monthly_employer_no_tax_limit) = match employment_type {
             EmploymentContract::Dpp => {
                 if hourly_wage < wage_preset.min_hourly_wage {
                     return Err(
                         "The hourly_wage of DPP agreement is below a required minimum.".to_string(),
                     );
                 }
-                monthly_employee_no_tax_limit = wage_preset.monthly_dpp_employee_no_tax_limit;
-                monthly_employer_no_tax_limit = wage_preset.monthly_dpp_employer_no_tax_limit
+                (
+                    wage_preset.monthly_dpp_employee_no_tax_limit,
+                    wage_preset.monthly_dpp_employer_no_tax_limit,
+                )
             }
-            EmploymentContract::Dpc => {
-                monthly_employee_no_tax_limit = wage_preset.monthly_dpc_employee_no_tax_limit;
-                monthly_employer_no_tax_limit = wage_preset.monthly_dpc_employer_no_tax_limit
-            }
+            EmploymentContract::Dpc => (
+                wage_preset.monthly_dpc_employee_no_tax_limit,
+                wage_preset.monthly_dpc_employer_no_tax_limit,
+            ),
             EmploymentContract::Hpp => unreachable!("Bug in code."),
-        }
+        };
 
         let wage_preset_optimized = WagePresetOptimized::new_wage_preset(
             &wage_preset,
@@ -194,11 +195,11 @@ fn compute_dpp_or_dpc_wage(
         );
 
         let related_workdays_tax_base =
-            compute_tax_base_of_workdays(&related_timesheets, year_month);
+            compute_tax_base_of_workdays(related_timesheets, year_month);
 
         let monthly_wage_output = compute_monthly_dpp_or_dpc_wage(
             pink_paper_signed,
-            &wanted_workdays_info,
+            wanted_workdays_info,
             &wage_preset_optimized,
             related_workdays_tax_base,
         );
@@ -227,7 +228,7 @@ fn compute_dpp_or_dpc_wage(
 // Divides workdays into equivalence classes where all elems have a same
 // year and month.
 //
-fn classify_workdays(workdays: &Vec<Workday>) -> HashMap<YearAndMonth, WorkdaysInfo> {
+fn classify_workdays(workdays: &[Workday]) -> HashMap<YearAndMonth, WorkdaysInfo> {
     let mut date_to_workdays_info = HashMap::<YearAndMonth, WorkdaysInfo>::new();
 
     for workday in workdays.iter() {
@@ -255,7 +256,7 @@ pub fn calculate_hpp_or_dpp_or_dpc_wage(
     date_to_wage_presets: &HashMap<YearAndMonth, Option<WagePreset>>,
     hourly_wage: f32,
     employment_type: EmploymentContract,
-    related_timesheets: &Vec<TimesheetWithClassifiedWorkdays>,
+    related_timesheets: &[TimesheetWithClassifiedWorkdays],
 ) -> Result<TimesheetWageDetailed, String> {
     match employment_type {
         EmploymentContract::Dpp => (),

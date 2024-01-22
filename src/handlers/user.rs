@@ -127,8 +127,7 @@ pub async fn toggle_user_edit(
         let body = template.render();
 
         if body.is_err() {
-            return HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+            return HttpResponse::InternalServerError().body("Internal Server Error.");
         }
 
         return HttpResponse::Ok()
@@ -139,15 +138,19 @@ pub async fn toggle_user_edit(
     handle_database_error(result.expect_err("Should be error."))
 }
 
-fn validate_new_user(new_user: NewUser) -> bool {
-    if new_user.name.is_empty()
-        || new_user.email.is_empty()
-        || new_user.birth >= Utc::now().date_naive()
-    {
-        return false;
+fn validate_new_user(new_user: NewUser) -> Result<(), String> {
+    if new_user.name.trim().is_empty() || new_user.email.trim().is_empty() {
+        return Err("Username or Email empty.".to_string());
     }
 
-    check_email_validity(new_user.email)
+    if new_user.birth >= Utc::now().date_naive() {
+        return Err("You can't be younger than today!".to_string());
+    }
+
+    if !check_email_validity(new_user.email) {
+        return Err("Invalid Email format.".to_string());
+    }
+    Ok(())
 }
 
 #[post("/user")]
@@ -155,8 +158,9 @@ pub async fn create_user(
     new_user: web::Json<NewUser>,
     user_repo: web::Data<UserRepository>,
 ) -> HttpResponse {
-    if !validate_new_user(new_user.clone()) {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    let validation_res = validate_new_user(new_user.clone());
+    if let Err(err_msg) = validation_res {
+        return HttpResponse::BadRequest().body(err_msg);
     }
     let result = user_repo.create(new_user.into_inner()).await;
 
@@ -179,29 +183,33 @@ pub async fn create_user(
     handle_database_error(result.expect_err("Should be error."))
 }
 
-fn validate_edit_data(user_data: UserData) -> bool {
+fn validate_edit_data(user_data: UserData) -> Result<(), String> {
     if user_data.name.is_none()
         && user_data.email.is_none()
         && user_data.birth.is_none()
         && user_data.avatar_url.is_none()
         && user_data.role.is_none()
     {
-        return false;
+        return Err("No data provided.".to_string());
     }
 
-    if user_data.name.is_some() && user_data.name.unwrap().is_empty() {
-        return false;
+    if user_data.name.is_some() && user_data.name.unwrap().trim().is_empty() {
+        return Err("Username empty.".to_string());
     }
 
     if user_data.email.is_some() && !check_email_validity(user_data.email.clone().unwrap()) {
-        return false;
+        return Err("Invalid email format.".to_string());
     }
 
-    if user_data.avatar_url.is_some() && user_data.avatar_url.unwrap().is_empty() {
-        return false;
+    if user_data.avatar_url.is_some() && user_data.avatar_url.unwrap().trim().is_empty() {
+        return Err("Empty avatar url.".to_string());
     }
 
-    !(user_data.birth.is_some() && user_data.birth.unwrap() >= Utc::now().date_naive())
+    if user_data.birth.is_some() && user_data.birth.unwrap() >= Utc::now().date_naive() {
+        return Err("Can't be older than today!".to_string());
+    }
+
+    Ok(())
 }
 
 #[patch("/user/{user_id}")]
@@ -210,8 +218,9 @@ pub async fn update_user(
     user_data: web::Json<UserData>,
     user_repo: web::Data<UserRepository>,
 ) -> HttpResponse {
-    if !validate_edit_data(user_data.clone()) {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+    let validation_res = validate_edit_data(user_data.clone());
+    if let Err(err_msg) = validation_res {
+        return HttpResponse::BadRequest().body(err_msg);
     }
 
     let id_parse = Uuid::from_str(user_id.into_inner().as_str());
@@ -231,8 +240,7 @@ pub async fn update_user(
         let body = template.render();
 
         if body.is_err() {
-            return HttpResponse::InternalServerError()
-                .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
+            return HttpResponse::InternalServerError().body("Internal server error.".to_string());
         }
 
         return HttpResponse::Ok()
@@ -250,7 +258,7 @@ pub async fn delete_user(
 ) -> HttpResponse {
     let id_parse = Uuid::from_str(user_id.into_inner().as_str());
     if id_parse.is_err() {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Incorrect ID format.".to_string());
     }
 
     let parsed_id = id_parse.expect("Should be valid.");

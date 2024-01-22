@@ -1,6 +1,0 @@
-{% match error_option %}
-  {% when Some with (error) -%}
-    <p>error!</p>
-    {% when None -%}
-    {{ total_wage.net_wage }}{{ wage_currency }}
-{% endmatch %}

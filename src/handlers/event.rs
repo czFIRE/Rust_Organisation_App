@@ -6,6 +6,7 @@ use askama::Template;
 use uuid::Uuid;
 
 use crate::{
+    common::{calculate_new_offsets, PAGINATION_LIMIT},
     errors::{handle_database_error, parse_error},
     handlers::common::extract_path_tuple_ids,
     models::{EmployeeLevel, EventRole},
@@ -39,13 +40,39 @@ pub async fn get_events(
         return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
     }
 
-    let result = event_repo.read_all(query_params).await;
+    let (prev_offset, next_offset) = calculate_new_offsets(query_params.offset);
+
+    // We read one ahead to determine if we have reached the end before we actually do.
+    let modified_query_params = EventFilter {
+        accepts_staff: query_params.accepts_staff,
+        limit: if query_params.limit.is_some() {
+            Some(query_params.limit.expect("Should be some") + 1)
+        } else {
+            None
+        },
+        offset: query_params.offset,
+    };
+
+    let result = event_repo.read_all(modified_query_params).await;
 
     if let Ok(events) = result {
-        let lite_events: Vec<EventLite> = events.into_iter().map(|event| event.into()).collect();
-
+        let mut lite_events: Vec<EventLite> =
+            events.into_iter().map(|event| event.into()).collect();
+        let next_offset_final: Option<i64>;
+        // This should be PAGINATION_LIMIT instead. ToDo convert.
+        if lite_events.len() <= 5 {
+            next_offset_final = None;
+        } else {
+            next_offset_final = next_offset;
+            if next_offset.is_some() {
+                lite_events.pop();
+            }
+        }
         let template = EventsTemplate {
             events: lite_events,
+            next_offset: next_offset_final,
+            prev_offset,
+            limit: PAGINATION_LIMIT,
         };
 
         let body = template.render();
@@ -99,8 +126,33 @@ pub async fn create_event(
     event_repo: web::Data<EventRepository>,
     employment_repo: web::Data<EmploymentRepository>,
 ) -> HttpResponse {
+    if new_event.name.trim().is_empty() {
+        return HttpResponse::BadRequest().body("Name can't be empty.");
+    }
+
+    if new_event.description.is_some()
+        && new_event
+            .description
+            .clone()
+            .expect("Should be some")
+            .trim()
+            .is_empty()
+    {
+        return HttpResponse::BadRequest().body("Description can't be set as blank.");
+    }
+
+    if new_event.website.is_some()
+        && new_event
+            .website
+            .clone()
+            .expect("Should be some")
+            .trim()
+            .is_empty()
+    {
+        return HttpResponse::BadRequest().body("Website can't be set as blank.");
+    }
     if new_event.start_date > new_event.end_date {
-        return HttpResponse::BadRequest().body(parse_error(http::StatusCode::BAD_REQUEST));
+        return HttpResponse::BadRequest().body("Start date can't be later than end date.");
     }
 
     let employee_res = employment_repo

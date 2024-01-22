@@ -1,6 +1,6 @@
 use crate::common::DbResult;
 use async_trait::async_trait;
-use sqlx::{postgres::PgPool, Postgres, Transaction};
+use sqlx::postgres::PgPool;
 use std::{ops::DerefMut, sync::Arc};
 use uuid::Uuid;
 
@@ -59,13 +59,13 @@ impl AssociatedCompanyRepository {
         .await?;
 
         let new_associated_company = self
-            .read_one_tx(
+            .read_one_db(
+                tx.deref_mut(),
                 associated_company.company_id,
                 associated_company.event_id,
-                tx,
             )
             .await?;
-
+        tx.commit().await?;
         Ok(new_associated_company)
     }
 
@@ -75,16 +75,19 @@ impl AssociatedCompanyRepository {
         event_id: Uuid,
     ) -> DbResult<AssociatedCompanyExtended> {
         // TODO REDIS here
-        self.read_one_db(company_id, event_id).await
+        let executor = self.pool.as_ref();
+        self.read_one_db(executor, company_id, event_id).await
     }
 
-    async fn read_one_db(
+    async fn read_one_db<'e, E>(
         &self,
+        db: E,
         company_id: Uuid,
         event_id: Uuid,
-    ) -> DbResult<AssociatedCompanyExtended> {
-        let executor = self.pool.as_ref();
-
+    ) -> DbResult<AssociatedCompanyExtended>
+    where
+        E: sqlx::Executor<'e, Database = sqlx::Postgres>,
+    {
         let associated_company: AssociatedCompanyFlattened = sqlx::query_as!(
             AssociatedCompanyFlattened,
             r#" SELECT 
@@ -125,62 +128,8 @@ impl AssociatedCompanyRepository {
             company_id,
             event_id,
         )
-        .fetch_one(executor)
+        .fetch_one(db)
         .await?;
-
-        Ok(associated_company.into())
-    }
-
-    async fn read_one_tx(
-        &self,
-        company_id: Uuid,
-        event_id: Uuid,
-        mut tx: Transaction<'_, Postgres>,
-    ) -> DbResult<AssociatedCompanyExtended> {
-        let associated_company: AssociatedCompanyFlattened = sqlx::query_as!(
-            AssociatedCompanyFlattened,
-            r#" SELECT 
-                company.id as "company_id!", 
-                company.name as "company_name!", 
-                company.description as "company_description", 
-                company.phone as "company_phone!", 
-                company.email as "company_email!", 
-                company.avatar_url as "company_avatar_url", 
-                company.website as "company_website", 
-                company.crn as "company_crn!", 
-                company.vatin as "company_vatin!", 
-                company.created_at as "company_created_at!", 
-                company.edited_at as "company_edited_at!", 
-                company.deleted_at as "company_deleted_at", 
-                event.id as "event_id!", 
-                event.name as "event_name!", 
-                event.description as "event_description", 
-                event.website as "event_website", 
-                event.accepts_staff as "event_accepts_staff!", 
-                event.start_date as "event_start_date!", 
-                event.end_date as "event_end_date!", 
-                event.avatar_url as "event_avatar_url", 
-                event.created_at as "event_created_at!", 
-                event.edited_at as "event_edited_at!", 
-                event.deleted_at as "event_deleted_at", 
-                associated_company.type as "association_type!: Association", 
-                associated_company.created_at as "created_at!", 
-                associated_company.edited_at as "edited_at!", 
-                associated_company.deleted_at as "deleted_at" 
-            FROM associated_company 
-            INNER JOIN company ON associated_company.company_id = company.id 
-            INNER JOIN event ON associated_company.event_id = event.id 
-            WHERE associated_company.company_id = $1 
-              AND associated_company.event_id = $2
-              AND associated_company.deleted_at IS NULL;
-            "#,
-            company_id,
-            event_id,
-        )
-        .fetch_one(tx.deref_mut())
-        .await?;
-
-        tx.commit().await?;
 
         Ok(associated_company.into())
     }
@@ -392,12 +341,6 @@ impl AssociatedCompanyRepository {
     ) -> DbResult<AssociatedCompanyExtended> {
         let mut tx = self.pool.begin().await?;
 
-        if data.association_type.is_none() {
-            return Err(sqlx::Error::TypeNotFound {
-                type_name: "User Error".to_string(),
-            });
-        }
-
         let associated_company: Option<AssociatedCompany> = sqlx::query_as!(
             AssociatedCompany,
             r#" UPDATE associated_company SET 
@@ -413,7 +356,7 @@ impl AssociatedCompanyRepository {
                 edited_at, 
                 deleted_at;
             "#,
-            data.association_type.unwrap() as Association,
+            data.association_type as Association,
             company_id,
             event_id,
         )
@@ -424,7 +367,11 @@ impl AssociatedCompanyRepository {
             return Err(sqlx::Error::RowNotFound);
         }
 
-        let updated_associated_company = self.read_one_tx(company_id, event_id, tx).await?;
+        let updated_associated_company = self
+            .read_one_db(tx.deref_mut(), company_id, event_id)
+            .await?;
+
+        tx.commit().await?;
 
         Ok(updated_associated_company)
     }
@@ -503,26 +450,5 @@ impl AssociatedCompanyRepository {
         .await?;
 
         Ok(result)
-    }
-
-    /*
-     * Actually deletes associated companies marked with deleted_at.
-     * This should only be used by administrators or not at all.
-     * Here, we mainly use it for the API testing, so that created
-     * data is cleaned up.
-     */
-    pub async fn _hard_delete_deleted_associated_companies(&self) -> DbResult<()> {
-        let executor = self.pool.as_ref();
-
-        // Associated Company is a 'stub' table, we can delete
-        // without cascading.
-        sqlx::query!(
-            "DELETE FROM associated_company
-             WHERE deleted_at IS NOT NULL;"
-        )
-        .execute(executor)
-        .await?;
-
-        Ok(())
     }
 }

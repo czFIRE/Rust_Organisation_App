@@ -1,4 +1,3 @@
-pub mod avatar;
 pub mod comment;
 pub mod common;
 pub mod company;

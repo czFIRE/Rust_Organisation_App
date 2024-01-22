@@ -1,9 +1,14 @@
-<div id="company-edit" class="flex flex-col space-y-10 w-full p-3 items-center">
+<div
+  id="company-edit"
+  class="flex flex-col space-y-10 w-full p-3 items-center"
+  hx-ext="response-targets"
+>
   <h2 class="font-mono text-4xl text-txthl">Edit Company</h2>
   <form
     hx-patch="/company/{{ id }}"
     hx-swap="innerHTML"
     hx-target="#content"
+    hx-target-error="#error"
     hx-ext="json-enc"
     hx-confirm="Are you sure you want to make these changes?"
     class="flex flex-col space-y-5 p-3 items-center w-8/12 bg-foreground1 rounded-md"
@@ -38,6 +43,7 @@
         <input
           type="tel"
           id="phone"
+          pattern="^[\+]?[0-9]{3}[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{3}$"
           name="phone"
           value="{{ phone }}"
           class="font-mono text-lg text-txt bg-foreground2 rounded-md"
@@ -48,6 +54,7 @@
         <input
           type="email"
           id="email"
+          pattern="^[A-Za-z0-9.,-]+@([A-Za-z0-9]+[.])+[A-Za-z]{2,4}$"
           name="email"
           value="{{ email }}"
           class="font-mono text-lg text-txt bg-foreground2 rounded-md"
@@ -161,12 +168,17 @@
       Submit
     </button>
   </form>
+  <div
+    id="error"
+    class="w-8/12 text-center items-center self-center font-mono text-lg text-rej p-1 bg-foreground1 rounded-md"
+  ></div>
   <div class="flex flex-row space-x-5">
     <form
       hx-encoding="multipart/form-data"
       hx-put="/company/{{ id }}/avatar"
       hx-swap="innerHTML"
       hx-target="#result-text"
+      hx-target-error="#error-img"
       class="grid grid-cols-4 grid-rows-1 gap-4 bg-foreground1 rounded-md p-2"
     >
       <input
@@ -193,10 +205,15 @@
     >
       Delete Image
     </button>
-    <p id="result-text" class="font-mono text-txt text-lg"></p>
   </div>
+  <div
+    id="result-text"
+    class="font-mono text-lg text-txt p-1 bg-foreground1 rounded-md"
+  ></div>
   <button
     hx-get="/user/{{ user_id }}/employment/{{ id }}"
+    hx-target="#content"
+    hx-swap="innerHTML"
     class="font-mono text-lg bg-foreground2 text-txthl rounded-md p-2"
   >
     Cancel

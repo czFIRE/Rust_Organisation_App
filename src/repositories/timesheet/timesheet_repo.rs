@@ -20,6 +20,7 @@ use uuid::Uuid;
 
 use super::models::WorkdayUpdateData;
 
+// These functions outside of the repository were added by s_vlc
 /// Reads workdays of a specific timesheet that match a requested date range.
 async fn read_some_timesheet_workdays_db_using_tx(
     tx: &mut Transaction<'_, sqlx::Postgres>,
@@ -443,8 +444,8 @@ impl TimesheetRepository {
         date: NaiveDate,
         data: WorkdayUpdateData,
     ) -> DbResult<Workday> {
-        let executor = self.pool.as_ref();
-
+        let mut tx = self.pool.begin().await?;
+        println!("BEFORE WORKDAY UPDATE");
         let workday = sqlx::query_as!(
             Workday,
             r#"
@@ -466,8 +467,23 @@ impl TimesheetRepository {
             timesheet_id,
             date
         )
-        .fetch_one(executor)
+        .fetch_one(tx.deref_mut())
         .await?;
+        println!("BEFORE SHEET UPDATE");
+        sqlx::query!(
+            r#"
+            UPDATE timesheet 
+            SET total_hours = (SELECT SUM(total_hours) 
+                              FROM workday 
+                              WHERE workday.timesheet_id = $1
+                              GROUP BY timesheet_id)
+            WHERE id = $1 AND deleted_at IS NULL;"#,
+            timesheet_id,
+        )
+        .execute(tx.deref_mut())
+        .await?;
+        println!("BEFORE COMMIT");
+        tx.commit().await?;
 
         Ok(workday)
     }
@@ -621,7 +637,7 @@ impl TimesheetRepository {
         Ok(edited_data)
     }
 
-    pub async fn read_all_with_date_from_to_per_employment(
+    pub async fn _read_all_with_date_from_to_per_employment(
         &self,
         user_id: Uuid,
         company_id: Uuid,
@@ -712,7 +728,9 @@ impl TimesheetRepository {
 
             while cur_date <= date_to {
                 let year_and_month = cur_date.into();
-                if !date_to_wage_presets.contains_key(&year_and_month) {
+                if let std::collections::hash_map::Entry::Vacant(e) =
+                    date_to_wage_presets.entry(year_and_month)
+                {
                     //
                     // todo later: Try to find a preset in `date_to_wage_presets`
                     //             first as its faster than seeking it DB.
@@ -723,8 +741,21 @@ impl TimesheetRepository {
                         )
                         .await?;
 
-                    date_to_wage_presets.insert(year_and_month, preset_optional);
+                    e.insert(preset_optional);
                 }
+                // if !date_to_wage_presets.contains_key(&year_and_month) {
+                //     //
+                //     // todo later: Try to find a preset in `date_to_wage_presets`
+                //     //             first as its faster than seeking it DB.
+                //     //
+                //     let preset_optional =
+                //         wage_preset_repo::read_optional_matching_date_db_using_tx(
+                //             &mut tx, &cur_date,
+                //         )
+                //         .await?;
+
+                //     date_to_wage_presets.insert(year_and_month, preset_optional);
+                // }
 
                 if let Some(cur_date_incremented) = cur_date.checked_add_months(Months::new(1)) {
                     cur_date = cur_date_incremented;
