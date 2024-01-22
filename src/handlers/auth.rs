@@ -55,14 +55,12 @@ pub async fn register(
     user_repository: web::Data<UserRepository>,
 ) -> HttpResponse {
     let path_res = build_path("/realms/master/protocol/openid-connect/token");
-    println!("REE 1");
     if path_res.is_err() {
         return HttpResponse::InternalServerError().body("Internal server error.");
     }
-    println!("REE 2");
+
     let path = path_res.expect("Should be some.");
-    log::error!("Path is {}", path.clone());
-    // let path = "http://localhost:9090/realms/master/protocol/openid-connect/token";
+  
     let payload = json!({
         "username": std::env::var("KEYCLOAK_ADMIN").expect("Should be set"),
         "password": std::env::var("KEYCLOAK_ADMIN_PASSWORD").expect("Should be set"),
@@ -71,11 +69,10 @@ pub async fn register(
     });
 
     let result = get_token(&path, payload).await;
-    log::error!("Result is {:?}", result);
     if result.is_err() {
         return HttpResponse::InternalServerError().finish();
     }
-    println!("REE 3");
+
     // We kinda juggle the token around to get the data. This doesn't work yet.
     let token = result.expect("Should be okay.");
     let token_json = serde_json::to_string(&token);
@@ -88,12 +85,11 @@ pub async fn register(
         return HttpResponse::InternalServerError().finish();
     }
     let access = access_json.expect("Should be valid");
-    println!("REE 4");
+  
     let path_res = build_path("/admin/realms/Orchestrate/users");
     if path_res.is_err() {
         return HttpResponse::InternalServerError().body("Internal server error.");
     }
-    println!("REE 5");
     let path = path_res.expect("Should be some.");
     // let path = "http://localhost:9090/admin/realms/Orchestrate/users";
 
@@ -109,7 +105,7 @@ pub async fn register(
             "value": form.password
         }]
     });
-    println!("REE 6");
+
     let payload_str = serde_json::to_string(&payload);
     if payload_str.is_err() {
         return HttpResponse::InternalServerError().finish();
@@ -121,16 +117,17 @@ pub async fn register(
         .body(payload_str.expect("Should be valid."))
         .bearer_auth(access.access_token);
     let response = request.send().await;
-    println!("REE 7");
+
     if response.is_err() {
         return HttpResponse::BadRequest().finish();
     }
-    println!("REE 8");
+
+
     let response_exp = response.expect("Should be valid here.");
     if response_exp.status() != http::StatusCode::CREATED {
         return HttpResponse::BadRequest().finish();
     }
-    println!("REE 9");
+
     let mut full_name = form.first_name;
     full_name.push(' ');
     full_name.push_str(&form.last_name);
@@ -143,7 +140,7 @@ pub async fn register(
         role: UserRole::User,
     };
     let user_res = user_repository.create(user_data).await;
-    println!("REE 10");
+
     if user_res.is_err() {
         return handle_database_error(user_res.expect_err("Should be an error."));
     }
@@ -155,7 +152,7 @@ pub async fn register(
         return HttpResponse::InternalServerError()
             .body(parse_error(http::StatusCode::INTERNAL_SERVER_ERROR));
     }
-    println!("REE 11");
+
     HttpResponse::Created().body(body.expect("Should be valid"))
 }
 
@@ -171,6 +168,7 @@ pub async fn login(
     let path = path_res.expect("Should be some.");
     // The path variable stores the URL of the authentication server
     // let path = "http://localhost:9090/realms/Orchestrate/protocol/openid-connect/token";
+
 
     // The payload variable stores the JSON object with the login credentials and the client information
     let payload = json!({
@@ -198,6 +196,7 @@ pub async fn login(
     let result = res.expect("Should be some.");
 
     let result_status = result.status();
+
 
     let user_res = user_repo.read_one_with_email(form.username).await;
 
