@@ -1,10 +1,10 @@
 # Organization app
 
 ### Contents
-- Official Assignment
-- Project Deployment
-- Authors
-- Work Distribution
+- [Official Assignment](#official-assignment)
+- [Project Deployment](#project-deployment)
+- [Authors](#authors)
+- [Work Distribution](#work-distribution)
 
 ## Official Assignment
 
@@ -27,22 +27,8 @@ employees.
 ## Project Deployment
 **Contact Person** - Matej Vavrek (Discord: .swiftfeather)
 
-To deploy the project, you must first prepare a ``.env`` file.
-The example of a ``.env`` file can be found in ``.env.example``.
-
-For some of the values, even though they would not be used on a real production
-server, they can be kept as is.  The values that must be changed are
-``KEYCLOAK_ADMIN``, ``KEYCLOAK_ADMIN_PASSWORD``, ``KEYCLOAK_DB_USER``, ``KEYCLOAK_DB_PASSWORD``
-and ``KEYCLOAK_DB_URL``.
-
-To start the docker compose, you need to set, ``KEYCLOAK_ADMIN``,
-``KEYCLOAK_ADMIN_PASSWORD``, ``KEYCLOAK_DB_USER``, ``KEYCLOAK_DB_PASSWORD`` and
-``KEYCLOAK_DB_URL``. Set these to whatever you like, but be mindful that in
-``KEYCLOAK_DB_URL``, you must only change the parts that contain
-KEYCLOAK_DB_USER_HERE:KEYCLOAK_DB_PASSWORD_HERE to the user and password chosen
-for the keycloak db.
-
-Now, you can start the docker compose and it should start working.
+For the sake of convenience, we have prepared a default setup in .env.docker. 
+This example should, obviously, never used in production as it uses credentials that are default and well known, but for the purposes of a demo, you may use them to start up the application.
 
 To start the project up, you must have docker on your machine.
 The command to start the project is:
@@ -63,17 +49,19 @@ We have prepared several user accounts you can use to explore Orchestrate.
 
 **Dave Null** - Our most privileged user. Dave should be able to access the Administration Panel, manage Employments for AMD, manage AMD itself and also manage the Woodstock event.
 
-
 Login: dave@null.com 
-
 
 Password: davenull
 
-**Anna Smeth** - A regular user. She should have an editable timesheet in her employment.
-Login: 
-Password:
+**Anna Smeth** - A regular user. She should have an editable timesheet in her employment. You should be able to confirm Anna's timesheet as Dave Null, since he is her superior in the company hierarchy.
 
-TODO
+Login: a.smeth@seznam.cz
+Password: annasmeth
+
+**James Bean** - Regular user with a regular employment. Can be registered to Woodstock and confirmed/denied by Dave Null.
+
+Login: jamesbean176@snailmail.com
+Password: beans
 
 ## Authors 
 * Bc. Petr Kadlec - czFire
