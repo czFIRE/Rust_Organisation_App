@@ -107,7 +107,7 @@ entity user {
     ' Full name. They will log in using their email.
     *name: varchar(255)
     *email: varchar(45)
-    *date_of_birth: date
+    *birth: date
     *avatar_url: varchar(255)
     *gender: <<enum Gender>>
     *role: <<enum UserRole>>
@@ -137,7 +137,7 @@ entity timesheet {
 
 entity workday {
     *<u>timesheet_id</u>: <<uuid>> (also FK timesheet)
-    *<u>work_date</u>: date
+    *<u>date</u>: date
     ---
     *total_hours: float
     comment: text
@@ -179,8 +179,8 @@ entity task {
 entity assigned_staff {
     *<u>task_id</u>: <<uuid>> (FK task)
     *<u>staff_id</u>: <<uuid>> (FK event_staff)
-    decided_by: <<uuid>> (FK event_staff)
     ---
+    decided_by: <<uuid>> (FK event_staff)
     *status: <<enum AcceptanceStatus>>
     *created_at: timestamp
     *edited_at: timestamp
@@ -233,7 +233,7 @@ entity associated_company {
     *<u>company_id</u>: <<uuid>>
     *<u>event_id</u>: <<uuid>>
     ---
-    *association_type: <<enum Association>>
+    *type: <<enum Association>>
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
@@ -253,8 +253,8 @@ entity employment {
     *end_date: date
     ' Allows for descriptions of the employment's purpose.
     description: text
-    *employment_type: <<enum EmploymentContract>>
-    *employee_level: <<enum EmployeeLevel>>
+    *type: <<enum EmploymentContract>>
+    *level: <<enum EmployeeLevel>>
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
@@ -268,7 +268,7 @@ entity event_staff {
     *event_id: <<uuid>> (FK event)
     decided_by: <<uuid>> (FK event_staff)
     *role: <<enum EventRole>>
-    *acceptance_status: <<enum AcceptanceStatus>>
+    *status: <<enum AcceptanceStatus>>
     *created_at: timestamp
     *edited_at: timestamp
     deleted_at: timestamp
@@ -293,6 +293,35 @@ entity comment {
 }
 
 /'
+  A class for representing presets for calculating wage statistics.
+'/
+entity wage_preset {
+    *<u>name</u>: varchar(32)
+    ---
+    *valid_from: date
+    /'
+         When preset\'s applicability ends. One preset may be set to NULL
+         which denotes its applicability has not expired yet.
+    '/
+    valid_to: date
+    *description: text
+    *currency: varchar(8)
+    *monthly_dpp_employee_no_tax_limit: float
+    *monthly_dpp_employer_no_tax_limit: float
+    *monthly_dpc_employee_no_tax_limit: float
+    *monthly_dpc_employer_no_tax_limit: float
+    *health_insurance_employee_tax_pct: float
+    *social_insurance_employee_tax_pct: float
+    *health_insurance_employer_tax_pct: float
+    *social_insurance_employer_tax_pct: float
+    *min_hourly_wage: float
+    *min_monthly_hpp_salary: float
+    *created_at: timestamp
+    *edited_at: timestamp
+    deleted_at: timestamp
+}
+
+/'
   Class relations, possibly with labels.
 
   Note: One can use `u`, `r`, `d`, `b` values in relation syntax
@@ -304,12 +333,12 @@ entity comment {
 
         This seems to be undocumented, but it works.
 '/
-user||..|{employment
-timesheet}o..||employment
-timesheet||.l.o{workday : can\nhave\n <
-timesheet}o.r.||event
+user||..|{employment : is formed by <
+timesheet}o..||employment : is\nrepresented\nby\n <
+timesheet||.l.o{workday : has\n <
+timesheet}o.r.||event : belongs\nto\n >
 employment||..o{event_staff
-employment}o..||company
+employment}o..||company : is held at >
 employment|o..o{employment : manages
 event||.o{associated_company
 company||.r.o{associated_company
@@ -320,7 +349,7 @@ event|o...o{comment : can\nhave >
 task|o...o{comment : can\nhave >
 comment}o..||user : is sent by >
 task||..||event_staff : was\ncreated\nby >
-task||..o{assigned_staff
+task||..o{assigned_staff : is\nsolved\nby\n >
 assigned_staff}o..||event_staff
 assigned_staff||..||event_staff : is\ndecided\nby >
 event_staff}o..||event_staff : appointed\n as an\n organizer
