@@ -39,7 +39,7 @@ Now, you can start the docker compose and it should start working.
 
 To start the project up, you must have docker on your machine.
 The command to start the project is:
-```bash
+```sh
 docker compose up --build
 ```
 However, for keycloak authentization to work, you will need to perform

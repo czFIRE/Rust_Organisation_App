@@ -2,7 +2,7 @@
 
 The database can be controlled using a CLI utility _psql_:
 
-```bash
+```sh
 # export variables from the config file into the shell
 source ../.env
 
