@@ -41,6 +41,7 @@ services:
     container_name: postgres-keycloak-container
     image: postgres:latest
     command: postgres -c 'max_connections=100'
+    restart: always
     volumes:
       - pgdata_keycloak:/var/lib/postgresql/data
     environment:

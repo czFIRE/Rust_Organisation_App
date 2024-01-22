@@ -1,4 +1,4 @@
-use actix_web::web::{self, scope};
+use actix_web::web;
 
 use crate::handlers::user::{
     create_user, delete_user, get_user, get_users, open_admin_panel, remove_user_avatar,

@@ -8,7 +8,6 @@ mod repositories;
 mod templates;
 mod utils;
 
-use crate::auth::models::CookieAuthError;
 use crate::handlers::auth::{login, register};
 use actix_web::dev::Service;
 use actix_web::http::header::HeaderValue;
@@ -24,8 +23,8 @@ use sqlx::{Pool, Postgres};
 
 use std::sync::Arc;
 
-use actix_web_middleware_keycloak_auth::{DecodingKey, KeycloakAuth};
 use actix_web_httpauth::extractors::AuthenticationError;
+use actix_web_middleware_keycloak_auth::{DecodingKey, KeycloakAuth};
 
 use crate::configs::assigned_staff_config::configure_assigned_staff_endpoints;
 use crate::configs::associated_company_config::configure_associated_company_endpoints;
@@ -38,7 +37,7 @@ use crate::configs::task_config::configure_task_endpoints;
 use crate::configs::timesheet_config::configure_timesheet_endpoints;
 use crate::configs::user_config::configure_user_endpoints;
 
-use crate::handlers::index::{index, registration_page, login_page};
+use crate::handlers::index::{index, login_page, registration_page};
 use crate::repositories::associated_company::associated_company_repo::AssociatedCompanyRepository;
 use crate::repositories::comment::comment_repo::CommentRepository;
 use crate::repositories::company::company_repo::CompanyRepository;
@@ -132,7 +131,10 @@ async fn main() -> std::io::Result<()> {
                     .wrap(keycloak_auth)
                     .wrap_fn(|mut req, service| {
                         trace!("Initialize Cookie Transform Middleware.");
-                        let cookie_val = req.cookie("bearer_token").map(|cookie| cookie.value().to_owned()).ok_or_else(|| HttpResponse::Unauthorized().finish());
+                        let cookie_val = req
+                            .cookie("bearer_token")
+                            .map(|cookie| cookie.value().to_owned())
+                            .ok_or_else(|| HttpResponse::Unauthorized().finish());
                         // if cookie_val.is_err() {
                         //     return CookieAuthError{ message: "Failed to parse cookie.".to_string() };
                         // }
@@ -142,10 +144,12 @@ async fn main() -> std::io::Result<()> {
                         // if header_value.is_err() {
                         //     return HttpResponse::InternalServerError().finish();
                         // }
-                        req.headers_mut().insert(header::AUTHORIZATION, header_value.expect("Should be some."));
+                        req.headers_mut().insert(
+                            header::AUTHORIZATION,
+                            header_value.expect("Should be some."),
+                        );
                         trace!("Initialize Cookie Transform Middleware.");
                         service.call(req)
-
                     })
                     .configure(configure_user_endpoints)
                     .configure(configure_company_endpoints)

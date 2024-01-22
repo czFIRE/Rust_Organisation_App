@@ -15,19 +15,37 @@ use serde_json::json;
 
 use actix_web::{http, post, web, HttpResponse};
 
-
 fn build_path(suffix: &str) -> Result<String, ()> {
-    let host = std::env::var("HOST");
-    let port = std::env::var("KC_PORT");
-    if host.is_err() || port.is_err() {
-        return Err(());
+    let docker_env = std::env::var("DOCKER");
+
+    let port: i32 = if docker_env.is_err() || docker_env.clone().unwrap() == "0" {
+        let tmp = std::env::var("KC_PORT");
+        if tmp.is_err() {
+            return Err(());
+        }
+        Some(tmp.unwrap().parse::<i32>().expect("Should be a number."))
+    } else {
+        Some(8080)
     }
+    .expect("Should be set and be a number when using localhost development.");
+
+    let host = if docker_env.is_err() || docker_env.clone().unwrap() == "0" {
+        "localhost"
+    } else {
+        "keycloak"
+    };
+
+    log::error!("Host is {}", host);
+    log::error!("Port is {}", port.clone());
 
     let mut path = "http://".to_string();
-    path.push_str(host.expect("Should be some").as_str());
+    path.push_str(host);
     path.push(':');
-    path.push_str(port.expect("Should be some").as_str());
+    path.push_str(port.to_string().as_str());
     path.push_str(suffix);
+
+    log::error!("Path is {}", path.clone());
+
     Ok(path)
 }
 
@@ -53,6 +71,7 @@ pub async fn register(
     });
 
     let result = get_token(&path, payload).await;
+    log::error!("Result is {:?}", result);
     if result.is_err() {
         return HttpResponse::InternalServerError().finish();
     }

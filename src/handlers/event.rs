@@ -10,7 +10,7 @@ use uuid::Uuid;
 use crate::{
     auth::models::FullClaims,
     errors::{handle_database_error, parse_error},
-    handlers::{common::extract_path_tuple_ids, index::ClaimsWithEmail},
+    handlers::common::extract_path_tuple_ids,
     models::{EmployeeLevel, EventRole},
     repositories::{
         employment::employment_repo::EmploymentRepository,
