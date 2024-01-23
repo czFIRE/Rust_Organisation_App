@@ -55,7 +55,7 @@ Password: davenull
 
 **Anna Smeth** - A regular user. She should have an editable timesheet in her employment. You should be able to confirm Anna's timesheet as Dave Null, since he is her superior in the company hierarchy.
 
-Login: a.smeth@seznam.cz
+Login: a.smeth@sezam.cz
 Password: annasmeth
 
 **James Bean** - Regular user with a regular employment. Can be registered to Woodstock and confirmed/denied by Dave Null.
