@@ -241,7 +241,7 @@ BEGIN
         type, level,
         created_at, edited_at)
         VALUES
-        (user2_id, company1_id, NULL, 280,
+        (user2_id, company1_id, user0_id, 280,
         '2023-12-31', '2026-01-01', '-',
         'dpp', 'manager',
         '2023-12-28 14:30', '2023-12-28 14:30');
