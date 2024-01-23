@@ -376,6 +376,29 @@
   "webAuthnPolicyPasswordlessAcceptableAaguids" : [ ],
   "webAuthnPolicyPasswordlessExtraOrigins" : [ ],
   "users" : [ {
+    "id" : "a8d54d6d-c20b-4758-ab0c-78460651dc58",
+    "createdTimestamp" : 1705968495303,
+    "username" : "a.smeth@sezam.cz",
+    "enabled" : true,
+    "totp" : false,
+    "emailVerified" : true,
+    "firstName" : "Anna",
+    "lastName" : "Smeth",
+    "email" : "a.smeth@sezam.cz",
+    "credentials" : [ {
+      "id" : "4dfd8795-a627-4f39-a2ab-45a58f34bbd7",
+      "type" : "password",
+      "userLabel" : "My password",
+      "createdDate" : 1705968507821,
+      "secretData" : "{\"value\":\"nt3fFmrfESQOggrjiJKCqQtj1VqtZxldMyBxOpsF4CI=\",\"salt\":\"WvKTuC3fAaT1yRnJuqxYBg==\",\"additionalParameters\":{}}",
+      "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+    } ],
+    "disableableCredentialTypes" : [ ],
+    "requiredActions" : [ ],
+    "realmRoles" : [ "default-roles-orchestrate" ],
+    "notBefore" : 0,
+    "groups" : [ ]
+  }, {
     "id" : "07b2e190-1650-47dd-9ca2-50d318f4c7fb",
     "createdTimestamp" : 1705960535266,
     "username" : "a.smeth@seznam.cz",
@@ -624,7 +647,7 @@
     "directAccessGrantsEnabled" : true,
     "serviceAccountsEnabled" : false,
     "publicClient" : true,
-    "frontchannelLogout" : true,
+    "frontchannelLogout" : false,
     "protocol" : "openid-connect",
     "attributes" : {
       "access.token.lifespan" : "7200",
@@ -635,7 +658,7 @@
       "backchannel.logout.revoke.offline.tokens" : "false",
       "use.refresh.tokens" : "true",
       "oidc.ciba.grant.enabled" : "false",
-      "backchannel.logout.session.required" : "true",
+      "backchannel.logout.session.required" : "false",
       "client_credentials.use_refresh_token" : "false",
       "acr.loa.map" : "{}",
       "require.pushed.authorization.requests" : "false",
@@ -1279,7 +1302,7 @@
       "subType" : "anonymous",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "oidc-usermodel-property-mapper", "saml-role-list-mapper", "oidc-sha256-pairwise-sub-mapper", "oidc-address-mapper", "oidc-full-name-mapper", "saml-user-property-mapper", "saml-user-attribute-mapper", "oidc-usermodel-attribute-mapper" ]
+        "allowed-protocol-mapper-types" : [ "oidc-sha256-pairwise-sub-mapper", "saml-user-property-mapper", "oidc-full-name-mapper", "oidc-address-mapper", "saml-user-attribute-mapper", "oidc-usermodel-attribute-mapper", "oidc-usermodel-property-mapper", "saml-role-list-mapper" ]
       }
     }, {
       "id" : "9bb4350e-cde1-4457-9418-80b817a171de",
@@ -1298,7 +1321,7 @@
       "subType" : "authenticated",
       "subComponents" : { },
       "config" : {
-        "allowed-protocol-mapper-types" : [ "oidc-full-name-mapper", "oidc-usermodel-property-mapper", "saml-user-attribute-mapper", "saml-user-property-mapper", "oidc-address-mapper", "saml-role-list-mapper", "oidc-usermodel-attribute-mapper", "oidc-sha256-pairwise-sub-mapper" ]
+        "allowed-protocol-mapper-types" : [ "oidc-full-name-mapper", "oidc-sha256-pairwise-sub-mapper", "saml-user-property-mapper", "oidc-address-mapper", "oidc-usermodel-attribute-mapper", "oidc-usermodel-property-mapper", "saml-role-list-mapper", "saml-user-attribute-mapper" ]
       }
     }, {
       "id" : "aaa32ed2-858b-4069-b0c7-116de73f0065",

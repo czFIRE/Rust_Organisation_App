@@ -3,10 +3,7 @@ use std::str::FromStr;
 use crate::{
     errors::{handle_database_error, parse_error},
     repositories::user::models::{NewUser, UserData, UsersQuery},
-    templates::user::{
-        AdminTemplate, UserEditTemplate, UserInfo, UserInfoTemplate, UserLiteTemplate,
-        UserTemplate, UsersTemplate,
-    },
+    templates::user::{AdminTemplate, UserEditTemplate, UserInfo, UserInfoTemplate, UserTemplate},
     utils::{
         format_check::check::check_email_validity,
         image_storage::{

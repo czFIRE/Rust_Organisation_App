@@ -8,11 +8,8 @@ mod repositories;
 mod templates;
 mod utils;
 
+use crate::auth::cookie_parser::CookieParser;
 use crate::handlers::auth::{login, register};
-use actix_web::dev::Service;
-use actix_web::http::header::HeaderValue;
-use log::trace;
-use reqwest::header;
 
 use actix_files::Files as ActixFiles;
 use actix_web::{middleware::Logger, App, HttpServer};
@@ -48,7 +45,7 @@ use crate::repositories::task::task_repo::TaskRepository;
 use crate::repositories::timesheet::timesheet_repo::TimesheetRepository;
 use crate::repositories::user::user_repo::UserRepository;
 
-use actix_web::{web, HttpResponse};
+use actix_web::web;
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -125,7 +122,7 @@ async fn main() -> std::io::Result<()> {
             .service(
                 web::scope("/protected")
                     .wrap(keycloak_auth)
-                    .wrap_fn(|mut req, service| {
+                    /*.wrap_fn(|mut req, service| {
                         trace!("Initialize Cookie Transform Middleware.");
                         let cookie_val = req
                             .cookie("bearer_token")
@@ -146,7 +143,8 @@ async fn main() -> std::io::Result<()> {
                         );
                         trace!("Initialize Cookie Transform Middleware.");
                         service.call(req)
-                    })
+                    })*/
+                    .wrap(CookieParser::new())
                     .configure(configure_user_endpoints)
                     .configure(configure_company_endpoints)
                     .configure(configure_event_endpoints)

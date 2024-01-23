@@ -76,14 +76,8 @@
   </div>
 </div>
 
-<nav
-  id="topbar"
-  hx-swap-oob="true"
-  class="flex flex-row justify-between items-center bg-foreground1 p-3"
->
-  <h1
-    class="col-start-1 col-span-3 col-end-4 font-mono text-4xl font-extrabold text-txt ml-5"
-  >
+<nav id="topbar" hx-swap-oob="true" class="flex flex-row justify-between items-center bg-foreground1 p-3">
+  <h1 class="col-start-1 col-span-3 col-end-4 font-mono text-4xl font-extrabold text-txt ml-5">
     <a title="show index page" href="/">
       <img src="/img/application/logo_318.png" width="318" height="68" alt="logo Orchestrate">
       </img>
@@ -113,7 +107,8 @@
           d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
       </svg>
     </button>
-    <button hx-get="/" hx-swap="outerHTML" hx-target="#body" title="Log Out" hx-confirm="Are you sure you want to log out?">
+    <button hx-get="/" hx-swap="outerHTML" hx-target="#body" title="Log Out"
+      hx-confirm="Are you sure you want to log out?">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
         class="w-8 h-8 text-rej">
         <path stroke-linecap="round" stroke-linejoin="round"

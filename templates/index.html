@@ -1,116 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Orchestrate</title>
-    <!-- CSS -->
-    <link href="output.css" rel="stylesheet" />
-    <!-- HTMX -->
-    <script
-      src="https://unpkg.com/htmx.org@1.9.4"
-      integrity="sha384-zUfuhFKKZCbHTY6aRR46gxiqszMk5tcHjsVFxnUo8VMus4kHGVdIYVbOYYNlKmHV"
-      crossorigin="anonymous"
-    ></script>
-    <!-- HTMX JSON Extension -->
-    <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
-    <!-- HTMX Path Params Extension -->
-    <script src="https://unpkg.com/htmx.org/dist/ext/path-params.js"></script>
-    <script src="https://unpkg.com/htmx.org@1.9.10/dist/ext/response-targets.js"></script>
-  </head>
 
-  <body id="body" class="bg-background">
-    <nav
-      id="topbar"
-      class="flex flex-row justify-between items-center bg-foreground1 p-3"
-    >
-      <h1 class="col-span-2 font-mono text-4xl font-extrabold text-txt ml-5">
-        <a title="show index page" href="/">
-          <img src="/img/application/logo_318.png" width="318" height="68" alt="logo Orchestrate">
-          </img>
-        </a>
-      </h1>
-      <div class="flex flex-row space-x-5 mx-5">
-        <button
-          hx-get="/user"
-          hx-target="#content"
-          class="txt-xl text-txthl"
-          title="Log In"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="currentColor"
-            class="w-8 h-8 text-txthl"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"
-            />
-          </svg>
-        </button>
-        <button
-          hx-get="/user"
-          hx-target="#content"
-          class="txt-xl text-txthl"
-          title="Sign Up"
-        >
-          <svg
-            class="h-8 w-8 text-txthl"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              d="M13.5 10.5V6.75a4.5 4.5 0 1 1 9 0v3.75M3.75 21.75h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H3.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z"
-            />
-          </svg>
-        </button>
-      </div>
-    </nav>
+<head>
+  <meta charset="UTF-8" />
+  <title>Orchestrate</title>
+  <!-- CSS -->
+  <link href="output.css" rel="stylesheet" />
+  <!-- HTMX -->
+  <script src="https://unpkg.com/htmx.org@1.9.4"
+    integrity="sha384-zUfuhFKKZCbHTY6aRR46gxiqszMk5tcHjsVFxnUo8VMus4kHGVdIYVbOYYNlKmHV"
+    crossorigin="anonymous"></script>
+  <!-- HTMX JSON Extension -->
+  <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+  <!-- HTMX Path Params Extension -->
+  <script src="https://unpkg.com/htmx.org/dist/ext/path-params.js"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.10/dist/ext/response-targets.js"></script>
+</head>
 
-    <div id="content" hx-ext="response-targets" class="flex flex-col space-y-5 items-center mt-10 w-full">
-      {% block content %}
-      <div id="title">
-        <h2 class="font-mono text-4xl font-extrabold text-txthl">
-          {{ landing_title }}
-        </h2>
-      </div>
-      <div class="text-wrap flex flex-col space-y-1 items-center mt-10 w-full">
-        <p class="text-txt text-xl text-center">
-          Welcome to Orchestrate, a website that empowers companies with tools
-          all about the organization of music events.
-        </p>
-      </div>
-      <div class="text-wrap flex flex-col space-y-1 items-center mt-10">
-        <p class="text-txt text-xl">
-          Already using Orchestrate?
-          <button
-            hx-get="/login"
-            hx-target="#content"
-            class="txt-xl text-txthl"
-          >
-            Log in!
-          </button>
-        </p>
-        <p class="text-txt text-xl">
-          Not yet signed up?
-          <button
-            hx-get="/registration"
-            hx-target="#content"
-            class="txt-xl text-txthl"
-          >
-            Sign up now!
-          </button>
-        </p>
-      </div>
-      {% endblock content %}
+<body id="body" class="bg-background">
+  <nav id="topbar" class="flex flex-row justify-between items-center bg-foreground1 p-3">
+    <h1 class="col-span-2 font-mono text-4xl font-extrabold text-txt ml-5">
+      <a title="show index page" href="/">
+        <img src="/img/application/logo_318.png" width="318" height="68" alt="logo Orchestrate">
+        </img>
+      </a>
+    </h1>
+    <div class="flex flex-row space-x-5 mx-5">
+      <button hx-get="/login" hx-target="#content" class="txt-xl text-txthl" title="Log In">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+          class="w-8 h-8 text-txthl">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75" />
+        </svg>
+      </button>
+      <button hx-get="/registration" hx-target="#content" class="txt-xl text-txthl" title="Sign Up">
+        <svg class="h-8 w-8 text-txthl" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+          stroke-width="1.5" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M13.5 10.5V6.75a4.5 4.5 0 1 1 9 0v3.75M3.75 21.75h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H3.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+        </svg>
+      </button>
     </div>
-  </body>
+  </nav>
+
+  <div id="content" hx-ext="response-targets" class="flex flex-col space-y-5 items-center mt-10 w-full">
+    {% block content %}
+    <div id="title">
+      <h2 class="font-mono text-4xl font-extrabold text-txthl">
+        {{ landing_title }}
+      </h2>
+    </div>
+    <div class="text-wrap flex flex-col space-y-1 items-center mt-10 w-full">
+      <p class="text-txt text-xl text-center">
+        Welcome to Orchestrate, a website that empowers companies with tools
+        all about the organization of music events.
+      </p>
+    </div>
+    <div class="text-wrap flex flex-col space-y-1 items-center mt-10">
+      <p class="text-txt text-xl">
+        Already using Orchestrate?
+        <button hx-get="/login" hx-target="#content" class="txt-xl text-txthl">
+          Log in!
+        </button>
+      </p>
+      <p class="text-txt text-xl">
+        Not yet signed up?
+        <button hx-get="/registration" hx-target="#content" class="txt-xl text-txthl">
+          Sign up now!
+        </button>
+      </p>
+    </div>
+    {% endblock content %}
+  </div>
+</body>
+
 </html>
