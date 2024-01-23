@@ -1,4 +1,5 @@
 use actix_web::web;
+use organization::handlers::user::get_users;
 
 use crate::handlers::user::{
     create_user, delete_user, get_user, open_admin_panel, remove_user_avatar, toggle_user_edit,
@@ -9,6 +10,7 @@ use crate::handlers::user::{
 pub fn configure_user_endpoints(config: &mut web::ServiceConfig) {
     config
         .service(get_user)
+        .service(get_users)
         .service(toggle_user_edit)
         .service(create_user)
         .service(update_user)

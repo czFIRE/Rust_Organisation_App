@@ -35,16 +35,11 @@ fn build_path(suffix: &str) -> Result<String, ()> {
         "keycloak"
     };
 
-    log::error!("Host is {}", host);
-    log::error!("Port is {}", port.clone());
-
     let mut path = "http://".to_string();
     path.push_str(host);
     path.push(':');
     path.push_str(port.to_string().as_str());
     path.push_str(suffix);
-
-    log::error!("Path is {}", path.clone());
 
     Ok(path)
 }
