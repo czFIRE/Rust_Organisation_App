@@ -67,7 +67,7 @@ pub fn store_image(
         .create(true)
         .truncate(true)
         .read(true)
-        .open(final_path.clone())?;
+        .open(final_path)?;
 
     io::copy(&mut src_file, &mut dest_file)?;
 
