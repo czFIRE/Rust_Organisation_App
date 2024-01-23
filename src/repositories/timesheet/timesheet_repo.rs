@@ -445,7 +445,6 @@ impl TimesheetRepository {
         data: WorkdayUpdateData,
     ) -> DbResult<Workday> {
         let mut tx = self.pool.begin().await?;
-        println!("BEFORE WORKDAY UPDATE");
         let workday = sqlx::query_as!(
             Workday,
             r#"
@@ -469,7 +468,6 @@ impl TimesheetRepository {
         )
         .fetch_one(tx.deref_mut())
         .await?;
-        println!("BEFORE SHEET UPDATE");
         sqlx::query!(
             r#"
             UPDATE timesheet 
@@ -482,7 +480,6 @@ impl TimesheetRepository {
         )
         .execute(tx.deref_mut())
         .await?;
-        println!("BEFORE COMMIT");
         tx.commit().await?;
 
         Ok(workday)

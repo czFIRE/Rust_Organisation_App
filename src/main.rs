@@ -122,28 +122,6 @@ async fn main() -> std::io::Result<()> {
             .service(
                 web::scope("/protected")
                     .wrap(keycloak_auth)
-                    /*.wrap_fn(|mut req, service| {
-                        trace!("Initialize Cookie Transform Middleware.");
-                        let cookie_val = req
-                            .cookie("bearer_token")
-                            .map(|cookie| cookie.value().to_owned())
-                            .ok_or_else(|| HttpResponse::Unauthorized().finish());
-                        // if cookie_val.is_err() {
-                        //     return CookieAuthError{ message: "Failed to parse cookie.".to_string() };
-                        // }
-                        let cookie = cookie_val.expect("Should be valid");
-                        let auth_header_value = format!("Bearer {}", cookie);
-                        let header_value = HeaderValue::from_str(auth_header_value.as_str());
-                        // if header_value.is_err() {
-                        //     return HttpResponse::InternalServerError().finish();
-                        // }
-                        req.headers_mut().insert(
-                            header::AUTHORIZATION,
-                            header_value.expect("Should be some."),
-                        );
-                        trace!("Initialize Cookie Transform Middleware.");
-                        service.call(req)
-                    })*/
                     .wrap(CookieParser::new())
                     .configure(configure_user_endpoints)
                     .configure(configure_company_endpoints)

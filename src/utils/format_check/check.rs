@@ -11,7 +11,6 @@ pub fn check_email_validity(email: String) -> bool {
 }
 
 pub fn check_phone_validity(phone: String) -> bool {
-    println!("PHONE NUMBER:{}|", phone);
     let phone_regex = Regex::new(r"^[\+]?[0-9]{3}[-\s\.]?[0-9]{9}$").expect("Should be valid.");
     let phone_captures = phone_regex.captures(phone.as_str());
     phone_captures.is_some()
